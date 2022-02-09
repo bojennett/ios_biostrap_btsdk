@@ -142,7 +142,7 @@ var gblLimitEthos	= false
 	var length: Int {
 		switch (self) {
 		case .unknown			: return 300
-		case .steps				: return 6
+		case .steps				: return 7
 		case .ppg				: return 17
 		case .activity			: return 10
 		case .temp				: return 9

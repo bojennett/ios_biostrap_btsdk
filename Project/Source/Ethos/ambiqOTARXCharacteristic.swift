@@ -1,5 +1,5 @@
 //
-//  DeviceDFU.swift
+//  ambiqOTARXCharacteristic.swift
 //  AmbiqOTATest
 //
 //  Created by Joseph Bennett on 9/20/21.
@@ -45,7 +45,7 @@ internal enum amotaStatus: UInt8 {
 	}
 }
 
-class ethosOTARXCharacteristic: Characteristic {
+class ambiqOTARXCharacteristic: Characteristic {
 	internal var mData							: Data?
 
 	//--------------------------------------------------------------------------------
@@ -113,8 +113,8 @@ class ethosOTARXCharacteristic: Characteristic {
 		var packet = Data()
 		
 		// fill data + checksum length
-		packet.append(UInt8(((length + ethosOTARXCharacteristic.CRC_SIZE) >> 0) & 0xff))
-		packet.append(UInt8(((length + ethosOTARXCharacteristic.CRC_SIZE) >> 8) & 0xff))
+		packet.append(UInt8(((length + ambiqOTARXCharacteristic.CRC_SIZE) >> 0) & 0xff))
+		packet.append(UInt8(((length + ambiqOTARXCharacteristic.CRC_SIZE) >> 8) & 0xff))
 		packet.append(command.rawValue)
 		
 		if let data = data {
@@ -145,8 +145,8 @@ class ethosOTARXCharacteristic: Characteristic {
 		
 		while (index < data.count) {
 			var frameLength: Int
-			if (data.count - index > ethosOTARXCharacteristic.BLUETOOTH_MTU_SIZE) {
-				frameLength	= ethosOTARXCharacteristic.BLUETOOTH_MTU_SIZE
+			if (data.count - index > ambiqOTARXCharacteristic.BLUETOOTH_MTU_SIZE) {
+				frameLength	= ambiqOTARXCharacteristic.BLUETOOTH_MTU_SIZE
 			}
 			else {
 				frameLength	= data.count - index
@@ -207,24 +207,24 @@ class ethosOTARXCharacteristic: Characteristic {
 		if let _ = pPeripheral, let _ = pCharacteristic, let data = mData {
 			self.started?()
 			
-			if (data.count < ethosOTARXCharacteristic.FILE_HEADER_BLOCK) {
+			if (data.count < ambiqOTARXCharacteristic.FILE_HEADER_BLOCK) {
 				self.failed?(Int(amotaStatus.APP_NOT_ENOUGH_DATA.rawValue), amotaStatus.APP_NOT_ENOUGH_DATA.title)
 				return
 			}
 			
-			let header = data.subdata(in: 0..<ethosOTARXCharacteristic.FILE_HEADER_BLOCK)
+			let header = data.subdata(in: 0..<ambiqOTARXCharacteristic.FILE_HEADER_BLOCK)
 						
 			mFileSize = (Int(header[11]) << 24) | (Int(header[10]) << 16) | (Int(header[9]) << 8) | Int(header[8])
 			mHeaderPackets = mBuildFrames(data: mBuildPacket(command: otaCommand.AMOTA_CMD_FW_HEADER, data: header))
 			
-			var currentOffset = ethosOTARXCharacteristic.FILE_HEADER_BLOCK
+			var currentOffset = ambiqOTARXCharacteristic.FILE_HEADER_BLOCK
 			while (currentOffset < mFileSize) {				
 				var length = 0
-				if (currentOffset + ethosOTARXCharacteristic.FILE_HEADER_BLOCK + ethosOTARXCharacteristic.DATA_BLOCK_SIZE) > mFileSize {
-					length = mFileSize + ethosOTARXCharacteristic.FILE_HEADER_BLOCK - currentOffset
+				if (currentOffset + ambiqOTARXCharacteristic.FILE_HEADER_BLOCK + ambiqOTARXCharacteristic.DATA_BLOCK_SIZE) > mFileSize {
+					length = mFileSize + ambiqOTARXCharacteristic.FILE_HEADER_BLOCK - currentOffset
 				}
 				else {
-					length = ethosOTARXCharacteristic.DATA_BLOCK_SIZE
+					length = ambiqOTARXCharacteristic.DATA_BLOCK_SIZE
 				}
 				
 				let packet = mBuildPacket(command: otaCommand.AMOTA_CMD_FW_DATA, data: data.subdata(in: currentOffset..<(currentOffset + length)))

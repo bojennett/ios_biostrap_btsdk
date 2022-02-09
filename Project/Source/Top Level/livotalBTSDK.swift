@@ -9,9 +9,11 @@ import Foundation
 
 @objc public class livotalBTSDK: biostrapDeviceSDK {
 	
+	#if UNIVERSAL || LIVOTAL
 	@objc public override init() {
 		super.init()
 		
 		gblLimitLivotal = true
 	}
+	#endif
 }

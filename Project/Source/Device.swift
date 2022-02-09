@@ -163,8 +163,8 @@ public class Device: NSObject {
 	#endif
 
 	#if UNIVERSAL || ETHOS
-	internal var mEthosOTARXCharacteristic		: ethosOTARXCharacteristic?
-	internal var mEthosOTATXCharacteristic		: ethosOTATXCharacteristic?
+	internal var mAmbiqOTARXCharacteristic		: ambiqOTARXCharacteristic?
+	internal var mAmbiqOTATXCharacteristic		: ambiqOTATXCharacteristic?
 	#endif
 	
 	class var scan_services: [CBUUID] {
@@ -275,7 +275,7 @@ public class Device: NSObject {
 				return (false)
 			}
 		case .ethos:
-			if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ethosOTARXCharacteristic = mEthosOTARXCharacteristic, let ethosOTATXCharacteristic = mEthosOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+			if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 				
 				//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ethosOTARXCharacteristic.configured), OTATX: \(ethosOTATXCharacteristic.configured)")
 
@@ -285,8 +285,8 @@ public class Device: NSObject {
 						manufacturerName.configured &&
 						batteryCharacteristic.configured &&
 						customCharacteristic.configured &&
-						ethosOTARXCharacteristic.configured &&
-						ethosOTATXCharacteristic.configured
+						ambiqOTARXCharacteristic.configured &&
+						ambiqOTATXCharacteristic.configured
 				)
 			}
 			else {
@@ -313,9 +313,9 @@ public class Device: NSObject {
 			return (false)
 		}
 		#elseif ETHOS
-		if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ethosOTARXCharacteristic = mEthosOTARXCharacteristic, let ethosOTATXCharacteristic = mEthosOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+		if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 			
-			log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ethosOTARXCharacteristic.configured), OTATX: \(ethosOTATXCharacteristic.configured)")
+			log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 
 			return (modelNumber.configured &&
 					hardwareRevision.configured &&
@@ -323,8 +323,8 @@ public class Device: NSObject {
 					manufacturerName.configured &&
 					batteryCharacteristic.configured &&
 					customCharacteristic.configured &&
-					ethosOTARXCharacteristic.configured &&
-					ethosOTATXCharacteristic.configured
+					ambiqOTARXCharacteristic.configured &&
+					ambiqOTATXCharacteristic.configured
 			)
 		}
 		else {
@@ -786,19 +786,19 @@ public class Device: NSObject {
 				case .ambiqOTARXCharacteristic:
 					log?.v ("\(gblReturnID(peripheral)) for service: \(characteristic.service.prettyID) - '\(testCharacteristic.title)'")
 					
-					mEthosOTARXCharacteristic = ethosOTARXCharacteristic(peripheral, characteristic: characteristic)
+					mAmbiqOTARXCharacteristic = ambiqOTARXCharacteristic(peripheral, characteristic: characteristic)
 					
-					mEthosOTARXCharacteristic?.started = { self.updateFirmwareStarted?(self.mID) }
-					mEthosOTARXCharacteristic?.finished = { self.updateFirmwareFinished?(self.mID) }
-					mEthosOTARXCharacteristic?.failed = { code, message in self.updateFirmwareFailed?(self.mID, code, message) }
-					mEthosOTARXCharacteristic?.progress = { percent in self.updateFirmwareProgress?(self.mID, percent) }
+					mAmbiqOTARXCharacteristic?.started = { self.updateFirmwareStarted?(self.mID) }
+					mAmbiqOTARXCharacteristic?.finished = { self.updateFirmwareFinished?(self.mID) }
+					mAmbiqOTARXCharacteristic?.failed = { code, message in self.updateFirmwareFailed?(self.mID, code, message) }
+					mAmbiqOTARXCharacteristic?.progress = { percent in self.updateFirmwareProgress?(self.mID, percent) }
 
 					
 				case .ambiqOTATXCharacteristic:
 					log?.v ("\(gblReturnID(peripheral)) for service: \(characteristic.service.prettyID) - '\(testCharacteristic.title)'")
 					
-					mEthosOTATXCharacteristic = ethosOTATXCharacteristic(peripheral, characteristic: characteristic)
-					mEthosOTATXCharacteristic?.discoverDescriptors()
+					mAmbiqOTATXCharacteristic = ambiqOTATXCharacteristic(peripheral, characteristic: characteristic)
+					mAmbiqOTATXCharacteristic?.discoverDescriptors()
 					//peripheral.setNotifyValue(true, for: characteristic)
 				#endif
 				
@@ -879,7 +879,7 @@ public class Device: NSObject {
 						#if UNIVERSAL || ETHOS
 						case .ethosCharacteristic		: mCustomCharacteristic?.didDiscoverDescriptor()
 						case .ambiqOTARXCharacteristic	: log?.e ("\(gblReturnID(peripheral)) '\(enumerated.title)' - should not be here")
-						case .ambiqOTATXCharacteristic	: mEthosOTATXCharacteristic?.didDiscoverDescriptor()
+						case .ambiqOTATXCharacteristic	: mAmbiqOTATXCharacteristic?.didDiscoverDescriptor()
 						#endif
 						
 						#if UNIVERSAL || LIVOTAL
@@ -942,7 +942,7 @@ public class Device: NSObject {
 				#if UNIVERSAL || ETHOS
 				case .ethosCharacteristic		: mCustomCharacteristic?.didUpdateValue()
 				case .ambiqOTARXCharacteristic	: log?.e ("\(gblReturnID(peripheral)) '\(enumerated.title)' - should not be here")
-				case .ambiqOTATXCharacteristic	: mEthosOTARXCharacteristic?.didUpdateValue()	// Comes in on TX, causes RX to do next step
+				case .ambiqOTATXCharacteristic	: mAmbiqOTARXCharacteristic?.didUpdateValue()	// Comes in on TX, causes RX to do next step
 				#endif
 				
 				#if UNIVERSAL || LIVOTAL
@@ -976,7 +976,7 @@ public class Device: NSObject {
 					#if UNIVERSAL || ETHOS
 					case .ethosCharacteristic		: mCustomCharacteristic?.didUpdateNotificationState()
 					case .ambiqOTARXCharacteristic	: log?.e ("\(gblReturnID(characteristic.service.peripheral)) '\(enumerated.title)' - should not be here")
-					case .ambiqOTATXCharacteristic	: mEthosOTATXCharacteristic?.didUpdateNotificationState()
+					case .ambiqOTATXCharacteristic	: mAmbiqOTATXCharacteristic?.didUpdateNotificationState()
 					#endif
 
 					#if UNIVERSAL || LIVOTAL
@@ -1014,7 +1014,7 @@ public class Device: NSObject {
 	//--------------------------------------------------------------------------------
 	func isReady() {
 		#if UNIVERSAL || ETHOS
-		mEthosOTARXCharacteristic?.isReady()
+		mAmbiqOTARXCharacteristic?.isReady()
 		#endif
 	}
 

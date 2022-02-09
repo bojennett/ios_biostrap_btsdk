@@ -1,5 +1,5 @@
 //
-//  ethosOTATXCharacteristic.swift
+//  ambiqOTATXCharacteristic.swift
 //  AmbiqOTATest
 //
 //  Created by Joseph Bennett on 9/21/21.
@@ -8,7 +8,7 @@
 import Foundation
 import CoreBluetooth
 
-class ethosOTATXCharacteristic: Characteristic {
+class ambiqOTATXCharacteristic: Characteristic {
 	
 	//--------------------------------------------------------------------------------
 	//

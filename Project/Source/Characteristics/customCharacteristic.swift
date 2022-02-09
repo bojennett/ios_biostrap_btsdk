@@ -538,9 +538,9 @@ class customCharacteristic: Characteristic {
 			case .caughtUp:
 				log?.v ("\(type.title): Got the 'caught up' packet")
 				return (true, true, type, biostrapDataPacket())
-			case .steps,
-				 .ppg,
+			case .ppg,
 				 .activity,
+				 .steps,
 				 .temp,
 				 .rawAccelFifoCount,
 				 .rawAccel,
@@ -554,11 +554,9 @@ class customCharacteristic: Characteristic {
 				let packetData = data.subdata(in: Range((index)...(index + type.length - 1)))
 				
 				switch (type) {
-				case .steps:
-					log?.e ("\(type.title) (not yet supported): \(packetData.hexString)")
-					return (false, false, .unknown, biostrapDataPacket())
 				case .ppg,
 					 .activity,
+					 .steps,
 					 .temp,
 					 .worn,
 					 .sleep,

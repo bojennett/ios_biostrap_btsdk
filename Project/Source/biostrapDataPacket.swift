@@ -87,7 +87,7 @@ import Foundation
 			 .rawPPGProximity	: return ("\(type.title),\(value)")
 		case .ppg				: return ("\(type.title),\(epoch),\(hr_valid),\(hr_result),\(hr_uncertainty),\(hrv_valid),\(hrv_result),\(hrv_uncertainty),\(rr_valid),\(rr_result),\(rr_uncertainty),\(spo2_valid),\(spo2_result),\(spo2_uncertainty)")
 		case .unknown			: return ("\(type.title)")
-		case .steps				: return ("\(type.title)")
+		case .steps				: return ("\(type.title),\(epoch),\(value)")
 		case .diagnostic		: return ("\(type.title),\(diagnostic_data.hexString)")
 		case .caughtUp			: return ("\(type.title)")
 		}
@@ -165,6 +165,10 @@ import Foundation
 				 .rawPPGGreen,
 				 .rawPPGProximity:
 				value		= data.subdata(in: Range(1...4)).leInt
+				
+			case .steps:
+				epoch				= data.subdata(in: Range(1...4)).leInt
+				value				= Int(data.subdata(in: Range(5...6)).leUInt16)
 
 			case .ppg:
 				epoch				= data.subdata(in: Range(1...4)).leInt
@@ -221,6 +225,10 @@ import Foundation
 			value				= try values.decode(Int.self, forKey: .value)
 			elapsed_ms			= try values.decode(Int.self, forKey: .elapsed_ms)
 			
+		case .steps:
+			epoch				= try values.decode(Int.self, forKey: .epoch)
+			value				= try values.decode(Int.self, forKey: .value)
+			
 		case .rawAccel:
 			x					= try values.decode(Float.self, forKey: .x)
 			y					= try values.decode(Float.self, forKey: .y)
@@ -276,7 +284,11 @@ import Foundation
 		case .worn:
 			try container.encode(epoch, forKey: .epoch)
 			try container.encode(worn, forKey: .worn)
-			
+
+		case .steps:
+			try container.encode(epoch, forKey: .epoch)
+			try container.encode(value, forKey: .value)
+
 		case .sleep:
 			try container.encode(epoch, forKey: .epoch)
 			try container.encode(end_epoch, forKey: .end_epoch)
