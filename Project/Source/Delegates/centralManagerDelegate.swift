@@ -79,6 +79,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.readEpochComplete?(id, successful, value) }
 							}
 
+							device.endSleepComplete			= { id, successful in
+								DispatchQueue.main.async { self.endSleepComplete?(id, successful) }
+							}
+
 							device.getAllPacketsComplete	= { id, successful in
 								DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) }
 							}
@@ -99,12 +103,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.stopManualComplete?(id, successful) }
 							}
 							
-							device.blinkLEDComplete			= { id, successful in
-								DispatchQueue.main.async { self.blinkLEDComplete?(id, successful) }
-							}
-							
-							device.setLEDComplete			= { id, successful in
-								DispatchQueue.main.async { self.setLEDComplete?(id, successful) }
+							device.ledComplete			= { id, successful in
+								DispatchQueue.main.async { self.ledComplete?(id, successful) }
 							}
 							
 							device.enterShipModeComplete	= { id, successful in
@@ -218,6 +218,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.readEpochComplete?(id, successful, value) }
 							}
 
+							device.endSleepComplete			= { id, successful in
+								DispatchQueue.main.async { self.endSleepComplete?(id, successful) }
+							}
+
 							device.getAllPacketsComplete	= { id, successful in
 								DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) }
 							}
@@ -230,20 +234,16 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) }
 							}
 
-							device.startManualComplete = { id, successful in
+							device.startManualComplete		= { id, successful in
 								DispatchQueue.main.async { self.startManualComplete?(id, successful) }
 							}
 							
-							device.stopManualComplete = { id, successful in
+							device.stopManualComplete		= { id, successful in
 								DispatchQueue.main.async { self.stopManualComplete?(id, successful) }
 							}
 							
-							device.blinkLEDComplete			= { id, successful in
-								DispatchQueue.main.async { self.blinkLEDComplete?(id, successful) }
-							}
-							
-							device.setLEDComplete			= { id, successful in
-								DispatchQueue.main.async { self.setLEDComplete?(id, successful) }
+							device.ledComplete				= { id, successful in
+								DispatchQueue.main.async { self.ledComplete?(id, successful) }
 							}
 							
 							device.enterShipModeComplete	= { id, successful in

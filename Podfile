@@ -13,4 +13,9 @@ target 'universalBTSDK' do
 	pod 'iOSDFULibrary', '~> 4.9.0'
 end
 
+target 'ethosBTSDK' do
+	use_frameworks!
+	project 'Project/biostrapDeviceSDK.xcodeproj'
+	pod 'iOSDFULibrary', '~> 4.9.0'
+end
 

@@ -16,10 +16,10 @@ class customCharacteristic: Characteristic {
 		case getAllPackets		= 0x01
 		case getNextPacket		= 0x02
 		case getPacketCount		= 0x03
-		case blinkLED			= 0x10
+		case led				= 0x10
 		case enterShipMode		= 0x11
-		case setLED				= 0x12
-		case readEpoch			= 0x13
+		case readEpoch			= 0x12
+		case endSleep			= 0x13
 		case writeID			= 0x40
 		case readID				= 0x41
 		case deleteID			= 0x42
@@ -66,7 +66,7 @@ class customCharacteristic: Characteristic {
 	var getPacketCountComplete: ((_ successful: Bool, _ count: Int)->())?
 	var startManualComplete: ((_ successful: Bool)->())?
 	var stopManualComplete: ((_ successful: Bool)->())?
-	var blinkLEDComplete: ((_ successful: Bool)->())?
+	var ledComplete: ((_ successful: Bool)->())?
 	var enterShipModeComplete: ((_ successful: Bool)->())?
 	var writeIDComplete: ((_ successful: Bool)->())?
 	var readIDComplete: ((_ successful: Bool, _ partID: String)->())?
@@ -79,12 +79,12 @@ class customCharacteristic: Characteristic {
 	var rawLoggingComplete: ((_ successful: Bool)->())?
 	var wornCheckComplete: ((_ successful: Bool, _ type: String, _ value: Int)->())?
 	var resetComplete: ((_ successful: Bool)->())?
-	var setLEDComplete: ((_ successful: Bool)->())?
 	var readEpochComplete: ((_ successful: Bool, _ value: Int)->())?
     var manualResult: ((_ successful: Bool, _ packet: String)->())?
 	var ppgBroken: (()->())?
 	var disableWornDetectComplete: ((_ successful: Bool)->())?
 	var enableWornDetectComplete: ((_ successful: Bool)->())?
+	var endSleepComplete: ((_ successful: Bool)->())?
 
 	var dataPackets: ((_ packets: String)->())?
 	var dataComplete: (()->())?
@@ -140,6 +140,25 @@ class customCharacteristic: Characteristic {
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
 		else { self.readEpochComplete?(false, 0) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func endSleep() {
+		log?.v("\(pID)")
+
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.endSleep.rawValue)
+
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.endSleepComplete?(false) }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -232,6 +251,7 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || LIVOTAL
 	func startManual(leds: livotalLEDConfiguration, algorithms: livotalAlgorithmConfiguration) {
 		log?.v("\(pID)")
 		
@@ -245,6 +265,7 @@ class customCharacteristic: Characteristic {
 		}
 		else { self.startManualComplete?(false) }
 	}
+	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -266,21 +287,24 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func blinkLED(red: Bool, green: Bool, blue: Bool, seconds: Int) {
-		log?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Seconds: \(seconds)")
+	#if UNIVERSAL || LIVOTAL
+	func livotalLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+		log?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
-			data.append(commands.blinkLED.rawValue)
+			data.append(commands.led.rawValue)
 			data.append(red ? 0x01 : 0x00)		// Red
 			data.append(green ? 0x01 : 0x00)	// Green
 			data.append(blue ? 0x01 : 0x00)		// Blue
+			data.append(blink ? 0x01 : 0x00)	// Blink
 			data.append(UInt8(seconds & 0xff))	// Seconds
 
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
-		else { self.blinkLEDComplete?(false) }
+		else { self.ledComplete?(false) }
 	}
+	#endif
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -289,21 +313,26 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setLED(red: Bool, green: Bool, blue: Bool) {
-		log?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue)")
+	#if UNIVERSAL || ETHOS
+	func ethosLED(red: Int, green: Int, blue: Int, mode: biostrapDeviceSDK.ethosLEDMode, seconds: Int, percent: Int) {
+		log?.v("\(pID): Red: \(String(format: "0x%02X", red)), Green: \(String(format: "0x%02X", green)), Blue: \(String(format: "0x%02X", blue)), Mode: \(mode.title), Seconds: \(seconds), Percent: \(percent)")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
-			data.append(commands.setLED.rawValue)
-			data.append(red ? 0x01 : 0x00)		// Red
-			data.append(green ? 0x01 : 0x00)	// Green
-			data.append(blue ? 0x01 : 0x00)		// Blue
+			data.append(commands.led.rawValue)
+			data.append(UInt8(red & 0xff))		// Red
+			data.append(UInt8(green & 0xff))	// Green
+			data.append(UInt8(blue & 0xff))		// Blue
+			data.append(UInt8(mode.value))		// Mode
+			data.append(UInt8(seconds & 0xff))	// Seconds
+			data.append(UInt8(percent & 0xff))	// Percent
 
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
-		else { self.setLEDComplete?(false) }
+		else { self.ledComplete?(false) }
 	}
-	
+	#endif
+		
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -657,6 +686,7 @@ class customCharacteristic: Characteristic {
 									else {
 										self.readEpochComplete?(false, 0)
 									}
+								case .endSleep		: self.endSleepComplete?(successful)
 								case .getAllPackets	: self.getAllPacketsComplete?(successful)
 								case .getNextPacket :
 									if (successful) {
@@ -701,8 +731,7 @@ class customCharacteristic: Characteristic {
 								case .enableWornDetect	: self.enableWornDetectComplete?(successful)
 								case .startManual		: self.startManualComplete?(successful)
 								case .stopManual		: self.stopManualComplete?(successful)
-								case .blinkLED			: self.blinkLEDComplete?(successful)
-								case .setLED			: self.setLEDComplete?(successful)
+								case .led				: self.ledComplete?(successful)
 								case .enterShipMode		: self.enterShipModeComplete?(successful)
 								case .writeID			: self.writeIDComplete?(successful)
 								case .readID			:

@@ -29,6 +29,32 @@ import iOSDFULibrary
 	}
 	#endif
 	
+	#if UNIVERSAL || ETHOS
+	@objc public enum ethosLEDMode: Int {
+		case blink		= 0
+		case fade		= 1
+		case sweep		= 2
+		case pulse		= 3
+		case sparkle	= 4
+		case percent	= 5
+		
+		public var title: String {
+			switch (self) {
+			case .blink		: return "Blink"
+			case .fade		: return "Fade"
+			case .sweep		: return "Sweep"
+			case .pulse		: return "Pulse"
+			case .sparkle	: return "Sparkle"
+			case .percent	: return "Percent"
+			}
+		}
+		
+		public var value: UInt8 {
+			return UInt8(self.rawValue)
+		}
+	}
+	#endif
+	
 	// Lambdas
 	@objc public var logV: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
 	@objc public var logD: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
@@ -48,13 +74,13 @@ import iOSDFULibrary
 	
 	@objc public var writeEpochComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var readEpochComplete: ((_ id: String, _ successful: Bool, _ value: Int)->())?
+	@objc public var endSleepComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var getAllPacketsComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var getNextPacketComplete: ((_ id: String, _ successful: Bool, _ packet: String)->())?
 	@objc public var getPacketCountComplete: ((_ id: String, _ successful: Bool, _ count: Int)->())?
 	@objc public var startManualComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var stopManualComplete: ((_ id: String, _ successful: Bool)->())?
-	@objc public var blinkLEDComplete: ((_ id: String, _ successful: Bool)->())?
-	@objc public var setLEDComplete: ((_ id: String, _ successful: Bool)->())?
+	@objc public var ledComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var enterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var writeIDComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var readIDComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
@@ -282,6 +308,20 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@objc public func endSleep(_ id: String) {
+		log?.v("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.endSleep(id) }
+		else { self.endSleepComplete?(id, false) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	@objc public func getAllPackets(_ id: String) {
 		log?.v ("\(id)")
 		
@@ -352,12 +392,14 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || LIVOTAL
 	@objc public func startManual(_ id: String, leds: livotalLEDConfiguration, algorithms: livotalAlgorithmConfiguration) {
 		log?.v ("\(id): LEDs: \(String(format: "0x%02X", leds.commandByte)), Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
 		
 		if let device = mConnectedDevices?[id] { device.startManual(id, leds: leds, algorithms: algorithms) }
 		else { self.startManualComplete?(id, false) }
 	}
+	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -380,22 +422,31 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
-	@objc public func blinkLED(_ id: String, red: Bool, green: Bool, blue: Bool, seconds: Int) {
-		if let device = mConnectedDevices?[id] { device.blinkLED(id, red: red, green: green, blue: blue, seconds: seconds) }
-		else { self.blinkLEDComplete?(id, false) }
+	#if UNIVERSAL
+	@objc public func livotalLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+		if let device = mConnectedDevices?[id] { device.livotalLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		else { self.ledComplete?(id, false) }
 	}
+	
+	@objc public func ethosLED(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
+		if let device = mConnectedDevices?[id] { device.ethosLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
+		else { self.ledComplete?(id, false) }
+	}
+	#endif
 
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	@objc public func setLED(_ id: String, red: Bool, green: Bool, blue: Bool) {
-		if let device = mConnectedDevices?[id] { device.setLED(id, red: red, green: green, blue: blue) }
-		else { self.setLEDComplete?(id, false) }
+	#if LIVOTAL
+	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+		if let device = mConnectedDevices?[id] { device.livotalLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		else { self.ledComplete?(id, false) }
 	}
+	#endif
+
+	#if ETHOS
+	@objc public func led(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
+		if let device = mConnectedDevices?[id] { device.ethosLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
+		else { self.ledComplete?(id, false) }
+	}
+	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:

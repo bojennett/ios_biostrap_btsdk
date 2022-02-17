@@ -82,7 +82,7 @@ public class Device: NSObject {
 	
 	internal var mState		: ConnectionState!
 	#if UNIVERSAL
-	var type				: biostrapDeviceSDK.biostrapDeviceType
+	@objc public var type	: biostrapDeviceSDK.biostrapDeviceType
 	#endif
 	
 	var peripheral			: CBPeripheral?
@@ -98,7 +98,7 @@ public class Device: NSObject {
 	var getPacketCountComplete: ((_ id: String, _ successful: Bool, _ count: Int)->())?
 	var startManualComplete: ((_ id: String, _ successful: Bool)->())?
 	var stopManualComplete: ((_ id: String, _ successful: Bool)->())?
-	var blinkLEDComplete: ((_ id: String, _ successful: Bool)->())?
+	var ledComplete: ((_ id: String, _ successful: Bool)->())?
 	var enterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
 	var writeIDComplete: ((_ id: String, _ successful: Bool)->())?
 	var readIDComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
@@ -111,8 +111,8 @@ public class Device: NSObject {
 	var wornCheckComplete: ((_ id: String, _ successful: Bool, _ code: String, _ value: Int)->())?
 	var rawLoggingComplete: ((_ id: String, _ successful: Bool)->())?
 	var resetComplete: ((_ id: String, _ successful: Bool)->())?
+	var endSleepComplete: ((_ id: String, _ successful: Bool)->())?
 	var readEpochComplete: ((_ id: String, _ successful: Bool, _ value: Int)->())?
-	var setLEDComplete: ((_ id: String, _ successful: Bool)->())?
     var manualResult: ((_ id: String, _ successful: Bool, _ packet: String)->())?
 	var ppgBroken: ((_ id: String)->())?
 	var disableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
@@ -392,6 +392,20 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
+	func endSleep(_ id: String) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.endSleep()
+		}
+		else { self.endSleepComplete?(id, false) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	func getAllPackets(_ id: String) {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.getAllPackets()
@@ -462,12 +476,14 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || LIVOTAL
 	func startManual(_ id: String, leds: livotalLEDConfiguration, algorithms: livotalAlgorithmConfiguration) {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.startManual(leds: leds, algorithms: algorithms)
 		}
 		else { self.startManualComplete?(id, false) }
 	}
+	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -490,26 +506,23 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func blinkLED(_ id: String, red: Bool, green: Bool, blue: Bool, seconds: Int) {
+	#if UNIVERSAL || LIVOTAL
+	func livotalLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.blinkLED(red: red, green: green, blue: blue, seconds: seconds)
+			customCharacteristic.livotalLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
 		}
-		else { self.blinkLEDComplete?(id, false) }
+		else { self.ledComplete?(id, false) }
 	}
+	#endif
 
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	func setLED(_ id: String, red: Bool, green: Bool, blue: Bool) {
+	#if UNIVERSAL || ETHOS
+	func ethosLED(_ id: String, red: Int, green: Int, blue: Int, mode: biostrapDeviceSDK.ethosLEDMode, seconds: Int, percent: Int) {
 		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.setLED(red: red, green: green, blue: blue)
+			customCharacteristic.ethosLED(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent)
 		}
-		else { self.setLEDComplete?(id, false) }
+		else { self.ledComplete?(id, false) }
 	}
+	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -688,8 +701,12 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func updateFirmware(_ file: URL) {
+		#if UNIVERSAL || LIVOTAL
 		if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.start(file) }
 		else { updateFirmwareFailed?(mID, 10001, "No DFU characteristic to update") }
+		#else
+		updateFirmwareFailed?(mID, 10001, "Cannot do this yet")
+		#endif
 	}
 
 	//--------------------------------------------------------------------------------
@@ -700,8 +717,12 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func cancelFirmwareUpdate() {
+		#if UNIVERSAL || LIVOTAL
 		if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.cancel() }
 		else { updateFirmwareFailed?(mID, 10001, "No DFU characteristic to update") }
+		#else
+		updateFirmwareFailed?(mID, 10001, "Cannot do this yet")
+		#endif
 	}
 
 	//--------------------------------------------------------------------------------
@@ -751,8 +772,7 @@ public class Device: NSObject {
 					mCustomCharacteristic	= customCharacteristic(peripheral, characteristic: characteristic)
 					mCustomCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.mID, successful) }
 					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.mID, successful) }
-					mCustomCharacteristic?.blinkLEDComplete = { successful in self.blinkLEDComplete?(self.mID, successful) }
-					mCustomCharacteristic?.setLEDComplete = { successful in self.setLEDComplete?(self.mID, successful) }
+					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.mID, successful) }
 					mCustomCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.mID, successful) }
 					mCustomCharacteristic?.writeIDComplete = { successful in self.writeIDComplete?(self.mID, successful) }
 					mCustomCharacteristic?.readIDComplete = { successful, partID in self.readIDComplete?(self.mID, successful, partID) }
@@ -769,6 +789,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.ppgBroken = { self.ppgBroken?(self.mID) }
 					mCustomCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.mID, successful) }
 					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.mID, successful,  value) }
+					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.mID, successful) }
 					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.getNextPacketComplete = { successful, packet in self.getNextPacketComplete?(self.mID, successful, packet) }
 					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.mID, successful, count) }
@@ -807,8 +828,7 @@ public class Device: NSObject {
 					mCustomCharacteristic	= customCharacteristic(peripheral, characteristic: characteristic)
 					mCustomCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.mID, successful) }
 					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.mID, successful) }
-					mCustomCharacteristic?.blinkLEDComplete = { successful in self.blinkLEDComplete?(self.mID, successful) }
-					mCustomCharacteristic?.setLEDComplete = { successful in self.setLEDComplete?(self.mID, successful) }
+					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.mID, successful) }
 					mCustomCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.mID, successful) }
 					mCustomCharacteristic?.writeIDComplete = { successful in self.writeIDComplete?(self.mID, successful) }
 					mCustomCharacteristic?.readIDComplete = { successful, partID in self.readIDComplete?(self.mID, successful, partID) }
@@ -825,6 +845,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.ppgBroken = { self.ppgBroken?(self.mID) }
 					mCustomCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.mID, successful) }
 					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.mID, successful,  value) }
+					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.mID, successful) }
 					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.getNextPacketComplete = { successful, packet in self.getNextPacketComplete?(self.mID, successful, packet) }
 					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.mID, successful, count) }
