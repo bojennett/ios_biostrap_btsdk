@@ -22,7 +22,12 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		DispatchQueue.main.async {
 			if (central.state != .poweredOn) {
 				self.mDiscoveredDevices?.removeAll()
-				self.mConnectedDevices?.removeAll()
+				
+				if let connectedDevices = self.mConnectedDevices {
+					for (id, _) in connectedDevices { self.mProcessDisconnection(id) }
+				}
+				
+				//self.mConnectedDevices?.removeAll()
 				self.bluetoothReady?(false)
 			}
 			else {
