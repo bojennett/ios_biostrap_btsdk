@@ -28,6 +28,7 @@ class customCharacteristic: Characteristic {
 		case deleteAdvInterval	= 0x46
 		case clearChargeCycle	= 0x48
 		case readChargeCycle	= 0x49
+		case allowPPG			= 0xf8
 		case wornCheck			= 0xf9
 		case logRaw				= 0xfa
 		case disableWornDetect	= 0xfb
@@ -77,6 +78,7 @@ class customCharacteristic: Characteristic {
 	var clearChargeCyclesComplete: ((_ successful: Bool)->())?
 	var readChargeCyclesComplete: ((_ successful: Bool, _ cycles: Float)->())?
 	var rawLoggingComplete: ((_ successful: Bool)->())?
+	var allowPPGComplete: ((_ successful: Bool)->())?
 	var wornCheckComplete: ((_ successful: Bool, _ type: String, _ value: Int)->())?
 	var resetComplete: ((_ successful: Bool)->())?
 	var readEpochComplete: ((_ successful: Bool, _ value: Int)->())?
@@ -511,6 +513,25 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
+	func allowPPG(_ allow: Bool) {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.allowPPG.rawValue)
+			data.append(allow ? 0x01 : 0x00)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.allowPPGComplete?(false) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	func wornCheck() {
 		log?.v("\(pID)")
 		
@@ -766,6 +787,7 @@ class customCharacteristic: Characteristic {
 									else {
 										self.readChargeCyclesComplete?(false, 0.0)
 									}
+								case .allowPPG			: self.allowPPGComplete?(successful)
 								case .wornCheck			:
 									if (data.count == 8) {
 										if let code = wornResult(rawValue: data[3]) {
@@ -794,20 +816,25 @@ class customCharacteristic: Characteristic {
 							log?.e ("\(pID): Incorrect length for completion: \(data.hexString)")
 						}
 					case .dataPacket:
-						let (dataPackets, caughtUp) = self.mParsePackets(data.subdata(in: Range(1...(data.count - 1))))
-							
-						if (dataPackets.count > 0) {
-							do {
-								let jsonData = try JSONEncoder().encode(dataPackets)
-								if let jsonString = String(data: jsonData, encoding: .utf8) {
-									log?.v ("\(jsonString)")
-									self.dataPackets?(jsonString)
+						if (data.count > 1) {
+							let (dataPackets, caughtUp) = self.mParsePackets(data.subdata(in: Range(1...(data.count - 1))))
+								
+							if (dataPackets.count > 0) {
+								do {
+									let jsonData = try JSONEncoder().encode(dataPackets)
+									if let jsonString = String(data: jsonData, encoding: .utf8) {
+										log?.v ("\(jsonString)")
+										self.dataPackets?(jsonString)
+									}
+									else { log?.e ("Cannot make string from json data") }
 								}
-								else { log?.e ("Cannot make string from json data") }
+								catch { log?.e ("Cannot make JSON data") }
 							}
-							catch { log?.e ("Cannot make JSON data") }
+							if (caughtUp) { self.dataComplete?() }
 						}
-						if (caughtUp) { self.dataComplete?() }
+						else {
+							log?.e ("\(pID): Incorrect data length for data: \(data.hexString)")
+						}
 					case .worn:
 						log?.v ("Worn State: \(data[1])")
 						if      (data[1] == 0x00) { deviceWornStatus?(false) }

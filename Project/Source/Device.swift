@@ -108,6 +108,7 @@ public class Device: NSObject {
 	var deleteAdvIntervalComplete: ((_ id: String, _ successful: Bool)->())?
 	var clearChargeCyclesComplete: ((_ id: String, _ successful: Bool)->())?
 	var readChargeCyclesComplete: ((_ id: String, _ successful: Bool, _ cycles: Float)->())?
+	var allowPPGComplete: ((_ id: String, _ successful: Bool)->())?
 	var wornCheckComplete: ((_ id: String, _ successful: Bool, _ code: String, _ value: Int)->())?
 	var rawLoggingComplete: ((_ id: String, _ successful: Bool)->())?
 	var resetComplete: ((_ id: String, _ successful: Bool)->())?
@@ -315,7 +316,7 @@ public class Device: NSObject {
 		#elseif ETHOS
 		if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 			
-			log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+			//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 
 			return (modelNumber.configured &&
 					hardwareRevision.configured &&
@@ -657,13 +658,27 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
+	func allowPPG(_ id: String, allow: Bool) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.allowPPG(allow)
+		}
+		else { self.allowPPGComplete?(id, false) }
+	}
+
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	func wornCheck(_ id: String) {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.wornCheck()
 		}
 		else { self.wornCheckComplete?(id, false, "Missing Characteristic", 0) }
 	}
-
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -783,6 +798,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.mID, successful) }
 					mCustomCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.mID, successful, cycles) }
 					mCustomCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.mID, successful) }
+					mCustomCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.mID, successful)}
 					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.mID, successful, code, value )}
 					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.mID, successful) }
 					mCustomCharacteristic?.manualResult = { successful, packet in self.manualResult?(self.mID, successful, packet) }
@@ -839,6 +855,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.mID, successful) }
 					mCustomCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.mID, successful, cycles) }
 					mCustomCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.mID, successful) }
+					mCustomCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.mID, successful)}
 					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.mID, successful, code, value )}
 					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.mID, successful) }
 					mCustomCharacteristic?.manualResult = { successful, packet in self.manualResult?(self.mID, successful, packet) }

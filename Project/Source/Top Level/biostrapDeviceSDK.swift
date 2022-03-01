@@ -90,6 +90,7 @@ import iOSDFULibrary
 	@objc public var deleteAdvIntervalComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var clearChargeCyclesComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var readChargeCyclesComplete: ((_ id: String, _ successful: Bool, _ cycles: Float)->())?
+	@objc public var allowPPGComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var wornCheckComplete: ((_ id: String, _ successful: Bool, _ code: String, _ value: Int)->())?
 	@objc public var rawLoggingComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var resetComplete: ((_ id: String, _ successful: Bool)->())?
@@ -554,6 +555,20 @@ import iOSDFULibrary
 	@objc public func readChargeCycles(_ id: String) {
 		if let device = mConnectedDevices?[id] { device.readChargeCycles(id) }
 		else { self.readChargeCyclesComplete?(id, false, 0) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func allowPPG(_ id: String, allow: Bool) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.allowPPG(id, allow: allow) }
+		else { self.allowPPGComplete?(id, false) }
 	}
 
 	//--------------------------------------------------------------------------------

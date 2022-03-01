@@ -148,6 +148,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) }
 							}
 							
+							device.allowPPGComplete			= { id, successful in
+								DispatchQueue.main.async { self.allowPPGComplete?(id, successful) }
+							}
+							
 							device.wornCheckComplete		= { id, successful, code, value in
 								DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) }
 							}
@@ -285,6 +289,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 							
 							device.readChargeCyclesComplete	= { id, successful, cycles in
 								DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) }
+							}
+							
+							device.allowPPGComplete			= { id, successful in
+								DispatchQueue.main.async { self.allowPPGComplete?(id, successful) }
 							}
 							
 							device.wornCheckComplete		= { id, successful, code, value in
