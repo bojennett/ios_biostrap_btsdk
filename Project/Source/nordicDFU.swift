@@ -33,6 +33,8 @@ class nordicDFU: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func prepare(_ id: String, file: URL) {
+		log?.v ("")
+		
 		mID				= id
 		mActive			= false
 		
@@ -56,8 +58,13 @@ class nordicDFU: NSObject {
 		mServiceInitiator.delegate			= self
 		mServiceInitiator.progressDelegate	= self
 		mActive								= true
-
-		let _	= mServiceInitiator.with(firmware: mFirmwareFile).start(target: peripheral)
+		
+		if (mFirmwareFile == nil) {
+			self.failed?(mID, 10003, "Could not find input file")
+		}
+		else {
+			let _	= mServiceInitiator.with(firmware: mFirmwareFile).start(target: peripheral)
+		}
 	}
 }
 
