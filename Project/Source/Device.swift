@@ -716,9 +716,40 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func updateFirmware(_ file: URL) {
-		#if UNIVERSAL || LIVOTAL
+		#if UNIVERSAL
+		switch (type) {
+		case .livotal:
+			if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.start(file) }
+			else { updateFirmwareFailed?(mID, 10001, "No DFU characteristic to update") }
+		case .ethos:
+			if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
+				do {
+					let contents = try Data(contentsOf: file)
+					ambiqOTARXCharacteristic.start(contents)
+				}
+				catch {
+					log?.e ("Cannot open file")
+					self.updateFirmwareFailed?(mID, 10001, "Cannot parse file for update")
+				}
+			}
+			else { updateFirmwareFailed?(mID, 10001, "No OTA RX characteristic to update") }
+		default: updateFirmwareFailed?(mID, 10001, "Do not understand type to update: \(type.title)")
+		}
+		#elseif LIVOTAL
 		if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.start(file) }
 		else { updateFirmwareFailed?(mID, 10001, "No DFU characteristic to update") }
+		#elseif ETHOS
+		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
+			do {
+				let contents = try Data(contentsOf: file)
+				ambiqOTARXCharacteristic.start(contents)
+			}
+			catch {
+				log?.e ("Cannot open file")
+				self.updateFirmwareFailed?(mID, 10001, "Cannot parse file for update")
+			}
+		}
+		else { updateFirmwareFailed?(mID, 10001, "No OTA RX characteristic to update") }
 		#else
 		updateFirmwareFailed?(mID, 10001, "Cannot do this yet")
 		#endif
@@ -824,19 +855,16 @@ public class Device: NSObject {
 					log?.v ("\(gblReturnID(peripheral)) for service: \(characteristic.service.prettyID) - '\(testCharacteristic.title)'")
 					
 					mAmbiqOTARXCharacteristic = ambiqOTARXCharacteristic(peripheral, characteristic: characteristic)
-					
-					mAmbiqOTARXCharacteristic?.started = { self.updateFirmwareStarted?(self.mID) }
+					mAmbiqOTARXCharacteristic?.started	= { self.updateFirmwareStarted?(self.mID) }
 					mAmbiqOTARXCharacteristic?.finished = { self.updateFirmwareFinished?(self.mID) }
-					mAmbiqOTARXCharacteristic?.failed = { code, message in self.updateFirmwareFailed?(self.mID, code, message) }
-					mAmbiqOTARXCharacteristic?.progress = { percent in self.updateFirmwareProgress?(self.mID, percent) }
-
+					mAmbiqOTARXCharacteristic?.failed	= { code, message in self.updateFirmwareFailed?(self.mID, code, message) }
+					mAmbiqOTARXCharacteristic?.progress	= { percent in self.updateFirmwareProgress?(self.mID, percent) }
 					
 				case .ambiqOTATXCharacteristic:
 					log?.v ("\(gblReturnID(peripheral)) for service: \(characteristic.service.prettyID) - '\(testCharacteristic.title)'")
 					
 					mAmbiqOTATXCharacteristic = ambiqOTATXCharacteristic(peripheral, characteristic: characteristic)
 					mAmbiqOTATXCharacteristic?.discoverDescriptors()
-					//peripheral.setNotifyValue(true, for: characteristic)
 				#endif
 				
 				#if UNIVERSAL || LIVOTAL
@@ -980,7 +1008,14 @@ public class Device: NSObject {
 				#if UNIVERSAL || ETHOS
 				case .ethosCharacteristic		: mCustomCharacteristic?.didUpdateValue()
 				case .ambiqOTARXCharacteristic	: log?.e ("\(gblReturnID(peripheral)) '\(enumerated.title)' - should not be here")
-				case .ambiqOTATXCharacteristic	: mAmbiqOTARXCharacteristic?.didUpdateValue()	// Comes in on TX, causes RX to do next step
+				case .ambiqOTATXCharacteristic	:
+					// Commands to RX come in on TX, causes RX to do next step
+					if let value = characteristic.value {
+						mAmbiqOTARXCharacteristic?.didUpdateTXValue(value)
+					}
+					else {
+						log?.e ("\(gblReturnID(peripheral)) '\(enumerated.title)' - No data received for RX command")
+					}
 				#endif
 				
 				#if UNIVERSAL || LIVOTAL

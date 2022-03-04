@@ -196,6 +196,18 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) }
 							}
 							
+							device.updateFirmwareFinished	= { id in
+								DispatchQueue.main.async { self.updateFirmwareFinished?(id) }
+							}
+
+							device.updateFirmwareStarted	= { id in
+								DispatchQueue.main.async { self.updateFirmwareStarted?(id) }
+							}
+
+							device.updateFirmwareProgress	= { id, percentage in
+								DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) }
+							}
+
 							self.mDiscoveredDevices?[gblReturnID(id)] = device
 							log?.v("didDiscover: \(name)")
 							
@@ -337,6 +349,18 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 
 							device.updateFirmwareFailed		= { id, code, message in
 								DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) }
+							}
+							
+							device.updateFirmwareFinished	= { id in
+								DispatchQueue.main.async { self.updateFirmwareFinished?(id) }
+							}
+
+							device.updateFirmwareStarted	= { id in
+								DispatchQueue.main.async { self.updateFirmwareStarted?(id) }
+							}
+
+							device.updateFirmwareProgress	= { id, percentage in
+								DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) }
 							}
 							
 							self.mDiscoveredDevices?[gblReturnID(id)] = device

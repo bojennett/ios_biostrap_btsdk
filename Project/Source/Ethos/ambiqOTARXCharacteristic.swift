@@ -261,73 +261,68 @@ class ambiqOTARXCharacteristic: Characteristic {
 	// Function Name:
 	//--------------------------------------------------------------------------------
 	//
-	//
+	// This does not override any function.  Commands on RX come back as notifications
+	// on TX, so I can't get the value from the RX characteristic
 	//
 	//--------------------------------------------------------------------------------
-	override func didUpdateValue() {
-		if let characteristic = pCharacteristic, let response = characteristic.value {
-			if let cmd = otaCommand(rawValue: response[2]), let status = amotaStatus(rawValue: response[3]) {
-				if (cmd == .AMOTA_CMD_UNKNOWN) {
-					log?.e("Got unknown command: \(response.hexString)")
-					failed?(Int(amotaStatus.UNKNOWN_ERROR.rawValue), amotaStatus.UNKNOWN_ERROR.title)
-					return
-				}
-				
-				if (status != .SUCCESS) {
-					log?.e("Error '\(status)': \(response.hexString)")
-					failed?(Int(status.rawValue), status.title)
-					return
-				}
+	func didUpdateTXValue(_ value: Data) {
 
-				//log?.v("\(cmd)")
-				
-				switch (mState) {
-				case .IDLE: break
+		if let cmd = otaCommand(rawValue: value[2]), let status = amotaStatus(rawValue: value[3]) {
+			if (cmd == .AMOTA_CMD_UNKNOWN) {
+				log?.e("Got unknown command: \(value.hexString)")
+				failed?(Int(amotaStatus.UNKNOWN_ERROR.rawValue), amotaStatus.UNKNOWN_ERROR.title)
+				return
+			}
+			
+			if (status != .SUCCESS) {
+				log?.e("Error '\(status)': \(value.hexString)")
+				failed?(Int(status.rawValue), status.title)
+				return
+			}
 
-				case .HEADER:
-					log?.v("Finished the header -> send data blocks")
-					mState		= .DATA
-					mDataIndex	= 0
-					mFrameIndex	= 0
+			switch (mState) {
+			case .IDLE: break
+
+			case .HEADER:
+				log?.v("Finished the header -> send data blocks")
+				mState		= .DATA
+				mDataIndex	= 0
+				mFrameIndex	= 0
+				mSendFrame(data: mDataPackets[mDataIndex][mFrameIndex])
+
+			case .DATA:
+				mDataIndex = mDataIndex + 1
+				progress?(Float(mDataIndex) / Float(mDataPackets.count))
+
+				if (mDataIndex == mDataPackets.count) {
+					log?.v("Finished the data -> send verify command")
+
+					mState = .VERIFY
+					mSendFrame(data: mBuildPacket(command: otaCommand.AMOTA_CMD_FW_VERIFY, data: nil))
+				}
+				else {
+					mFrameIndex = 0
 					mSendFrame(data: mDataPackets[mDataIndex][mFrameIndex])
-
-				case .DATA:
-					mDataIndex = mDataIndex + 1
-					progress?(Float(mDataIndex * 100 / mDataPackets.count))
-
-					if (mDataIndex == mDataPackets.count) {
-						log?.v("Finished the data -> send verify command")
-
-						mState = .VERIFY
-						mSendFrame(data: mBuildPacket(command: otaCommand.AMOTA_CMD_FW_VERIFY, data: nil))
-					}
-					else {
-						mFrameIndex = 0
-						mSendFrame(data: mDataPackets[mDataIndex][mFrameIndex])
-					}
-
-				case .VERIFY:
-					log?.v("Finished the verify -> send reset command")
-					
-					mState = .RESET
-					mSendFrame(data: mBuildPacket(command: otaCommand.AMOTA_CMD_FW_RESET, data: nil))
-
-				case .RESET:
-					log?.v("Done")
-					mState = .DONE
-					
-					finished?()
-
-				default: log?.e ("Unknown state: \(mState)")
 				}
 
+			case .VERIFY:
+				log?.v("Finished the verify -> send reset command")
+				
+				mState = .RESET
+				mSendFrame(data: mBuildPacket(command: otaCommand.AMOTA_CMD_FW_RESET, data: nil))
+
+			case .RESET:
+				log?.v("Done")
+				mState = .DONE
+				
+				finished?()
+
+			default: log?.e ("Unknown state: \(mState)")
 			}
-			else {
-				log?.e ("Received an unknown command \(String(format: "0x%02X", response[2])) and/or status \(String(format: "0x%02X", response[3]))")
-			}
+
 		}
 		else {
-			log?.e ("Do not have any value")
+			log?.e ("Received an unknown command \(String(format: "0x%02X", value[2])) and/or status \(String(format: "0x%02X", value[3]))")
 		}
 	}
 
