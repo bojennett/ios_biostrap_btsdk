@@ -168,14 +168,3 @@ var gblLimitEthos	= false
 //
 //
 //--------------------------------------------------------------------------------
-internal var gblEmulatorID		= ""
-
-func gblReturnID(_ id: String) -> String {
-	if (id == gblEmulatorID) { return "EMULATOR" }
-	return id
-}
-
-func gblReturnID(_ peripheral: CBPeripheral) -> String {
-	return (gblReturnID(peripheral.identifier.uuidString))
-}
-

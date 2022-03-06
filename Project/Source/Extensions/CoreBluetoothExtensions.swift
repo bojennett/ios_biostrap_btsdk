@@ -14,7 +14,7 @@ import CoreBluetooth
 //
 //--------------------------------------------------------------------------------
 extension CBPeripheral {
-	var ID: String { return self.identifier.uuidString.uppercased() }
+	var prettyID: String { return self.identifier.uuidString.uppercased() }
 }
 
 //--------------------------------------------------------------------------------

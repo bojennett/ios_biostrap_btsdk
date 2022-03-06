@@ -46,16 +46,15 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
 		
 		if (advertisementData[CBAdvertisementDataServiceUUIDsKey] == nil) { return }
-		let id = peripheral.ID
 
 		DispatchQueue.main.async {
-			if let _ = self.mDiscoveredDevices?[gblReturnID(id)] {
+			if let _ = self.mDiscoveredDevices?[peripheral.prettyID] {
 				// Do nothing
 			}
-			else if let _ = self.mConnectedDevices?[gblReturnID(id)] {
-				log?.v ("Discovered a device that is in my connected list... remove that and mark as disconnected...")
-				self.mConnectedDevices?.removeValue(forKey: gblReturnID(id))
-				self.disconnected?(gblReturnID(id))
+			else if let _ = self.mConnectedDevices?[peripheral.prettyID] {
+				log?.v ("\(peripheral.prettyID): didDiscover: Discovered a device that is in my connected list... remove that and mark as disconnected...")
+				self.mConnectedDevices?.removeValue(forKey: peripheral.prettyID)
+				self.disconnected?(peripheral.prettyID)
 			}
 			else {
 				// Local Name
@@ -67,9 +66,9 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						#if UNIVERSAL || ETHOS
 						if (thisUUID == Device.services.ethosService.UUID) {
 							#if UNIVERSAL
-							let device = Device(name, id: gblReturnID(id), peripheral: peripheral, type: .ethos)
+							let device = Device(name, id: peripheral.prettyID, peripheral: peripheral, type: .ethos)
 							#else
-							let device = Device(name, id: gblReturnID(id), peripheral: peripheral)
+							let device = Device(name, id: peripheral.prettyID, peripheral: peripheral)
 							#endif
 							
 							device.batteryLevelUpdated		= { id, percentage in
@@ -208,13 +207,13 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) }
 							}
 
-							self.mDiscoveredDevices?[gblReturnID(id)] = device
-							log?.v("didDiscover: \(name)")
+							self.mDiscoveredDevices?[peripheral.prettyID] = device
+							log?.v("\(peripheral.prettyID): didDiscover: \(name)")
 							
 							#if UNIVERSAL
-							self.discovered?(gblReturnID(id), .ethos)
+							self.discovered?(peripheral.prettyID, .ethos)
 							#else
-							self.discovered?(gblReturnID(id))
+							self.discovered?(peripheral.prettyID)
 							#endif
 						}
 						#endif
@@ -222,9 +221,9 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						#if UNIVERSAL || LIVOTAL
 						if (thisUUID == Device.services.livotalService.UUID) {
 							#if UNIVERSAL
-							let device = Device(name, id: gblReturnID(id), peripheral: peripheral, type: .livotal)
+							let device = Device(name, id: peripheral.prettyID, peripheral: peripheral, type: .livotal)
 							#else
-							let device = Device(name, id: gblReturnID(id), peripheral: peripheral)
+							let device = Device(name, id: peripheral.prettyID, peripheral: peripheral)
 							#endif
 							
 							device.batteryLevelUpdated		= { id, percentage in
@@ -363,37 +362,37 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) }
 							}
 							
-							self.mDiscoveredDevices?[gblReturnID(id)] = device
-							log?.v("didDiscover: \(name)")
+							self.mDiscoveredDevices?[peripheral.prettyID] = device
+							log?.v("\(peripheral.prettyID): didDiscover: \(name)")
 							
 							#if UNIVERSAL
-							self.discovered?(gblReturnID(id), .livotal)
+							self.discovered?(peripheral.prettyID, .livotal)
 							#else
-							self.discovered?(gblReturnID(id))
+							self.discovered?(peripheral.prettyID)
 							#endif
 						}
 						
 						if (thisUUID == Device.services.nordicDFUService.UUID) {
-							log?.v("didDiscover: \(name) -> DFU mode!")
+							log?.v("\(peripheral.prettyID): didDiscover: \(name) -> DFU mode!")
 							
 							if (name == gblDFUName) {
 								if (!dfu.active) {
-									log?.v("didDiscover: And it happens to be who I am looking for!")
+									log?.v("\(peripheral.prettyID): didDiscover: And it happens to be who I am looking for!")
 									dfu.update(peripheral)
 								}
 								else {
-									log?.e("didDiscover: I should have started by now...")
+									log?.e("\(peripheral.prettyID): didDiscover: I should have started by now...")
 								}
 							}
 							else {
-								log?.e("didDiscover: This is not who I am looking for, though...")
+								log?.e("\(peripheral.prettyID): didDiscover: This is not who I am looking for, though...")
 							}
 						}
 						#endif
 					}
 				}
 				else {
-					log?.e("didDiscover: \(id), but no name given, not indicating discovered")
+					log?.e("\(peripheral.prettyID): didDiscover: No name given, not indicating discovered")
 				}
 			}
 		}
@@ -407,26 +406,24 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-		let id = gblReturnID(peripheral.ID)
-		
-		log?.v("\(id): didConnect")
+		log?.v("\(peripheral.prettyID): didConnect")
 		
 		DispatchQueue.main.async {
-			if let device = self.mDiscoveredDevices?[id] {
+			if let device = self.mDiscoveredDevices?[peripheral.prettyID] {
 				if (device.connecting) {
 					if let devicePeripheral = device.peripheral {
 						if (peripheral == devicePeripheral) {
 							devicePeripheral.delegate = self
 							device.peripheral = devicePeripheral
 							device.configuring = true
-							self.mDiscoveredDevices?.removeValue(forKey: id)
-							self.mConnectedDevices?[id] = device
+							self.mDiscoveredDevices?.removeValue(forKey: peripheral.prettyID)
+							self.mConnectedDevices?[peripheral.prettyID] = device
 							devicePeripheral.discoverServices(nil)
 						}
 					}
 				}
 				else {
-					log?.e ("Connected to a device that isn't requesting connection.  Weird!")
+					log?.e ("\(peripheral.prettyID): didConnect: Connected to a device that isn't requesting connection.  Weird!")
 				}
 			}
 		}
@@ -446,7 +443,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					self.mDiscoveredDevices?.removeValue(forKey: id)
 				}
 				else {
-					log?.e ("Disconnected from a discovered device that isn't requesting connection.  Weird!")
+					log?.e ("\(id): Disconnected from a discovered device that isn't requesting connection.  Weird!")
 				}
 				
 				self.disconnected?(id)
@@ -458,7 +455,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					self.mConnectedDevices?.removeValue(forKey: id)
 				}
 				else {
-					log?.e ("Disconnected from a connected device that isn't discovering services or fully connected.  Weird!")
+					log?.e ("\(id): Disconnected from a connected device that isn't discovering services or fully connected.  Weird!")
 				}
 				
 				self.disconnected?(id)
@@ -475,10 +472,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-		let id = gblReturnID(peripheral.ID)
-
-		log?.v("didDisconnectPeripheral: \(id)")
-		self.mProcessDisconnection(id)
+		log?.v("\(peripheral.prettyID): didDisconnectPeripheral")
+		self.mProcessDisconnection(peripheral.prettyID)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -489,10 +484,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-		let id = gblReturnID(peripheral.ID)
-
-		log?.v("didFailToConnect: \(id)")
-		self.mProcessDisconnection(id)
+		log?.v("\(peripheral.prettyID): didFailToConnect")
+		self.mProcessDisconnection(peripheral.prettyID)
 	}
 	
 }

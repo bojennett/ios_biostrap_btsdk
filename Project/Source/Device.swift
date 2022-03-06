@@ -186,22 +186,27 @@ public class Device: NSObject {
 	}
 	
 	class func hit(_ service: CBService) -> Bool {
-		if let standardService = org_bluetooth_service(rawValue: service.prettyID) {
-			log?.v ("\(gblReturnID(service.peripheral)): '\(standardService.title)'")
-			switch standardService {
-			case .device_information: return (true)
-			case .battery_service: return (true)
-			default:
-				log?.e ("\(gblReturnID(service.peripheral)): (unknown): '\(standardService.title)'")
+		if let peripheral = service.peripheral {
+			if let standardService = org_bluetooth_service(rawValue: service.prettyID) {
+				log?.v ("\(peripheral.prettyID): '\(standardService.title)'")
+				switch standardService {
+				case .device_information: return (true)
+				case .battery_service: return (true)
+				default:
+					log?.e ("\(peripheral.prettyID): (unknown): '\(standardService.title)'")
+					return (false)
+				}
+			}
+			else if let customService = Device.services(rawValue: service.prettyID) {
+				log?.v ("\(peripheral.prettyID): '\(customService.title)'")
+				return (true)
+			}
+			else {
+				log?.e ("\(peripheral.prettyID): \(service.prettyID) - don't know what to do!!!!")
 				return (false)
 			}
 		}
-		else if let customService = Device.services(rawValue: service.prettyID) {
-			log?.v ("\(gblReturnID(service.peripheral)): '\(customService.title)'")
-			return (true)
-		}
 		else {
-			log?.e ("\(gblReturnID(service.peripheral)): \(service.prettyID) - don't know what to do!!!!")
 			return (false)
 		}
 	}
@@ -795,7 +800,7 @@ public class Device: NSObject {
 					mManufacturerName = disStringCharacteristic(peripheral, characteristic: characteristic)
 					mManufacturerName?.read()
 				case .battery_level:
-					log?.v ("\(gblReturnID(peripheral)) '\(testCharacteristic.title)' - read it and enable notifications")
+					log?.v ("\(mID) '\(testCharacteristic.title)' - read it and enable notifications")
 					mBatteryLevelCharacteristic	= batteryLevelCharacteristic(peripheral, characteristic: characteristic)
 					mBatteryLevelCharacteristic?.updated	= { id, percentage in
 						self.batteryLevel = percentage
@@ -804,10 +809,15 @@ public class Device: NSObject {
 					mBatteryLevelCharacteristic?.read()
 					mBatteryLevelCharacteristic?.discoverDescriptors()
 				case .body_sensor_location:
-					log?.v ("\(gblReturnID(peripheral)) '\(testCharacteristic.title)' - read it")
+					log?.v ("\(mID) '\(testCharacteristic.title)' - read it")
 					peripheral.readValue(for: characteristic)
 				default:
-					log?.e ("\(gblReturnID(peripheral)) for service: \(characteristic.service.prettyID) - '\(testCharacteristic.title)' - do not know what to do")
+					if let service = characteristic.service {
+						log?.e ("\(mID) for service: \(service.prettyID) - '\(testCharacteristic.title)' - do not know what to do")
+					}
+					else {
+						log?.e ("\(mID) for nil service - '\(testCharacteristic.title)' - do not know what to do")
+					}
 				}
 			}
 			else if let testCharacteristic = Device.characteristics(rawValue: characteristic.prettyID) {
@@ -852,7 +862,12 @@ public class Device: NSObject {
 					mCustomCharacteristic?.discoverDescriptors()
 					
 				case .ambiqOTARXCharacteristic:
-					log?.v ("\(gblReturnID(peripheral)) for service: \(characteristic.service.prettyID) - '\(testCharacteristic.title)'")
+					if let service = characteristic.service {
+						log?.v ("\(mID) for service: \(service.prettyID) - '\(testCharacteristic.title)'")
+					}
+					else {
+						log?.v ("\(mID) for nil service - '\(testCharacteristic.title)'")
+					}
 					
 					mAmbiqOTARXCharacteristic = ambiqOTARXCharacteristic(peripheral, characteristic: characteristic)
 					mAmbiqOTARXCharacteristic?.started	= { self.updateFirmwareStarted?(self.mID) }
@@ -861,7 +876,12 @@ public class Device: NSObject {
 					mAmbiqOTARXCharacteristic?.progress	= { percent in self.updateFirmwareProgress?(self.mID, percent) }
 					
 				case .ambiqOTATXCharacteristic:
-					log?.v ("\(gblReturnID(peripheral)) for service: \(characteristic.service.prettyID) - '\(testCharacteristic.title)'")
+					if let service = characteristic.service {
+						log?.v ("\(mID) for service: \(service.prettyID) - '\(testCharacteristic.title)'")
+					}
+					else {
+						log?.v ("\(mID) for nil service - '\(testCharacteristic.title)'")
+					}
 					
 					mAmbiqOTATXCharacteristic = ambiqOTATXCharacteristic(peripheral, characteristic: characteristic)
 					mAmbiqOTATXCharacteristic?.discoverDescriptors()
@@ -919,7 +939,12 @@ public class Device: NSObject {
 				}
 			}
 			else {
-				log?.e ("\(gblReturnID(peripheral)) for service: \(characteristic.service.prettyID) - \(characteristic.prettyID) - UNKNOWN")
+				if let service = characteristic.service {
+					log?.e ("\(mID) for service: \(service.prettyID) - \(characteristic.prettyID) - UNKNOWN")
+				}
+				else {
+					log?.e ("\(mID) for nil service - \(characteristic.prettyID) - UNKNOWN")
+				}
 			}
 		}
 		else {
@@ -935,46 +960,41 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func didDiscoverDescriptor (_ descriptor: CBDescriptor, forCharacteristic characteristic: CBCharacteristic) {
-		if let peripheral = peripheral {
-			if let standardDescriptor = org_bluetooth_descriptor(rawValue: descriptor.prettyID) {
-				switch (standardDescriptor) {
-				case .client_characteristic_configuration:
-					if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
-						log?.v ("\(gblReturnID(peripheral)): \(standardDescriptor.title) '\(enumerated.title)'")
-						switch (enumerated) {
-						#if UNIVERSAL || ETHOS
-						case .ethosCharacteristic		: mCustomCharacteristic?.didDiscoverDescriptor()
-						case .ambiqOTARXCharacteristic	: log?.e ("\(gblReturnID(peripheral)) '\(enumerated.title)' - should not be here")
-						case .ambiqOTATXCharacteristic	: mAmbiqOTATXCharacteristic?.didDiscoverDescriptor()
-						#endif
-						
-						#if UNIVERSAL || LIVOTAL
-						case .livotalCharacteristic		: mCustomCharacteristic?.didDiscoverDescriptor()
-						case .nordicDFUCharacteristic	: mNordicDFUCharacteristic?.didDiscoverDescriptor()
-						#endif
-						}
-					}
-					else if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
-						switch (enumerated) {
-						case .battery_level				: mBatteryLevelCharacteristic?.didDiscoverDescriptor()
-						default:
-							log?.e ("\(gblReturnID(peripheral)) '\(enumerated.title)' - don't know what to do")
-						}
-					}
+		if let standardDescriptor = org_bluetooth_descriptor(rawValue: descriptor.prettyID) {
+			switch (standardDescriptor) {
+			case .client_characteristic_configuration:
+				if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
+					log?.v ("\(mID): \(standardDescriptor.title) '\(enumerated.title)'")
+					switch (enumerated) {
+					#if UNIVERSAL || ETHOS
+					case .ethosCharacteristic		: mCustomCharacteristic?.didDiscoverDescriptor()
+					case .ambiqOTARXCharacteristic	: log?.e ("\(mID) '\(enumerated.title)' - should not be here")
+					case .ambiqOTATXCharacteristic	: mAmbiqOTATXCharacteristic?.didDiscoverDescriptor()
+					#endif
 					
-				case .characteristic_user_description:
-					break
-
-				default:
-					log?.e ("\(gblReturnID(peripheral)) for characteristic: \(characteristic.prettyID) - '\(standardDescriptor.title)'.  Do not know what to do - skipping")
+					#if UNIVERSAL || LIVOTAL
+					case .livotalCharacteristic		: mCustomCharacteristic?.didDiscoverDescriptor()
+					case .nordicDFUCharacteristic	: mNordicDFUCharacteristic?.didDiscoverDescriptor()
+					#endif
+					}
 				}
-			}
-			else {
-				log?.e ("\(gblReturnID(peripheral)) for characteristic \(characteristic.prettyID): \(descriptor.prettyID) - do not know what to do")
+				else if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
+					switch (enumerated) {
+					case .battery_level				: mBatteryLevelCharacteristic?.didDiscoverDescriptor()
+					default:
+						log?.e ("\(mID) '\(enumerated.title)' - don't know what to do")
+					}
+				}
+				
+			case .characteristic_user_description:
+				break
+
+			default:
+				log?.e ("\(mID) for characteristic: \(characteristic.prettyID) - '\(standardDescriptor.title)'.  Do not know what to do - skipping")
 			}
 		}
 		else {
-			log?.e ("Peripheral object is nil - do nothing")
+			log?.e ("\(mID) for characteristic \(characteristic.prettyID): \(descriptor.prettyID) - do not know what to do")
 		}
 	}
 
@@ -986,50 +1006,45 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func didUpdateValue (_ characteristic: CBCharacteristic) {
-		if let peripheral = peripheral {
-			if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
-				switch (enumerated) {
-				case .model_number_string		: mModelNumber?.didUpdateValue()
-				case .hardware_revision_string	: mHardwareRevision?.didUpdateValue()
-				case .firmware_revision_string	: mFirmwareVersion?.didUpdateValue()
-				case .manufacturer_name_string	: mManufacturerName?.didUpdateValue()
-				case .battery_level				: mBatteryLevelCharacteristic?.didUpdateValue()
-				case .body_sensor_location:
-					if let value = characteristic.value {
-						log?.v ("\(gblReturnID(peripheral)): '\(enumerated.title)' - \(value.hexString)")
-					}
-					else { log?.e ("No valid \(enumerated.title) data!") }
-				default:
-					log?.e ("\(gblReturnID(peripheral)) for characteristic: '\(enumerated.title)' - do not know what to do")
+		if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
+			switch (enumerated) {
+			case .model_number_string		: mModelNumber?.didUpdateValue()
+			case .hardware_revision_string	: mHardwareRevision?.didUpdateValue()
+			case .firmware_revision_string	: mFirmwareVersion?.didUpdateValue()
+			case .manufacturer_name_string	: mManufacturerName?.didUpdateValue()
+			case .battery_level				: mBatteryLevelCharacteristic?.didUpdateValue()
+			case .body_sensor_location:
+				if let value = characteristic.value {
+					log?.v ("\(mID): '\(enumerated.title)' - \(value.hexString)")
 				}
+				else { log?.e ("No valid \(enumerated.title) data!") }
+			default:
+				log?.e ("\(mID) for characteristic: '\(enumerated.title)' - do not know what to do")
 			}
-			else if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
-				switch (enumerated) {
-				#if UNIVERSAL || ETHOS
-				case .ethosCharacteristic		: mCustomCharacteristic?.didUpdateValue()
-				case .ambiqOTARXCharacteristic	: log?.e ("\(gblReturnID(peripheral)) '\(enumerated.title)' - should not be here")
-				case .ambiqOTATXCharacteristic	:
-					// Commands to RX come in on TX, causes RX to do next step
-					if let value = characteristic.value {
-						mAmbiqOTARXCharacteristic?.didUpdateTXValue(value)
-					}
-					else {
-						log?.e ("\(gblReturnID(peripheral)) '\(enumerated.title)' - No data received for RX command")
-					}
-				#endif
-				
-				#if UNIVERSAL || LIVOTAL
-				case .livotalCharacteristic		: mCustomCharacteristic?.didUpdateValue()
-				case .nordicDFUCharacteristic	: mNordicDFUCharacteristic?.didUpdateValue()
-				#endif
+		}
+		else if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
+			switch (enumerated) {
+			#if UNIVERSAL || ETHOS
+			case .ethosCharacteristic		: mCustomCharacteristic?.didUpdateValue()
+			case .ambiqOTARXCharacteristic	: log?.e ("\(mID) '\(enumerated.title)' - should not be here")
+			case .ambiqOTATXCharacteristic	:
+				// Commands to RX come in on TX, causes RX to do next step
+				if let value = characteristic.value {
+					mAmbiqOTARXCharacteristic?.didUpdateTXValue(value)
 				}
-			}
-			else {
-				log?.v ("\(gblReturnID(peripheral)) for characteristic: \(characteristic.prettyID)")
+				else {
+					log?.e ("\(mID) '\(enumerated.title)' - No data received for RX command")
+				}
+			#endif
+			
+			#if UNIVERSAL || LIVOTAL
+			case .livotalCharacteristic		: mCustomCharacteristic?.didUpdateValue()
+			case .nordicDFUCharacteristic	: mNordicDFUCharacteristic?.didUpdateValue()
+			#endif
 			}
 		}
 		else {
-			log?.e ("Peripheral object is nil - do nothing")
+			log?.v ("\(mID) for characteristic: \(characteristic.prettyID)")
 		}
 	}
 
@@ -1044,11 +1059,12 @@ public class Device: NSObject {
 		if let _ = peripheral {
 			if (characteristic.isNotifying) {
 				if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
-					log?.v ("\(gblReturnID(characteristic.service.peripheral)): '\(enumerated.title)'")
+					log?.v ("\(mID): '\(enumerated.title)'")
+					
 					switch (enumerated) {
 					#if UNIVERSAL || ETHOS
 					case .ethosCharacteristic		: mCustomCharacteristic?.didUpdateNotificationState()
-					case .ambiqOTARXCharacteristic	: log?.e ("\(gblReturnID(characteristic.service.peripheral)) '\(enumerated.title)' - should not be here")
+					case .ambiqOTARXCharacteristic	: log?.e ("\(mID) '\(enumerated.title)' - should not be here")
 					case .ambiqOTATXCharacteristic	: mAmbiqOTATXCharacteristic?.didUpdateNotificationState()
 					#endif
 
@@ -1059,15 +1075,15 @@ public class Device: NSObject {
 					}
 				}
 				else if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
-					log?.v ("\(gblReturnID(characteristic.service.peripheral)): '\(enumerated.title)'")
+					log?.v ("\(mID): '\(enumerated.title)'")
+					
 					switch (enumerated) {
-					case .battery_level				: mBatteryLevelCharacteristic?.didUpdateNotificationState()
-					default:
-						log?.e ("\(gblReturnID(characteristic.service.peripheral)): '\(enumerated.title)'.  Do not know what to do - skipping")
+					case .battery_level		: mBatteryLevelCharacteristic?.didUpdateNotificationState()
+					default					: log?.e ("\(mID): '\(enumerated.title)'.  Do not know what to do - skipping")
 					}
 				}
 				else {
-					log?.e ("\(gblReturnID(characteristic.service.peripheral)): \(characteristic.prettyID) - do not know what to do")
+					log?.e ("\(mID): \(characteristic.prettyID) - do not know what to do")
 				}
 			}
 		}

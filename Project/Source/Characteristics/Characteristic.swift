@@ -27,7 +27,7 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic) {
-		pID				= gblReturnID(peripheral.identifier.uuidString)
+		pID				= peripheral.prettyID
 		pPeripheral		= peripheral
 		pCharacteristic	= characteristic
 		pConfigured		= false
