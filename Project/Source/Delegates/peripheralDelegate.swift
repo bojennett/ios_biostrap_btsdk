@@ -18,7 +18,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheralDidUpdateName(_ peripheral: CBPeripheral) {
-		log?.i ("\(gblReturnID(peripheral)): (do nothing)")
+		log?.i ("\(peripheral.prettyID): (do nothing)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -28,11 +28,9 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	public func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) {		
-		let id = gblReturnID(peripheral)
-
+	public func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) {
 		DispatchQueue.main.async {
-			if let device = self.mConnectedDevices?[id], (device.peripheral == peripheral) {
+			if let device = self.mConnectedDevices?[peripheral.prettyID], (device.peripheral == peripheral) {
 				device.isReady()
 			}
 		}
@@ -48,7 +46,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
 		DispatchQueue.main.async {
 			if let error = error {
-				log?.e ("\(gblReturnID(peripheral)): didDiscoverServices: Error: \(error.localizedDescription).  Disconnecting")
+				log?.e ("\(peripheral.prettyID): didDiscoverServices: Error: \(error.localizedDescription).  Disconnecting")
 				self.mCentralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
@@ -71,7 +69,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
-		log?.v ("\(gblReturnID(peripheral)): didModifyServices (do nothing)")
+		log?.v ("\(peripheral.prettyID): didModifyServices (do nothing)")
 		log?.v ("Invalidated services: \(invalidatedServices.count)")
 		for service in invalidatedServices {
 			log?.v ("\(service.prettyID)")
@@ -87,7 +85,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
-		log?.v ("\(gblReturnID(peripheral)): didReadRSSI (do nothing)")
+		log?.v ("\(peripheral.prettyID): didReadRSSI (do nothing)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -98,7 +96,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didOpen channel: CBL2CAPChannel?, error: Error?) {
-		log?.i ("\(gblReturnID(peripheral)): didOpen channel (do nothing)")
+		log?.i ("\(peripheral.prettyID): didOpen channel (do nothing)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -109,7 +107,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor descriptor: CBDescriptor, error: Error?) {
-		log?.v ("\(gblReturnID(peripheral)): didWriteValueFor descriptor: \(descriptor.prettyID)")
+		log?.v ("\(peripheral.prettyID): didWriteValueFor descriptor: \(descriptor.prettyID)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -120,7 +118,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor descriptor: CBDescriptor, error: Error?) {
-		log?.v ("\(gblReturnID(peripheral)): didUpdateValueFor descriptor: \(descriptor.prettyID)")
+		log?.v ("\(peripheral.prettyID): didUpdateValueFor descriptor: \(descriptor.prettyID)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -133,22 +131,20 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
 		DispatchQueue.main.async {
 			if let error = error {
-				log?.e ("\(gblReturnID(peripheral)): didDiscoverCharacteristics for service: \(service.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
+				log?.e ("\(peripheral.prettyID): didDiscoverCharacteristics for service: \(service.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
 				self.mCentralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 			
-			let id = gblReturnID(peripheral)
-
 			if let characteristics = service.characteristics {
 				for characteristic in characteristics {
-					if let device = self.mConnectedDevices?[id], (device.peripheral == peripheral) {
+					if let device = self.mConnectedDevices?[peripheral.prettyID], (device.peripheral == peripheral) {
 						device.didDiscoverCharacteristic(characteristic)
 						
 						if (device.configured) {
 							if (device.configuring) {
 								device.connected = true
-								self.connected?(id)
+								self.connected?(peripheral.prettyID)
 							}
 						}
 					}
@@ -165,7 +161,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-		log?.v ("\(gblReturnID(peripheral)): didWriteValueFor characteristic: \(characteristic.prettyID)")
+		log?.v ("\(peripheral.prettyID): didWriteValueFor characteristic: \(characteristic.prettyID)")
 	}
 		
 	//--------------------------------------------------------------------------------
@@ -178,25 +174,23 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
 		DispatchQueue.main.async {
 			if let error = error {
-				log?.e ("\(gblReturnID(peripheral)): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
+				log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
 				//self.mCentralManager?.cancelPeripheralConnection(peripheral)
 				//return
 			}
 			
-			let id = gblReturnID(peripheral)
-
-			if let device = self.mConnectedDevices?[id], (device.peripheral == peripheral) {
+			if let device = self.mConnectedDevices?[peripheral.prettyID], (device.peripheral == peripheral) {
 				device.didUpdateValue(characteristic)
 				
 				if (device.configured) {
 					if (device.configuring) {
 						device.connected = true
-						self.connected?(id)
+						self.connected?(peripheral.prettyID)
 					}
 				}
 			}
 			else {
-				log?.e ("\(gblReturnID(peripheral)): didUpdateValue for characteristic: \(characteristic.prettyID) - No connected device found...")
+				log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - No connected device found...")
 			}
 		}
 	}
@@ -209,26 +203,24 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?) {
-		log?.v ("\(gblReturnID(peripheral)): didDiscoverDescriptorsFor characteristic: \(characteristic.prettyID)")
+		log?.v ("\(peripheral.prettyID): didDiscoverDescriptorsFor characteristic: \(characteristic.prettyID)")
 		
 		DispatchQueue.main.async {
 			if let error = error {
-				log?.e ("\(gblReturnID(peripheral)): didDiscoverDescriptors for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Skipping")
+				log?.e ("\(peripheral.prettyID): didDiscoverDescriptors for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Skipping")
 				//self.mCentralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 			
-			let id = gblReturnID(peripheral)
-
 			if let descriptors = characteristic.descriptors {
 				for descriptor in descriptors {
-					if let device = self.mConnectedDevices?[id] {
+					if let device = self.mConnectedDevices?[peripheral.prettyID] {
 						device.didDiscoverDescriptor(descriptor, forCharacteristic: characteristic)
 					}
 				}
 			}
 			else {
-				log?.e ("\(gblReturnID(peripheral)): didDiscoverDescriptor for characteristic \(characteristic.prettyID): No descriptors - do not know what to do")
+				log?.e ("\(peripheral.prettyID): didDiscoverDescriptor for characteristic \(characteristic.prettyID): No descriptors - do not know what to do")
 			}
 		}
 	}
@@ -241,7 +233,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didDiscoverIncludedServicesFor service: CBService, error: Error?) {
-		log?.v ("\(gblReturnID(peripheral)): didDiscoverIncludedServicesFor service: \(service.prettyID)")
+		log?.v ("\(peripheral.prettyID): didDiscoverIncludedServicesFor service: \(service.prettyID)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -255,20 +247,18 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 		
 		DispatchQueue.main.async {
 			if let error = error {
-				log?.e ("\(gblReturnID(peripheral)): didUpdateNotificationState for characteristic: \(characteristic.prettyID) - Error: '\(error.localizedDescription)'  Skipping")
+				log?.e ("\(peripheral.prettyID): didUpdateNotificationState for characteristic: \(characteristic.prettyID) - Error: '\(error.localizedDescription)'  Skipping")
 				//self.mCentralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 
-			let id = gblReturnID(peripheral)
-
-			if let device = self.mConnectedDevices?[id], (device.peripheral == peripheral) {
+			if let device = self.mConnectedDevices?[peripheral.prettyID], (device.peripheral == peripheral) {
 				device.didUpdateNotificationState(characteristic)
 				
 				if (device.configured) {
 					if (device.configuring) {
 						device.connected = true
-						self.connected?(id)
+						self.connected?(peripheral.prettyID)
 					}
 				}
 			}
@@ -283,6 +273,6 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func centralManager(_ central: CBCentralManager, didUpdateANCSAuthorizationFor peripheral: CBPeripheral) {
-		log?.i ("\(gblReturnID(peripheral)): didUpdateANCSAuthorization - (do nothing)")
+		log?.i ("\(peripheral.prettyID): didUpdateANCSAuthorization - (do nothing)")
 	}
 }
