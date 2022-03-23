@@ -115,12 +115,13 @@ public class Device: NSObject {
 	var endSleepComplete: ((_ id: String, _ successful: Bool)->())?
 	var readEpochComplete: ((_ id: String, _ successful: Bool, _ value: Int)->())?
     var manualResult: ((_ id: String, _ successful: Bool, _ packet: String)->())?
-	var ppgBroken: ((_ id: String)->())?
+	var ppgFailed: ((_ id: String, _ code: Int)->())?
 	var disableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 	var enableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 
 	var dataPackets: ((_ id: String, _ packets: String)->())?
 	var dataComplete: ((_ id: String)->())?
+	var dataFailure: ((_ id: String)->())?
 	
 	var deviceWornStatus: ((_ id: String, _ isWorn: Bool)->())?
 
@@ -483,9 +484,9 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || LIVOTAL
-	func startManual(_ id: String, leds: livotalLEDConfiguration, algorithms: livotalAlgorithmConfiguration) {
+	func startManual(_ id: String, algorithms: livotalAlgorithmConfiguration) {
 		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.startManual(leds: leds, algorithms: algorithms)
+			customCharacteristic.startManual(algorithms)
 		}
 		else { self.startManualComplete?(id, false) }
 	}
@@ -843,7 +844,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.mID, successful, code, value )}
 					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.mID, successful) }
 					mCustomCharacteristic?.manualResult = { successful, packet in self.manualResult?(self.mID, successful, packet) }
-					mCustomCharacteristic?.ppgBroken = { self.ppgBroken?(self.mID) }
+					mCustomCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.mID, code) }
 					mCustomCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.mID, successful) }
 					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.mID, successful,  value) }
 					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.mID, successful) }
@@ -854,6 +855,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.mID, successful) }
 					mCustomCharacteristic?.dataPackets = { packets in self.dataPackets?(self.mID, packets) }
 					mCustomCharacteristic?.dataComplete = { self.dataComplete?(self.mID) }
+					mCustomCharacteristic?.dataFailure = { self.dataFailure?(self.mID) }
 					mCustomCharacteristic?.deviceWornStatus = { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
 						else { self.wornStatus = "Not Worn" }
@@ -907,7 +909,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.mID, successful, code, value )}
 					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.mID, successful) }
 					mCustomCharacteristic?.manualResult = { successful, packet in self.manualResult?(self.mID, successful, packet) }
-					mCustomCharacteristic?.ppgBroken = { self.ppgBroken?(self.mID) }
+					mCustomCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.mID, code) }
 					mCustomCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.mID, successful) }
 					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.mID, successful,  value) }
 					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.mID, successful) }
@@ -918,6 +920,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.mID, successful) }
 					mCustomCharacteristic?.dataPackets = { packets in self.dataPackets?(self.mID, packets) }
 					mCustomCharacteristic?.dataComplete = { self.dataComplete?(self.mID) }
+					mCustomCharacteristic?.dataFailure = { self.dataFailure?(self.mID) }
 					mCustomCharacteristic?.deviceWornStatus = { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
 						else { self.wornStatus = "Not Worn" }

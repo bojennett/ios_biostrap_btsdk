@@ -85,6 +85,8 @@ var gblLimitEthos	= false
 	case worn				= 0x85
 	case sleep				= 0x86
 	case diagnostic			= 0x87
+	case ppg_failed			= 0x88
+	case battery			= 0x89
 	case rawAccel			= 0xe0
 	case rawAccelFifoCount	= 0xe1
 	case rawPPGProximity	= 0xe2
@@ -92,7 +94,6 @@ var gblLimitEthos	= false
 	case rawPPGRed			= 0xe4
 	case rawPPGIR			= 0xe5
 	case rawPPGFifoCount	= 0xe6
-	case caughtUp			= 0xf0
 	
 	public init(from decoder: Decoder) throws {
 		let container = try decoder.singleValueContainer()
@@ -101,9 +102,11 @@ var gblLimitEthos	= false
 		case "Unknown"				: self	= .unknown
 		case "Steps"				: self	= .steps
 		case "PPG Results"			: self	= .ppg
+		case "PPG Failed"			: self	= .ppg_failed
 		case "Activity"				: self	= .activity
 		case "Temperature"			: self	= .temp
 		case "Worn"					: self	= .worn
+		case "Battery"				: self	= .battery
 		case "Sleep"				: self	= .sleep
 		case "Diagnostic"			: self	= .diagnostic
 		case "Raw Accel"			: self	= .rawAccel
@@ -113,7 +116,6 @@ var gblLimitEthos	= false
 		case "Raw PPG Red Sample"	: self	= .rawPPGRed
 		case "Raw PPG IR Sample"	: self	= .rawPPGIR
 		case "Raw PPG FIFO Count"	: self	= .rawPPGFifoCount
-		case "Caught Up"			: self	= .caughtUp
 		default: self	= .unknown
 		}
 	}
@@ -123,9 +125,11 @@ var gblLimitEthos	= false
 		case .unknown			: return "Unknown"
 		case .steps				: return "Steps"
 		case .ppg				: return "PPG Results"
+		case .ppg_failed		: return "PPG Failed"
 		case .activity			: return "Activity"
 		case .temp				: return "Temperature"
 		case .worn				: return "Worn"
+		case .battery			: return "Battery"
 		case .sleep				: return "Sleep"
 		case .diagnostic		: return "Diagnostic"
 		case .rawAccel			: return "Raw Accel"
@@ -135,7 +139,6 @@ var gblLimitEthos	= false
 		case .rawPPGRed			: return "Raw PPG Red Sample"
 		case .rawPPGIR			: return "Raw PPG IR Sample"
 		case .rawPPGFifoCount	: return "Raw PPG FIFO Count"
-		case .caughtUp			: return "Caught Up"
 		}
 	}
 	
@@ -144,9 +147,11 @@ var gblLimitEthos	= false
 		case .unknown			: return 300
 		case .steps				: return 7
 		case .ppg				: return 17
+		case .ppg_failed		: return 6
 		case .activity			: return 10
 		case .temp				: return 9
 		case .worn				: return 6
+		case .battery			: return 8
 		case .sleep				: return 9
 		case .diagnostic		: return 0 		// Done by calculation
 		case .rawAccel			: return 13
@@ -156,7 +161,6 @@ var gblLimitEthos	= false
 		case .rawPPGRed			: return 5
 		case .rawPPGIR			: return 5
 		case .rawPPGFifoCount	: return 6
-		case .caughtUp			: return 1
 		}
 	}
 }

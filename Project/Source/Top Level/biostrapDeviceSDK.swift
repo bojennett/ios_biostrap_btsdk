@@ -95,12 +95,13 @@ import iOSDFULibrary
 	@objc public var rawLoggingComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var resetComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var manualResult: ((_ id: String, _ successful: Bool, _ packet : String)->())?
-	@objc public var ppgBroken: ((_ id: String)->())?
+	@objc public var ppgFailed: ((_ id: String, _ code: Int)->())?
 	@objc public var disableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var enableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 
 	@objc public var dataPackets: ((_ id: String, _ packets: String)->())?
 	@objc public var dataComplete: ((_ id: String)->())?
+	@objc public var dataFailure: ((_ id: String)->())?
 	
 	@objc public var deviceWornStatus: ((_ id: String, _ isWorn: Bool)->())?
 
@@ -394,10 +395,10 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || LIVOTAL
-	@objc public func startManual(_ id: String, leds: livotalLEDConfiguration, algorithms: livotalAlgorithmConfiguration) {
-		log?.v ("\(id): LEDs: \(String(format: "0x%02X", leds.commandByte)), Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
+	@objc public func startManual(_ id: String, algorithms: livotalAlgorithmConfiguration) {
+		log?.v ("\(id): Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
 		
-		if let device = mConnectedDevices?[id] { device.startManual(id, leds: leds, algorithms: algorithms) }
+		if let device = mConnectedDevices?[id] { device.startManual(id, algorithms: algorithms) }
 		else { self.startManualComplete?(id, false) }
 	}
 	#endif

@@ -12,12 +12,14 @@ import Foundation
 	public var epoch			: Int			= 0
 	public var end_epoch		: Int			= 0
 	public var worn				: Bool			= false
+	public var ppg_failed_code	: Int			= 0
 	public var elapsed_ms		: Int			= 0
 	public var x				: Float			= 0.0
 	public var y				: Float			= 0.0
 	public var z				: Float			= 0.0
 	public var seconds			: Int			= 0
 	public var value			: Int			= 0
+	public var voltage			: Int			= 0
 	public var temperature		: Float			= 0.0
 	public var hr_valid			: Bool			= false
 	public var hr_result		: Float			= 0.0
@@ -43,6 +45,8 @@ import Foundation
 		case epoch
 		case end_epoch
 		case worn
+		case ppg_failed_code
+		case voltage
 		case elapsed_ms
 		case x
 		case y
@@ -77,6 +81,8 @@ import Foundation
 		case .activity			: return ("\(type.title),\(epoch),\(seconds),\(value)")
 		case .temp				: return ("\(type.title),\(epoch),\(temperature)")
 		case .worn				: return ("\(type.title),\(epoch),\(worn)")
+		case .ppg_failed		: return ("\(type.title),\(epoch),\(ppg_failed_code)")
+		case .battery			: return ("\(type.title),\(epoch),\(value),\(voltage)")
 		case .sleep				: return ("\(type.title),\(epoch),\(end_epoch)")
 		case .rawPPGFifoCount,
 			 .rawAccelFifoCount	: return ("\(type.title),\(value),\(elapsed_ms)")
@@ -89,7 +95,6 @@ import Foundation
 		case .unknown			: return ("\(type.title)")
 		case .steps				: return ("\(type.title),\(epoch),\(value)")
 		case .diagnostic		: return ("\(type.title),\(diagnostic_data.hexString)")
-		case .caughtUp			: return ("\(type.title)")
 		}
 	}
 	
@@ -185,7 +190,17 @@ import Foundation
 				spo2_uncertainty	= mDecodeUncertainty(data[16])
 				spo2_valid			= (data[16] != 0xff)
 
+			case .ppg_failed:
+				epoch				= data.subdata(in: Range(1...4)).leInt
+				ppg_failed_code		= Int(data[5])
+
+			case .battery:
+				epoch				= data.subdata(in: Range(1...4)).leInt
+				value				= Int(data[5])
+				voltage				= Int(data.subdata(in: Range(6...7)).leUInt16)
+
 			default: break
+
 			}
 		}
 	}
@@ -255,6 +270,15 @@ import Foundation
 			spo2_result			= try values.decode(Float.self, forKey: .spo2_result)
 			spo2_uncertainty	= try values.decode(Float.self, forKey: .spo2_uncertainty)
 			
+		case .ppg_failed:
+			epoch				= try values.decode(Int.self, forKey: .epoch)
+			ppg_failed_code		= try values.decode(Int.self, forKey: .ppg_failed_code)
+			
+		case .battery:
+			epoch				= try values.decode(Int.self, forKey: .epoch)
+			value				= try values.decode(Int.self, forKey: .value)
+			voltage				= try values.decode(Int.self, forKey: .voltage)
+						
 		default: break
 		}
 	}
@@ -327,7 +351,16 @@ import Foundation
 			try container.encode(spo2_result, forKey: .spo2_result)
 			try container.encode(spo2_uncertainty, forKey: .spo2_uncertainty)
 			
-		default: break
+		case .ppg_failed:
+			try container.encode(epoch, forKey: .epoch)
+			try container.encode(ppg_failed_code, forKey: .ppg_failed_code)
+			
+		case .battery:
+			try container.encode(epoch, forKey: .epoch)
+			try container.encode(value, forKey: .value)
+			try container.encode(voltage, forKey: .voltage)
+
+		case .unknown: break
 		}
 	}
 }

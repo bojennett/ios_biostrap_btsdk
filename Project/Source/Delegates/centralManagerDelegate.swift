@@ -175,8 +175,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.manualResult?(id, successful, packet) }
 							}
 							
-							device.ppgBroken				= { id in
-								DispatchQueue.main.async { self.ppgBroken?(id) }
+							device.ppgFailed				= { id, code in
+								DispatchQueue.main.async { self.ppgFailed?(id, code) }
 							}
 
 							device.dataPackets				= { id, packets in
@@ -185,6 +185,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 
 							device.dataComplete				= { id in
 								DispatchQueue.main.async { self.dataComplete?(id) }
+							}
+							
+							device.dataFailure				= { id in
+								DispatchQueue.main.async { self.dataFailure?(id) }
 							}
 							
 							device.deviceWornStatus			= { id, isWorn in
@@ -330,8 +334,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.manualResult?(id, successful, packet) }
 							}
 							
-							device.ppgBroken				= { id in
-								DispatchQueue.main.async { self.ppgBroken?(id) }
+							device.ppgFailed				= { id, code in
+								DispatchQueue.main.async { self.ppgFailed?(id, code) }
 							}
 
 							device.dataPackets				= { id, packets in
@@ -340,6 +344,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 
 							device.dataComplete				= { id in
 								DispatchQueue.main.async { self.dataComplete?(id) }
+							}
+							
+							device.dataFailure				= { id in
+								DispatchQueue.main.async { self.dataFailure?(id) }
 							}
 							
 							device.deviceWornStatus			= { id, isWorn in

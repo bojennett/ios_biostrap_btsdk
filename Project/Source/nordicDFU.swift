@@ -114,6 +114,7 @@ extension nordicDFU: LoggerDelegate {
 		case .debug			: log?.d ("\(message)")
 		case .warning		: log?.w ("\(message)")
 		case .error			: log?.e ("\(message)")
+		@unknown default	: log?.e ("UNKNOWN LEVEL: \(message)")
 		}
 	}
 }
