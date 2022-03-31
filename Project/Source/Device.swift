@@ -153,10 +153,16 @@ public class Device: NSObject {
 		else { return ("???") }
 	}
 
+	@objc public var serialNumber : String {
+		if let serialNumber = mSerialNumber { return serialNumber.value }
+		else { return ("???") }
+	}
+
 	internal var mModelNumber					: disStringCharacteristic?
 	internal var mFirmwareVersion				: disStringCharacteristic?
 	internal var mHardwareRevision				: disStringCharacteristic?
 	internal var mManufacturerName				: disStringCharacteristic?
+	internal var mSerialNumber					: disStringCharacteristic?
 	
 	internal var mBatteryLevelCharacteristic	: batteryLevelCharacteristic?
 	internal var mCustomCharacteristic			: customCharacteristic?
@@ -266,21 +272,42 @@ public class Device: NSObject {
 		#if UNIVERSAL
 		switch type {
 		case .livotal:
-			if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
-				
-				//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
+			if let firmwareVersion = mFirmwareVersion {
+				if (firmwareVersion.value < "1.2.4") {
+					if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let manufacturerName = mManufacturerName, let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+						
+						//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
 
-				return (modelNumber.configured &&
-						hardwareRevision.configured &&
-						firmwareVersion.configured &&
-						manufacturerName.configured &&
-						batteryCharacteristic.configured &&
-						customCharacteristic.configured &&
-						nordicDFUCharacteristic.configured)
+						return (modelNumber.configured &&
+								hardwareRevision.configured &&
+								firmwareVersion.configured &&
+								manufacturerName.configured &&
+								batteryCharacteristic.configured &&
+								customCharacteristic.configured &&
+								nordicDFUCharacteristic.configured)
+					}
+					else {
+						return (false)
+					}
+				}
+				else {
+					if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let manufacturerName = mManufacturerName, let serialNumber = mSerialNumber, let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+						
+						//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
+
+						return (modelNumber.configured &&
+								hardwareRevision.configured &&
+								firmwareVersion.configured &&
+								manufacturerName.configured &&
+								serialNumber.configured &&
+								batteryCharacteristic.configured &&
+								customCharacteristic.configured &&
+								nordicDFUCharacteristic.configured)
+					}
+					else { return (false) }
+				}
 			}
-			else {
-				return (false)
-			}
+			else { return (false) }
 		case .ethos:
 			if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 				
@@ -304,21 +331,42 @@ public class Device: NSObject {
 		case .unknown: return false
 		}
 		#elseif LIVOTAL
-		if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
-			
-			//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
+		if let firmwareVersion = mFirmwareVersion {
+			if (firmwareVersion.value < "1.2.4") {
+				if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let manufacturerName = mManufacturerName, let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+					
+					//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
 
-			return (modelNumber.configured &&
-					hardwareRevision.configured &&
-					firmwareVersion.configured &&
-					manufacturerName.configured &&
-					batteryCharacteristic.configured &&
-					customCharacteristic.configured &&
-					nordicDFUCharacteristic.configured)
+					return (modelNumber.configured &&
+							hardwareRevision.configured &&
+							firmwareVersion.configured &&
+							manufacturerName.configured &&
+							batteryCharacteristic.configured &&
+							customCharacteristic.configured &&
+							nordicDFUCharacteristic.configured)
+				}
+				else {
+					return (false)
+				}
+			}
+			else {
+				if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let manufacturerName = mManufacturerName, let serialNumber = mSerialNumber, let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+					
+					//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
+
+					return (modelNumber.configured &&
+							hardwareRevision.configured &&
+							firmwareVersion.configured &&
+							manufacturerName.configured &&
+							serialNumber.configured &&
+							batteryCharacteristic.configured &&
+							customCharacteristic.configured &&
+							nordicDFUCharacteristic.configured)
+				}
+				else { return (false) }
+			}
 		}
-		else {
-			return (false)
-		}
+		else { return (false) }
 		#elseif ETHOS
 		if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 			
@@ -800,6 +848,9 @@ public class Device: NSObject {
 				case .manufacturer_name_string:
 					mManufacturerName = disStringCharacteristic(peripheral, characteristic: characteristic)
 					mManufacturerName?.read()
+				case .serial_number_string:
+					mSerialNumber = disStringCharacteristic(peripheral, characteristic: characteristic)
+					mSerialNumber?.read()
 				case .battery_level:
 					log?.v ("\(mID) '\(testCharacteristic.title)' - read it and enable notifications")
 					mBatteryLevelCharacteristic	= batteryLevelCharacteristic(peripheral, characteristic: characteristic)
@@ -1015,6 +1066,7 @@ public class Device: NSObject {
 			case .hardware_revision_string	: mHardwareRevision?.didUpdateValue()
 			case .firmware_revision_string	: mFirmwareVersion?.didUpdateValue()
 			case .manufacturer_name_string	: mManufacturerName?.didUpdateValue()
+			case .serial_number_string		: mSerialNumber?.didUpdateValue()
 			case .battery_level				: mBatteryLevelCharacteristic?.didUpdateValue()
 			case .body_sensor_location:
 				if let value = characteristic.value {
