@@ -677,43 +677,6 @@ class customCharacteristic: Characteristic {
 	internal func mParseSinglePacket(_ data: Data, index: Int) -> (Bool, packetType, biostrapDataPacket) {
 		if let type = packetType(rawValue: data[index]) {
 			switch (type) {
-			case .ppg,
-				 .activity,
-				 .steps,
-				 .temp,
-				 .rawAccelFifoCount,
-				 .rawAccel,
-				 .rawPPGIR,
-				 .rawPPGRed,
-				 .rawPPGGreen,
-				 .rawPPGProximity,
-				 .rawPPGFifoCount,
-				 .worn,
-				 .ppg_failed,
-				 .battery,
-				 .sleep:
-				let packetData = data.subdata(in: Range((index)...(index + type.length - 1)))
-				
-				switch (type) {
-				case .ppg,
-					 .activity,
-					 .steps,
-					 .temp,
-					 .worn,
-					 .ppg_failed,
-					 .sleep,
-					 .battery,
-					 .rawPPGFifoCount,
-					 .rawAccelFifoCount,
-					 .rawPPGProximity,
-					 .rawPPGRed,
-					 .rawPPGGreen,
-					 .rawPPGIR,
-					 .rawAccel:				return (true, type, biostrapDataPacket(packetData))
-				default:
-					log?.e ("\(type.title) (shouldn't be here): \(packetData.hexString)")
-					return (false, .unknown, biostrapDataPacket())
-				}
 			case .diagnostic:
 				let length = Int(data[index + 1]) + 1
 				
@@ -729,7 +692,12 @@ class customCharacteristic: Characteristic {
 			case .unknown:
 				log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
 				return (false, type, biostrapDataPacket())
+				
+			default:
+				let packetData = data.subdata(in: Range((index)...(index + type.length - 1)))
+				return (true, type, biostrapDataPacket(packetData))
 			}
+			
 		}
 		else {
 			log?.v ("Could not parse type: Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")

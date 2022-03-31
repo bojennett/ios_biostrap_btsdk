@@ -90,10 +90,24 @@ var gblLimitEthos	= false
 	case rawAccel			= 0xe0
 	case rawAccelFifoCount	= 0xe1
 	case rawPPGProximity	= 0xe2
+	#if LIVOTAL
 	case rawPPGGreen		= 0xe3
+	#endif
+	
+	#if ETHOS || UNIVERSAL
+	case rawPPGGreenIRRPD	= 0xe3
+	#endif
+
 	case rawPPGRed			= 0xe4
 	case rawPPGIR			= 0xe5
 	case rawPPGFifoCount	= 0xe6
+	
+	#if ETHOS || UNIVERSAL
+	case rawPPGGreenWhitePD	= 0xe7
+	case rawPPGWhiteIRRPD	= 0xe8
+	case rawPPGWhiteWhitePD	= 0xe9
+	case rawGyro			= 0xea
+	#endif
 	
 	public init(from decoder: Decoder) throws {
 		let container = try decoder.singleValueContainer()
@@ -112,10 +126,26 @@ var gblLimitEthos	= false
 		case "Raw Accel"			: self	= .rawAccel
 		case "Raw Accel FIFO Count"	: self	= .rawAccelFifoCount
 		case "Raw PPG Proximity"	: self	= .rawPPGProximity
+			
+		#if LIVOTAL
 		case "Raw PPG Green Sample"	: self	= .rawPPGGreen
+		#endif
+
+		#if ETHOS || UNIVERSAL
+		case "Raw PPG Green Sample IRR PD"	: self	= .rawPPGGreenIRRPD
+		#endif
+			
 		case "Raw PPG Red Sample"	: self	= .rawPPGRed
 		case "Raw PPG IR Sample"	: self	= .rawPPGIR
 		case "Raw PPG FIFO Count"	: self	= .rawPPGFifoCount
+			
+		#if ETHOS || UNIVERSAL
+		case "Raw PPG Green Sample White PD"	: self	= .rawPPGGreenWhitePD
+		case "Raw PPG White Sample IRR PD"		: self	= .rawPPGWhiteIRRPD
+		case "Raw PPG White Sample White PD"	: self	= .rawPPGWhiteWhitePD
+		case "Raw Gyroscope"					: self	= .rawGyro
+		#endif
+
 		default: self	= .unknown
 		}
 	}
@@ -135,10 +165,25 @@ var gblLimitEthos	= false
 		case .rawAccel			: return "Raw Accel"
 		case .rawAccelFifoCount	: return "Raw Accel FIFO Count"
 		case .rawPPGProximity	: return "Raw PPG Proximity"
+			
+		#if LIVOTAL
 		case .rawPPGGreen		: return "Raw PPG Green Sample"
+		#endif
+
+		#if ETHOS || UNIVERSAL
+		case .rawPPGGreenIRRPD	: return "Raw PPG Green Sample IRR PD"
+		#endif
+
 		case .rawPPGRed			: return "Raw PPG Red Sample"
 		case .rawPPGIR			: return "Raw PPG IR Sample"
 		case .rawPPGFifoCount	: return "Raw PPG FIFO Count"
+			
+		#if ETHOS || UNIVERSAL
+		case .rawPPGGreenWhitePD	: return "Raw PPG Green Sample White PD"
+		case .rawPPGWhiteIRRPD		: return "Raw PPG White Sample IRR PD"
+		case .rawPPGWhiteWhitePD	: return "Raw PPG White Sample White PD"
+		case .rawGyro				: return "Raw Gyroscope"
+		#endif
 		}
 	}
 	
@@ -157,10 +202,26 @@ var gblLimitEthos	= false
 		case .rawAccel			: return 13
 		case .rawAccelFifoCount	: return 6
 		case .rawPPGProximity	: return 5
+			
+		#if LIVOTAL
 		case .rawPPGGreen		: return 5
+		#endif
+			
+		#if ETHOS || UNIVERSAL
+		case .rawPPGGreenIRRPD	: return 5
+		#endif
+			
 		case .rawPPGRed			: return 5
 		case .rawPPGIR			: return 5
 		case .rawPPGFifoCount	: return 6
+			
+		#if ETHOS || UNIVERSAL
+		case .rawPPGGreenWhitePD	: return 5
+		case .rawPPGWhiteIRRPD		: return 5
+		case .rawPPGWhiteWhitePD	: return 5
+		case .rawGyro				: return 13
+		#endif
+
 		}
 	}
 }

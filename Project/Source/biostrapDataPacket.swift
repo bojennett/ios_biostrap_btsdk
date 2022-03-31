@@ -78,19 +78,30 @@ import Foundation
 	//--------------------------------------------------------------------------------
 	public var csv: String {
 		switch (type) {
-		case .activity			: return ("\(type.title),\(epoch),\(seconds),\(value)")
-		case .temp				: return ("\(type.title),\(epoch),\(temperature)")
-		case .worn				: return ("\(type.title),\(epoch),\(worn)")
-		case .ppg_failed		: return ("\(type.title),\(epoch),\(ppg_failed_code)")
-		case .battery			: return ("\(type.title),\(epoch),\(value),\(voltage)")
-		case .sleep				: return ("\(type.title),\(epoch),\(end_epoch)")
+		case .activity				: return ("\(type.title),\(epoch),\(seconds),\(value)")
+		case .temp					: return ("\(type.title),\(epoch),\(temperature)")
+		case .worn					: return ("\(type.title),\(epoch),\(worn)")
+		case .ppg_failed			: return ("\(type.title),\(epoch),\(ppg_failed_code)")
+		case .battery				: return ("\(type.title),\(epoch),\(value),\(voltage)")
+		case .sleep					: return ("\(type.title),\(epoch),\(end_epoch)")
 		case .rawPPGFifoCount,
-			 .rawAccelFifoCount	: return ("\(type.title),\(value),\(elapsed_ms)")
-		case .rawAccel			: return ("\(type.title),\(x),\(y),\(z)")
-		case .rawPPGRed,
-			 .rawPPGIR,
-			 .rawPPGGreen,
-			 .rawPPGProximity	: return ("\(type.title),\(value)")
+			 .rawAccelFifoCount		: return ("\(type.title),\(value),\(elapsed_ms)")
+		case .rawAccel				: return ("\(type.title),\(x),\(y),\(z)")
+		case .rawPPGProximity		: return ("\(type.title),\(value)")
+		case .rawPPGRed				: return ("\(type.title),\(value)")
+		case .rawPPGIR				: return ("\(type.title),\(value)")
+		#if LIVOTAL
+		case .rawPPGGreen			: return ("\(type.title),\(value)")
+		#endif
+			
+		#if ETHOS || UNIVERSAL
+		case .rawPPGGreenIRRPD		: return ("\(type.title),\(value)")
+		case .rawPPGGreenWhitePD	: return ("\(type.title),\(value)")
+		case .rawPPGWhiteIRRPD		: return ("\(type.title),\(value)")
+		case .rawPPGWhiteWhitePD	: return ("\(type.title),\(value)")
+		case .rawGyro				: return ("\(type.title),\(x),\(y),\(z)")
+		#endif
+
 		case .ppg				: return ("\(type.title),\(epoch),\(hr_valid),\(hr_result),\(hr_uncertainty),\(hrv_valid),\(hrv_result),\(hrv_uncertainty),\(rr_valid),\(rr_result),\(rr_uncertainty),\(spo2_valid),\(spo2_result),\(spo2_uncertainty)")
 		case .unknown			: return ("\(type.title)")
 		case .steps				: return ("\(type.title),\(epoch),\(value)")
@@ -165,10 +176,37 @@ import Foundation
 				value		= Int(data[1])
 				elapsed_ms	= data.subdata(in: Range(2...5)).leInt
 
-			case .rawPPGRed,
-				 .rawPPGIR,
-				 .rawPPGGreen,
-				 .rawPPGProximity:
+			case .rawPPGRed:
+				value		= data.subdata(in: Range(1...4)).leInt
+
+			case .rawPPGIR:
+				value		= data.subdata(in: Range(1...4)).leInt
+
+			#if LIVOTAL
+			case .rawPPGGreen:
+				value		= data.subdata(in: Range(1...4)).leInt
+			#endif
+				
+			#if ETHOS || UNIVERSAL
+			case .rawPPGGreenIRRPD:
+				value		= data.subdata(in: Range(1...4)).leInt
+
+			case .rawPPGGreenWhitePD:
+				value		= data.subdata(in: Range(1...4)).leInt
+
+			case .rawPPGWhiteIRRPD:
+				value		= data.subdata(in: Range(1...4)).leInt
+			
+			case .rawPPGWhiteWhitePD:
+				value		= data.subdata(in: Range(1...4)).leInt
+
+			case .rawGyro:
+				x = data.subdata(in: Range(1...4)).leFloat
+				y = data.subdata(in: Range(5...8)).leFloat
+				z = data.subdata(in: Range(9...12)).leFloat
+			#endif
+
+			case .rawPPGProximity:
 				value		= data.subdata(in: Range(1...4)).leInt
 				
 			case .steps:
@@ -249,12 +287,39 @@ import Foundation
 			y					= try values.decode(Float.self, forKey: .y)
 			z					= try values.decode(Float.self, forKey: .z)
 			
-		case .rawPPGRed,
-			 .rawPPGIR,
-			 .rawPPGGreen,
-			 .rawPPGProximity:
+		case .rawPPGRed:
+			value				= try values.decode(Int.self, forKey: .value)
+
+		case .rawPPGIR:
+			value				= try values.decode(Int.self, forKey: .value)
+
+		case .rawPPGProximity:
+			value				= try values.decode(Int.self, forKey: .value)
+
+		#if LIVOTAL
+		case .rawPPGGreen:
+			value				= try values.decode(Int.self, forKey: .value)
+		#endif
+			
+		#if ETHOS || UNIVERSAL
+		case .rawPPGGreenIRRPD:
+			value				= try values.decode(Int.self, forKey: .value)
+
+		case .rawPPGGreenWhitePD:
+			value				= try values.decode(Int.self, forKey: .value)
+
+		case .rawPPGWhiteIRRPD:
+			value				= try values.decode(Int.self, forKey: .value)
+
+		case .rawPPGWhiteWhitePD:
 			value				= try values.decode(Int.self, forKey: .value)
 			
+		case .rawGyro:
+			x					= try values.decode(Float.self, forKey: .x)
+			y					= try values.decode(Float.self, forKey: .y)
+			z					= try values.decode(Float.self, forKey: .z)
+		#endif
+
 		case .ppg:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
 			hr_valid			= try values.decode(Bool.self, forKey: .hr_valid)
@@ -330,12 +395,39 @@ import Foundation
 			try container.encode(y, forKey: .y)
 			try container.encode(z, forKey: .z)
 			
-		case .rawPPGRed,
-			 .rawPPGIR,
-			 .rawPPGGreen,
-			 .rawPPGProximity:
+		case .rawPPGRed:
 			try container.encode(value, forKey: .value)
-			
+
+		case .rawPPGIR:
+			try container.encode(value, forKey: .value)
+
+		case .rawPPGProximity:
+			try container.encode(value, forKey: .value)
+
+		#if LIVOTAL
+		case .rawPPGGreen:
+			try container.encode(value, forKey: .value)
+		#endif
+
+		#if ETHOS || UNIVERSAL
+		case .rawPPGGreenIRRPD:
+			try container.encode(value, forKey: .value)
+
+		case .rawPPGGreenWhitePD:
+			try container.encode(value, forKey: .value)
+
+		case .rawPPGWhiteIRRPD:
+			try container.encode(value, forKey: .value)
+
+		case .rawPPGWhiteWhitePD:
+			try container.encode(value, forKey: .value)
+
+		case .rawGyro:
+			try container.encode(x, forKey: .x)
+			try container.encode(y, forKey: .y)
+			try container.encode(z, forKey: .z)
+		#endif
+
 		case .ppg:
 			try container.encode(epoch, forKey: .epoch)
 			try container.encode(hr_valid, forKey: .hr_valid)
