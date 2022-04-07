@@ -76,6 +76,37 @@ var gblLimitEthos	= false
 //
 //
 //--------------------------------------------------------------------------------
+@objc public enum sessionParameterType: UInt8, Codable {
+	case ppgInterval		= 0x00
+	case reset				= 0xfd
+	case accept				= 0xfe
+	case unknown			= 0xff
+}
+
+//--------------------------------------------------------------------------------
+//
+//
+//
+//--------------------------------------------------------------------------------
+@objc public enum deviceParameterType: UInt8, Codable {
+	case serialNumber			= 0x01
+	case chargeCycle			= 0x02
+	case advertisingInterval	= 0x03
+	
+	var title: String {
+		switch (self) {
+		case .serialNumber			: return "serialNumber"
+		case .chargeCycle			: return "chargeCycle"
+		case .advertisingInterval	: return "advertisingInterval"
+		}
+	}
+}
+
+//--------------------------------------------------------------------------------
+//
+//
+//
+//--------------------------------------------------------------------------------
 @objc public enum packetType: UInt8, Codable {
 	case unknown			= 0x00
 	case steps				= 0x81

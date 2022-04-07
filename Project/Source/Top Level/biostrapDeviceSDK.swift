@@ -82,9 +82,9 @@ import iOSDFULibrary
 	@objc public var stopManualComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var ledComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var enterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
-	@objc public var writeIDComplete: ((_ id: String, _ successful: Bool)->())?
-	@objc public var readIDComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
-	@objc public var deleteIDComplete: ((_ id: String, _ successful: Bool)->())?
+	@objc public var writeSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
+	@objc public var readSerialNumberComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
+	@objc public var deleteSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var writeAdvIntervalComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var readAdvIntervalComplete: ((_ id: String, _ successful: Bool, _ seconds: Int)->())?
 	@objc public var deleteAdvIntervalComplete: ((_ id: String, _ successful: Bool)->())?
@@ -100,7 +100,7 @@ import iOSDFULibrary
 	@objc public var enableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 
 	@objc public var dataPackets: ((_ id: String, _ packets: String)->())?
-	@objc public var dataComplete: ((_ id: String)->())?
+	@objc public var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
 	@objc public var dataFailure: ((_ id: String)->())?
 	
 	@objc public var deviceWornStatus: ((_ id: String, _ isWorn: Bool)->())?
@@ -109,6 +109,11 @@ import iOSDFULibrary
 	@objc public var updateFirmwareFinished: ((_ id: String)->())?
 	@objc public var updateFirmwareFailed: ((_ id: String, _ code: Int, _ message: String)->())?
 	@objc public var updateFirmwareProgress: ((_ id: String, _ percentage: Float)->())?
+
+	@objc public var setSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType)->())?
+	@objc public var getSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
+	@objc public var resetSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
+	@objc public var acceptSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
 
 	@objc public var batteryLevel: ((_ id: String, _ percentage: Int)->())?
 
@@ -469,9 +474,9 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
-	@objc public func writeID(_ id: String, partID: String) {
-		if let device = mConnectedDevices?[id] { device.writeID(id, partID: partID) }
-		else { self.writeIDComplete?(id, false) }
+	@objc public func writeSerialNumber(_ id: String, partID: String) {
+		if let device = mConnectedDevices?[id] { device.writeSerialNumber(id, partID: partID) }
+		else { self.writeSerialNumberComplete?(id, false) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -481,9 +486,9 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
-	@objc public func readID(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.readID(id) }
-		else { self.readIDComplete?(id, false, "") }
+	@objc public func readSerialNumber(_ id: String) {
+		if let device = mConnectedDevices?[id] { device.readSerialNumber(id) }
+		else { self.readSerialNumberComplete?(id, false, "") }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -493,9 +498,9 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
-	@objc public func deleteID(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.deleteID(id) }
-		else { self.deleteIDComplete?(id, false) }
+	@objc public func deleteSerialNumber(_ id: String) {
+		if let device = mConnectedDevices?[id] { device.deleteSerialNumber(id) }
+		else { self.deleteSerialNumberComplete?(id, false) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -642,6 +647,65 @@ import iOSDFULibrary
 		if let device = mConnectedDevices?[id] { device.cancelFirmwareUpdate() }
 		else { self.updateFirmwareFailed?(id, 10000, "No connected device to update") }
 	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func setSessionParam(_ id: String, parameter: sessionParameterType, value: Int) {
+		log?.v("\(id): \(parameter) - \(value)")
+
+		if let device = mConnectedDevices?[id] { device.setSessionParam(parameter, value: value) }
+		else { self.setSessionParamComplete?(id, false, parameter) }
+
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func getSessionParam(_ id: String, parameter: sessionParameterType) {
+		log?.v("\(id): \(parameter)")
+
+		if let device = mConnectedDevices?[id] { device.getSessionParam(parameter) }
+		else { self.getSessionParamComplete?(id, false, parameter, 0) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func resetSessionParams(_ id: String) {
+		log?.v("\(id)")
+
+		if let device = mConnectedDevices?[id] { device.resetSessionParams() }
+		else { self.resetSessionParamsComplete?(id, false) }
+	}
+
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func acceptSessionParams(_ id: String) {
+		log?.v("\(id)")
+
+		if let device = mConnectedDevices?[id] { device.acceptSessionParams() }
+		else { self.acceptSessionParamsComplete?(id, false) }
+	}
+
 }
 
 

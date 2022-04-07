@@ -100,9 +100,9 @@ public class Device: NSObject {
 	var stopManualComplete: ((_ id: String, _ successful: Bool)->())?
 	var ledComplete: ((_ id: String, _ successful: Bool)->())?
 	var enterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
-	var writeIDComplete: ((_ id: String, _ successful: Bool)->())?
-	var readIDComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
-	var deleteIDComplete: ((_ id: String, _ successful: Bool)->())?
+	var writeSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
+	var readSerialNumberComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
+	var deleteSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
 	var writeAdvIntervalComplete: ((_ id: String, _ successful: Bool)->())?
 	var readAdvIntervalComplete: ((_ id: String, _ successful: Bool, _ seconds: Int)->())?
 	var deleteAdvIntervalComplete: ((_ id: String, _ successful: Bool)->())?
@@ -120,7 +120,7 @@ public class Device: NSObject {
 	var enableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 
 	var dataPackets: ((_ id: String, _ packets: String)->())?
-	var dataComplete: ((_ id: String)->())?
+	var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
 	var dataFailure: ((_ id: String)->())?
 	
 	var deviceWornStatus: ((_ id: String, _ isWorn: Bool)->())?
@@ -129,6 +129,11 @@ public class Device: NSObject {
 	var updateFirmwareFinished: ((_ id: String)->())?
 	var updateFirmwareProgress: ((_ id: String, _ percentage: Float)->())?
 	var updateFirmwareFailed: ((_ id: String, _ code: Int, _ message: String)->())?
+
+	var setSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType)->())?
+	var getSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
+	var resetSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
+	var acceptSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
 
 	@objc public var batteryLevel	: Int = 0
 	@objc public var wornStatus		: String = "Not worn"
@@ -293,7 +298,7 @@ public class Device: NSObject {
 				else {
 					if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let manufacturerName = mManufacturerName, let serialNumber = mSerialNumber, let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 						
-						//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
+						//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), SN: \(serialNumber.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
 
 						return (modelNumber.configured &&
 								hardwareRevision.configured &&
@@ -352,7 +357,7 @@ public class Device: NSObject {
 			else {
 				if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let manufacturerName = mManufacturerName, let serialNumber = mSerialNumber, let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 					
-					//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
+					//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), SN: \(serialNumber.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(nordicDFUCharacteristic.configured)")
 
 					return (modelNumber.configured &&
 							hardwareRevision.configured &&
@@ -600,11 +605,11 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func writeID(_ id: String, partID: String) {
+	func writeSerialNumber(_ id: String, partID: String) {
 		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.writeID(partID)
+			customCharacteristic.writeSerialNumber(partID)
 		}
-		else { self.writeIDComplete?(id, false) }
+		else { self.writeSerialNumberComplete?(id, false) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -614,11 +619,11 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func readID(_ id: String) {
+	func readSerialNumber(_ id: String) {
 		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.readID()
+			customCharacteristic.readSerialNumber()
 		}
-		else { self.readIDComplete?(id, false, "") }
+		else { self.readSerialNumberComplete?(id, false, "") }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -628,11 +633,11 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func deleteID(_ id: String) {
+	func deleteSerialNumber(_ id: String) {
 		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.deleteID()
+			customCharacteristic.deleteSerialNumber()
 		}
-		else { self.deleteIDComplete?(id, false) }
+		else { self.deleteSerialNumberComplete?(id, false) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -825,6 +830,72 @@ public class Device: NSObject {
 		#endif
 	}
 
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setSessionParam(_ parameter: sessionParameterType, value: Int) {
+		log?.v("\(mID): \(parameter)")
+
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.setSessionParam(parameter, value: value)
+		}
+		else { self.setSessionParamComplete?(mID, false, parameter) }
+
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getSessionParam(_ parameter: sessionParameterType) {
+		log?.v("\(mID): \(parameter)")
+
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.getSessionParam(parameter)
+		}
+		else { self.getSessionParamComplete?(mID, false, parameter, 0) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func resetSessionParams() {
+		log?.v("\(mID)")
+
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.resetSessionParams()
+		}
+		else { self.resetSessionParamsComplete?(mID, false) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func acceptSessionParams() {
+		log?.v("\(mID)")
+
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.acceptSessionParams()
+		}
+		else { self.acceptSessionParamsComplete?(mID, false) }
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -882,9 +953,9 @@ public class Device: NSObject {
 					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.mID, successful) }
 					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.mID, successful) }
 					mCustomCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.mID, successful) }
-					mCustomCharacteristic?.writeIDComplete = { successful in self.writeIDComplete?(self.mID, successful) }
-					mCustomCharacteristic?.readIDComplete = { successful, partID in self.readIDComplete?(self.mID, successful, partID) }
-					mCustomCharacteristic?.deleteIDComplete = { successful in self.deleteIDComplete?(self.mID, successful) }
+					mCustomCharacteristic?.writeSerialNumberComplete = { successful in self.writeSerialNumberComplete?(self.mID, successful) }
+					mCustomCharacteristic?.readSerialNumberComplete = { successful, partID in self.readSerialNumberComplete?(self.mID, successful, partID) }
+					mCustomCharacteristic?.deleteSerialNumberComplete = { successful in self.deleteSerialNumberComplete?(self.mID, successful) }
 					mCustomCharacteristic?.writeAdvIntervalComplete = { successful in self.writeAdvIntervalComplete?(self.mID, successful) }
 					mCustomCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.readAdvIntervalComplete?(self.mID, successful, seconds) }
 					mCustomCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.mID, successful) }
@@ -905,13 +976,17 @@ public class Device: NSObject {
 					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.mID, successful) }
 					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.mID, successful) }
 					mCustomCharacteristic?.dataPackets = { packets in self.dataPackets?(self.mID, packets) }
-					mCustomCharacteristic?.dataComplete = { self.dataComplete?(self.mID) }
+					mCustomCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.mID, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
 					mCustomCharacteristic?.dataFailure = { self.dataFailure?(self.mID) }
 					mCustomCharacteristic?.deviceWornStatus = { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
 						else { self.wornStatus = "Not Worn" }
 						self.deviceWornStatus?(self.mID, isWorn)
 					}
+					mCustomCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.mID, successful, parameter) }
+					mCustomCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.mID, successful, parameter, value) }
+					mCustomCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.mID, successful) }
+					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.discoverDescriptors()
 					
 				case .ambiqOTARXCharacteristic:
@@ -947,9 +1022,9 @@ public class Device: NSObject {
 					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.mID, successful) }
 					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.mID, successful) }
 					mCustomCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.mID, successful) }
-					mCustomCharacteristic?.writeIDComplete = { successful in self.writeIDComplete?(self.mID, successful) }
-					mCustomCharacteristic?.readIDComplete = { successful, partID in self.readIDComplete?(self.mID, successful, partID) }
-					mCustomCharacteristic?.deleteIDComplete = { successful in self.deleteIDComplete?(self.mID, successful) }
+					mCustomCharacteristic?.writeSerialNumberComplete = { successful in self.writeSerialNumberComplete?(self.mID, successful) }
+					mCustomCharacteristic?.readSerialNumberComplete = { successful, partID in self.readSerialNumberComplete?(self.mID, successful, partID) }
+					mCustomCharacteristic?.deleteSerialNumberComplete = { successful in self.deleteSerialNumberComplete?(self.mID, successful) }
 					mCustomCharacteristic?.writeAdvIntervalComplete = { successful in self.writeAdvIntervalComplete?(self.mID, successful) }
 					mCustomCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.readAdvIntervalComplete?(self.mID, successful, seconds) }
 					mCustomCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.mID, successful) }
@@ -970,13 +1045,17 @@ public class Device: NSObject {
 					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.mID, successful) }
 					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.mID, successful) }
 					mCustomCharacteristic?.dataPackets = { packets in self.dataPackets?(self.mID, packets) }
-					mCustomCharacteristic?.dataComplete = { self.dataComplete?(self.mID) }
+					mCustomCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.mID, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
 					mCustomCharacteristic?.dataFailure = { self.dataFailure?(self.mID) }
 					mCustomCharacteristic?.deviceWornStatus = { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
 						else { self.wornStatus = "Not Worn" }
 						self.deviceWornStatus?(self.mID, isWorn)
 					}
+					mCustomCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.mID, successful, parameter) }
+					mCustomCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.mID, successful, parameter, value) }
+					mCustomCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.mID, successful) }
+					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.discoverDescriptors()
 				
 				case .nordicDFUCharacteristic:

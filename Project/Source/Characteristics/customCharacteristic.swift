@@ -22,14 +22,11 @@ class customCharacteristic: Characteristic {
 		case enterShipMode		= 0x11
 		case readEpoch			= 0x12
 		case endSleep			= 0x13
-		case writeID			= 0x40
-		case readID				= 0x41
-		case deleteID			= 0x42
-		case writeAdvInterval	= 0x44
-		case readAdvInterval	= 0x45
-		case deleteAdvInterval	= 0x46
-		case clearChargeCycle	= 0x48
-		case readChargeCycle	= 0x49
+		case setDeviceParam		= 0x70
+		case getDeviceParam		= 0x71
+		case delDeviceParam		= 0x72
+		case setSessionParam	= 0x80
+		case getSessionParam	= 0x81
 		case allowPPG			= 0xf8
 		case wornCheck			= 0xf9
 		case logRaw				= 0xfa
@@ -73,9 +70,9 @@ class customCharacteristic: Characteristic {
 	var stopManualComplete: ((_ successful: Bool)->())?
 	var ledComplete: ((_ successful: Bool)->())?
 	var enterShipModeComplete: ((_ successful: Bool)->())?
-	var writeIDComplete: ((_ successful: Bool)->())?
-	var readIDComplete: ((_ successful: Bool, _ partID: String)->())?
-	var deleteIDComplete: ((_ successful: Bool)->())?
+	var writeSerialNumberComplete: ((_ successful: Bool)->())?
+	var readSerialNumberComplete: ((_ successful: Bool, _ partID: String)->())?
+	var deleteSerialNumberComplete: ((_ successful: Bool)->())?
 	var writeAdvIntervalComplete: ((_ successful: Bool)->())?
 	var readAdvIntervalComplete: ((_ successful: Bool, _ seconds: Int)->())?
 	var deleteAdvIntervalComplete: ((_ successful: Bool)->())?
@@ -93,14 +90,20 @@ class customCharacteristic: Characteristic {
 	var endSleepComplete: ((_ successful: Bool)->())?
 
 	var dataPackets: ((_ packets: String)->())?
-	var dataComplete: (()->())?
+	var dataComplete: ((_ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
 	var dataFailure: (()->())?
+	
+	var setSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType)->())?
+	var getSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
+	var resetSessionParamsComplete: ((_ successful: Bool)->())?
+	var acceptSessionParamsComplete: ((_ successful: Bool)->())?
 	
 	var deviceWornStatus: ((_ isWorn: Bool)->())?
 	
-	internal var mDataPackets	: [biostrapDataPacket]!
-	internal var mCRCOK			: Bool = true
-	internal var mCRCFailCount	: Int = 0
+	internal var mDataPackets		: [biostrapDataPacket]!
+	internal var mCRCOK				: Bool = true
+	internal var mCRCFailCount		: Int = 0
+	internal var mFailedDecodeCount	: Int	= 0
 	
 	//--------------------------------------------------------------------------------
 	//
@@ -181,11 +184,7 @@ class customCharacteristic: Characteristic {
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
 			data.append(commands.writeEpoch.rawValue)
-			data.append(UInt8((newEpoch >>  0) & 0xff))
-			data.append(UInt8((newEpoch >>  8) & 0xff))
-			data.append(UInt8((newEpoch >> 16) & 0xff))
-			data.append(UInt8((newEpoch >> 24) & 0xff))
-
+			data.append(newEpoch.leData32)
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
 		else { self.writeEpochComplete?(false) }
@@ -270,6 +269,8 @@ class customCharacteristic: Characteristic {
 	func getAllPackets() {
 		log?.v("\(pID)")
 
+		mFailedDecodeCount	= 0
+		
 		if (!mSimpleCommand(.getAllPackets)) { self.getAllPacketsComplete?(false) }
 	}
 
@@ -425,19 +426,20 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func writeID(_ partID: String) {
+	func writeSerialNumber(_ partID: String) {
 		log?.v("\(pID): \(partID)")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
-			data.append(commands.writeID.rawValue)
+			data.append(commands.setDeviceParam.rawValue)
+			data.append(deviceParameterType.serialNumber.rawValue)
 			data.append(contentsOf: [UInt8](partID.utf8))
 			
 			log?.v ("\(data.hexString)")
 
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
-		else { self.writeIDComplete?(false) }
+		else { self.writeSerialNumberComplete?(false) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -447,15 +449,16 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func readID() {
+	func readSerialNumber() {
 		log?.v("\(pID)")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
-			data.append(commands.readID.rawValue)
+			data.append(commands.getDeviceParam.rawValue)
+			data.append(deviceParameterType.serialNumber.rawValue)
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
-		else { self.readIDComplete?(false, "") }
+		else { self.readSerialNumberComplete?(false, "") }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -465,15 +468,16 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func deleteID() {
+	func deleteSerialNumber() {
 		log?.v("\(pID)")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
-			data.append(commands.deleteID.rawValue)
+			data.append(commands.delDeviceParam.rawValue)
+			data.append(deviceParameterType.serialNumber.rawValue)
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
-		else { self.deleteIDComplete?(false) }
+		else { self.deleteSerialNumberComplete?(false) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -488,7 +492,8 @@ class customCharacteristic: Characteristic {
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
-			data.append(commands.writeAdvInterval.rawValue)
+			data.append(commands.setDeviceParam.rawValue)
+			data.append(deviceParameterType.advertisingInterval.rawValue)
 			data.append(contentsOf: seconds.leData32)
 			
 			log?.v ("\(data.hexString)")
@@ -510,7 +515,8 @@ class customCharacteristic: Characteristic {
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
-			data.append(commands.readAdvInterval.rawValue)
+			data.append(commands.getDeviceParam.rawValue)
+			data.append(deviceParameterType.advertisingInterval.rawValue)
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
 		else { self.readAdvIntervalComplete?(false, 0) }
@@ -528,7 +534,8 @@ class customCharacteristic: Characteristic {
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
-			data.append(commands.deleteAdvInterval.rawValue)
+			data.append(commands.delDeviceParam.rawValue)
+			data.append(deviceParameterType.advertisingInterval.rawValue)
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
 		else { self.deleteAdvIntervalComplete?(false) }
@@ -546,8 +553,8 @@ class customCharacteristic: Characteristic {
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
-			data.append(commands.clearChargeCycle.rawValue)
-			
+			data.append(commands.setDeviceParam.rawValue)
+			data.append(deviceParameterType.chargeCycle.rawValue)
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
 		else { self.clearChargeCyclesComplete?(false) }
@@ -565,7 +572,8 @@ class customCharacteristic: Characteristic {
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
-			data.append(commands.readChargeCycle.rawValue)
+			data.append(commands.getDeviceParam.rawValue)
+			data.append(deviceParameterType.chargeCycle.rawValue)
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
 		else { self.readChargeCyclesComplete?(false, 0.0) }
@@ -641,6 +649,83 @@ class customCharacteristic: Characteristic {
 	}
 	
 	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setSessionParam(_ parameter: sessionParameterType, value: Int) {
+		log?.v("\(parameter) - \(value)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.setSessionParam.rawValue)
+			data.append(parameter.rawValue)
+			data.append(value.leData32)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.setSessionParamComplete?(false, parameter) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getSessionParam(_ parameter: sessionParameterType) {
+		log?.v("\(parameter)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getSessionParam.rawValue)
+			data.append(parameter.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getSessionParamComplete?(false, parameter, 0) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func resetSessionParams() {
+		log?.v("")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.setSessionParam.rawValue)
+			data.append(sessionParameterType.reset.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.resetSessionParamsComplete?(false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func acceptSessionParams() {
+		log?.v("")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.setSessionParam.rawValue)
+			data.append(sessionParameterType.accept.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.acceptSessionParamsComplete?(false) }
+	}
+
+	//--------------------------------------------------------------------------------
 	// Function Name: Validate CRC
 	//--------------------------------------------------------------------------------
 	//
@@ -713,7 +798,7 @@ class customCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mParsePackets(_ data: Data) -> ([biostrapDataPacket]) {
-		log?.v ("\(pID): Data: \(data.hexString)")
+		//log?.v ("\(pID): Data: \(data.hexString)")
 		
 		var index = 0
 		var dataPackets = [biostrapDataPacket]()
@@ -732,6 +817,7 @@ class customCharacteristic: Characteristic {
 			}
 			else {
 				index = index + type.length
+				mFailedDecodeCount	= mFailedDecodeCount + 1
 			}			
 		}
 		
@@ -808,39 +894,96 @@ class customCharacteristic: Characteristic {
 						case .stopManual		: self.stopManualComplete?(successful)
 						case .led				: self.ledComplete?(successful)
 						case .enterShipMode		: self.enterShipModeComplete?(successful)
-						case .writeID			: self.writeIDComplete?(successful)
-						case .readID			:
-							if (data.count == 19) {
-								let partID = String(decoding: data.subdata(in: Range(3...18)), as: UTF8.self)
-								let nulls = CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"]))
-								let stringID = partID.trimmingCharacters(in: nulls)
-								self.readIDComplete?(successful, stringID)
+						case .setDeviceParam	:
+							if let parameter = deviceParameterType(rawValue: data[3]) {
+								switch (parameter) {
+								case .advertisingInterval	: self.writeAdvIntervalComplete?(successful)
+								case .serialNumber			: self.writeSerialNumberComplete?(successful)
+								case .chargeCycle			: self.clearChargeCyclesComplete?(successful)
+								}
 							}
 							else {
-								self.readIDComplete?(false, "")
+								log?.e ("Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
-						case .deleteID			: self.deleteIDComplete?(successful)
-						case .writeAdvInterval	: self.writeAdvIntervalComplete?(successful)
-						case .readAdvInterval	:
-							if (data.count == 19) {
-								log?.v ("\(response): Data: \(data.hexString)")
-								let seconds = data.subdata(in: Range(3...6)).leInt
-								self.readAdvIntervalComplete?(successful, seconds)
+						case .getDeviceParam	:
+							if let parameter = deviceParameterType(rawValue: data[3]) {
+								if (data.count == 20) {
+									switch (parameter) {
+									case .advertisingInterval	:
+										let seconds = data.subdata(in: Range(4...7)).leInt
+										self.readAdvIntervalComplete?(successful, seconds)
+									case .serialNumber			:
+										let snData		= String(decoding: data.subdata(in: Range(4...19)), as: UTF8.self)
+										let nulls		= CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"]))
+										let snString	= snData.trimmingCharacters(in: nulls)
+										self.readSerialNumberComplete?(successful, snString)
+									case .chargeCycle			:
+										log?.v ("\(response): Data: \(data.hexString)")
+										let cycles = data.subdata(in: Range(4...7)).leFloat
+										self.readChargeCyclesComplete?(successful, cycles)
+									}
+								}
+								else {
+									switch (parameter) {
+									case .advertisingInterval	: self.readAdvIntervalComplete?(false, 0)
+									case .serialNumber			: self.readSerialNumberComplete?(false, "")
+									case .chargeCycle			: self.readChargeCyclesComplete?(false, 0.0)
+									}
+								}
 							}
 							else {
-								self.readAdvIntervalComplete?(false, 0)
+								log?.e ("Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
-						case .deleteAdvInterval	: self.deleteAdvIntervalComplete?(successful)
-						case .clearChargeCycle	: self.clearChargeCyclesComplete?(successful)
-						case .readChargeCycle	:
-							if (data.count == 19) {
-								log?.v ("\(response): Data: \(data.hexString)")
-								let cycles = data.subdata(in: Range(3...6)).leFloat
-								self.readChargeCyclesComplete?(successful, cycles)
+						case .delDeviceParam	:
+							if let parameter = deviceParameterType(rawValue: data[3]) {
+								switch (parameter) {
+								case .advertisingInterval	: self.deleteAdvIntervalComplete?(successful)
+								case .serialNumber			: self.deleteSerialNumberComplete?(successful)
+								case .chargeCycle			:
+									log?.e ("Should not have been able to delete \(parameter.title)")
+								}
 							}
 							else {
-								self.readChargeCyclesComplete?(false, 0.0)
+								log?.e ("Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
+						case .setSessionParam		:
+							if let enumParameter = sessionParameterType(rawValue: data[3]) {
+								switch (enumParameter) {
+								case .ppgInterval		:
+									setSessionParamComplete?(successful, enumParameter)
+									break
+								case .reset	: resetSessionParamsComplete?(successful)
+								case .accept	: acceptSessionParamsComplete?(successful)
+								case .unknown			:
+									setSessionParamComplete?(false, enumParameter)					// Shouldn't get this ever!
+									break
+								}
+							}
+							else {
+								log?.e ("Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
+							}
+
+						case .getSessionParam		:
+							log?.e ("GET PARAMETER")
+							if let enumParameter = sessionParameterType(rawValue: data[3]) {
+								log?.e ("GET PARAMETER: \(enumParameter)")
+								switch (enumParameter) {
+								case .ppgInterval:
+									let value = data.subdata(in: Range(4...7)).leInt
+									getSessionParamComplete?(successful, enumParameter, value)
+									break
+								case .reset	: resetSessionParamsComplete?(false)		// Shouldn't get this on a get
+								case .accept	: acceptSessionParamsComplete?(false)		// Shouldn't get this on a get
+								case .unknown			:
+									getSessionParamComplete?(false, enumParameter, 0)				// Shouldn't get this ever!
+									break
+								}
+
+							}
+							else {
+								log?.e ("Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
+							}
+
 						case .allowPPG			: self.allowPPGComplete?(successful)
 						case .wornCheck			:
 							if (data.count == 8) {
@@ -916,8 +1059,16 @@ class customCharacteristic: Characteristic {
 				}
 				
 			case .dataCaughtUp:
-				log?.v ("\(response)")
-				self.dataComplete?()
+				log?.v ("\(response) - \(data.hexString)")
+				if (data.count > 1) {
+					let bad_read_count	= Int(data.subdata(in: Range(1...2)).leUInt16)
+					let bad_parse_count	= Int(data.subdata(in: Range(3...4)).leUInt16)
+					let overflow_count	= Int(data.subdata(in: Range(5...6)).leUInt16)
+					self.dataComplete?(bad_read_count, bad_parse_count, overflow_count, self.mFailedDecodeCount)
+				}
+				else {
+					self.dataComplete?(-1, -1, -1, self.mFailedDecodeCount)
+				}
 				
 			case .validateCRC:
 				log?.v ("\(response)")

@@ -115,16 +115,16 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) }
 							}
 							
-							device.writeIDComplete			= { id, successful in
-								DispatchQueue.main.async { self.writeIDComplete?(id, successful) }
+							device.writeSerialNumberComplete			= { id, successful in
+								DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) }
 							}
 							
-							device.readIDComplete			= { id, successful, partID in
-								DispatchQueue.main.async { self.readIDComplete?(id, successful, partID) }
+							device.readSerialNumberComplete			= { id, successful, partID in
+								DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) }
 							}
 							
-							device.deleteIDComplete			= { id, successful in
-								DispatchQueue.main.async { self.deleteIDComplete?(id, successful) }
+							device.deleteSerialNumberComplete			= { id, successful in
+								DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) }
 							}
 
 							device.writeAdvIntervalComplete	= { id, successful in
@@ -183,10 +183,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.dataPackets?(id, packets) }
 							}
 
-							device.dataComplete				= { id in
-								DispatchQueue.main.async { self.dataComplete?(id) }
+							device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
+								DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count) }
 							}
-							
+
 							device.dataFailure				= { id in
 								DispatchQueue.main.async { self.dataFailure?(id) }
 							}
@@ -209,6 +209,22 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 
 							device.updateFirmwareProgress	= { id, percentage in
 								DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) }
+							}
+
+							device.setSessionParamComplete		= { id, successful, parameter in
+								DispatchQueue.main.async { self.setSessionParamComplete?(id, successful, parameter) }
+							}
+
+							device.getSessionParamComplete		= { id, successful, parameter, value in
+								DispatchQueue.main.async { self.getSessionParamComplete?(id, successful, parameter, value) }
+							}
+
+							device.resetSessionParamsComplete	= { id, successful in
+								DispatchQueue.main.async { self.resetSessionParamsComplete?(id, successful) }
+							}
+
+							device.acceptSessionParamsComplete	= { id, successful in
+								DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) }
 							}
 
 							self.mDiscoveredDevices?[peripheral.prettyID] = device
@@ -274,16 +290,16 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) }
 							}
 							
-							device.writeIDComplete			= { id, successful in
-								DispatchQueue.main.async { self.writeIDComplete?(id, successful) }
+							device.writeSerialNumberComplete			= { id, successful in
+								DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) }
 							}
 							
-							device.readIDComplete			= { id, successful, partID in
-								DispatchQueue.main.async { self.readIDComplete?(id, successful, partID) }
+							device.readSerialNumberComplete			= { id, successful, partID in
+								DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) }
 							}
 							
-							device.deleteIDComplete			= { id, successful in
-								DispatchQueue.main.async { self.deleteIDComplete?(id, successful) }
+							device.deleteSerialNumberComplete			= { id, successful in
+								DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) }
 							}
 
 							device.writeAdvIntervalComplete	= { id, successful in
@@ -342,10 +358,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.dataPackets?(id, packets) }
 							}
 
-							device.dataComplete				= { id in
-								DispatchQueue.main.async { self.dataComplete?(id) }
+							device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
+								DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count) }
 							}
-							
+
 							device.dataFailure				= { id in
 								DispatchQueue.main.async { self.dataFailure?(id) }
 							}
@@ -370,6 +386,22 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) }
 							}
 							
+							device.setSessionParamComplete		= { id, successful, parameter in
+								DispatchQueue.main.async { self.setSessionParamComplete?(id, successful, parameter) }
+							}
+
+							device.getSessionParamComplete		= { id, successful, parameter, value in
+								DispatchQueue.main.async { self.getSessionParamComplete?(id, successful, parameter, value) }
+							}
+
+							device.resetSessionParamsComplete	= { id, successful in
+								DispatchQueue.main.async { self.resetSessionParamsComplete?(id, successful) }
+							}
+
+							device.acceptSessionParamsComplete	= { id, successful in
+								DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) }
+							}
+
 							self.mDiscoveredDevices?[peripheral.prettyID] = device
 							log?.v("\(peripheral.prettyID): didDiscover: \(name)")
 							
