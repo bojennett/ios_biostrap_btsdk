@@ -274,6 +274,10 @@ public class Device: NSObject {
 	}
 	
 	var configured: Bool {
+		if let firmwareVesion = mFirmwareVersion, let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.firmwareVersion = firmwareVesion.value
+		}
+
 		#if UNIVERSAL
 		switch type {
 		case .livotal:
@@ -1143,7 +1147,9 @@ public class Device: NSObject {
 			switch (enumerated) {
 			case .model_number_string		: mModelNumber?.didUpdateValue()
 			case .hardware_revision_string	: mHardwareRevision?.didUpdateValue()
-			case .firmware_revision_string	: mFirmwareVersion?.didUpdateValue()
+			case .firmware_revision_string	:
+				mFirmwareVersion?.didUpdateValue()
+				
 			case .manufacturer_name_string	: mManufacturerName?.didUpdateValue()
 			case .serial_number_string		: mSerialNumber?.didUpdateValue()
 			case .battery_level				: mBatteryLevelCharacteristic?.didUpdateValue()

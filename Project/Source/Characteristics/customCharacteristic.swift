@@ -100,10 +100,13 @@ class customCharacteristic: Characteristic {
 	
 	var deviceWornStatus: ((_ isWorn: Bool)->())?
 	
-	internal var mDataPackets		: [biostrapDataPacket]!
-	internal var mCRCOK				: Bool = true
-	internal var mCRCFailCount		: Int = 0
-	internal var mFailedDecodeCount	: Int	= 0
+	var firmwareVersion						: String = ""
+	
+	internal var mDataPackets				: [biostrapDataPacket]!
+	internal var mCRCOK						: Bool = true
+	internal var mExpectedSequenceNumber	: Int = 0
+	internal var mCRCFailCount				: Int = 0
+	internal var mFailedDecodeCount			: Int = 0
 	
 	//--------------------------------------------------------------------------------
 	//
@@ -162,8 +165,9 @@ class customCharacteristic: Characteristic {
 		mCRCIgnoreTest	= testStruct(name: "CRC Ignore", enable: false, limit: 3)
 		mCRCFailTest	= testStruct(name: "CRC Fail", enable: false, limit: 3)
 		
-		mCRCOK			= false
-		mCRCFailCount	= 0
+		mCRCOK					= false
+		mExpectedSequenceNumber	= 0
+		mCRCFailCount			= 0
 
 		super.init(peripheral, characteristic: characteristic)
 		
@@ -732,10 +736,10 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	internal func mValidateCRC(_ valid: Bool) {
-		log?.v("\(pID): \(valid)")
+	internal func mValidateCRC() {
+		log?.v("\(pID): \(mCRCOK)")
 		
-		if (valid == false) {
+		if (mCRCOK == false) {
 			mCRCFailCount	= mCRCFailCount + 1
 			if (mCRCFailCount == 10) { dataFailure?() }
 		}
@@ -744,12 +748,14 @@ class customCharacteristic: Characteristic {
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
 			data.append(commands.validateCRC.rawValue)
-			data.append(valid ? 0x01 : 0x00)
+			data.append(mCRCOK ? 0x01 : 0x00)
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
 		else {
 			log?.e ("I can't run the validate CRC command.  I don't know what to do here")
 		}
+		
+		mCRCOK				= true
 	}
 
 	//--------------------------------------------------------------------------------
@@ -833,6 +839,9 @@ class customCharacteristic: Characteristic {
 	//--------------------------------------------------------------------------------
 	internal func mProcessUpdateValue(_ data: Data) {
 		
+		//#if ETHOS
+		//#endif
+		
 		if let response = notifications(rawValue: data[0]) {
 			switch (response) {
 			case .completion:
@@ -852,7 +861,8 @@ class customCharacteristic: Characteristic {
 							}
 						case .endSleep		: self.endSleepComplete?(successful)
 						case .getAllPackets	:
-							mCRCOK	= true
+							mCRCOK					= true
+							mExpectedSequenceNumber	= 0
 							self.getAllPacketsComplete?(successful)
 						case .getNextPacket :
 							if (successful) {
@@ -964,9 +974,7 @@ class customCharacteristic: Characteristic {
 							}
 
 						case .getSessionParam		:
-							log?.e ("GET PARAMETER")
 							if let enumParameter = sessionParameterType(rawValue: data[3]) {
-								log?.e ("GET PARAMETER: \(enumParameter)")
 								switch (enumParameter) {
 								case .ppgInterval:
 									let value = data.subdata(in: Range(4...7)).leInt
@@ -1016,9 +1024,38 @@ class customCharacteristic: Characteristic {
 				}
 				
 			case .dataPacket:
-				if (data.count > 1) {	// Accounts for header byte
-					let dataPackets = self.mParsePackets(data.subdata(in: Range(1...(data.count - 1))))
-					mDataPackets.append(contentsOf: dataPackets)
+				if (data.count > 3) {	// Accounts for header byte and sequence number
+					log?.v ("\(data.subdata(in: Range(0...7)).hexString)")
+					let sequence_number = data.subdata(in: Range(1...2)).leUInt16
+					if (sequence_number == mExpectedSequenceNumber) {
+						//log?.v ("Sequence Number Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")
+					}
+					else {
+						log?.e ("$response - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
+						mCRCOK	= false
+					}
+					mExpectedSequenceNumber = mExpectedSequenceNumber + 1
+					
+					if (mCRCOK) {
+						
+						var index = 1
+						if (firmwareVersion > "255.5") {
+							//log?.e ("TEST Firmware - use index of 3")
+							index = 3
+						}
+						else {
+							if (firmwareVersion >= "1.5.0") {
+								//log?.e ("Newer Firmware - use index of 3")
+								index = 3
+							}
+							else {
+								//log?.e ("Older Firmware: \(firmwareVersion) - use index of 1")
+							}
+						}
+						
+						let dataPackets = self.mParsePackets(data.subdata(in: Range(index...(data.count - 1))))
+						mDataPackets.append(contentsOf: dataPackets)
+					}
 				}
 				else {
 					log?.e ("\(pID): Bad data length for data packet: \(data.hexString)")
@@ -1071,14 +1108,24 @@ class customCharacteristic: Characteristic {
 				}
 				
 			case .validateCRC:
-				log?.v ("\(response)")
+				log?.v ("\(response) - \(data.hexString)")
+				
+				let sequence_number = data.subdata(in: Range(1...2)).leUInt16
+				if (sequence_number == mExpectedSequenceNumber) {
+					//log?.v ("SN Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")
+				}
+				else {
+					log?.e ("\(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
+					mCRCOK	= false
+				}
+
 				let allowResponse		= mCRCIgnoreTest.check()
 				let allowGoodResponse	= mCRCFailTest.check()
 										
 				if (allowResponse) {
 					if (allowGoodResponse) {
 						if (mCRCOK == true) {
-							log?.v ("Validate CRC Requested and they've passed - let received packets through")
+							//log?.v ("Validate CRC Passed: Let received packets through")
 							
 							if (mDataPackets.count > 0) {
 								do {
@@ -1092,18 +1139,19 @@ class customCharacteristic: Characteristic {
 						   }
 						}
 						else {
-							log?.v ("Validate CRC Requested and there was at least one failed CRC - do not let packets through")
+							log?.v ("\(response) Failed: Do not let packets through")
 						}
 					}
 					else {
 						mCRCOK	= false
 					}
-												
-					DispatchQueue.main.async {
-						self.mValidateCRC(self.mCRCOK)
-						self.mDataPackets.removeAll()
-						self.mCRCOK	= true
-					}
+
+					self.mDataPackets.removeAll()
+					self.mExpectedSequenceNumber	= 0
+
+					DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(50), execute: {
+						self.mValidateCRC()
+					})
 				}
 			}
 		}
@@ -1135,6 +1183,8 @@ class customCharacteristic: Characteristic {
 					}
 					else {
 						log?.e ("Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
+						mCRCOK = false
+						mExpectedSequenceNumber = mExpectedSequenceNumber + 1	// go ahead and increase the expected sequence number.  already going to create retransmit.  this avoids other expected sequence checks from failling
 						return
 					}
 				}
