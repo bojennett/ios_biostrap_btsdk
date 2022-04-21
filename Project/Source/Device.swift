@@ -130,6 +130,9 @@ public class Device: NSObject {
 	var updateFirmwareProgress: ((_ id: String, _ percentage: Float)->())?
 	var updateFirmwareFailed: ((_ id: String, _ code: Int, _ message: String)->())?
 
+	var manufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
+	var manufacturingTestResult: ((_ id: String, _ result: Int)->())?
+
 	var setSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType)->())?
 	var getSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
 	var resetSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
@@ -728,6 +731,19 @@ public class Device: NSObject {
 		else { self.allowPPGComplete?(id, false) }
 	}
 
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func manufacturingTest(_ id: String) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.manufacturingTest()
+		}
+		else { self.manufacturingTestComplete?(id, false) }
+	}
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -991,6 +1007,8 @@ public class Device: NSObject {
 					mCustomCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.mID, successful, parameter, value) }
 					mCustomCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.mID, successful) }
+					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.mID, successful) }
+					mCustomCharacteristic?.manufacturingTestResult		= { result in self.manufacturingTestResult?(self.mID, result)}
 					mCustomCharacteristic?.discoverDescriptors()
 					
 				case .ambiqOTARXCharacteristic:
@@ -1060,6 +1078,8 @@ public class Device: NSObject {
 					mCustomCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.mID, successful, parameter, value) }
 					mCustomCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.mID, successful) }
+					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.mID, successful) }
+					mCustomCharacteristic?.manufacturingTestResult		= { result in self.manufacturingTestResult?(self.mID, result)}
 					mCustomCharacteristic?.discoverDescriptors()
 				
 				case .nordicDFUCharacteristic:

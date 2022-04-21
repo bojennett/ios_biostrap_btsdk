@@ -172,26 +172,24 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-		DispatchQueue.main.async {
-			if let error = error {
-				log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
-				//self.mCentralManager?.cancelPeripheralConnection(peripheral)
-				//return
-			}
+		if let error = error {
+			log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
+			//self.mCentralManager?.cancelPeripheralConnection(peripheral)
+			//return
+		}
+		
+		if let device = self.mConnectedDevices?[peripheral.prettyID], (device.peripheral == peripheral) {
+			device.didUpdateValue(characteristic)
 			
-			if let device = self.mConnectedDevices?[peripheral.prettyID], (device.peripheral == peripheral) {
-				device.didUpdateValue(characteristic)
-				
-				if (device.configured) {
-					if (device.configuring) {
-						device.connected = true
-						self.connected?(peripheral.prettyID)
-					}
+			if (device.configured) {
+				if (device.configuring) {
+					device.connected = true
+					self.connected?(peripheral.prettyID)
 				}
 			}
-			else {
-				log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - No connected device found...")
-			}
+		}
+		else {
+			log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - No connected device found...")
 		}
 	}
 	

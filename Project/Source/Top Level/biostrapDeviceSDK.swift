@@ -109,6 +109,9 @@ import iOSDFULibrary
 	@objc public var updateFirmwareFinished: ((_ id: String)->())?
 	@objc public var updateFirmwareFailed: ((_ id: String, _ code: Int, _ message: String)->())?
 	@objc public var updateFirmwareProgress: ((_ id: String, _ percentage: Float)->())?
+	
+	@objc public var manufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
+	@objc public var manufacturingTestResult: ((_ id: String, _ result: Int)->())?
 
 	@objc public var setSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType)->())?
 	@objc public var getSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
@@ -561,6 +564,20 @@ import iOSDFULibrary
 	@objc public func readChargeCycles(_ id: String) {
 		if let device = mConnectedDevices?[id] { device.readChargeCycles(id) }
 		else { self.readChargeCyclesComplete?(id, false, 0) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func manufacturingTest(_ id: String) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.manufacturingTest(id) }
+		else { self.manufacturingTestComplete?(id, false) }
 	}
 
 	//--------------------------------------------------------------------------------

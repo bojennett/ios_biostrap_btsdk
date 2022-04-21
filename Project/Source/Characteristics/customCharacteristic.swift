@@ -27,6 +27,7 @@ class customCharacteristic: Characteristic {
 		case delDeviceParam		= 0x72
 		case setSessionParam	= 0x80
 		case getSessionParam	= 0x81
+		case manufacturingTest	= 0xf7
 		case allowPPG			= 0xf8
 		case wornCheck			= 0xf9
 		case logRaw				= 0xfa
@@ -45,6 +46,7 @@ class customCharacteristic: Characteristic {
 		case ppgFailed			= 0x04
 		case validateCRC		= 0x05
 		case dataCaughtUp		= 0x06
+		case manufacturingTest	= 0x07
 	}
 	
 	enum wornResult: UInt8 {
@@ -93,10 +95,14 @@ class customCharacteristic: Characteristic {
 	var dataComplete: ((_ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
 	var dataFailure: (()->())?
 	
+	var manufacturingTestComplete: ((_ successful: Bool)->())?
+	var manufacturingTestResult: ((_ result: Int)->())?
+
 	var setSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType)->())?
 	var getSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
 	var resetSessionParamsComplete: ((_ successful: Bool)->())?
 	var acceptSessionParamsComplete: ((_ successful: Bool)->())?
+	
 	
 	var deviceWornStatus: ((_ isWorn: Bool)->())?
 	
@@ -736,6 +742,24 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
+	func manufacturingTest() {
+		log?.v("")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.manufacturingTest.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.manufacturingTestComplete?(false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: Validate CRC
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	internal func mValidateCRC() {
 		log?.v("\(pID): \(mCRCOK)")
 		
@@ -992,6 +1016,7 @@ class customCharacteristic: Characteristic {
 								log?.e ("Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
 							}
 
+						case .manufacturingTest	: self.manufacturingTestComplete?(successful)
 						case .allowPPG			: self.allowPPGComplete?(successful)
 						case .wornCheck			:
 							if (data.count == 8) {
@@ -1153,6 +1178,10 @@ class customCharacteristic: Characteristic {
 						self.mValidateCRC()
 					})
 				}
+				
+			case .manufacturingTest:
+				log?.v ("Data: \(data.hexString)")
+				self.manufacturingTestResult?(0)
 			}
 		}
 		else {

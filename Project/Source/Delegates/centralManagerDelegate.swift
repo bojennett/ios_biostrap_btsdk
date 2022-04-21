@@ -226,6 +226,14 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 							device.acceptSessionParamsComplete	= { id, successful in
 								DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) }
 							}
+							
+							device.manufacturingTestComplete	= { id, successful in
+								DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) }
+							}
+
+							device.manufacturingTestResult		= { id, successful in
+								DispatchQueue.main.async { self.manufacturingTestResult?(id, successful) }
+							}
 
 							self.mDiscoveredDevices?[peripheral.prettyID] = device
 							log?.v("\(peripheral.prettyID): didDiscover: \(name)")
@@ -400,6 +408,14 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 
 							device.acceptSessionParamsComplete	= { id, successful in
 								DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) }
+							}
+
+							device.manufacturingTestComplete	= { id, successful in
+								DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) }
+							}
+
+							device.manufacturingTestResult		= { id, successful in
+								DispatchQueue.main.async { self.manufacturingTestResult?(id, successful) }
 							}
 
 							self.mDiscoveredDevices?[peripheral.prettyID] = device
