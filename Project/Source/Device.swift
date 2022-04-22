@@ -131,7 +131,7 @@ public class Device: NSObject {
 	var updateFirmwareFailed: ((_ id: String, _ code: Int, _ message: String)->())?
 
 	var manufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
-	var manufacturingTestResult: ((_ id: String, _ result: Int)->())?
+	var manufacturingTestResult: ((_ id: String, _ valid: Bool, _ result: String)->())?
 
 	var setSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType)->())?
 	var getSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
@@ -1008,7 +1008,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.mID, successful) }
-					mCustomCharacteristic?.manufacturingTestResult		= { result in self.manufacturingTestResult?(self.mID, result)}
+					mCustomCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.mID, valid, result)}
 					mCustomCharacteristic?.discoverDescriptors()
 					
 				case .ambiqOTARXCharacteristic:
@@ -1079,7 +1079,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.mID, successful) }
-					mCustomCharacteristic?.manufacturingTestResult		= { result in self.manufacturingTestResult?(self.mID, result)}
+					mCustomCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.mID, valid, result)}
 					mCustomCharacteristic?.discoverDescriptors()
 				
 				case .nordicDFUCharacteristic:

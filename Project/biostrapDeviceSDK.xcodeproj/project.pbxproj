@@ -79,6 +79,9 @@
 		3BF809BB27BD787300595493 /* ethosBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF809BA27BD787300595493 /* ethosBTSDK.swift */; };
 		3BF809BC27BD787300595493 /* ethosBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF809BA27BD787300595493 /* ethosBTSDK.swift */; };
 		3BF809BD27BD787300595493 /* ethosBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF809BA27BD787300595493 /* ethosBTSDK.swift */; };
+		3BFAC25A2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */; };
+		3BFAC25B2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */; };
+		3BFAC25C2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -111,6 +114,7 @@
 		3BF8082927A4570000595493 /* livotalBTSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = livotalBTSDK.swift; sourceTree = "<group>"; };
 		3BF809B527BD766D00595493 /* ethosBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ethosBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BF809BA27BD787300595493 /* ethosBTSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ethosBTSDK.swift; sourceTree = "<group>"; };
+		3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = livotalManufacturingTestResult.swift; sourceTree = "<group>"; };
 		45FB47FAAB8CA00CE5244F58 /* Pods-livotalBTSDK.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-livotalBTSDK.debug.xcconfig"; path = "Target Support Files/Pods-livotalBTSDK/Pods-livotalBTSDK.debug.xcconfig"; sourceTree = "<group>"; };
 		5D3047CFC230344A0899B985 /* Pods_universalBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_universalBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9293CBFFFE9969D4D4CD5CF1 /* Pods-ethosBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ethosBTSDK.release.xcconfig"; path = "Target Support Files/Pods-ethosBTSDK/Pods-ethosBTSDK.release.xcconfig"; sourceTree = "<group>"; };
@@ -165,6 +169,7 @@
 				3B29C554264C5A5B006BC11B /* Characteristic.swift */,
 				3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */,
 				3B29C556264C5B53006BC11B /* customCharacteristic.swift */,
+				3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */,
 				3B29C560264C6C1A006BC11B /* batteryLevelCharacteristic.swift */,
 				3B29C566264C7033006BC11B /* heartRateCharacteristic.swift */,
 			);
@@ -504,6 +509,7 @@
 				3BD01F9326153AC50014CEF0 /* centralManagerDelegate.swift in Sources */,
 				3B29C561264C6C1A006BC11B /* batteryLevelCharacteristic.swift in Sources */,
 				3B29C567264C7033006BC11B /* heartRateCharacteristic.swift in Sources */,
+				3BFAC25B2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */,
 				3B29C56D264C7263006BC11B /* disStringCharacteristic.swift in Sources */,
 				3BF3FEE326D81A40005AF135 /* livotalAlgorithmConfiguration.swift in Sources */,
 				3BD01F9D26153EF10014CEF0 /* Device.swift in Sources */,
@@ -534,6 +540,7 @@
 				3BF809BC27BD787300595493 /* ethosBTSDK.swift in Sources */,
 				3BF807CE27A1AFA000595493 /* centralManagerDelegate.swift in Sources */,
 				3BF807CF27A1AFA000595493 /* batteryLevelCharacteristic.swift in Sources */,
+				3BFAC25C2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */,
 				3BF807D027A1AFA000595493 /* heartRateCharacteristic.swift in Sources */,
 				3BF807D127A1AFA000595493 /* disStringCharacteristic.swift in Sources */,
 				3BF807EB27A201E600595493 /* ambiqOTATXCharacteristic.swift in Sources */,
@@ -569,6 +576,7 @@
 				3BF809AC27BD766D00595493 /* disStringCharacteristic.swift in Sources */,
 				3BF809AE27BD766D00595493 /* Device.swift in Sources */,
 				3BF809BD27BD787300595493 /* ethosBTSDK.swift in Sources */,
+				3BFAC25A2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */,
 				3BF809AF27BD766D00595493 /* IntExtentions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -642,7 +650,7 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -655,7 +663,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.5;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D LIVOTAL";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.livotalBTSDK;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";

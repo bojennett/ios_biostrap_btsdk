@@ -96,7 +96,7 @@ class customCharacteristic: Characteristic {
 	var dataFailure: (()->())?
 	
 	var manufacturingTestComplete: ((_ successful: Bool)->())?
-	var manufacturingTestResult: ((_ result: Int)->())?
+	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
 
 	var setSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType)->())?
 	var getSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
@@ -736,7 +736,7 @@ class customCharacteristic: Characteristic {
 	}
 
 	//--------------------------------------------------------------------------------
-	// Function Name: Validate CRC
+	// Function Name: Manufacturing Test
 	//--------------------------------------------------------------------------------
 	//
 	//
@@ -1181,7 +1181,21 @@ class customCharacteristic: Characteristic {
 				
 			case .manufacturingTest:
 				log?.v ("Data: \(data.hexString)")
-				self.manufacturingTestResult?(0)
+				let testResult = livotalManufacturingTestResult(data.subdata(in: Range(1...4)))
+				do {
+					let jsonData = try JSONEncoder().encode(testResult)
+					if let jsonString = String(data: jsonData, encoding: .utf8) {
+						self.manufacturingTestResult?(true, jsonString)
+					}
+					else {
+						log?.e ("Result jsonString Failed")
+						self.manufacturingTestResult?(false, "")
+					}
+				}
+				catch {
+					log?.e ("Result jsonData Failed")
+					self.manufacturingTestResult?(false, "")
+				}
 			}
 		}
 		else {
