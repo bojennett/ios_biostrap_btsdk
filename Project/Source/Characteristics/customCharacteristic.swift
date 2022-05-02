@@ -1062,23 +1062,7 @@ class customCharacteristic: Characteristic {
 					mExpectedSequenceNumber = mExpectedSequenceNumber + 1
 					
 					if (mCRCOK) {
-						
-						var index = 1
-						if (firmwareVersion > "255.5") {
-							//log?.e ("TEST Firmware - use index of 3")
-							index = 3
-						}
-						else {
-							if (firmwareVersion >= "1.5.0") {
-								//log?.e ("Newer Firmware - use index of 3")
-								index = 3
-							}
-							else {
-								//log?.e ("Older Firmware: \(firmwareVersion) - use index of 1")
-							}
-						}
-						
-						let dataPackets = self.mParsePackets(data.subdata(in: Range(index...(data.count - 1))))
+						let dataPackets = self.mParsePackets(data.subdata(in: Range(3...(data.count - 1))))
 						mDataPackets.append(contentsOf: dataPackets)
 					}
 				}
