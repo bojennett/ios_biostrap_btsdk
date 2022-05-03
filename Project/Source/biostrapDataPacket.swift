@@ -9,6 +9,7 @@ import Foundation
 
 @objc public class biostrapDataPacket: NSObject, Codable {
 	public var type				: packetType	= .unknown
+	public var settings_type	: settingsType	= .unknown
 	public var epoch			: Int			= 0
 	public var end_epoch		: Int			= 0
 	public var worn				: Bool			= false
@@ -33,6 +34,8 @@ import Foundation
 	public var spo2_valid		: Bool			= false
 	public var spo2_result		: Float			= 0.0
 	public var spo2_uncertainty	: Float			= 0.0
+	public var tag				: String		= ""
+	public var settings_value	: Float			= 0.0
 	public var diagnostic_data	: Data			= Data()
 	
 	//--------------------------------------------------------------------------------
@@ -66,6 +69,9 @@ import Foundation
 		case spo2_result
 		case spo2_uncertainty
 		case value
+		case tag
+		case settings_type
+		case settings_value
 		case diagnostic_data
 	}
 	
@@ -102,10 +108,12 @@ import Foundation
 		case .rawGyro				: return ("\(type.title),\(x),\(y),\(z)")
 		#endif
 
-		case .ppg				: return ("\(type.title),\(epoch),\(hr_valid),\(hr_result),\(hr_uncertainty),\(hrv_valid),\(hrv_result),\(hrv_uncertainty),\(rr_valid),\(rr_result),\(rr_uncertainty),\(spo2_valid),\(spo2_result),\(spo2_uncertainty)")
-		case .unknown			: return ("\(type.title)")
-		case .steps				: return ("\(type.title),\(epoch),\(value)")
-		case .diagnostic		: return ("\(type.title),\(diagnostic_data.hexString)")
+		case .ppg					: return ("\(type.title),\(epoch),\(hr_valid),\(hr_result),\(hr_uncertainty),\(hrv_valid),\(hrv_result),\(hrv_uncertainty),\(rr_valid),\(rr_result),\(rr_uncertainty),\(spo2_valid),\(spo2_result),\(spo2_uncertainty)")
+		case .unknown				: return ("\(type.title)")
+		case .steps					: return ("\(type.title),\(epoch),\(value)")
+		case .diagnostic			: return ("\(type.title),\(diagnostic_data.hexString)")
+		case .milestone				: return ("\(type.title),\(epoch),\(tag)")
+		case .settings				: return ("\(type.title),\(settings_type.title),\(settings_value)")
 		}
 	}
 	
@@ -237,8 +245,18 @@ import Foundation
 				value				= Int(data[5])
 				voltage				= Int(data.subdata(in: Range(6...7)).leUInt16)
 
-			default: break
+			case .milestone:
+				epoch				= data.subdata(in: Range(1...4)).leInt
+				if let testTag = String(data: data.subdata(in: Range(5...6)), encoding: .utf8) { tag = testTag }
+				else { tag			= "UK" }
+				
+			case .settings:
+				if let thisSetting = settingsType(rawValue: data[1]) { settings_type = thisSetting }
+				else { settings_type	= .unknown }
+				settings_value		= data.subdata(in: Range(2...5)).leFloat
 
+			case .unknown:
+				break
 			}
 		}
 	}
@@ -343,8 +361,18 @@ import Foundation
 			epoch				= try values.decode(Int.self, forKey: .epoch)
 			value				= try values.decode(Int.self, forKey: .value)
 			voltage				= try values.decode(Int.self, forKey: .voltage)
-						
-		default: break
+
+		case .milestone:
+			epoch				= try values.decode(Int.self, forKey: .epoch)
+			tag					= try values.decode(String.self, forKey: .tag)
+			
+		case .settings:
+			settings_type		= try values.decode(settingsType.self, forKey: .settings_type)
+			settings_value		= try values.decode(Float.self, forKey: .settings_value)
+			break
+			
+		case .unknown:
+			break
 		}
 	}
 	
@@ -452,6 +480,16 @@ import Foundation
 			try container.encode(value, forKey: .value)
 			try container.encode(voltage, forKey: .voltage)
 
+		case .milestone:
+			try container.encode(epoch, forKey: .epoch)
+			try container.encode(tag, forKey: .tag)
+			break
+			
+		case .settings:
+			try container.encode(settings_type.title, forKey: .settings_type)
+			try container.encode(settings_value, forKey: .settings_value)
+			break
+			
 		case .unknown: break
 		}
 	}
