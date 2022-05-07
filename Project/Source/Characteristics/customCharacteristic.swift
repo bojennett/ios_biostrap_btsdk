@@ -983,10 +983,10 @@ class customCharacteristic: Characteristic {
 						case .setSessionParam		:
 							if let enumParameter = sessionParameterType(rawValue: data[3]) {
 								switch (enumParameter) {
-								case .ppgInterval		:
-									setSessionParamComplete?(successful, enumParameter)
-									break
-								case .reset	: resetSessionParamsComplete?(successful)
+								case .ppgCapturePeriod,
+									 .ppgCaptureDuration,
+									 .tag		: setSessionParamComplete?(successful, enumParameter)
+								case .reset		: resetSessionParamsComplete?(successful)
 								case .accept	: acceptSessionParamsComplete?(successful)
 								case .unknown			:
 									setSessionParamComplete?(false, enumParameter)					// Shouldn't get this ever!
@@ -1000,13 +1000,15 @@ class customCharacteristic: Characteristic {
 						case .getSessionParam		:
 							if let enumParameter = sessionParameterType(rawValue: data[3]) {
 								switch (enumParameter) {
-								case .ppgInterval:
+								case .ppgCapturePeriod,
+									 .ppgCaptureDuration,
+									 .tag		:
 									let value = data.subdata(in: Range(4...7)).leInt
 									getSessionParamComplete?(successful, enumParameter, value)
 									break
-								case .reset	: resetSessionParamsComplete?(false)		// Shouldn't get this on a get
+								case .reset		: resetSessionParamsComplete?(false)		// Shouldn't get this on a get
 								case .accept	: acceptSessionParamsComplete?(false)		// Shouldn't get this on a get
-								case .unknown			:
+								case .unknown	:
 									getSessionParamComplete?(false, enumParameter, 0)				// Shouldn't get this ever!
 									break
 								}

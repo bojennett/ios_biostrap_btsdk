@@ -18,6 +18,9 @@ import Foundation
 	public var x				: Float			= 0.0
 	public var y				: Float			= 0.0
 	public var z				: Float			= 0.0
+	public var x_adc			: Int			= 0
+	public var y_adc			: Int			= 0
+	public var z_adc			: Int			= 0
 	public var seconds			: Int			= 0
 	public var value			: Int			= 0
 	public var voltage			: Int			= 0
@@ -54,6 +57,9 @@ import Foundation
 		case x
 		case y
 		case z
+		case x_adc
+		case y_adc
+		case z_adc
 		case seconds
 		case temperature
 		case hr_valid
@@ -105,8 +111,10 @@ import Foundation
 		case .rawPPGGreenWhitePD	: return ("\(type.title),\(value)")
 		case .rawPPGWhiteIRRPD		: return ("\(type.title),\(value)")
 		case .rawPPGWhiteWhitePD	: return ("\(type.title),\(value)")
-		case .rawGyro				: return ("\(type.title),\(x),\(y),\(z)")
+		case .rawGyroADC			: return ("\(type.title),\(x_adc),\(y_adc),\(z_adc)")
 		#endif
+			
+		case .rawAccelADC			: return ("\(type.title),\(x_adc),\(y_adc),\(z_adc)")
 
 		case .ppg					: return ("\(type.title),\(epoch),\(hr_valid),\(hr_result),\(hr_uncertainty),\(hrv_valid),\(hrv_result),\(hrv_uncertainty),\(rr_valid),\(rr_result),\(rr_uncertainty),\(spo2_valid),\(spo2_result),\(spo2_uncertainty)")
 		case .unknown				: return ("\(type.title)")
@@ -208,18 +216,25 @@ import Foundation
 			case .rawPPGWhiteWhitePD:
 				value		= data.subdata(in: Range(1...4)).leInt
 
-			case .rawGyro:
-				x = data.subdata(in: Range(1...4)).leFloat
-				y = data.subdata(in: Range(5...8)).leFloat
-				z = data.subdata(in: Range(9...12)).leFloat
+			case .rawGyroADC:
+				x_adc		= data.subdata(in: Range(1...2)).leInt16
+				y_adc		= data.subdata(in: Range(3...4)).leInt16
+				z_adc		= data.subdata(in: Range(5...6)).leInt16
+				log?.v("\(data.hexString) - \(x_adc),\(y_adc),\(z_adc)")
 			#endif
+
+			case .rawAccelADC:
+				x_adc		= data.subdata(in: Range(1...2)).leInt16
+				y_adc		= data.subdata(in: Range(3...4)).leInt16
+				z_adc		= data.subdata(in: Range(5...6)).leInt16
+				log?.v("\(data.hexString) - \(x_adc),\(y_adc),\(z_adc)")
 
 			case .rawPPGProximity:
 				value		= data.subdata(in: Range(1...4)).leInt
 				
 			case .steps:
 				epoch				= data.subdata(in: Range(1...4)).leInt
-				value				= Int(data.subdata(in: Range(5...6)).leUInt16)
+				value				= data.subdata(in: Range(5...6)).leUInt16
 
 			case .ppg:
 				epoch				= data.subdata(in: Range(1...4)).leInt
@@ -243,7 +258,7 @@ import Foundation
 			case .battery:
 				epoch				= data.subdata(in: Range(1...4)).leInt
 				value				= Int(data[5])
-				voltage				= Int(data.subdata(in: Range(6...7)).leUInt16)
+				voltage				= data.subdata(in: Range(6...7)).leUInt16
 
 			case .milestone:
 				epoch				= data.subdata(in: Range(1...4)).leInt
@@ -332,11 +347,16 @@ import Foundation
 		case .rawPPGWhiteWhitePD:
 			value				= try values.decode(Int.self, forKey: .value)
 			
-		case .rawGyro:
-			x					= try values.decode(Float.self, forKey: .x)
-			y					= try values.decode(Float.self, forKey: .y)
-			z					= try values.decode(Float.self, forKey: .z)
+		case .rawGyroADC:
+			x_adc				= try values.decode(Int.self, forKey: .x_adc)
+			y_adc				= try values.decode(Int.self, forKey: .y_adc)
+			z_adc				= try values.decode(Int.self, forKey: .z_adc)
 		#endif
+
+		case .rawAccelADC:
+			x_adc				= try values.decode(Int.self, forKey: .x_adc)
+			y_adc				= try values.decode(Int.self, forKey: .y_adc)
+			z_adc				= try values.decode(Int.self, forKey: .z_adc)
 
 		case .ppg:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
@@ -450,11 +470,16 @@ import Foundation
 		case .rawPPGWhiteWhitePD:
 			try container.encode(value, forKey: .value)
 
-		case .rawGyro:
-			try container.encode(x, forKey: .x)
-			try container.encode(y, forKey: .y)
-			try container.encode(z, forKey: .z)
+		case .rawGyroADC:
+			try container.encode(x_adc, forKey: .x_adc)
+			try container.encode(y_adc, forKey: .y_adc)
+			try container.encode(z_adc, forKey: .z_adc)
 		#endif
+
+		case .rawAccelADC:
+			try container.encode(x_adc, forKey: .x_adc)
+			try container.encode(y_adc, forKey: .y_adc)
+			try container.encode(z_adc, forKey: .z_adc)
 
 		case .ppg:
 			try container.encode(epoch, forKey: .epoch)

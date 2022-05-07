@@ -77,10 +77,23 @@ var gblLimitEthos	= false
 //
 //--------------------------------------------------------------------------------
 @objc public enum sessionParameterType: UInt8, Codable {
-	case ppgInterval		= 0x00
-	case reset				= 0xfd
-	case accept				= 0xfe
-	case unknown			= 0xff
+	case ppgCapturePeriod		= 0x00
+	case ppgCaptureDuration		= 0x01
+	case tag					= 0x10
+	case reset					= 0xfd
+	case accept					= 0xfe
+	case unknown				= 0xff
+	
+	public var title: String {
+		switch (self) {
+		case .ppgCapturePeriod		: return "PPG Capture Period"
+		case .ppgCaptureDuration	: return "PPG Capture Duration"
+		case .tag					: return "Tag"
+		case .reset					: return "Reset"
+		case .accept				: return "Accept"
+		case .unknown				: return "Unknown"
+		}
+	}
 }
 
 //--------------------------------------------------------------------------------
@@ -93,7 +106,7 @@ var gblLimitEthos	= false
 	case chargeCycle			= 0x02
 	case advertisingInterval	= 0x03
 	
-	var title: String {
+	public var title: String {
 		switch (self) {
 		case .serialNumber			: return "serialNumber"
 		case .chargeCycle			: return "chargeCycle"
@@ -137,8 +150,10 @@ var gblLimitEthos	= false
 	case rawPPGGreenWhitePD	= 0xe7
 	case rawPPGWhiteIRRPD	= 0xe8
 	case rawPPGWhiteWhitePD	= 0xe9
-	case rawGyro			= 0xea
+	case rawGyroADC			= 0xea
 	#endif
+	
+	case rawAccelADC		= 0xeb
 	
 	case milestone			= 0xf0
 	case settings			= 0xf1
@@ -177,8 +192,10 @@ var gblLimitEthos	= false
 		case "Raw PPG Green Sample White PD"	: self	= .rawPPGGreenWhitePD
 		case "Raw PPG White Sample IRR PD"		: self	= .rawPPGWhiteIRRPD
 		case "Raw PPG White Sample White PD"	: self	= .rawPPGWhiteWhitePD
-		case "Raw Gyroscope"					: self	= .rawGyro
+		case "Raw Gyro ADC"						: self	= .rawGyroADC
 		#endif
+			
+		case "Raw Accel ADC"		: self	= .rawAccelADC
 
 		case "Milestone"			: self	= .milestone
 		case "Settings"				: self	= .settings
@@ -218,8 +235,10 @@ var gblLimitEthos	= false
 		case .rawPPGGreenWhitePD	: return "Raw PPG Green Sample White PD"
 		case .rawPPGWhiteIRRPD		: return "Raw PPG White Sample IRR PD"
 		case .rawPPGWhiteWhitePD	: return "Raw PPG White Sample White PD"
-		case .rawGyro				: return "Raw Gyroscope"
+		case .rawGyroADC			: return "Raw Gyro ADC"
 		#endif
+			
+		case .rawAccelADC		: return "Raw Accel ADC"
 			
 		case .milestone			: return "Milestone"
 		case .settings			: return "Settings"
@@ -258,8 +277,10 @@ var gblLimitEthos	= false
 		case .rawPPGGreenWhitePD	: return 5
 		case .rawPPGWhiteIRRPD		: return 5
 		case .rawPPGWhiteWhitePD	: return 5
-		case .rawGyro				: return 13
+		case .rawGyroADC			: return 7
 		#endif
+			
+		case .rawAccelADC		: return 7
 
 		case .milestone			: return 7
 		case .settings			: return 6
