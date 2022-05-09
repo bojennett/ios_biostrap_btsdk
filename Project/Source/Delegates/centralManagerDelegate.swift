@@ -234,6 +234,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 							device.manufacturingTestResult		= { id, valid, result in
 								DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) }
 							}
+							
+							device.deviceChargingStatus			= { id, charging, on_charger, error in
+								DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) }
+							}
 
 							self.mDiscoveredDevices?[peripheral.prettyID] = device
 							log?.v("\(peripheral.prettyID): didDiscover: \(name)")
@@ -416,6 +420,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 
 							device.manufacturingTestResult		= { id, valid, result in
 								DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) }
+							}
+
+							device.deviceChargingStatus			= { id, charging, on_charger, error in
+								DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) }
 							}
 
 							self.mDiscoveredDevices?[peripheral.prettyID] = device

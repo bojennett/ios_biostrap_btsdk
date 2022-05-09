@@ -132,6 +132,8 @@ public class Device: NSObject {
 
 	var manufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
 	var manufacturingTestResult: ((_ id: String, _ valid: Bool, _ result: String)->())?
+	
+	var deviceChargingStatus: ((_ id: String, _ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
 
 	var setSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType)->())?
 	var getSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
@@ -140,6 +142,7 @@ public class Device: NSObject {
 
 	@objc public var batteryLevel	: Int = 0
 	@objc public var wornStatus		: String = "Not worn"
+	@objc public var chargingStatus	: String = "Not charging"
 
 	@objc public var modelNumber : String {
 		if let modelNumber = mModelNumber { return modelNumber.value }
@@ -1009,6 +1012,12 @@ public class Device: NSObject {
 					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.mID, successful) }
 					mCustomCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.mID, valid, result)}
+					mCustomCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
+						if (charging) { self.chargingStatus	= "Charging" }
+						else if (on_charger) { self.chargingStatus = "On Charger" }
+						else if (error) { self.chargingStatus = "Charging Error" }
+						else { self.chargingStatus = "Not Charging" }
+						self.deviceChargingStatus?(self.mID, charging, on_charger, error) }
 					mCustomCharacteristic?.discoverDescriptors()
 					
 				case .ambiqOTARXCharacteristic:
@@ -1080,6 +1089,12 @@ public class Device: NSObject {
 					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.mID, successful) }
 					mCustomCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.mID, valid, result)}
+					mCustomCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
+						if (charging) { self.chargingStatus	= "Charging" }
+						else if (on_charger) { self.chargingStatus = "On Charger" }
+						else if (error) { self.chargingStatus = "Charging Error" }
+						else { self.chargingStatus = "Not Charging" }
+						self.deviceChargingStatus?(self.mID, charging, on_charger, error) }
 					mCustomCharacteristic?.discoverDescriptors()
 				
 				case .nordicDFUCharacteristic:

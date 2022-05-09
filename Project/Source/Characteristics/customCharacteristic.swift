@@ -47,6 +47,7 @@ class customCharacteristic: Characteristic {
 		case validateCRC		= 0x05
 		case dataCaughtUp		= 0x06
 		case manufacturingTest	= 0x07
+		case charging			= 0x08
 	}
 	
 	enum wornResult: UInt8 {
@@ -97,6 +98,8 @@ class customCharacteristic: Characteristic {
 	
 	var manufacturingTestComplete: ((_ successful: Bool)->())?
 	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
+	
+	var deviceChargingStatus: ((_ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
 
 	var setSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType)->())?
 	var getSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
@@ -1182,6 +1185,13 @@ class customCharacteristic: Characteristic {
 					log?.e ("Result jsonData Failed")
 					self.manufacturingTestResult?(false, "")
 				}
+				
+			case .charging:
+				let on_charger	= (data[1] == 0x01)
+				let charging	= (data[2] == 0x01)
+				let error		= (data[3] == 0x01)
+				
+				self.deviceChargingStatus?(charging, on_charger, error)
 			}
 		}
 		else {

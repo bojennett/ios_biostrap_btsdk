@@ -113,6 +113,8 @@ import iOSDFULibrary
 	@objc public var manufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var manufacturingTestResult: ((_ id: String, _ valid: Bool, _ result: String)->())?
 
+	@objc public var deviceChargingStatus: ((_ id: String, _ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
+
 	@objc public var setSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType)->())?
 	@objc public var getSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
 	@objc public var resetSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
