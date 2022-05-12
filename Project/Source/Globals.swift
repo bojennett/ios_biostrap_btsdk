@@ -131,6 +131,11 @@ var gblLimitEthos	= false
 	case diagnostic			= 0x87
 	case ppg_failed			= 0x88
 	case battery			= 0x89
+	
+	case rawPPGCompressedGreen	= 0xd3
+	case rawPPGCompressedRed	= 0xd4
+	case rawPPGCompressedIR		= 0xd5
+
 	case rawAccel			= 0xe0
 	case rawAccelFifoCount	= 0xe1
 	case rawPPGProximity	= 0xe2
@@ -175,7 +180,11 @@ var gblLimitEthos	= false
 		case "Raw Accel"			: self	= .rawAccel
 		case "Raw Accel FIFO Count"	: self	= .rawAccelFifoCount
 		case "Raw PPG Proximity"	: self	= .rawPPGProximity
-			
+
+		case "Raw PPG Compressed Green"	: self	= .rawPPGCompressedGreen
+		case "Raw PPG Compressed Red"	: self	= .rawPPGCompressedRed
+		case "Raw PPG Compressed IR"	: self	= .rawPPGCompressedIR
+
 		#if LIVOTAL
 		case "Raw PPG Green Sample"	: self	= .rawPPGGreen
 		#endif
@@ -218,7 +227,11 @@ var gblLimitEthos	= false
 		case .rawAccel			: return "Raw Accel"
 		case .rawAccelFifoCount	: return "Raw Accel FIFO Count"
 		case .rawPPGProximity	: return "Raw PPG Proximity"
-			
+
+		case .rawPPGCompressedGreen		: return "Raw PPG Compressed Green"
+		case .rawPPGCompressedRed		: return "Raw PPG Compressed Red"
+		case .rawPPGCompressedIR		: return "Raw PPG Compressed IR"
+
 		#if LIVOTAL
 		case .rawPPGGreen		: return "Raw PPG Green Sample"
 		#endif
@@ -260,7 +273,11 @@ var gblLimitEthos	= false
 		case .rawAccel			: return 13
 		case .rawAccelFifoCount	: return 6
 		case .rawPPGProximity	: return 5
-			
+
+		case .rawPPGCompressedGreen		: return 0	// Done by calculation
+		case .rawPPGCompressedRed		: return 0	// Done by calculation
+		case .rawPPGCompressedIR		: return 0	// Done by calculation
+
 		#if LIVOTAL
 		case .rawPPGGreen		: return 5
 		#endif

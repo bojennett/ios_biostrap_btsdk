@@ -784,6 +784,63 @@ class customCharacteristic: Characteristic {
 		
 		mCRCOK				= true
 	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//def reconstruct(dataComp8Bit):
+	//	reconstructedData = []
+	//	reconstructedData.append(dataComp8Bit.dataOffset)
+	//
+	//	for counter in range(0,dataComp8Bit.compressionCount):
+	//		sign = dataComp8Bit.bitwiseSign & (1 << counter)
+	//		if sign != 0:
+	//			sign = -1
+	//		else:
+	//			sign = 1
+	//
+	//		reconstructedData.append(reconstructedData[0] + sign*dataComp8Bit.dataPointer[counter])
+	//
+	//	return reconstructedData
+	//
+	//--------------------------------------------------------------------------------
+	internal func mDecompressPPGPackets(_ data: Data) -> [biostrapDataPacket] {
+		var packets				= [biostrapDataPacket]()
+		if let packetType = packetType(rawValue: data[0]) {
+			let compressionCount	= Int(data[1])
+			let bitwiseSign			= data[2]
+			
+			let firstSample			= (Int(data[3]) << 0) | (Int(data[4]) << 8) | (Int(data[5]) << 16)
+			let packet				= biostrapDataPacket()
+			packet.value			= firstSample
+			packet.raw_data			= data
+			packet.type				= packetType
+			
+			packets.append(packet)
+			
+			var index		= 0
+			while (index < compressionCount) {
+				let negative		= ((bitwiseSign & (0x01 << index)) != 0)
+				let sample			= Int(data[index + 6])
+				let packet			= biostrapDataPacket()
+				packet.type			= packetType
+				packet.raw_data			= data
+
+				if (negative) {
+					packet.value	= firstSample - sample
+				}
+				else {
+					packet.value	= firstSample + sample
+				}
+				
+				packets.append(packet)
+				index = index + 1
+			}
+		}
+		
+		return (packets)
+	}
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -798,6 +855,19 @@ class customCharacteristic: Characteristic {
 			case .diagnostic:
 				let length = Int(data[index + 1]) + 1
 				
+				if ((index + length) <= data.count) {
+					let packetData = data.subdata(in: Range(index...(index + length - 1)))
+					return (true, type, biostrapDataPacket(packetData))
+				}
+				else {
+					log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+					return (false, .unknown, biostrapDataPacket())
+				}
+				
+			case .rawPPGCompressedGreen,
+				 .rawPPGCompressedIR,
+				 .rawPPGCompressedRed:
+				let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
 				if ((index + length) <= data.count) {
 					let packetData = data.subdata(in: Range(index...(index + length - 1)))
 					return (true, type, biostrapDataPacket(packetData))
@@ -840,13 +910,21 @@ class customCharacteristic: Characteristic {
 			let (found, type, packet) = mParseSinglePacket(data, index: index)
 
 			if (found) {
-				if (type == .diagnostic) {
-					index = index + packet.diagnostic_data.count
-				}
-				else {
+				switch (type) {
+				case .diagnostic:
+					index = index + packet.raw_data.count
+					dataPackets.append(packet)
+				case .rawPPGCompressedGreen,
+					 .rawPPGCompressedIR,
+					 .rawPPGCompressedRed:
+					index = index + packet.raw_data.count
+					
+					let packets = mDecompressPPGPackets(packet.raw_data)
+					dataPackets.append(contentsOf: packets)
+				default:
 					index = index + type.length
+					if (type != .unknown) { dataPackets.append(packet) }
 				}
-				if (type != .unknown) { dataPackets.append(packet) }
 			}
 			else {
 				index = index + type.length
@@ -1055,7 +1133,8 @@ class customCharacteristic: Characteristic {
 				
 			case .dataPacket:
 				if (data.count > 3) {	// Accounts for header byte and sequence number
-					log?.v ("\(data.subdata(in: Range(0...7)).hexString)")
+					//log?.v ("\(data.subdata(in: Range(0...7)).hexString)")
+					log?.v ("\(data.hexString)")
 					let sequence_number = data.subdata(in: Range(1...2)).leUInt16
 					if (sequence_number == mExpectedSequenceNumber) {
 						//log?.v ("Sequence Number Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")

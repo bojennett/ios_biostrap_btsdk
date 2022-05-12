@@ -39,7 +39,7 @@ import Foundation
 	public var spo2_uncertainty	: Float			= 0.0
 	public var tag				: String		= ""
 	public var settings_value	: Float			= 0.0
-	public var diagnostic_data	: Data			= Data()
+	public var raw_data			: Data			= Data()
 	
 	//--------------------------------------------------------------------------------
 	//
@@ -78,7 +78,7 @@ import Foundation
 		case tag
 		case settings_type
 		case settings_value
-		case diagnostic_data
+		case raw_data
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -102,6 +102,10 @@ import Foundation
 		case .rawPPGProximity		: return ("\(type.title),\(value)")
 		case .rawPPGRed				: return ("\(type.title),\(value)")
 		case .rawPPGIR				: return ("\(type.title),\(value)")
+			
+		case .rawPPGCompressedGreen,
+			 .rawPPGCompressedIR,
+			 .rawPPGCompressedRed	: return ("\(type.title),\(value),\(raw_data.hexString)")
 		#if LIVOTAL
 		case .rawPPGGreen			: return ("\(type.title),\(value)")
 		#endif
@@ -119,7 +123,7 @@ import Foundation
 		case .ppg					: return ("\(type.title),\(epoch),\(hr_valid),\(hr_result),\(hr_uncertainty),\(hrv_valid),\(hrv_result),\(hrv_uncertainty),\(rr_valid),\(rr_result),\(rr_uncertainty),\(spo2_valid),\(spo2_result),\(spo2_uncertainty)")
 		case .unknown				: return ("\(type.title)")
 		case .steps					: return ("\(type.title),\(epoch),\(value)")
-		case .diagnostic			: return ("\(type.title),\(diagnostic_data.hexString)")
+		case .diagnostic			: return ("\(type.title),\(raw_data.hexString)")
 		case .milestone				: return ("\(type.title),\(epoch),\(tag)")
 		case .settings				: return ("\(type.title),\(settings_type.title),\(settings_value)")
 		}
@@ -180,7 +184,7 @@ import Foundation
 				end_epoch	= data.subdata(in: Range(5...8)).leInt
 				
 			case .diagnostic:
-				diagnostic_data	= data	// App has to parse
+				raw_data	= data	// App has to parse
 				
 			case .rawAccel:
 				x = data.subdata(in: Range(1...4)).leFloat
@@ -191,6 +195,11 @@ import Foundation
 				 .rawAccelFifoCount:
 				value		= Int(data[1])
 				elapsed_ms	= data.subdata(in: Range(2...5)).leInt
+
+			case .rawPPGCompressedGreen,
+				 .rawPPGCompressedIR,
+				 .rawPPGCompressedRed:
+				raw_data	= data	// App has to parse
 
 			case .rawPPGRed:
 				value		= data.subdata(in: Range(1...4)).leInt
@@ -303,8 +312,14 @@ import Foundation
 			epoch				= try values.decode(Int.self, forKey: .epoch)
 			end_epoch			= try values.decode(Int.self, forKey: .end_epoch)
 			
+		case .rawPPGCompressedGreen,
+			 .rawPPGCompressedIR,
+			 .rawPPGCompressedRed:
+			value				= try values.decode(Int.self, forKey: .value)
+			raw_data			= try values.decode(Data.self, forKey: .raw_data)
+
 		case .diagnostic:
-			diagnostic_data		= try values.decode(Data.self, forKey: .diagnostic_data)
+			raw_data			= try values.decode(Data.self, forKey: .raw_data)
 			
 		case .rawPPGFifoCount,
 			 .rawAccelFifoCount:
@@ -431,8 +446,14 @@ import Foundation
 			try container.encode(end_epoch, forKey: .end_epoch)
 			
 		case .diagnostic:
-			try container.encode(diagnostic_data, forKey: .diagnostic_data)
+			try container.encode(raw_data, forKey: .raw_data)
 			
+		case .rawPPGCompressedGreen,
+			 .rawPPGCompressedIR,
+			 .rawPPGCompressedRed:
+			try container.encode(value, forKey: .value)
+			try container.encode(raw_data, forKey: .raw_data)
+
 		case .rawPPGFifoCount,
 			 .rawAccelFifoCount:
 			try container.encode(value, forKey: .value)
