@@ -132,9 +132,21 @@ var gblLimitEthos	= false
 	case ppg_failed			= 0x88
 	case battery			= 0x89
 	
+    #if LIVOTAL
 	case rawPPGCompressedGreen	= 0xd3
+    #endif
+    
+    #if ETHOS || UNIVERSAL
+    case rawPPGCompressedGreenIRRPD = 0xd3
+    #endif
 	case rawPPGCompressedRed	= 0xd4
 	case rawPPGCompressedIR		= 0xd5
+
+    #if ETHOS || UNIVERSAL
+    case rawPPGCompressedGreenWhitePD   = 0xd7
+    case rawPPGCompressedWhiteIRRPD     = 0xd8
+    case rawPPGCompressedWhiteWhitePD   = 0xd9
+    #endif
 
 	case rawAccel			= 0xe0
 	case rawAccelFifoCount	= 0xe1
@@ -181,9 +193,21 @@ var gblLimitEthos	= false
 		case "Raw Accel FIFO Count"	: self	= .rawAccelFifoCount
 		case "Raw PPG Proximity"	: self	= .rawPPGProximity
 
+        #if LIVOTAL
 		case "Raw PPG Compressed Green"	: self	= .rawPPGCompressedGreen
+        #endif
+        
+        #if ETHOS || UNIVERSAL
+        case "Raw PPG Compressed Green Sample IRR PD"	: self		= .rawPPGCompressedGreenIRRPD
+        #endif
 		case "Raw PPG Compressed Red"	: self	= .rawPPGCompressedRed
 		case "Raw PPG Compressed IR"	: self	= .rawPPGCompressedIR
+
+        #if ETHOS || UNIVERSAL
+        case "Raw PPG Compressed Green White PD"		: self		= .rawPPGCompressedGreenWhitePD
+        case "Raw PPG Compressed White IRR PD"			: self		= .rawPPGCompressedWhiteIRRPD
+        case "Raw PPG Compressed White White PD"		: self		= .rawPPGCompressedWhiteWhitePD
+        #endif
 
 		#if LIVOTAL
 		case "Raw PPG Green Sample"	: self	= .rawPPGGreen
@@ -214,93 +238,115 @@ var gblLimitEthos	= false
 		
 	public var title: String {
 		switch (self) {
-		case .unknown			: return "Unknown"
-		case .steps				: return "Steps"
-		case .ppg				: return "PPG Results"
-		case .ppg_failed		: return "PPG Failed"
-		case .activity			: return "Activity"
-		case .temp				: return "Temperature"
-		case .worn				: return "Worn"
-		case .battery			: return "Battery"
-		case .sleep				: return "Sleep"
-		case .diagnostic		: return "Diagnostic"
-		case .rawAccel			: return "Raw Accel"
-		case .rawAccelFifoCount	: return "Raw Accel FIFO Count"
-		case .rawPPGProximity	: return "Raw PPG Proximity"
-
-		case .rawPPGCompressedGreen		: return "Raw PPG Compressed Green"
-		case .rawPPGCompressedRed		: return "Raw PPG Compressed Red"
-		case .rawPPGCompressedIR		: return "Raw PPG Compressed IR"
+		case .unknown						: return "Unknown"
+		case .steps							: return "Steps"
+		case .ppg							: return "PPG Results"
+		case .ppg_failed					: return "PPG Failed"
+		case .activity						: return "Activity"
+		case .temp							: return "Temperature"
+		case .worn							: return "Worn"
+		case .battery						: return "Battery"
+		case .sleep							: return "Sleep"
+		case .diagnostic					: return "Diagnostic"
+		case .rawAccel						: return "Raw Accel"
+		case .rawAccelFifoCount				: return "Raw Accel FIFO Count"
+		case .rawPPGProximity				: return "Raw PPG Proximity"
 
 		#if LIVOTAL
-		case .rawPPGGreen		: return "Raw PPG Green Sample"
+		case .rawPPGCompressedGreen			: return "Raw PPG Compressed Green"
+		#endif
+		#if ETHOS || UNIVERSAL
+		case .rawPPGCompressedGreenIRRPD	: return "Raw PPG Compressed Green IRR PD"
+		#endif
+		case .rawPPGCompressedRed			: return "Raw PPG Compressed Red"
+		case .rawPPGCompressedIR			: return "Raw PPG Compressed IR"
+			
+		#if ETHOS || UNIVERSAL
+		case .rawPPGCompressedGreenWhitePD	: return "Raw PPG Compressed Green White PD"
+		case .rawPPGCompressedWhiteIRRPD	: return "Raw PPG Compressed White IRR PD"
+		case .rawPPGCompressedWhiteWhitePD	: return "Raw PPG Compressed White White PD"
+		#endif
+
+		#if LIVOTAL
+		case .rawPPGGreen					: return "Raw PPG Green Sample"
 		#endif
 
 		#if ETHOS || UNIVERSAL
-		case .rawPPGGreenIRRPD	: return "Raw PPG Green Sample IRR PD"
+		case .rawPPGGreenIRRPD				: return "Raw PPG Green Sample IRR PD"
 		#endif
 
-		case .rawPPGRed			: return "Raw PPG Red Sample"
-		case .rawPPGIR			: return "Raw PPG IR Sample"
-		case .rawPPGFifoCount	: return "Raw PPG FIFO Count"
+		case .rawPPGRed						: return "Raw PPG Red Sample"
+		case .rawPPGIR						: return "Raw PPG IR Sample"
+		case .rawPPGFifoCount				: return "Raw PPG FIFO Count"
 			
 		#if ETHOS || UNIVERSAL
-		case .rawPPGGreenWhitePD	: return "Raw PPG Green Sample White PD"
-		case .rawPPGWhiteIRRPD		: return "Raw PPG White Sample IRR PD"
-		case .rawPPGWhiteWhitePD	: return "Raw PPG White Sample White PD"
-		case .rawGyroADC			: return "Raw Gyro ADC"
+		case .rawPPGGreenWhitePD			: return "Raw PPG Green Sample White PD"
+		case .rawPPGWhiteIRRPD				: return "Raw PPG White Sample IRR PD"
+		case .rawPPGWhiteWhitePD			: return "Raw PPG White Sample White PD"
+		case .rawGyroADC					: return "Raw Gyro ADC"
 		#endif
 			
-		case .rawAccelADC		: return "Raw Accel ADC"
+		case .rawAccelADC					: return "Raw Accel ADC"
 			
-		case .milestone			: return "Milestone"
-		case .settings			: return "Settings"
+		case .milestone						: return "Milestone"
+		case .settings						: return "Settings"
 		}
 	}
 	
 	var length: Int {
 		switch (self) {
-		case .unknown			: return 300
-		case .steps				: return 7
-		case .ppg				: return 17
-		case .ppg_failed		: return 6
-		case .activity			: return 10
-		case .temp				: return 9
-		case .worn				: return 6
-		case .battery			: return 8
-		case .sleep				: return 9
-		case .diagnostic		: return 0 		// Done by calculation
-		case .rawAccel			: return 13
-		case .rawAccelFifoCount	: return 6
-		case .rawPPGProximity	: return 5
-
-		case .rawPPGCompressedGreen		: return 0	// Done by calculation
-		case .rawPPGCompressedRed		: return 0	// Done by calculation
-		case .rawPPGCompressedIR		: return 0	// Done by calculation
+		case .unknown						: return 300
+		case .steps							: return 7
+		case .ppg							: return 17
+		case .ppg_failed					: return 6
+		case .activity						: return 10
+		case .temp							: return 9
+		case .worn							: return 6
+		case .battery						: return 8
+		case .sleep							: return 9
+		case .diagnostic					: return 0 		// Done by calculation
+		case .rawAccel						: return 13
+		case .rawAccelFifoCount				: return 6
+		case .rawPPGProximity				: return 5
 
 		#if LIVOTAL
-		case .rawPPGGreen		: return 5
+		case .rawPPGCompressedGreen			: return 0	// Done by calculation
 		#endif
+		#if ETHOS || UNIVERSAL
+		case .rawPPGCompressedGreenIRRPD	: return 0	// Done by calculation
+		#endif
+		case .rawPPGCompressedRed			: return 0	// Done by calculation
+		case .rawPPGCompressedIR			: return 0	// Done by calculation
 			
 		#if ETHOS || UNIVERSAL
-		case .rawPPGGreenIRRPD	: return 5
+		case .rawPPGCompressedGreenWhitePD	: return 0	// Done by calculation
+		case .rawPPGCompressedWhiteIRRPD	: return 0	// Done by calculation
+		case .rawPPGCompressedWhiteWhitePD	: return 0	// Done by calculation
 		#endif
-			
-		case .rawPPGRed			: return 5
-		case .rawPPGIR			: return 5
-		case .rawPPGFifoCount	: return 6
-			
-		#if ETHOS || UNIVERSAL
-		case .rawPPGGreenWhitePD	: return 5
-		case .rawPPGWhiteIRRPD		: return 5
-		case .rawPPGWhiteWhitePD	: return 5
-		case .rawGyroADC			: return 7
-		#endif
-			
-		case .rawAccelADC		: return 7
 
-		case .milestone			: return 7
-		case .settings			: return 6
+		#if LIVOTAL
+		case .rawPPGGreen					: return 5
+		#endif
+			
+		#if ETHOS || UNIVERSAL
+		case .rawPPGGreenIRRPD				: return 5
+		#endif
+			
+		case .rawPPGRed						: return 5
+		case .rawPPGIR						: return 5
+		case .rawPPGFifoCount				: return 6
+			
+		#if ETHOS || UNIVERSAL
+		case .rawPPGGreenWhitePD			: return 5
+		case .rawPPGWhiteIRRPD				: return 5
+		case .rawPPGWhiteWhitePD			: return 5
+		case .rawGyroADC					: return 7
+		#endif
+			
+		case .rawAccelADC					: return 7
+
+		case .milestone						: return 7
+		case .settings						: return 6
 		}
 	}
 }

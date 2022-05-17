@@ -103,9 +103,22 @@ import Foundation
 		case .rawPPGRed				: return ("\(type.title),\(value)")
 		case .rawPPGIR				: return ("\(type.title),\(value)")
 			
-		case .rawPPGCompressedGreen,
-			 .rawPPGCompressedIR,
+		#if LIVOTAL
+		case .rawPPGCompressedGreen	: return ("\(type.title),\(value),\(raw_data.hexString)")
+		#endif
+			
+		#if ETHOS || UNIVERSAL
+		case .rawPPGCompressedGreenIRRPD	: return ("\(type.title),\(value),\(raw_data.hexString)")
+		#endif
+			
+		case .rawPPGCompressedIR,
 			 .rawPPGCompressedRed	: return ("\(type.title),\(value),\(raw_data.hexString)")
+		#if ETHOS || UNIVERSAL
+		case .rawPPGCompressedGreenWhitePD	: return ("\(type.title),\(value),\(raw_data.hexString)")
+		case .rawPPGCompressedWhiteIRRPD	: return ("\(type.title),\(value),\(raw_data.hexString)")
+		case .rawPPGCompressedWhiteWhitePD	: return ("\(type.title),\(value),\(raw_data.hexString)")
+		#endif
+
 		#if LIVOTAL
 		case .rawPPGGreen			: return ("\(type.title),\(value)")
 		#endif
@@ -196,10 +209,26 @@ import Foundation
 				value		= Int(data[1])
 				elapsed_ms	= data.subdata(in: Range(2...5)).leInt
 
-			case .rawPPGCompressedGreen,
-				 .rawPPGCompressedIR,
+			#if LIVOTAL
+			case .rawPPGCompressedGreen	:
+				raw_data	= data	// App has to parse
+			#endif
+
+			#if ETHOS || UNIVERSAL
+			case .rawPPGCompressedGreenIRRPD	:
+				raw_data	= data	// App has to parse
+			#endif
+
+			case .rawPPGCompressedIR,
 				 .rawPPGCompressedRed:
 				raw_data	= data	// App has to parse
+
+			#if ETHOS || UNIVERSAL
+			case .rawPPGCompressedGreenWhitePD,
+				 .rawPPGCompressedWhiteIRRPD,
+				 .rawPPGCompressedWhiteWhitePD	:
+				raw_data	= data	// App has to parse
+			#endif
 
 			case .rawPPGRed:
 				value		= data.subdata(in: Range(1...4)).leInt
@@ -312,11 +341,30 @@ import Foundation
 			epoch				= try values.decode(Int.self, forKey: .epoch)
 			end_epoch			= try values.decode(Int.self, forKey: .end_epoch)
 			
-		case .rawPPGCompressedGreen,
-			 .rawPPGCompressedIR,
+		#if LIVOTAL
+		case .rawPPGCompressedGreen:
+			value				= try values.decode(Int.self, forKey: .value)
+			raw_data			= try values.decode(Data.self, forKey: .raw_data)
+		#endif
+
+		#if ETHOS || UNIVERSAL
+		case .rawPPGCompressedGreenIRRPD:
+			value				= try values.decode(Int.self, forKey: .value)
+			raw_data			= try values.decode(Data.self, forKey: .raw_data)
+		#endif
+
+		case .rawPPGCompressedIR,
 			 .rawPPGCompressedRed:
 			value				= try values.decode(Int.self, forKey: .value)
 			raw_data			= try values.decode(Data.self, forKey: .raw_data)
+
+		#if ETHOS || UNIVERSAL
+		case .rawPPGCompressedGreenWhitePD,
+			 .rawPPGCompressedWhiteIRRPD,
+			 .rawPPGCompressedWhiteWhitePD:
+			value				= try values.decode(Int.self, forKey: .value)
+			raw_data			= try values.decode(Data.self, forKey: .raw_data)
+		#endif
 
 		case .diagnostic:
 			raw_data			= try values.decode(Data.self, forKey: .raw_data)
@@ -448,11 +496,30 @@ import Foundation
 		case .diagnostic:
 			try container.encode(raw_data, forKey: .raw_data)
 			
-		case .rawPPGCompressedGreen,
-			 .rawPPGCompressedIR,
+		#if LIVOTAL
+		case .rawPPGCompressedGreen:
+			try container.encode(value, forKey: .value)
+			try container.encode(raw_data, forKey: .raw_data)
+		#endif
+
+		#if ETHOS || UNIVERSAL
+		case .rawPPGCompressedGreenIRRPD:
+			try container.encode(value, forKey: .value)
+			try container.encode(raw_data, forKey: .raw_data)
+		#endif
+
+		case .rawPPGCompressedIR,
 			 .rawPPGCompressedRed:
 			try container.encode(value, forKey: .value)
 			try container.encode(raw_data, forKey: .raw_data)
+
+		#if ETHOS || UNIVERSAL
+		case .rawPPGCompressedGreenWhitePD,
+			 .rawPPGCompressedWhiteIRRPD,
+			 .rawPPGCompressedWhiteWhitePD:
+			try container.encode(value, forKey: .value)
+			try container.encode(raw_data, forKey: .raw_data)
+		#endif
 
 		case .rawPPGFifoCount,
 			 .rawAccelFifoCount:
