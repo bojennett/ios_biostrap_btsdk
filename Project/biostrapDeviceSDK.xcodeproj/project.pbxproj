@@ -16,6 +16,7 @@
 		3B29C567264C7033006BC11B /* heartRateCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C566264C7033006BC11B /* heartRateCharacteristic.swift */; };
 		3B29C56D264C7263006BC11B /* disStringCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */; };
 		3B29C59D264C9E72006BC11B /* nordicDFU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C59C264C9E72006BC11B /* nordicDFU.swift */; };
+		3B49444028388D300074F569 /* ppgAlgorithmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */; };
 		3B98B4B72787B4960081DA14 /* IntExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B98B4B62787B4960081DA14 /* IntExtentions.swift */; };
 		3BD01F90261539630014CEF0 /* biostrapDeviceSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F8F261539630014CEF0 /* biostrapDeviceSDK.swift */; };
 		3BD01F9326153AC50014CEF0 /* centralManagerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9226153AC50014CEF0 /* centralManagerDelegate.swift */; };
@@ -26,7 +27,7 @@
 		3BD01FB1261770BE0014CEF0 /* peripheralDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01FB0261770BE0014CEF0 /* peripheralDelegate.swift */; };
 		3BF3FEC326C58BCF005AF135 /* biostrapDataPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEC226C58BCF005AF135 /* biostrapDataPacket.swift */; };
 		3BF3FEC526C59733005AF135 /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEC426C59733005AF135 /* DataExtensions.swift */; };
-		3BF3FEE326D81A40005AF135 /* livotalAlgorithmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEE226D81A40005AF135 /* livotalAlgorithmConfiguration.swift */; };
+		3BF3FEE326D81A40005AF135 /* ppgAlgorithmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */; };
 		3BF807C227A1AFA000595493 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9826153B280014CEF0 /* Globals.swift */; };
 		3BF807C327A1AFA000595493 /* customCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C556264C5B53006BC11B /* customCharacteristic.swift */; };
 		3BF807C427A1AFA000595493 /* nordicDFU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C59C264C9E72006BC11B /* nordicDFU.swift */; };
@@ -44,7 +45,7 @@
 		3BF807D127A1AFA000595493 /* disStringCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */; };
 		3BF807D327A1AFA000595493 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9C26153EF10014CEF0 /* Device.swift */; };
 		3BF807D427A1AFA000595493 /* IntExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B98B4B62787B4960081DA14 /* IntExtentions.swift */; };
-		3BF807E327A1C40A00595493 /* livotalAlgorithmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEE226D81A40005AF135 /* livotalAlgorithmConfiguration.swift */; };
+		3BF807E327A1C40A00595493 /* ppgAlgorithmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */; };
 		3BF807EA27A201E200595493 /* ambiqOTARXCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807E627A201A500595493 /* ambiqOTARXCharacteristic.swift */; };
 		3BF807EB27A201E600595493 /* ambiqOTATXCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807E827A201AD00595493 /* ambiqOTATXCharacteristic.swift */; };
 		3BF807EE27A2057700595493 /* CrcCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807EC27A2057400595493 /* CrcCalculator.swift */; };
@@ -104,7 +105,7 @@
 		3BD01FB0261770BE0014CEF0 /* peripheralDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = peripheralDelegate.swift; sourceTree = "<group>"; };
 		3BF3FEC226C58BCF005AF135 /* biostrapDataPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = biostrapDataPacket.swift; sourceTree = "<group>"; };
 		3BF3FEC426C59733005AF135 /* DataExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExtensions.swift; sourceTree = "<group>"; };
-		3BF3FEE226D81A40005AF135 /* livotalAlgorithmConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = livotalAlgorithmConfiguration.swift; sourceTree = "<group>"; };
+		3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ppgAlgorithmConfiguration.swift; sourceTree = "<group>"; };
 		3BF807DA27A1AFA000595493 /* universalBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = universalBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BF807E627A201A500595493 /* ambiqOTARXCharacteristic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ambiqOTARXCharacteristic.swift; sourceTree = "<group>"; };
 		3BF807E827A201AD00595493 /* ambiqOTATXCharacteristic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ambiqOTATXCharacteristic.swift; sourceTree = "<group>"; };
@@ -227,7 +228,7 @@
 		3BF807DC27A1B08900595493 /* Livotal */ = {
 			isa = PBXGroup;
 			children = (
-				3BF3FEE226D81A40005AF135 /* livotalAlgorithmConfiguration.swift */,
+				3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */,
 				3B29C546264C3D59006BC11B /* nordicDFUCharacteristic.swift */,
 			);
 			path = Livotal;
@@ -511,7 +512,7 @@
 				3B29C567264C7033006BC11B /* heartRateCharacteristic.swift in Sources */,
 				3BFAC25B2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */,
 				3B29C56D264C7263006BC11B /* disStringCharacteristic.swift in Sources */,
-				3BF3FEE326D81A40005AF135 /* livotalAlgorithmConfiguration.swift in Sources */,
+				3BF3FEE326D81A40005AF135 /* ppgAlgorithmConfiguration.swift in Sources */,
 				3BD01F9D26153EF10014CEF0 /* Device.swift in Sources */,
 				3BF809BB27BD787300595493 /* ethosBTSDK.swift in Sources */,
 				3B98B4B72787B4960081DA14 /* IntExtentions.swift in Sources */,
@@ -545,7 +546,7 @@
 				3BF807D127A1AFA000595493 /* disStringCharacteristic.swift in Sources */,
 				3BF807EB27A201E600595493 /* ambiqOTATXCharacteristic.swift in Sources */,
 				3BF807D327A1AFA000595493 /* Device.swift in Sources */,
-				3BF807E327A1C40A00595493 /* livotalAlgorithmConfiguration.swift in Sources */,
+				3BF807E327A1C40A00595493 /* ppgAlgorithmConfiguration.swift in Sources */,
 				3BF807D427A1AFA000595493 /* IntExtentions.swift in Sources */,
 				3BF8082327A452A200595493 /* CoreBluetoothExtensions.swift in Sources */,
 			);
@@ -571,6 +572,7 @@
 				3BF809A727BD766D00595493 /* DataExtensions.swift in Sources */,
 				3BF809A827BD766D00595493 /* peripheralDelegate.swift in Sources */,
 				3BF809A927BD766D00595493 /* centralManagerDelegate.swift in Sources */,
+				3B49444028388D300074F569 /* ppgAlgorithmConfiguration.swift in Sources */,
 				3BF809AA27BD766D00595493 /* batteryLevelCharacteristic.swift in Sources */,
 				3BF809AB27BD766D00595493 /* heartRateCharacteristic.swift in Sources */,
 				3BF809AC27BD766D00595493 /* disStringCharacteristic.swift in Sources */,
@@ -587,6 +589,7 @@
 		3BD01F8A2615358B0014CEF0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -634,6 +637,8 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
@@ -646,9 +651,11 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 331A1546F82DD6F1138DBC0F /* Pods-livotalBTSDK.release.xcconfig */;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				BITCODE_GENERATION_MODE = bitcode;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -668,6 +675,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.livotalBTSDK;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -677,6 +686,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C46DF70A7FBAE85EEDD8765B /* Pods-universalBTSDK.release.xcconfig */;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				BITCODE_GENERATION_MODE = bitcode;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
@@ -698,6 +708,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.universalBTSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchsimulator watchos macosx iphonesimulator iphoneos driverkit appletvsimulator appletvos";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -707,12 +719,13 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9293CBFFFE9969D4D4CD5CF1 /* Pods-ethosBTSDK.release.xcconfig */;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				BITCODE_GENERATION_MODE = bitcode;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -730,6 +743,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.ethosBTSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

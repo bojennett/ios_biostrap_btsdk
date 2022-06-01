@@ -404,14 +404,12 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || LIVOTAL
-	@objc public func startManual(_ id: String, algorithms: livotalAlgorithmConfiguration) {
+	@objc public func startManual(_ id: String, algorithms: ppgAlgorithmConfiguration) {
 		log?.v ("\(id): Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
 		
 		if let device = mConnectedDevices?[id] { device.startManual(id, algorithms: algorithms) }
 		else { self.startManualComplete?(id, false) }
 	}
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:

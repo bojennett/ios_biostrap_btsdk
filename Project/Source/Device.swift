@@ -546,14 +546,12 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || LIVOTAL
-	func startManual(_ id: String, algorithms: livotalAlgorithmConfiguration) {
+	func startManual(_ id: String, algorithms: ppgAlgorithmConfiguration) {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.startManual(algorithms)
 		}
 		else { self.startManualComplete?(id, false) }
 	}
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:

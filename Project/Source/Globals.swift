@@ -132,20 +132,13 @@ var gblLimitEthos	= false
 	case ppg_failed			= 0x88
 	case battery			= 0x89
 	
-    #if LIVOTAL
 	case rawPPGCompressedGreen	= 0xd3
-    #endif
-    
-    #if ETHOS || UNIVERSAL
-    case rawPPGCompressedGreenIRRPD = 0xd3
-    #endif
 	case rawPPGCompressedRed	= 0xd4
 	case rawPPGCompressedIR		= 0xd5
 
     #if ETHOS || UNIVERSAL
-    case rawPPGCompressedGreenWhitePD   = 0xd7
-    case rawPPGCompressedWhiteIRRPD     = 0xd8
-    case rawPPGCompressedWhiteWhitePD   = 0xd9
+    case rawPPGCompressedWhiteIRRPD     = 0xd7
+    case rawPPGCompressedWhiteWhitePD   = 0xd8
     #endif
 
 	case rawAccel			= 0xe0
@@ -193,18 +186,11 @@ var gblLimitEthos	= false
 		case "Raw Accel FIFO Count"	: self	= .rawAccelFifoCount
 		case "Raw PPG Proximity"	: self	= .rawPPGProximity
 
-        #if LIVOTAL
 		case "Raw PPG Compressed Green"	: self	= .rawPPGCompressedGreen
-        #endif
-        
-        #if ETHOS || UNIVERSAL
-        case "Raw PPG Compressed Green Sample IRR PD"	: self		= .rawPPGCompressedGreenIRRPD
-        #endif
 		case "Raw PPG Compressed Red"	: self	= .rawPPGCompressedRed
 		case "Raw PPG Compressed IR"	: self	= .rawPPGCompressedIR
 
         #if ETHOS || UNIVERSAL
-        case "Raw PPG Compressed Green White PD"		: self		= .rawPPGCompressedGreenWhitePD
         case "Raw PPG Compressed White IRR PD"			: self		= .rawPPGCompressedWhiteIRRPD
         case "Raw PPG Compressed White White PD"		: self		= .rawPPGCompressedWhiteWhitePD
         #endif
@@ -222,7 +208,6 @@ var gblLimitEthos	= false
 		case "Raw PPG FIFO Count"	: self	= .rawPPGFifoCount
 			
 		#if ETHOS || UNIVERSAL
-		case "Raw PPG Green Sample White PD"	: self	= .rawPPGGreenWhitePD
 		case "Raw PPG White Sample IRR PD"		: self	= .rawPPGWhiteIRRPD
 		case "Raw PPG White Sample White PD"	: self	= .rawPPGWhiteWhitePD
 		case "Raw Gyro ADC"						: self	= .rawGyroADC
@@ -252,17 +237,11 @@ var gblLimitEthos	= false
 		case .rawAccelFifoCount				: return "Raw Accel FIFO Count"
 		case .rawPPGProximity				: return "Raw PPG Proximity"
 
-		#if LIVOTAL
 		case .rawPPGCompressedGreen			: return "Raw PPG Compressed Green"
-		#endif
-		#if ETHOS || UNIVERSAL
-		case .rawPPGCompressedGreenIRRPD	: return "Raw PPG Compressed Green IRR PD"
-		#endif
 		case .rawPPGCompressedRed			: return "Raw PPG Compressed Red"
 		case .rawPPGCompressedIR			: return "Raw PPG Compressed IR"
 			
 		#if ETHOS || UNIVERSAL
-		case .rawPPGCompressedGreenWhitePD	: return "Raw PPG Compressed Green White PD"
 		case .rawPPGCompressedWhiteIRRPD	: return "Raw PPG Compressed White IRR PD"
 		case .rawPPGCompressedWhiteWhitePD	: return "Raw PPG Compressed White White PD"
 		#endif
@@ -309,17 +288,11 @@ var gblLimitEthos	= false
 		case .rawAccelFifoCount				: return 6
 		case .rawPPGProximity				: return 5
 
-		#if LIVOTAL
 		case .rawPPGCompressedGreen			: return 0	// Done by calculation
-		#endif
-		#if ETHOS || UNIVERSAL
-		case .rawPPGCompressedGreenIRRPD	: return 0	// Done by calculation
-		#endif
 		case .rawPPGCompressedRed			: return 0	// Done by calculation
 		case .rawPPGCompressedIR			: return 0	// Done by calculation
 			
 		#if ETHOS || UNIVERSAL
-		case .rawPPGCompressedGreenWhitePD	: return 0	// Done by calculation
 		case .rawPPGCompressedWhiteIRRPD	: return 0	// Done by calculation
 		case .rawPPGCompressedWhiteWhitePD	: return 0	// Done by calculation
 		#endif

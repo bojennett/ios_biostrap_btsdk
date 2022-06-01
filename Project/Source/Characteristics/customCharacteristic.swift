@@ -333,8 +333,7 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || LIVOTAL
-	func startManual(_ algorithms: livotalAlgorithmConfiguration) {
+	func startManual(_ algorithms: ppgAlgorithmConfiguration) {
 		log?.v("\(pID)")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
@@ -346,7 +345,6 @@ class customCharacteristic: Characteristic {
 		}
 		else { self.startManualComplete?(false) }
 	}
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -864,33 +862,8 @@ class customCharacteristic: Characteristic {
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
-			#if LIVOTAL
-			case .rawPPGCompressedGreen:
-				let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
-				if ((index + length) <= data.count) {
-					let packetData = data.subdata(in: Range(index...(index + length - 1)))
-					return (true, type, biostrapDataPacket(packetData))
-				}
-				else {
-					log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
-					return (false, .unknown, biostrapDataPacket())
-				}
-			#endif
-				
-			#if ETHOS || UNIVERSAL
-			case .rawPPGCompressedGreenIRRPD:
-				let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
-				if ((index + length) <= data.count) {
-					let packetData = data.subdata(in: Range(index...(index + length - 1)))
-					return (true, type, biostrapDataPacket(packetData))
-				}
-				else {
-					log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
-					return (false, .unknown, biostrapDataPacket())
-				}
-			#endif
-
-			case .rawPPGCompressedIR,
+			case .rawPPGCompressedGreen,
+				 .rawPPGCompressedIR,
 				 .rawPPGCompressedRed:
 				let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
 				if ((index + length) <= data.count) {
@@ -903,8 +876,7 @@ class customCharacteristic: Characteristic {
 				}
 
 			#if ETHOS || UNIVERSAL
-			case .rawPPGCompressedGreenWhitePD,
-				 .rawPPGCompressedWhiteIRRPD,
+			case .rawPPGCompressedWhiteIRRPD,
 				 .rawPPGCompressedWhiteWhitePD:
 				let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
 				if ((index + length) <= data.count) {
@@ -954,23 +926,8 @@ class customCharacteristic: Characteristic {
 				case .diagnostic:
 					index = index + packet.raw_data.count
 					dataPackets.append(packet)
-				#if LIVOTAL
-				case .rawPPGCompressedGreen:
-					index = index + packet.raw_data.count
-					
-					let packets = mDecompressPPGPackets(packet.raw_data)
-					dataPackets.append(contentsOf: packets)
-				#endif
-
-				#if ETHOS || UNIVERSAL
-				case .rawPPGCompressedGreenIRRPD:
-					index = index + packet.raw_data.count
-					
-					let packets = mDecompressPPGPackets(packet.raw_data)
-					dataPackets.append(contentsOf: packets)
-				#endif
-
-				case .rawPPGCompressedIR,
+				case .rawPPGCompressedGreen,
+					 .rawPPGCompressedIR,
 					 .rawPPGCompressedRed:
 					index = index + packet.raw_data.count
 					
@@ -978,8 +935,7 @@ class customCharacteristic: Characteristic {
 					dataPackets.append(contentsOf: packets)
 					
 				#if ETHOS || UNIVERSAL
-				case .rawPPGCompressedGreenWhitePD,
-					 .rawPPGCompressedWhiteIRRPD,
+				case .rawPPGCompressedWhiteIRRPD,
 					 .rawPPGCompressedWhiteWhitePD:
 					index = index + packet.raw_data.count
 					
