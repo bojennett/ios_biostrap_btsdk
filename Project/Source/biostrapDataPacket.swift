@@ -15,12 +15,6 @@ import Foundation
 	public var worn				: Bool			= false
 	public var ppg_failed_code	: Int			= 0
 	public var elapsed_ms		: Int			= 0
-	public var x				: Float			= 0.0
-	public var y				: Float			= 0.0
-	public var z				: Float			= 0.0
-	public var x_adc			: Int			= 0
-	public var y_adc			: Int			= 0
-	public var z_adc			: Int			= 0
 	public var seconds			: Int			= 0
 	public var value			: Int			= 0
 	public var voltage			: Int			= 0
@@ -54,12 +48,6 @@ import Foundation
 		case ppg_failed_code
 		case voltage
 		case elapsed_ms
-		case x
-		case y
-		case z
-		case x_adc
-		case y_adc
-		case z_adc
 		case seconds
 		case temperature
 		case hr_valid
@@ -90,47 +78,62 @@ import Foundation
 	//--------------------------------------------------------------------------------
 	public var csv: String {
 		switch (type) {
-		case .activity				: return ("\(type.title),\(epoch),\(seconds),\(value)")
-		case .temp					: return ("\(type.title),\(epoch),\(temperature)")
-		case .worn					: return ("\(type.title),\(epoch),\(worn)")
-		case .ppg_failed			: return ("\(type.title),\(epoch),\(ppg_failed_code)")
-		case .battery				: return ("\(type.title),\(epoch),\(value),\(voltage)")
-		case .sleep					: return ("\(type.title),\(epoch),\(end_epoch)")
+		case .activity						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(seconds),\(value)")
+		case .temp							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(temperature)")
+		case .worn							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(worn)")
+		case .ppg_failed					: return ("\(raw_data.hexString),\(type.title),\(epoch),\(ppg_failed_code)")
+		case .battery						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(value),\(voltage)")
+		case .sleep							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(end_epoch)")
 		case .rawPPGFifoCount,
-			 .rawAccelFifoCount		: return ("\(type.title),\(value),\(elapsed_ms)")
-		case .rawAccel				: return ("\(type.title),\(x),\(y),\(z)")
-		case .rawPPGProximity		: return ("\(type.title),\(value)")
-		case .rawPPGRed				: return ("\(type.title),\(value)")
-		case .rawPPGIR				: return ("\(type.title),\(value)")
-			
+			 .rawAccelFifoCount				: return ("\(raw_data.hexString),\(type.title),\(value),\(elapsed_ms)")
+		case .rawPPGProximity				: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawPPGRed						: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawPPGIR						: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawPPGGreen					: return ("\(raw_data.hexString),\(type.title),\(value)")
+
+		case .rawAccelXADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawAccelYADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawAccelZADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawCompressedAccelXADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawCompressedAccelYADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawCompressedAccelZADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
+
+		#if ETHOS || UNIVERSAL
+		case .rawGyroXADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawGyroYADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawGyroZADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawCompressedGyroXADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawCompressedGyroYADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawCompressedGyroZADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
+		#endif
+
 		case .rawPPGCompressedGreen,
 			 .rawPPGCompressedIR,
-			 .rawPPGCompressedRed			: return ("\(type.title),\(value),\(raw_data.hexString)")
-		#if ETHOS || UNIVERSAL
-		case .rawPPGCompressedWhiteIRRPD	: return ("\(type.title),\(value),\(raw_data.hexString)")
-		case .rawPPGCompressedWhiteWhitePD	: return ("\(type.title),\(value),\(raw_data.hexString)")
-		#endif
+			 .rawPPGCompressedRed			: return ("\(raw_data.hexString),\(type.title),\(value)")
 
-		#if LIVOTAL
-		case .rawPPGGreen			: return ("\(type.title),\(value)")
+		#if ETHOS || UNIVERSAL
+		case .rawPPGCompressedWhiteIRRPD,
+			 .rawPPGCompressedWhiteWhitePD	: return ("\(raw_data.hexString),\(type.title),\(value)")
 		#endif
 			
 		#if ETHOS || UNIVERSAL
-		case .rawPPGGreenIRRPD		: return ("\(type.title),\(value)")
-		case .rawPPGGreenWhitePD	: return ("\(type.title),\(value)")
-		case .rawPPGWhiteIRRPD		: return ("\(type.title),\(value)")
-		case .rawPPGWhiteWhitePD	: return ("\(type.title),\(value)")
-		case .rawGyroADC			: return ("\(type.title),\(x_adc),\(y_adc),\(z_adc)")
+		case .rawPPGWhiteIRRPD,
+			 .rawPPGWhiteWhitePD			: return ("\(raw_data.hexString),\(type.title),\(value)")
 		#endif
 			
-		case .rawAccelADC			: return ("\(type.title),\(x_adc),\(y_adc),\(z_adc)")
-
-		case .ppg					: return ("\(type.title),\(epoch),\(hr_valid),\(hr_result),\(hr_uncertainty),\(hrv_valid),\(hrv_result),\(hrv_uncertainty),\(rr_valid),\(rr_result),\(rr_uncertainty),\(spo2_valid),\(spo2_result),\(spo2_uncertainty)")
-		case .unknown				: return ("\(type.title)")
-		case .steps					: return ("\(type.title),\(epoch),\(value)")
-		case .diagnostic			: return ("\(type.title),\(raw_data.hexString)")
-		case .milestone				: return ("\(type.title),\(epoch),\(tag)")
-		case .settings				: return ("\(type.title),\(settings_type.title),\(settings_value)")
+		case .ppg							:
+			let root	= "\(raw_data.hexString),\(type.title),\(epoch)"
+			let hr		= "\(root),HR,\(hr_valid),\(hr_result),\(hr_uncertainty)"
+			let hrv		= "\(root),HRV,\(hrv_valid),\(hrv_result),\(hrv_uncertainty)"
+			let rr		= "\(root),RR,\(rr_valid),\(rr_result),\(rr_uncertainty)"
+			let spo2	= "\(root),SPO2,\(spo2_valid),\(spo2_result),\(spo2_uncertainty)"
+			return ("\(hr)\n\(hrv)\n\(rr)\n\(spo2)")
+			
+		case .unknown						: return ("\(raw_data.hexString),\(type.title)")
+		case .steps							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(value)")
+		case .diagnostic					: return ("\(raw_data.hexString),\(type.title)")
+		case .milestone						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(tag)")
+		case .settings						: return ("\(raw_data.hexString),\(type.title),\(settings_type.title),\(settings_value)")
 		}
 	}
 	
@@ -169,7 +172,9 @@ import Foundation
 		super.init()
 		if let thisType = packetType(rawValue: data[0]) {
 			type = thisType
-			
+
+			raw_data		= data	// App has to parse
+
 			switch (type) {
 			case .activity:
 				epoch		= data.subdata(in: Range(1...4)).leInt
@@ -188,14 +193,8 @@ import Foundation
 				epoch		= data.subdata(in: Range(1...4)).leInt
 				end_epoch	= data.subdata(in: Range(5...8)).leInt
 				
-			case .diagnostic:
-				raw_data	= data	// App has to parse
+			case .diagnostic:	break // use raw_data
 				
-			case .rawAccel:
-				x = data.subdata(in: Range(1...4)).leFloat
-				y = data.subdata(in: Range(5...8)).leFloat
-				z = data.subdata(in: Range(9...12)).leFloat
-
 			case .rawPPGFifoCount,
 				 .rawAccelFifoCount:
 				value		= Int(data[1])
@@ -203,54 +202,46 @@ import Foundation
 
 			case .rawPPGCompressedGreen,
 				 .rawPPGCompressedIR,
-				 .rawPPGCompressedRed:
-				raw_data	= data	// App has to parse
+				 .rawPPGCompressedRed:	break	// use raw_data
 
 			#if ETHOS || UNIVERSAL
 			case .rawPPGCompressedWhiteIRRPD,
-				 .rawPPGCompressedWhiteWhitePD	:
-				raw_data	= data	// App has to parse
+				 .rawPPGCompressedWhiteWhitePD	:	break	// use raw_data
 			#endif
 
-			case .rawPPGRed:
-				value		= data.subdata(in: Range(1...4)).leInt
+			case .rawPPGRed,
+				 .rawPPGIR,
+				 .rawPPGGreen:
+				value				= data.subdata(in: Range(1...4)).leInt
 
-			case .rawPPGIR:
-				value		= data.subdata(in: Range(1...4)).leInt
+			case .rawAccelXADC,
+				 .rawAccelYADC,
+				 .rawAccelZADC:
+				value				= data.subdata(in: Range(1...2)).leInt16
 
-			#if LIVOTAL
-			case .rawPPGGreen:
-				value		= data.subdata(in: Range(1...4)).leInt
-			#endif
-				
+			case .rawCompressedAccelXADC,
+				 .rawCompressedAccelYADC,
+				 .rawCompressedAccelZADC: break // use raw_data
+
 			#if ETHOS || UNIVERSAL
-			case .rawPPGGreenIRRPD:
-				value		= data.subdata(in: Range(1...4)).leInt
+			case .rawGyroXADC,
+				 .rawGyroYADC,
+				 .rawGyroZADC:
+				value				= data.subdata(in: Range(1...2)).leInt16
 
-			case .rawPPGGreenWhitePD:
-				value		= data.subdata(in: Range(1...4)).leInt
-
-			case .rawPPGWhiteIRRPD:
-				value		= data.subdata(in: Range(1...4)).leInt
-			
-			case .rawPPGWhiteWhitePD:
-				value		= data.subdata(in: Range(1...4)).leInt
-
-			case .rawGyroADC:
-				x_adc		= data.subdata(in: Range(1...2)).leInt16
-				y_adc		= data.subdata(in: Range(3...4)).leInt16
-				z_adc		= data.subdata(in: Range(5...6)).leInt16
-				log?.v("\(data.hexString) - \(x_adc),\(y_adc),\(z_adc)")
+			case .rawCompressedGyroXADC,
+				 .rawCompressedGyroYADC,
+				 .rawCompressedGyroZADC: break // use raw_data
 			#endif
 
-			case .rawAccelADC:
-				x_adc		= data.subdata(in: Range(1...2)).leInt16
-				y_adc		= data.subdata(in: Range(3...4)).leInt16
-				z_adc		= data.subdata(in: Range(5...6)).leInt16
-				log?.v("\(data.hexString) - \(x_adc),\(y_adc),\(z_adc)")
+			#if ETHOS || UNIVERSAL
+			case .rawPPGWhiteIRRPD,
+				 .rawPPGWhiteWhitePD:
+				value				= data.subdata(in: Range(1...4)).leInt
+			#endif
 
 			case .rawPPGProximity:
-				value		= data.subdata(in: Range(1...4)).leInt
+				value				= data.subdata(in: Range(1...4)).leInt
 				
 			case .steps:
 				epoch				= data.subdata(in: Range(1...4)).leInt
@@ -305,6 +296,9 @@ import Foundation
 		let values = try decoder.container(keyedBy: CodingKeys.self)
 		type = try values.decode(packetType.self, forKey: .type)
 
+
+		raw_data				= try values.decode(Data.self, forKey: .raw_data)
+
 		switch (type) {
 		case .activity:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
@@ -323,21 +317,40 @@ import Foundation
 			epoch				= try values.decode(Int.self, forKey: .epoch)
 			end_epoch			= try values.decode(Int.self, forKey: .end_epoch)
 			
+		case .rawAccelXADC,
+			 .rawAccelYADC,
+			 .rawAccelZADC:
+			value				= try values.decode(Int.self, forKey: .value)
+
+		case .rawCompressedAccelXADC,
+			 .rawCompressedAccelYADC,
+			 .rawCompressedAccelZADC:
+			value				= try values.decode(Int.self, forKey: .value)
+
+		#if ETHOS || UNIVERSAL
+		case .rawGyroXADC,
+			 .rawGyroYADC,
+			 .rawGyroZADC:
+			value				= try values.decode(Int.self, forKey: .value)
+
+		case .rawCompressedGyroXADC,
+			 .rawCompressedGyroYADC,
+			 .rawCompressedGyroZADC:
+			value				= try values.decode(Int.self, forKey: .value)
+		#endif
+
 		case .rawPPGCompressedGreen,
 			 .rawPPGCompressedIR,
 			 .rawPPGCompressedRed:
 			value				= try values.decode(Int.self, forKey: .value)
-			raw_data			= try values.decode(Data.self, forKey: .raw_data)
 
 		#if ETHOS || UNIVERSAL
 		case .rawPPGCompressedWhiteIRRPD,
 			 .rawPPGCompressedWhiteWhitePD:
 			value				= try values.decode(Int.self, forKey: .value)
-			raw_data			= try values.decode(Data.self, forKey: .raw_data)
 		#endif
 
-		case .diagnostic:
-			raw_data			= try values.decode(Data.self, forKey: .raw_data)
+		case .diagnostic:		break // use raw_data
 			
 		case .rawPPGFifoCount,
 			 .rawAccelFifoCount:
@@ -348,48 +361,17 @@ import Foundation
 			epoch				= try values.decode(Int.self, forKey: .epoch)
 			value				= try values.decode(Int.self, forKey: .value)
 			
-		case .rawAccel:
-			x					= try values.decode(Float.self, forKey: .x)
-			y					= try values.decode(Float.self, forKey: .y)
-			z					= try values.decode(Float.self, forKey: .z)
-			
-		case .rawPPGRed:
+		case .rawPPGRed,
+			 .rawPPGIR,
+			 .rawPPGGreen,
+			 .rawPPGProximity:
 			value				= try values.decode(Int.self, forKey: .value)
 
-		case .rawPPGIR:
-			value				= try values.decode(Int.self, forKey: .value)
-
-		case .rawPPGProximity:
-			value				= try values.decode(Int.self, forKey: .value)
-
-		#if LIVOTAL
-		case .rawPPGGreen:
-			value				= try values.decode(Int.self, forKey: .value)
-		#endif
-			
 		#if ETHOS || UNIVERSAL
-		case .rawPPGGreenIRRPD:
+		case .rawPPGWhiteIRRPD,
+			 .rawPPGWhiteWhitePD:
 			value				= try values.decode(Int.self, forKey: .value)
-
-		case .rawPPGGreenWhitePD:
-			value				= try values.decode(Int.self, forKey: .value)
-
-		case .rawPPGWhiteIRRPD:
-			value				= try values.decode(Int.self, forKey: .value)
-
-		case .rawPPGWhiteWhitePD:
-			value				= try values.decode(Int.self, forKey: .value)
-			
-		case .rawGyroADC:
-			x_adc				= try values.decode(Int.self, forKey: .x_adc)
-			y_adc				= try values.decode(Int.self, forKey: .y_adc)
-			z_adc				= try values.decode(Int.self, forKey: .z_adc)
 		#endif
-
-		case .rawAccelADC:
-			x_adc				= try values.decode(Int.self, forKey: .x_adc)
-			y_adc				= try values.decode(Int.self, forKey: .y_adc)
-			z_adc				= try values.decode(Int.self, forKey: .z_adc)
 
 		case .ppg:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
@@ -441,6 +423,8 @@ import Foundation
 		var container = encoder.container(keyedBy: CodingKeys.self)
 		try container.encode(type.title, forKey: .type)
 		
+		try container.encode(raw_data, forKey: .raw_data)
+
 		switch (type) {
 		case .activity:
 			try container.encode(epoch, forKey: .epoch)
@@ -463,32 +447,46 @@ import Foundation
 			try container.encode(epoch, forKey: .epoch)
 			try container.encode(end_epoch, forKey: .end_epoch)
 			
-		case .diagnostic:
-			try container.encode(raw_data, forKey: .raw_data)
+		case .diagnostic:	break	// use raw_data
 			
+		case .rawAccelXADC,
+			 .rawAccelYADC,
+			 .rawAccelZADC:
+			try container.encode(value, forKey: .value)
+
+		case .rawCompressedAccelXADC,
+			 .rawCompressedAccelYADC,
+			 .rawCompressedAccelZADC:
+			try container.encode(value, forKey: .value)
+
+		#if ETHOS || UNIVERSAL
+		case .rawGyroXADC,
+			 .rawGyroYADC,
+			 .rawGyroZADC:
+			try container.encode(value, forKey: .value)
+
+		case .rawCompressedGyroXADC,
+			 .rawCompressedGyroYADC,
+			 .rawCompressedGyroZADC:
+			try container.encode(value, forKey: .value)
+		#endif
+
 		case .rawPPGCompressedGreen,
 			 .rawPPGCompressedIR,
 			 .rawPPGCompressedRed:
 			try container.encode(value, forKey: .value)
-			try container.encode(raw_data, forKey: .raw_data)
 
 		#if ETHOS || UNIVERSAL
 		case .rawPPGCompressedWhiteIRRPD,
 			 .rawPPGCompressedWhiteWhitePD:
 			try container.encode(value, forKey: .value)
-			try container.encode(raw_data, forKey: .raw_data)
 		#endif
 
 		case .rawPPGFifoCount,
 			 .rawAccelFifoCount:
 			try container.encode(value, forKey: .value)
 			try container.encode(elapsed_ms, forKey: .elapsed_ms)
-			
-		case .rawAccel:
-			try container.encode(x, forKey: .x)
-			try container.encode(y, forKey: .y)
-			try container.encode(z, forKey: .z)
-			
+						
 		case .rawPPGRed:
 			try container.encode(value, forKey: .value)
 
@@ -498,34 +496,16 @@ import Foundation
 		case .rawPPGProximity:
 			try container.encode(value, forKey: .value)
 
-		#if LIVOTAL
 		case .rawPPGGreen:
 			try container.encode(value, forKey: .value)
-		#endif
 
 		#if ETHOS || UNIVERSAL
-		case .rawPPGGreenIRRPD:
-			try container.encode(value, forKey: .value)
-
-		case .rawPPGGreenWhitePD:
-			try container.encode(value, forKey: .value)
-
 		case .rawPPGWhiteIRRPD:
 			try container.encode(value, forKey: .value)
 
 		case .rawPPGWhiteWhitePD:
 			try container.encode(value, forKey: .value)
-
-		case .rawGyroADC:
-			try container.encode(x_adc, forKey: .x_adc)
-			try container.encode(y_adc, forKey: .y_adc)
-			try container.encode(z_adc, forKey: .z_adc)
 		#endif
-
-		case .rawAccelADC:
-			try container.encode(x_adc, forKey: .x_adc)
-			try container.encode(y_adc, forKey: .y_adc)
-			try container.encode(z_adc, forKey: .z_adc)
 
 		case .ppg:
 			try container.encode(epoch, forKey: .epoch)
