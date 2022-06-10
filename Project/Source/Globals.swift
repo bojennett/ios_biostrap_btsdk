@@ -135,17 +135,17 @@ var gblLimitEthos	= false
 	case rawAccelXADC					= 0xc0
 	case rawAccelYADC					= 0xc1
 	case rawAccelZADC					= 0xc2
-	case rawCompressedAccelXADC			= 0xc3
-	case rawCompressedAccelYADC			= 0xc4
-	case rawCompressedAccelZADC			= 0xc5
+	case rawAccelCompressedXADC			= 0xc3
+	case rawAccelCompressedYADC			= 0xc4
+	case rawAccelCompressedZADC			= 0xc5
 	
 	#if ETHOS || UNIVERSAL
 	case rawGyroXADC					= 0xc8
 	case rawGyroYADC					= 0xc9
 	case rawGyroZADC					= 0xca
-	case rawCompressedGyroXADC			= 0xcb
-	case rawCompressedGyroYADC			= 0xcc
-	case rawCompressedGyroZADC			= 0xcd
+	case rawGyroCompressedXADC			= 0xcb
+	case rawGyroCompressedYADC			= 0xcc
+	case rawGyroCompressedZADC			= 0xcd
 	#endif
 
 	case rawPPGCompressedGreen			= 0xd3
@@ -192,17 +192,17 @@ var gblLimitEthos	= false
 		case "Raw Accel X ADC"						: self	= .rawAccelXADC
 		case "Raw Accel Y ADC"						: self	= .rawAccelYADC
 		case "Raw Accel Z ADC"						: self	= .rawAccelZADC
-		case "Raw Compressed Accel X ADC"			: self	= .rawCompressedAccelXADC
-		case "Raw Compressed Accel Y ADC"			: self	= .rawCompressedAccelYADC
-		case "Raw Compressed Accel Z ADC"			: self	= .rawCompressedAccelZADC
+		case "Raw Accel Compressed X ADC"			: self	= .rawAccelCompressedXADC
+		case "Raw Accel Compressed Y ADC"			: self	= .rawAccelCompressedYADC
+		case "Raw Accel Compressed Z ADC"			: self	= .rawAccelCompressedZADC
 
 		#if ETHOS || UNIVERSAL
 		case "Raw Gyro X ADC"						: self	= .rawGyroXADC
 		case "Raw Gyro Y ADC"						: self	= .rawGyroYADC
 		case "Raw Gyro Z ADC"						: self	= .rawGyroZADC
-		case "Raw Compressed Gyro X ADC"			: self	= .rawCompressedGyroXADC
-		case "Raw Compressed Gyro Y ADC"			: self	= .rawCompressedGyroYADC
-		case "Raw Compressed Gyro Z ADC"			: self	= .rawCompressedGyroZADC
+		case "Raw Gyro Compressed X ADC"			: self	= .rawGyroCompressedXADC
+		case "Raw Gyro Compressed Y ADC"			: self	= .rawGyroCompressedYADC
+		case "Raw Gyro Compressed Z ADC"			: self	= .rawGyroCompressedZADC
 		#endif
 
 		case "Raw PPG Compressed Green"				: self	= .rawPPGCompressedGreen
@@ -248,17 +248,17 @@ var gblLimitEthos	= false
 		case .rawAccelXADC							: return "Raw Accel X ADC"
 		case .rawAccelYADC							: return "Raw Accel Y ADC"
 		case .rawAccelZADC							: return "Raw Accel Z ADC"
-		case .rawCompressedAccelXADC				: return "Raw Compressed Accel X ADC"
-		case .rawCompressedAccelYADC				: return "Raw Compressed Accel Y ADC"
-		case .rawCompressedAccelZADC				: return "Raw Compressed Accel Z ADC"
+		case .rawAccelCompressedXADC				: return "Raw Accel Compressed X ADC"
+		case .rawAccelCompressedYADC				: return "Raw Accel Compressed Y ADC"
+		case .rawAccelCompressedZADC				: return "Raw Accel Compressed Z ADC"
 
 		#if ETHOS || UNIVERSAL
 		case .rawGyroXADC							: return "Raw Gyro X ADC"
 		case .rawGyroYADC							: return "Raw Gyro Y ADC"
 		case .rawGyroZADC							: return "Raw Gyro Z ADC"
-		case .rawCompressedGyroXADC					: return "Raw Compressed Gyro X ADC"
-		case .rawCompressedGyroYADC					: return "Raw Compressed Gyro Y ADC"
-		case .rawCompressedGyroZADC					: return "Raw Compressed Gyro Z ADC"
+		case .rawGyroCompressedXADC					: return "Raw Gyro Compressed X ADC"
+		case .rawGyroCompressedYADC					: return "Raw Gyro Compressed Y ADC"
+		case .rawGyroCompressedZADC					: return "Raw Gyro Compressed Z ADC"
 		#endif
 
 		case .rawPPGCompressedGreen					: return "Raw PPG Compressed Green"
@@ -303,17 +303,17 @@ var gblLimitEthos	= false
 		case .rawAccelXADC							: return 3
 		case .rawAccelYADC							: return 3
 		case .rawAccelZADC							: return 3
-		case .rawCompressedAccelXADC				: return 0	// Done by calculation
-		case .rawCompressedAccelYADC				: return 0	// Done by calculation
-		case .rawCompressedAccelZADC				: return 0	// Done by calculation
+		case .rawAccelCompressedXADC				: return 0	// Done by calculation
+		case .rawAccelCompressedYADC				: return 0	// Done by calculation
+		case .rawAccelCompressedZADC				: return 0	// Done by calculation
 
 		#if ETHOS || UNIVERSAL
 		case .rawGyroXADC							: return 3
 		case .rawGyroYADC							: return 3
 		case .rawGyroZADC							: return 3
-		case .rawCompressedGyroXADC				: return 0	// Done by calculation
-		case .rawCompressedGyroYADC				: return 0	// Done by calculation
-		case .rawCompressedGyroZADC				: return 0	// Done by calculation
+		case .rawGyroCompressedXADC				: return 0	// Done by calculation
+		case .rawGyroCompressedYADC				: return 0	// Done by calculation
+		case .rawGyroCompressedZADC				: return 0	// Done by calculation
 		#endif
 
 		case .rawPPGCompressedGreen					: return 0	// Done by calculation

@@ -94,17 +94,17 @@ import Foundation
 		case .rawAccelXADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawAccelYADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawAccelZADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
-		case .rawCompressedAccelXADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
-		case .rawCompressedAccelYADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
-		case .rawCompressedAccelZADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawAccelCompressedXADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawAccelCompressedYADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawAccelCompressedZADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
 
 		#if ETHOS || UNIVERSAL
 		case .rawGyroXADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawGyroYADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawGyroZADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
-		case .rawCompressedGyroXADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
-		case .rawCompressedGyroYADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
-		case .rawCompressedGyroZADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawGyroCompressedXADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawGyroCompressedYADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
+		case .rawGyroCompressedZADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
 		#endif
 
 		case .rawPPGCompressedGreen,
@@ -219,9 +219,9 @@ import Foundation
 				 .rawAccelZADC:
 				value				= data.subdata(in: Range(1...2)).leInt16
 
-			case .rawCompressedAccelXADC,
-				 .rawCompressedAccelYADC,
-				 .rawCompressedAccelZADC: break // use raw_data
+			case .rawAccelCompressedXADC,
+				 .rawAccelCompressedYADC,
+				 .rawAccelCompressedZADC: break // use raw_data
 
 			#if ETHOS || UNIVERSAL
 			case .rawGyroXADC,
@@ -229,9 +229,9 @@ import Foundation
 				 .rawGyroZADC:
 				value				= data.subdata(in: Range(1...2)).leInt16
 
-			case .rawCompressedGyroXADC,
-				 .rawCompressedGyroYADC,
-				 .rawCompressedGyroZADC: break // use raw_data
+			case .rawGyroCompressedXADC,
+				 .rawGyroCompressedYADC,
+				 .rawGyroCompressedZADC: break // use raw_data
 			#endif
 
 			#if ETHOS || UNIVERSAL
@@ -296,7 +296,6 @@ import Foundation
 		let values = try decoder.container(keyedBy: CodingKeys.self)
 		type = try values.decode(packetType.self, forKey: .type)
 
-
 		raw_data				= try values.decode(Data.self, forKey: .raw_data)
 
 		switch (type) {
@@ -322,9 +321,9 @@ import Foundation
 			 .rawAccelZADC:
 			value				= try values.decode(Int.self, forKey: .value)
 
-		case .rawCompressedAccelXADC,
-			 .rawCompressedAccelYADC,
-			 .rawCompressedAccelZADC:
+		case .rawAccelCompressedXADC,
+			 .rawAccelCompressedYADC,
+			 .rawAccelCompressedZADC:
 			value				= try values.decode(Int.self, forKey: .value)
 
 		#if ETHOS || UNIVERSAL
@@ -333,9 +332,9 @@ import Foundation
 			 .rawGyroZADC:
 			value				= try values.decode(Int.self, forKey: .value)
 
-		case .rawCompressedGyroXADC,
-			 .rawCompressedGyroYADC,
-			 .rawCompressedGyroZADC:
+		case .rawGyroCompressedXADC,
+			 .rawGyroCompressedYADC,
+			 .rawGyroCompressedZADC:
 			value				= try values.decode(Int.self, forKey: .value)
 		#endif
 
@@ -454,9 +453,9 @@ import Foundation
 			 .rawAccelZADC:
 			try container.encode(value, forKey: .value)
 
-		case .rawCompressedAccelXADC,
-			 .rawCompressedAccelYADC,
-			 .rawCompressedAccelZADC:
+		case .rawAccelCompressedXADC,
+			 .rawAccelCompressedYADC,
+			 .rawAccelCompressedZADC:
 			try container.encode(value, forKey: .value)
 
 		#if ETHOS || UNIVERSAL
@@ -465,9 +464,9 @@ import Foundation
 			 .rawGyroZADC:
 			try container.encode(value, forKey: .value)
 
-		case .rawCompressedGyroXADC,
-			 .rawCompressedGyroYADC,
-			 .rawCompressedGyroZADC:
+		case .rawGyroCompressedXADC,
+			 .rawGyroCompressedYADC,
+			 .rawGyroCompressedZADC:
 			try container.encode(value, forKey: .value)
 		#endif
 

@@ -823,7 +823,53 @@ class customCharacteristic: Characteristic {
 				let sample			= Int(data[index + 6])
 				let packet			= biostrapDataPacket()
 				packet.type			= packetType
-				packet.raw_data			= data
+				packet.raw_data		= data
+
+				if (negative) {
+					packet.value	= firstSample - sample
+				}
+				else {
+					packet.value	= firstSample + sample
+				}
+				
+				packets.append(packet)
+				index = index + 1
+			}
+		}
+		
+		return (packets)
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	// Similar to PPG.  Differences:
+	//    * firstSample is 2 bytes and signed
+	//    * bitwiseSign is 2 bytes (total of 15 possible samples)
+	//
+	//--------------------------------------------------------------------------------
+	internal func mDecompressIMUPackets(_ data: Data) -> [biostrapDataPacket] {
+		var packets				= [biostrapDataPacket]()
+		if let packetType = packetType(rawValue: data[0]) {
+			let compressionCount	= Int(data[1])
+			let bitwiseSign			= data.subdata(in: Range(2...3)).leUInt16
+			
+			let firstSample			= data.subdata(in: Range(4...5)).leInt16
+			let packet				= biostrapDataPacket()
+			packet.value			= firstSample
+			packet.raw_data			= data
+			packet.type				= packetType
+			
+			packets.append(packet)
+			
+			var index		= 0
+			while (index < compressionCount) {
+				let negative		= ((bitwiseSign & (0x01 << index)) != 0)
+				let sample			= Int(data[index + 6])
+				let packet			= biostrapDataPacket()
+				packet.type			= packetType
+				packet.raw_data		= data
 
 				if (negative) {
 					packet.value	= firstSample - sample
@@ -889,6 +935,34 @@ class customCharacteristic: Characteristic {
 				}
 			#endif
 				
+			case .rawAccelCompressedXADC,
+				 .rawAccelCompressedYADC,
+				 .rawAccelCompressedZADC:
+				let length = Int(data[index + 1]) + 1 + 1 + 2 + 2
+				if ((index + length) <= data.count) {
+					let packetData = data.subdata(in: Range(index...(index + length - 1)))
+					return (true, type, biostrapDataPacket(packetData))
+				}
+				else {
+					log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+					return (false, .unknown, biostrapDataPacket())
+				}
+				
+			#if ETHOS || UNIVERSAL
+			case .rawGyroCompressedXADC,
+				 .rawGyroCompressedYADC,
+				 .rawGyroCompressedZADC:
+				let length = Int(data[index + 1]) + 1 + 1 + 2 + 2
+				if ((index + length) <= data.count) {
+					let packetData = data.subdata(in: Range(index...(index + length - 1)))
+					return (true, type, biostrapDataPacket(packetData))
+				}
+				else {
+					log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+					return (false, .unknown, biostrapDataPacket())
+				}
+			#endif
+
 			case .unknown:
 				log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
 				return (false, type, biostrapDataPacket())
@@ -913,7 +987,7 @@ class customCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mParsePackets(_ data: Data) -> ([biostrapDataPacket]) {
-		//log?.v ("\(pID): Data: \(data.hexString)")
+		log?.v ("\(pID): Data: \(data.hexString)")
 		
 		var index = 0
 		var dataPackets = [biostrapDataPacket]()
@@ -940,6 +1014,24 @@ class customCharacteristic: Characteristic {
 					index = index + packet.raw_data.count
 					
 					let packets = mDecompressPPGPackets(packet.raw_data)
+					dataPackets.append(contentsOf: packets)
+				#endif
+
+				case .rawAccelCompressedXADC,
+					 .rawAccelCompressedYADC,
+					 .rawAccelCompressedZADC:
+					index = index + packet.raw_data.count
+					
+					let packets = mDecompressIMUPackets(packet.raw_data)
+					dataPackets.append(contentsOf: packets)
+
+				#if ETHOS || UNIVERSAL
+				case .rawGyroCompressedXADC,
+					 .rawGyroCompressedYADC,
+					 .rawGyroCompressedZADC:
+					index = index + packet.raw_data.count
+					
+					let packets = mDecompressIMUPackets(packet.raw_data)
 					dataPackets.append(contentsOf: packets)
 				#endif
 

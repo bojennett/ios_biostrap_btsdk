@@ -228,7 +228,6 @@
 		3BF807DC27A1B08900595493 /* Livotal */ = {
 			isa = PBXGroup;
 			children = (
-				3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */,
 				3B29C546264C3D59006BC11B /* nordicDFUCharacteristic.swift */,
 			);
 			path = Livotal;
@@ -261,6 +260,7 @@
 				3BF8081B27A4512700595493 /* universalBTSDK.swift */,
 				3BF809BA27BD787300595493 /* ethosBTSDK.swift */,
 				3BF8082927A4570000595493 /* livotalBTSDK.swift */,
+				3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */,
 			);
 			path = "Top Level";
 			sourceTree = "<group>";
@@ -657,7 +657,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 7;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -726,7 +726,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
