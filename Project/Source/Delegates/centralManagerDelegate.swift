@@ -235,6 +235,18 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) }
 							}
 							
+							device.startLiveSyncComplete		= { id, successful in
+								DispatchQueue.main.async { self.startLiveSyncComplete?(id, successful) }
+							}
+							
+							device.stopLiveSyncComplete			= { id, successful in
+								DispatchQueue.main.async { self.stopLiveSyncComplete?(id, successful) }
+							}
+
+							device.recalibratePPGComplete		= { id, successful in
+								DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) }
+							}
+
 							device.deviceChargingStatus			= { id, charging, on_charger, error in
 								DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) }
 							}

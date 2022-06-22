@@ -133,6 +133,12 @@ public class Device: NSObject {
 	var manufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
 	var manufacturingTestResult: ((_ id: String, _ valid: Bool, _ result: String)->())?
 	
+	#if ETHOS || UNIVERSAL
+	var startLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
+	var stopLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
+	var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
+	#endif
+
 	var deviceChargingStatus: ((_ id: String, _ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
 
 	var setSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType)->())?
@@ -746,6 +752,36 @@ public class Device: NSObject {
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 
+	#if ETHOS || UNIVERSAL
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func startLiveSync(_ id: String, configuration: liveSyncConfiguration) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.startLiveSync(configuration)
+		}
+		else { self.startLiveSyncComplete?(id, false) }
+	}
+	
+	func stopLiveSync(_ id: String) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.stopLiveSync()
+		}
+		else { self.stopLiveSyncComplete?(id, false) }
+	}
+	
+	func recalibratePPG(_ id: String) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.recalibratePPG()
+		}
+		else { self.recalibratePPGComplete?(id, false) }
+	}
+	#endif
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1009,7 +1045,10 @@ public class Device: NSObject {
 					mCustomCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.mID, successful) }
 					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.mID, successful) }
-					mCustomCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.mID, valid, result)}
+					mCustomCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.mID, valid, result) }
+					mCustomCharacteristic?.startLiveSyncComplete		= { successful in self.startLiveSyncComplete?(self.mID, successful) }
+					mCustomCharacteristic?.stopLiveSyncComplete			= { successful in self.stopLiveSyncComplete?(self.mID, successful) }
+					mCustomCharacteristic?.recalibratePPGComplete		= { successful in self.recalibratePPGComplete?(self.mID, successful) }
 					mCustomCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
 						if (charging) { self.chargingStatus	= "Charging" }
 						else if (on_charger) { self.chargingStatus = "On Charger" }

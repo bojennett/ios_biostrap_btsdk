@@ -113,6 +113,12 @@ import iOSDFULibrary
 	@objc public var manufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var manufacturingTestResult: ((_ id: String, _ valid: Bool, _ result: String)->())?
 
+	#if ETHOS || UNIVERSAL
+	@objc public var startLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
+	@objc public var stopLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
+	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
+	#endif
+
 	@objc public var deviceChargingStatus: ((_ id: String, _ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
 
 	@objc public var setSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType)->())?
@@ -579,6 +585,36 @@ import iOSDFULibrary
 		if let device = mConnectedDevices?[id] { device.manufacturingTest(id) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
+
+	#if ETHOS || UNIVERSAL
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func startLiveSync(_ id: String, configuration: liveSyncConfiguration) {
+		log?.v ("\(id): \(configuration.commandString)")
+		
+		if let device = mConnectedDevices?[id] { device.startLiveSync(id, configuration: configuration) }
+		else { self.startLiveSyncComplete?(id, false) }
+	}
+	
+	@objc public func stopLiveSync(_ id: String) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.stopLiveSync(id) }
+		else { self.stopLiveSyncComplete?(id, false) }
+	}
+	
+	@objc public func recalibratePPG(_ id: String) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.recalibratePPG(id) }
+		else { self.recalibratePPGComplete?(id, false) }
+	}
+	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:

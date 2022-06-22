@@ -157,6 +157,10 @@ var gblLimitEthos	= false
     case rawPPGCompressedWhiteWhitePD   = 0xd8
     #endif
 
+	#if ETHOS || UNIVERSAL
+	case ppgCalibrationMarker			= 0xe0
+	#endif
+
 	case rawAccelFifoCount				= 0xe1
 	case rawPPGProximity				= 0xe2
 	case rawPPGGreen					= 0xe3
@@ -223,7 +227,11 @@ var gblLimitEthos	= false
 		case "Raw PPG White Sample IRR PD"			: self	= .rawPPGWhiteIRRPD
 		case "Raw PPG White Sample White PD"		: self	= .rawPPGWhiteWhitePD
 		#endif
-			
+	
+		#if ETHOS || UNIVERSAL
+		case "PPG Calibration Marker"				: self	= .ppgCalibrationMarker
+		#endif
+
 		case "Milestone"							: self	= .milestone
 		case "Settings"								: self	= .settings
 		default: self	= .unknown
@@ -279,7 +287,11 @@ var gblLimitEthos	= false
 		case .rawPPGWhiteIRRPD						: return "Raw PPG White Sample IRR PD"
 		case .rawPPGWhiteWhitePD					: return "Raw PPG White Sample White PD"
 		#endif
-			
+
+		#if ETHOS || UNIVERSAL
+		case .ppgCalibrationMarker					: return "PPG Calibration Marker"
+		#endif
+
 		case .milestone								: return "Milestone"
 		case .settings								: return "Settings"
 		}
@@ -333,6 +345,10 @@ var gblLimitEthos	= false
 		#if ETHOS || UNIVERSAL
 		case .rawPPGWhiteIRRPD						: return 5
 		case .rawPPGWhiteWhitePD					: return 5
+		#endif
+			
+		#if ETHOS || UNIVERSAL
+		case .ppgCalibrationMarker					: return 5
 		#endif
 			
 		case .milestone								: return 7

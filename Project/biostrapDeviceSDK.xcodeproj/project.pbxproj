@@ -17,6 +17,8 @@
 		3B29C56D264C7263006BC11B /* disStringCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */; };
 		3B29C59D264C9E72006BC11B /* nordicDFU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C59C264C9E72006BC11B /* nordicDFU.swift */; };
 		3B49444028388D300074F569 /* ppgAlgorithmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */; };
+		3B5BFCDA285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */; };
+		3B5BFCDB285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */; };
 		3B98B4B72787B4960081DA14 /* IntExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B98B4B62787B4960081DA14 /* IntExtentions.swift */; };
 		3BD01F90261539630014CEF0 /* biostrapDeviceSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F8F261539630014CEF0 /* biostrapDeviceSDK.swift */; };
 		3BD01F9326153AC50014CEF0 /* centralManagerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9226153AC50014CEF0 /* centralManagerDelegate.swift */; };
@@ -52,11 +54,9 @@
 		3BF8081C27A4512700595493 /* universalBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8081B27A4512700595493 /* universalBTSDK.swift */; };
 		3BF8082327A452A200595493 /* CoreBluetoothExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8082227A452A200595493 /* CoreBluetoothExtensions.swift */; };
 		3BF8082B27A4571100595493 /* livotalBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8082927A4570000595493 /* livotalBTSDK.swift */; };
-		3BF8082C27A457C700595493 /* livotalBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8082927A4570000595493 /* livotalBTSDK.swift */; };
 		3BF8083127A4585900595493 /* CoreBluetoothExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8082227A452A200595493 /* CoreBluetoothExtensions.swift */; };
 		3BF8087F27A8B2C900595493 /* Pods_universalBTSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D3047CFC230344A0899B985 /* Pods_universalBTSDK.framework */; };
 		3BF8088027A8B2D500595493 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
-		3BF8099B27BD766D00595493 /* livotalBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8082927A4570000595493 /* livotalBTSDK.swift */; };
 		3BF8099C27BD766D00595493 /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9826153B280014CEF0 /* Globals.swift */; };
 		3BF8099D27BD766D00595493 /* customCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C556264C5B53006BC11B /* customCharacteristic.swift */; };
 		3BF8099E27BD766D00595493 /* nordicDFU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C59C264C9E72006BC11B /* nordicDFU.swift */; };
@@ -77,8 +77,6 @@
 		3BF809B727BD774200595493 /* ambiqOTARXCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807E627A201A500595493 /* ambiqOTARXCharacteristic.swift */; };
 		3BF809B827BD774400595493 /* ambiqOTATXCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807E827A201AD00595493 /* ambiqOTATXCharacteristic.swift */; };
 		3BF809B927BD774700595493 /* CrcCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807EC27A2057400595493 /* CrcCalculator.swift */; };
-		3BF809BB27BD787300595493 /* ethosBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF809BA27BD787300595493 /* ethosBTSDK.swift */; };
-		3BF809BC27BD787300595493 /* ethosBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF809BA27BD787300595493 /* ethosBTSDK.swift */; };
 		3BF809BD27BD787300595493 /* ethosBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF809BA27BD787300595493 /* ethosBTSDK.swift */; };
 		3BFAC25A2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */; };
 		3BFAC25B2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */; };
@@ -94,6 +92,7 @@
 		3B29C566264C7033006BC11B /* heartRateCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = heartRateCharacteristic.swift; sourceTree = "<group>"; };
 		3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = disStringCharacteristic.swift; sourceTree = "<group>"; };
 		3B29C59C264C9E72006BC11B /* nordicDFU.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nordicDFU.swift; sourceTree = "<group>"; };
+		3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = liveSyncConfiguration.swift; sourceTree = "<group>"; };
 		3B98B4B62787B4960081DA14 /* IntExtentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtentions.swift; sourceTree = "<group>"; };
 		3BD01F832615358B0014CEF0 /* livotalBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = livotalBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BD01F8F261539630014CEF0 /* biostrapDeviceSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = biostrapDeviceSDK.swift; sourceTree = "<group>"; };
@@ -212,6 +211,7 @@
 				3BD01F9526153AF20014CEF0 /* Logging.swift */,
 				3BD01FAD261632830014CEF0 /* BluetoothIDs.swift */,
 				3BD01F9826153B280014CEF0 /* Globals.swift */,
+				3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */,
 				3BD01F9C26153EF10014CEF0 /* Device.swift */,
 				3B29C59C264C9E72006BC11B /* nordicDFU.swift */,
 				3BF3FEC226C58BCF005AF135 /* biostrapDataPacket.swift */,
@@ -514,7 +514,6 @@
 				3B29C56D264C7263006BC11B /* disStringCharacteristic.swift in Sources */,
 				3BF3FEE326D81A40005AF135 /* ppgAlgorithmConfiguration.swift in Sources */,
 				3BD01F9D26153EF10014CEF0 /* Device.swift in Sources */,
-				3BF809BB27BD787300595493 /* ethosBTSDK.swift in Sources */,
 				3B98B4B72787B4960081DA14 /* IntExtentions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -524,10 +523,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				3BF807C227A1AFA000595493 /* Globals.swift in Sources */,
+				3B5BFCDB285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */,
 				3BF807EE27A2057700595493 /* CrcCalculator.swift in Sources */,
 				3BF807C327A1AFA000595493 /* customCharacteristic.swift in Sources */,
 				3BF8081C27A4512700595493 /* universalBTSDK.swift in Sources */,
-				3BF8082C27A457C700595493 /* livotalBTSDK.swift in Sources */,
 				3BF807C427A1AFA000595493 /* nordicDFU.swift in Sources */,
 				3BF807C527A1AFA000595493 /* Characteristic.swift in Sources */,
 				3BF807C627A1AFA000595493 /* biostrapDeviceSDK.swift in Sources */,
@@ -538,7 +537,6 @@
 				3BF807CB27A1AFA000595493 /* nordicDFUCharacteristic.swift in Sources */,
 				3BF807CC27A1AFA000595493 /* DataExtensions.swift in Sources */,
 				3BF807CD27A1AFA000595493 /* peripheralDelegate.swift in Sources */,
-				3BF809BC27BD787300595493 /* ethosBTSDK.swift in Sources */,
 				3BF807CE27A1AFA000595493 /* centralManagerDelegate.swift in Sources */,
 				3BF807CF27A1AFA000595493 /* batteryLevelCharacteristic.swift in Sources */,
 				3BFAC25C2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */,
@@ -557,7 +555,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3BF809B927BD774700595493 /* CrcCalculator.swift in Sources */,
-				3BF8099B27BD766D00595493 /* livotalBTSDK.swift in Sources */,
 				3BF809B827BD774400595493 /* ambiqOTATXCharacteristic.swift in Sources */,
 				3BF8099C27BD766D00595493 /* Globals.swift in Sources */,
 				3BF8099D27BD766D00595493 /* customCharacteristic.swift in Sources */,
@@ -566,6 +563,7 @@
 				3BF809A027BD766D00595493 /* CoreBluetoothExtensions.swift in Sources */,
 				3BF809A127BD766D00595493 /* biostrapDeviceSDK.swift in Sources */,
 				3BF809B727BD774200595493 /* ambiqOTARXCharacteristic.swift in Sources */,
+				3B5BFCDA285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */,
 				3BF809A327BD766D00595493 /* Logging.swift in Sources */,
 				3BF809A427BD766D00595493 /* biostrapDataPacket.swift in Sources */,
 				3BF809A527BD766D00595493 /* BluetoothIDs.swift in Sources */,
@@ -657,7 +655,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -726,7 +724,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;

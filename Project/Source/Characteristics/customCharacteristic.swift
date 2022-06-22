@@ -27,6 +27,11 @@ class customCharacteristic: Characteristic {
 		case delDeviceParam		= 0x72
 		case setSessionParam	= 0x80
 		case getSessionParam	= 0x81
+		#if ETHOS || UNIVERSAL
+		case recalibratePPG		= 0xed
+		case startLiveSync		= 0xee
+		case stopLiveSync		= 0xef
+		#endif
 		case manufacturingTest	= 0xf7
 		case allowPPG			= 0xf8
 		case wornCheck			= 0xf9
@@ -98,6 +103,12 @@ class customCharacteristic: Characteristic {
 	
 	var manufacturingTestComplete: ((_ successful: Bool)->())?
 	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
+	
+	#if ETHOS || UNIVERSAL
+	var startLiveSyncComplete: ((_ successful: Bool)->())?
+	var stopLiveSyncComplete: ((_ successful: Bool)->())?
+	var recalibratePPGComplete: ((_ successful: Bool)->())?
+	#endif
 	
 	var deviceChargingStatus: ((_ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
 
@@ -754,6 +765,51 @@ class customCharacteristic: Characteristic {
 		else { self.manufacturingTestComplete?(false) }
 	}
 	
+	#if ETHOS || UNIVERSAL
+	//--------------------------------------------------------------------------------
+	// Function Name: Live Sync start and stop
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func startLiveSync(_ configuration: liveSyncConfiguration) {
+		log?.v("\(configuration.commandString) -> \(String(format: "0x%02X", configuration.commandByte))")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.startLiveSync.rawValue)
+			data.append(configuration.commandByte)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.startLiveSyncComplete?(false) }
+	}
+	
+	func stopLiveSync() {
+		log?.v("")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.stopLiveSync.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.stopLiveSyncComplete?(false) }
+	}
+	
+	func recalibratePPG() {
+		log?.v("")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.recalibratePPG.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.recalibratePPGComplete?(false) }
+
+	}
+	#endif
+	
+	
 	//--------------------------------------------------------------------------------
 	// Function Name: Validate CRC
 	//--------------------------------------------------------------------------------
@@ -812,18 +868,20 @@ class customCharacteristic: Characteristic {
 			let firstSample			= (Int(data[3]) << 0) | (Int(data[4]) << 8) | (Int(data[5]) << 16)
 			let packet				= biostrapDataPacket()
 			packet.value			= firstSample
-			packet.raw_data			= data
 			packet.type				= packetType
-			
+			packet.raw_data			= data
+			packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
+
 			packets.append(packet)
 			
 			var index		= 0
 			while (index < compressionCount) {
-				let negative		= ((bitwiseSign & (0x01 << index)) != 0)
-				let sample			= Int(data[index + 6])
-				let packet			= biostrapDataPacket()
-				packet.type			= packetType
-				packet.raw_data		= data
+				let negative			= ((bitwiseSign & (0x01 << index)) != 0)
+				let sample				= Int(data[index + 6])
+				let packet				= biostrapDataPacket()
+				packet.type				= packetType
+				packet.raw_data			= data
+				packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
 
 				if (negative) {
 					packet.value	= firstSample - sample
@@ -859,17 +917,19 @@ class customCharacteristic: Characteristic {
 			let packet				= biostrapDataPacket()
 			packet.value			= firstSample
 			packet.raw_data			= data
+			packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
 			packet.type				= packetType
 			
 			packets.append(packet)
 			
 			var index		= 0
 			while (index < compressionCount) {
-				let negative		= ((bitwiseSign & (0x01 << index)) != 0)
-				let sample			= Int(data[index + 6])
-				let packet			= biostrapDataPacket()
-				packet.type			= packetType
-				packet.raw_data		= data
+				let negative			= ((bitwiseSign & (0x01 << index)) != 0)
+				let sample				= Int(data[index + 6])
+				let packet				= biostrapDataPacket()
+				packet.type				= packetType
+				packet.raw_data			= data
+				packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
 
 				if (negative) {
 					packet.value	= firstSample - sample
@@ -987,7 +1047,7 @@ class customCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mParsePackets(_ data: Data) -> ([biostrapDataPacket]) {
-		log?.v ("\(pID): Data: \(data.hexString)")
+		//log?.v ("\(pID): Data: \(data.hexString)")
 		
 		var index = 0
 		var dataPackets = [biostrapDataPacket]()
@@ -1214,6 +1274,11 @@ class customCharacteristic: Characteristic {
 							}
 
 						case .manufacturingTest	: self.manufacturingTestComplete?(successful)
+						#if ETHOS || UNIVERSAL
+						case .startLiveSync		: self.startLiveSyncComplete?(successful)
+						case .stopLiveSync		: self.stopLiveSyncComplete?(successful)
+						case .recalibratePPG	: self.recalibratePPGComplete?(successful)
+						#endif
 						case .allowPPG			: self.allowPPGComplete?(successful)
 						case .wornCheck			:
 							if (data.count == 8) {
@@ -1248,7 +1313,7 @@ class customCharacteristic: Characteristic {
 			case .dataPacket:
 				if (data.count > 3) {	// Accounts for header byte and sequence number
 					//log?.v ("\(data.subdata(in: Range(0...7)).hexString)")
-					log?.v ("\(data.hexString)")
+					//log?.v ("\(data.hexString)")
 					let sequence_number = data.subdata(in: Range(1...2)).leUInt16
 					if (sequence_number == mExpectedSequenceNumber) {
 						//log?.v ("Sequence Number Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")

@@ -9,11 +9,10 @@ import Foundation
 
 @objc public class ethosBTSDK: biostrapDeviceSDK {
 	
-	#if UNIVERSAL || ETHOS
 	@objc public override init() {
 		super.init()
 		
 		gblLimitEthos = true
 	}
-	#endif
+	
 }

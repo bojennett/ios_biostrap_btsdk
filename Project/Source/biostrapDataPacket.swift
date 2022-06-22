@@ -34,6 +34,7 @@ import Foundation
 	public var tag				: String		= ""
 	public var settings_value	: Float			= 0.0
 	public var raw_data			: Data			= Data()
+	public var raw_data_string	: String		= ""
 	
 	//--------------------------------------------------------------------------------
 	//
@@ -67,6 +68,7 @@ import Foundation
 		case settings_type
 		case settings_value
 		case raw_data
+		case raw_data_string
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -120,7 +122,11 @@ import Foundation
 		case .rawPPGWhiteIRRPD,
 			 .rawPPGWhiteWhitePD			: return ("\(raw_data.hexString),\(type.title),\(value)")
 		#endif
-			
+
+		#if ETHOS || UNIVERSAL
+		case .ppgCalibrationMarker			: return ("\(raw_data.hexString),\(type.title),\(epoch)")
+		#endif
+
 		case .ppg							:
 			let root	= "\(raw_data.hexString),\(type.title),\(epoch)"
 			let hr		= "\(root),HR,\(hr_valid),\(hr_result),\(hr_uncertainty)"
@@ -173,7 +179,8 @@ import Foundation
 		if let thisType = packetType(rawValue: data[0]) {
 			type = thisType
 
-			raw_data		= data	// App has to parse
+			raw_data		= data
+			raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
 
 			switch (type) {
 			case .activity:
@@ -240,6 +247,11 @@ import Foundation
 				value				= data.subdata(in: Range(1...4)).leInt
 			#endif
 
+			#if ETHOS || UNIVERSAL
+			case .ppgCalibrationMarker:
+				epoch				= data.subdata(in: Range(1...4)).leInt
+			#endif
+
 			case .rawPPGProximity:
 				value				= data.subdata(in: Range(1...4)).leInt
 				
@@ -297,6 +309,7 @@ import Foundation
 		type = try values.decode(packetType.self, forKey: .type)
 
 		raw_data				= try values.decode(Data.self, forKey: .raw_data)
+		raw_data_string			= try values.decode(String.self, forKey: .raw_data_string)
 
 		switch (type) {
 		case .activity:
@@ -372,6 +385,11 @@ import Foundation
 			value				= try values.decode(Int.self, forKey: .value)
 		#endif
 
+		#if ETHOS || UNIVERSAL
+		case .ppgCalibrationMarker:
+			epoch				= try values.decode(Int.self, forKey: .epoch)
+		#endif
+
 		case .ppg:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
 			hr_valid			= try values.decode(Bool.self, forKey: .hr_valid)
@@ -423,6 +441,7 @@ import Foundation
 		try container.encode(type.title, forKey: .type)
 		
 		try container.encode(raw_data, forKey: .raw_data)
+		try container.encode(raw_data_string, forKey: .raw_data_string)
 
 		switch (type) {
 		case .activity:
@@ -504,6 +523,11 @@ import Foundation
 
 		case .rawPPGWhiteWhitePD:
 			try container.encode(value, forKey: .value)
+		#endif
+
+		#if ETHOS || UNIVERSAL
+		case .ppgCalibrationMarker:
+			try container.encode(epoch, forKey: .epoch)
 		#endif
 
 		case .ppg:
