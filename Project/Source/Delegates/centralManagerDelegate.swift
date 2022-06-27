@@ -52,9 +52,9 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 				// Do nothing
 			}
 			else if let _ = self.mConnectedDevices?[peripheral.prettyID] {
-				log?.v ("\(peripheral.prettyID): didDiscover: Discovered a device that is in my connected list... remove that and mark as disconnected...")
-				self.mConnectedDevices?.removeValue(forKey: peripheral.prettyID)
-				self.disconnected?(peripheral.prettyID)
+				log?.e ("\(peripheral.prettyID): didDiscover: Discovered a device that is in my connected list.  Don't expect this...  Don't do anything, though")
+				//self.mConnectedDevices?.removeValue(forKey: peripheral.prettyID)
+				//self.disconnected?(peripheral.prettyID)
 			}
 			else {
 				// Local Name
