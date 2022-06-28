@@ -298,6 +298,34 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@objc public func getCSVFromDataPackets(_ json: String) -> String {
+		do {
+			if let jsonData = json.data(using: .utf8) {
+				let packets	= try JSONDecoder().decode([biostrapDataPacket].self, from: jsonData)
+				
+				let csvString	= NSMutableString()
+				for packet in packets { csvString.append ("\(packet.csv)\n") }
+				let csvResult	= String(csvString)
+				return (csvResult)
+			}
+			else {
+				log?.e ("Cannot get data from json String")
+			}
+		}
+		catch {
+			log?.e ("\(error.localizedDescription)")
+		}
+
+		return ("")
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	@objc public func writeEpoch(_ id: String, newEpoch: Int) {
 		log?.v("\(id): \(newEpoch)")
 		
