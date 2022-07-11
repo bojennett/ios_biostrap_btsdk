@@ -13,7 +13,6 @@ import Foundation
 	public var epoch			: Int			= 0
 	public var end_epoch		: Int			= 0
 	public var worn				: Bool			= false
-	public var ppg_failed_code	: Int			= 0
 	public var elapsed_ms		: Int			= 0
 	public var seconds			: Int			= 0
 	public var value			: Int			= 0
@@ -35,6 +34,8 @@ import Foundation
 	public var settings_value	: Float			= 0.0
 	public var raw_data			: Data			= Data()
 	public var raw_data_string	: String		= ""
+	public var diagnostic_type	: diagnosticType	= .unknown
+	public var ppg_failed_type	: ppgFailedType		= .unknown
 	
 	//--------------------------------------------------------------------------------
 	//
@@ -46,7 +47,6 @@ import Foundation
 		case epoch
 		case end_epoch
 		case worn
-		case ppg_failed_code
 		case voltage
 		case elapsed_ms
 		case seconds
@@ -69,6 +69,8 @@ import Foundation
 		case settings_value
 		case raw_data
 		case raw_data_string
+		case diagnostic_type
+		case ppg_failed_type
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -83,7 +85,7 @@ import Foundation
 		case .activity						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(seconds),\(value)")
 		case .temp							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(temperature)")
 		case .worn							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(worn)")
-		case .ppg_failed					: return ("\(raw_data.hexString),\(type.title),\(epoch),\(ppg_failed_code)")
+		case .ppg_failed					: return ("\(raw_data.hexString),\(type.title),\(epoch),\(ppg_failed_type.title)")
 		case .battery						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(value),\(voltage)")
 		case .sleep							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(end_epoch)")
 		case .rawPPGFifoCount,
@@ -137,7 +139,7 @@ import Foundation
 			
 		case .unknown						: return ("\(raw_data.hexString),\(type.title)")
 		case .steps							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(value)")
-		case .diagnostic					: return ("\(raw_data.hexString),\(type.title)")
+		case .diagnostic					: return ("\(raw_data.hexString),\(type.title),\(diagnostic_type.title)")
 		case .milestone						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(tag)")
 		case .settings						: return ("\(raw_data.hexString),\(type.title),\(settings_type.title),\(settings_value)")
 		}
@@ -200,7 +202,12 @@ import Foundation
 				epoch		= data.subdata(in: Range(1...4)).leInt
 				end_epoch	= data.subdata(in: Range(5...8)).leInt
 				
-			case .diagnostic:	break // use raw_data
+			case .diagnostic:
+				if (raw_data.count >= 2) {
+					if let test = diagnosticType(rawValue: raw_data[2]) { diagnostic_type = test }
+					else { diagnostic_type = .unknown }
+				}
+				else { diagnostic_type = .unknown }
 				
 			case .rawPPGFifoCount,
 				 .rawAccelFifoCount:
@@ -276,7 +283,8 @@ import Foundation
 
 			case .ppg_failed:
 				epoch				= data.subdata(in: Range(1...4)).leInt
-				ppg_failed_code		= Int(data[5])
+				if let test = ppgFailedType(rawValue: raw_data[5]) { ppg_failed_type = test }
+				else { ppg_failed_type = .unknown }
 
 			case .battery:
 				epoch				= data.subdata(in: Range(1...4)).leInt
@@ -362,7 +370,8 @@ import Foundation
 			value				= try values.decode(Int.self, forKey: .value)
 		#endif
 
-		case .diagnostic:		break // use raw_data
+		case .diagnostic:
+			diagnostic_type		= try values.decode(diagnosticType.self, forKey: .diagnostic_type)
 			
 		case .rawPPGFifoCount,
 			 .rawAccelFifoCount:
@@ -407,7 +416,7 @@ import Foundation
 			
 		case .ppg_failed:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
-			ppg_failed_code		= try values.decode(Int.self, forKey: .ppg_failed_code)
+			ppg_failed_type		= try values.decode(ppgFailedType.self, forKey: .ppg_failed_type)
 			
 		case .battery:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
@@ -465,8 +474,9 @@ import Foundation
 			try container.encode(epoch, forKey: .epoch)
 			try container.encode(end_epoch, forKey: .end_epoch)
 			
-		case .diagnostic:	break	// use raw_data
-			
+		case .diagnostic:
+			try container.encode(diagnostic_type.title, forKey: .diagnostic_type)
+
 		case .rawAccelXADC,
 			 .rawAccelYADC,
 			 .rawAccelZADC:
@@ -547,8 +557,8 @@ import Foundation
 			
 		case .ppg_failed:
 			try container.encode(epoch, forKey: .epoch)
-			try container.encode(ppg_failed_code, forKey: .ppg_failed_code)
-			
+			try container.encode(ppg_failed_type.title, forKey: .ppg_failed_type)
+
 		case .battery:
 			try container.encode(epoch, forKey: .epoch)
 			try container.encode(value, forKey: .value)

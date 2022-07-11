@@ -120,6 +120,98 @@ var gblLimitEthos	= false
 //
 //
 //--------------------------------------------------------------------------------
+@objc public enum diagnosticType: UInt8, Codable {
+	case sleep				= 0x00		// Packets related to sleep
+	case ppgBroken			= 0x01		// The PPG subsystem is broken
+	case pmicStatus			= 0x02		// Status register of the PMIC
+	case algorithm			= 0x03		// Algorithm library generated
+	case rotation			= 0x04		// Got a rotation callback
+	case pmicWatchdog		= 0x05		// The PMIC watchdog causes a change in charging status
+	case unknown			= 0xff		// Unknown
+	
+	public var title: String {
+		switch (self) {
+		case .sleep				: return ("Sleep")
+		case .ppgBroken			: return ("PPG Broken")
+		case .pmicStatus		: return ("PMIC Status")
+		case .algorithm			: return ("Algorithm")
+		case .rotation			: return ("Rotation")
+		case .pmicWatchdog		: return ("PMIC Watchdog")
+		case .unknown			: return ("Unknown")
+		}
+	}
+	
+	public init(from decoder: Decoder) throws {
+		let container = try decoder.singleValueContainer()
+		let code = try? container.decode(String.self)
+		switch code {
+		case "Sleep"			: self = .sleep
+		case "PPG Broken"		: self = .ppgBroken
+		case "PMIC Status"		: self = .pmicStatus
+		case "Algorithm"		: self = .algorithm
+		case "Rotation"			: self = .rotation
+		case "PMIC Watchdog"	: self = .pmicWatchdog
+		default					: self = .unknown
+		}
+	}
+}
+
+//--------------------------------------------------------------------------------
+//
+//
+//
+//--------------------------------------------------------------------------------
+@objc public enum ppgFailedType: UInt8, Codable {
+	case worn				= 0x00
+	case start				= 0x01
+	case interrupt			= 0x02
+	case overflow			= 0x03
+	case fifoRead			= 0x04
+	case alreadyRunning		= 0x05
+	case lowBattery			= 0x06
+	case userDisallowed		= 0x07
+	case timedNotWorn		= 0x08
+	case unknown			= 0xff
+	
+	public var title: String {
+		switch (self) {
+		case .worn				: return ("Worn")
+		case .start				: return ("Start")
+		case .interrupt			: return ("Interrupt")
+		case .overflow			: return ("Overflow")
+		case .fifoRead			: return ("FIFO Read")
+		case .alreadyRunning	: return ("Already Running")
+		case .lowBattery		: return ("Low Battery")
+		case .userDisallowed	: return ("User Disallowed")
+		case .timedNotWorn		: return ("Timed Not Worn")
+		case .unknown			: return ("Unknown")
+		}
+	}
+	
+	public init(from decoder: Decoder) throws {
+		let container = try decoder.singleValueContainer()
+		let code = try? container.decode(String.self)
+		switch code {
+		case "Worn"				: self = .worn
+		case "Start"			: self = .start
+		case "Interrupt"		: self = .interrupt
+		case "Overflow"			: self = .overflow
+		case "FIFO Read"		: self = .fifoRead
+		case "Already Running"	: self = .alreadyRunning
+		case "Low Battery"		: self = .lowBattery
+		case "User Disallowed"	: self = .userDisallowed
+		case "Timed Not Worn"	: self = .timedNotWorn
+		default					: self = .unknown
+		}
+	}
+}
+
+
+//--------------------------------------------------------------------------------
+//
+//
+//
+//--------------------------------------------------------------------------------
 @objc public enum packetType: UInt8, Codable {
 	case unknown						= 0x00
 	case steps							= 0x81
