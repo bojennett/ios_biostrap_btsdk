@@ -10,8 +10,10 @@ import CoreBluetooth
 
 var log				: Logging?
 
+#if UNIVERSAL || LIVOTAL
 var gblDFUName		= "DFU"
 var dfu				= nordicDFU()
+#endif
 
 var gblLimitLivotal	= false
 var gblLimitEthos	= false
@@ -240,6 +242,10 @@ var gblLimitEthos	= false
 	case rawGyroCompressedZADC			= 0xcd
 	#endif
 
+	#if ETHOS || UNIVERSAL
+	case ppgCalibrationDone				= 0xd0
+	#endif
+
 	case rawPPGCompressedGreen			= 0xd3
 	case rawPPGCompressedRed			= 0xd4
 	case rawPPGCompressedIR				= 0xd5
@@ -250,7 +256,7 @@ var gblLimitEthos	= false
     #endif
 
 	#if ETHOS || UNIVERSAL
-	case ppgCalibrationMarker			= 0xe0
+	case ppgCalibrationStart			= 0xe0
 	#endif
 
 	case rawAccelFifoCount				= 0xe1
@@ -301,6 +307,10 @@ var gblLimitEthos	= false
 		case "Raw Gyro Compressed Z ADC"			: self	= .rawGyroCompressedZADC
 		#endif
 
+		#if ETHOS || UNIVERSAL
+		case "PPG Calibration Done"					: self	= .ppgCalibrationDone
+		#endif
+
 		case "Raw PPG Compressed Green"				: self	= .rawPPGCompressedGreen
 		case "Raw PPG Compressed Red"				: self	= .rawPPGCompressedRed
 		case "Raw PPG Compressed IR"				: self	= .rawPPGCompressedIR
@@ -321,7 +331,7 @@ var gblLimitEthos	= false
 		#endif
 	
 		#if ETHOS || UNIVERSAL
-		case "PPG Calibration Marker"				: self	= .ppgCalibrationMarker
+		case "PPG Calibration Start"				: self	= .ppgCalibrationStart
 		#endif
 
 		case "Milestone"							: self	= .milestone
@@ -361,6 +371,10 @@ var gblLimitEthos	= false
 		case .rawGyroCompressedZADC					: return "Raw Gyro Compressed Z ADC"
 		#endif
 
+		#if ETHOS || UNIVERSAL
+		case .ppgCalibrationDone					: return "PPG Calibration Done"
+		#endif
+
 		case .rawPPGCompressedGreen					: return "Raw PPG Compressed Green"
 		case .rawPPGCompressedRed					: return "Raw PPG Compressed Red"
 		case .rawPPGCompressedIR					: return "Raw PPG Compressed IR"
@@ -381,7 +395,7 @@ var gblLimitEthos	= false
 		#endif
 
 		#if ETHOS || UNIVERSAL
-		case .ppgCalibrationMarker					: return "PPG Calibration Marker"
+		case .ppgCalibrationStart					: return "PPG Calibration Start"
 		#endif
 
 		case .milestone								: return "Milestone"
@@ -415,9 +429,13 @@ var gblLimitEthos	= false
 		case .rawGyroXADC							: return 3
 		case .rawGyroYADC							: return 3
 		case .rawGyroZADC							: return 3
-		case .rawGyroCompressedXADC				: return 0	// Done by calculation
-		case .rawGyroCompressedYADC				: return 0	// Done by calculation
-		case .rawGyroCompressedZADC				: return 0	// Done by calculation
+		case .rawGyroCompressedXADC					: return 0	// Done by calculation
+		case .rawGyroCompressedYADC					: return 0	// Done by calculation
+		case .rawGyroCompressedZADC					: return 0	// Done by calculation
+		#endif
+
+		#if ETHOS || UNIVERSAL
+		case .ppgCalibrationDone					: return 10
 		#endif
 
 		case .rawPPGCompressedGreen					: return 0	// Done by calculation
@@ -440,7 +458,7 @@ var gblLimitEthos	= false
 		#endif
 			
 		#if ETHOS || UNIVERSAL
-		case .ppgCalibrationMarker					: return 5
+		case .ppgCalibrationStart					: return 5
 		#endif
 			
 		case .milestone								: return 7

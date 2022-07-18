@@ -8,35 +8,40 @@
 import Foundation
 
 @objc public class biostrapDataPacket: NSObject, Codable {
-	public var type				: packetType	= .unknown
-	public var settings_type	: settingsType	= .unknown
-	public var epoch			: Int			= 0
-	public var end_epoch		: Int			= 0
-	public var worn				: Bool			= false
-	public var elapsed_ms		: Int			= 0
-	public var seconds			: Int			= 0
-	public var value			: Int			= 0
-	public var voltage			: Int			= 0
-	public var temperature		: Float			= 0.0
-	public var hr_valid			: Bool			= false
-	public var hr_result		: Float			= 0.0
-	public var hr_uncertainty	: Float			= 0.0
-	public var hrv_valid		: Bool			= false
-	public var hrv_result		: Float			= 0.0
-	public var hrv_uncertainty	: Float			= 0.0
-	public var rr_valid			: Bool			= false
-	public var rr_result		: Float			= 0.0
-	public var rr_uncertainty	: Float			= 0.0
-	public var spo2_valid		: Bool			= false
-	public var spo2_result		: Float			= 0.0
-	public var spo2_uncertainty	: Float			= 0.0
-	public var tag				: String		= ""
-	public var settings_value	: Float			= 0.0
-	public var raw_data			: Data			= Data()
-	public var raw_data_string	: String		= ""
-	public var diagnostic_type	: diagnosticType	= .unknown
-	public var ppg_failed_type	: ppgFailedType		= .unknown
-	
+	public var type						: packetType	= .unknown
+	public var settings_type			: settingsType	= .unknown
+	public var epoch					: Int			= 0
+	public var end_epoch				: Int			= 0
+	public var worn						: Bool			= false
+	public var elapsed_ms				: Int			= 0
+	public var seconds					: Int			= 0
+	public var value					: Int			= 0
+	public var voltage					: Int			= 0
+	public var temperature				: Float			= 0.0
+	public var hr_valid					: Bool			= false
+	public var hr_result				: Float			= 0.0
+	public var hr_uncertainty			: Float			= 0.0
+	public var hrv_valid				: Bool			= false
+	public var hrv_result				: Float			= 0.0
+	public var hrv_uncertainty			: Float			= 0.0
+	public var rr_valid					: Bool			= false
+	public var rr_result				: Float			= 0.0
+	public var rr_uncertainty			: Float			= 0.0
+	public var spo2_valid				: Bool			= false
+	public var spo2_result				: Float			= 0.0
+	public var spo2_uncertainty			: Float			= 0.0
+	public var tag						: String		= ""
+	public var settings_value			: Float			= 0.0
+	public var raw_data					: Data			= Data()
+	public var raw_data_string			: String		= ""
+	public var diagnostic_type			: diagnosticType	= .unknown
+	public var ppg_failed_type			: ppgFailedType		= .unknown
+	public var green_led_current		: Int			= 0
+	public var red_led_current			: Int			= 0
+	public var ir_led_current			: Int			= 0
+	public var white_irr_led_current	: Int			= 0
+	public var white_white_led_current	: Int			= 0
+
 	//--------------------------------------------------------------------------------
 	//
 	// Used for JSON encode/decode
@@ -71,6 +76,11 @@ import Foundation
 		case raw_data_string
 		case diagnostic_type
 		case ppg_failed_type
+		case green_led_current
+		case red_led_current
+		case ir_led_current
+		case white_irr_led_current
+		case white_white_led_current
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -111,6 +121,10 @@ import Foundation
 		case .rawGyroCompressedZADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
 		#endif
 
+		#if ETHOS || UNIVERSAL
+		case .ppgCalibrationDone			: return ("\(raw_data.hexString),\(type.title),\(epoch),\(green_led_current),\(red_led_current),\(ir_led_current),\(white_irr_led_current),\(white_white_led_current)")
+		#endif
+
 		case .rawPPGCompressedGreen,
 			 .rawPPGCompressedIR,
 			 .rawPPGCompressedRed			: return ("\(raw_data.hexString),\(type.title),\(value)")
@@ -126,7 +140,7 @@ import Foundation
 		#endif
 
 		#if ETHOS || UNIVERSAL
-		case .ppgCalibrationMarker			: return ("\(raw_data.hexString),\(type.title),\(epoch)")
+		case .ppgCalibrationStart			: return ("\(raw_data.hexString),\(type.title),\(epoch)")
 		#endif
 
 		case .ppg							:
@@ -254,9 +268,18 @@ import Foundation
 				value				= data.subdata(in: Range(1...4)).leInt
 			#endif
 
+				
 			#if ETHOS || UNIVERSAL
-			case .ppgCalibrationMarker:
+			case .ppgCalibrationStart:
 				epoch				= data.subdata(in: Range(1...4)).leInt
+				
+			case .ppgCalibrationDone:
+				epoch					= data.subdata(in: Range(1...4)).leInt
+				green_led_current		= Int(data[5])
+				red_led_current			= Int(data[6])
+				ir_led_current			= Int(data[7])
+				white_irr_led_current	= Int(data[8])
+				white_white_led_current	= Int(data[9])
 			#endif
 
 			case .rawPPGProximity:
@@ -395,8 +418,16 @@ import Foundation
 		#endif
 
 		#if ETHOS || UNIVERSAL
-		case .ppgCalibrationMarker:
+		case .ppgCalibrationStart:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
+			
+		case .ppgCalibrationDone:
+			epoch					= try values.decode(Int.self, forKey: .epoch)
+			green_led_current		= try values.decode(Int.self, forKey: .green_led_current)
+			red_led_current			= try values.decode(Int.self, forKey: .red_led_current)
+			ir_led_current			= try values.decode(Int.self, forKey: .ir_led_current)
+			white_irr_led_current	= try values.decode(Int.self, forKey: .white_irr_led_current)
+			white_white_led_current	= try values.decode(Int.self, forKey: .white_white_led_current)
 		#endif
 
 		case .ppg:
@@ -536,8 +567,16 @@ import Foundation
 		#endif
 
 		#if ETHOS || UNIVERSAL
-		case .ppgCalibrationMarker:
+		case .ppgCalibrationStart:
 			try container.encode(epoch, forKey: .epoch)
+
+		case .ppgCalibrationDone:
+			try container.encode(epoch, forKey: .epoch)
+			try container.encode(green_led_current, forKey: .green_led_current)
+			try container.encode(red_led_current, forKey: .red_led_current)
+			try container.encode(ir_led_current, forKey: .ir_led_current)
+			try container.encode(white_irr_led_current, forKey: .white_irr_led_current)
+			try container.encode(white_white_led_current, forKey: .white_white_led_current)
 		#endif
 
 		case .ppg:

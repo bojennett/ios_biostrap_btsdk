@@ -5,6 +5,7 @@
 //  Created by Joseph A. Bennett on 5/12/21.
 //
 
+#if UNIVERSAL || LIVOTAL
 import Foundation
 import CoreBluetooth
 
@@ -158,3 +159,5 @@ class nordicDFUCharacteristic: Characteristic {
 	}
 
 }
+
+#endif

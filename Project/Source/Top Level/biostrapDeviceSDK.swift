@@ -7,7 +7,9 @@
 
 import Foundation
 import CoreBluetooth
+#if UNIVERSAL || LIVOTAL
 import iOSDFULibrary
+#endif
 
 @objc public class biostrapDeviceSDK: NSObject {
 	
@@ -192,10 +194,12 @@ import iOSDFULibrary
 			}
 		}
 		
+		#if UNIVERSAL || LIVOTAL
 		dfu.finished		= { id in DispatchQueue.main.async { self.updateFirmwareFinished?(id) } }
 		dfu.failed			= { id, code, message in DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) } }
 		dfu.started			= { id in DispatchQueue.main.async { self.updateFirmwareStarted?(id) } }
 		dfu.progress		= { id, percentage in DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) } }
+		#endif
 		
 		let backgroundQueue	= DispatchQueue.global(qos: DispatchQoS.QoSClass.background)
 		mCentralManager		= CBCentralManager(delegate: self, queue: backgroundQueue, options: nil)
