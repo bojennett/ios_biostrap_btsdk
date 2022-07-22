@@ -1006,6 +1006,9 @@ public class Device: NSObject {
 				#if UNIVERSAL || ETHOS
 				case .ethosCharacteristic:
 					mCustomCharacteristic	= customCharacteristic(peripheral, characteristic: characteristic)
+					#if UNIVERSAL
+					mCustomCharacteristic?.type	= .ethos
+					#endif
 					mCustomCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.mID, successful) }
 					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.mID, successful) }
 					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.mID, successful) }
@@ -1086,6 +1089,9 @@ public class Device: NSObject {
 				#if UNIVERSAL || LIVOTAL
 				case .livotalCharacteristic:
 					mCustomCharacteristic	= customCharacteristic(peripheral, characteristic: characteristic)
+					#if UNIVERSAL
+					mCustomCharacteristic?.type	= .livotal
+					#endif
 					mCustomCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.mID, successful) }
 					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.mID, successful) }
 					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.mID, successful) }

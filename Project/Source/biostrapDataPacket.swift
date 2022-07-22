@@ -123,6 +123,7 @@ import Foundation
 
 		#if ETHOS || UNIVERSAL
 		case .ppgCalibrationDone			: return ("\(raw_data.hexString),\(type.title),\(epoch),\(green_led_current),\(red_led_current),\(ir_led_current),\(white_irr_led_current),\(white_white_led_current)")
+		case .motionLevel					: return ("\(raw_data.hexString),\(type.title),\(value),\(elapsed_ms)")
 		#endif
 
 		case .rawPPGCompressedGreen,
@@ -280,6 +281,10 @@ import Foundation
 				ir_led_current			= Int(data[7])
 				white_irr_led_current	= Int(data[8])
 				white_white_led_current	= Int(data[9])
+				
+			case .motionLevel:
+				value					= Int(data[2])
+				elapsed_ms				= data.subdata(in: Range(2...5)).leInt
 			#endif
 
 			case .rawPPGProximity:
@@ -428,6 +433,10 @@ import Foundation
 			ir_led_current			= try values.decode(Int.self, forKey: .ir_led_current)
 			white_irr_led_current	= try values.decode(Int.self, forKey: .white_irr_led_current)
 			white_white_led_current	= try values.decode(Int.self, forKey: .white_white_led_current)
+			
+		case .motionLevel:
+			value				= try values.decode(Int.self, forKey: .value)
+			elapsed_ms			= try values.decode(Int.self, forKey: .elapsed_ms)
 		#endif
 
 		case .ppg:
@@ -577,6 +586,10 @@ import Foundation
 			try container.encode(ir_led_current, forKey: .ir_led_current)
 			try container.encode(white_irr_led_current, forKey: .white_irr_led_current)
 			try container.encode(white_white_led_current, forKey: .white_white_led_current)
+			
+		case .motionLevel:
+			try container.encode(value, forKey: .value)
+			try container.encode(elapsed_ms, forKey: .elapsed_ms)
 		#endif
 
 		case .ppg:

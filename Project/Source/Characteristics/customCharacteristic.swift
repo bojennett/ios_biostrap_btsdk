@@ -11,6 +11,10 @@ import zlib
 
 class customCharacteristic: Characteristic {
 	
+	#if UNIVERSAL
+	var type:	biostrapDeviceSDK.biostrapDeviceType	= .unknown
+	#endif
+	
 	// MARK: Enumerations
 	enum commands: UInt8 {
 		case writeEpoch			= 0x00
@@ -1428,6 +1432,7 @@ class customCharacteristic: Characteristic {
 				
 			case .manufacturingTest:
 				log?.v ("Data: \(data.hexString)")
+				#if LIVOTAL
 				let testResult = livotalManufacturingTestResult(data.subdata(in: Range(1...4)))
 				do {
 					let jsonData = try JSONEncoder().encode(testResult)
@@ -1443,6 +1448,67 @@ class customCharacteristic: Characteristic {
 					log?.e ("Result jsonData Failed")
 					self.manufacturingTestResult?(false, "")
 				}
+				#endif
+				
+				#if ETHOS
+				let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...4)))
+				do {
+					let jsonData = try JSONEncoder().encode(testResult)
+					if let jsonString = String(data: jsonData, encoding: .utf8) {
+						self.manufacturingTestResult?(true, jsonString)
+					}
+					else {
+						log?.e ("Result jsonString Failed")
+						self.manufacturingTestResult?(false, "")
+					}
+				}
+				catch {
+					log?.e ("Result jsonData Failed")
+					self.manufacturingTestResult?(false, "")
+				}
+				#endif
+				
+				#if UNIVERSAL
+				switch (type) {
+				case .livotal	:
+					let testResult = livotalManufacturingTestResult(data.subdata(in: Range(1...4)))
+					do {
+						let jsonData = try JSONEncoder().encode(testResult)
+						if let jsonString = String(data: jsonData, encoding: .utf8) {
+							self.manufacturingTestResult?(true, jsonString)
+						}
+						else {
+							log?.e ("Result jsonString Failed")
+							self.manufacturingTestResult?(false, "")
+						}
+					}
+					catch {
+						log?.e ("Result jsonData Failed")
+						self.manufacturingTestResult?(false, "")
+					}
+
+				case .ethos		:
+					let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...4)))
+					do {
+						let jsonData = try JSONEncoder().encode(testResult)
+						if let jsonString = String(data: jsonData, encoding: .utf8) {
+							self.manufacturingTestResult?(true, jsonString)
+						}
+						else {
+							log?.e ("Result jsonString Failed")
+							self.manufacturingTestResult?(false, "")
+						}
+					}
+					catch {
+						log?.e ("Result jsonData Failed")
+						self.manufacturingTestResult?(false, "")
+					}
+
+				case .alter		: break
+				case .unknown	: break
+				}
+				#endif
+				
 				
 			case .charging:
 				let on_charger	= (data[1] == 0x01)
