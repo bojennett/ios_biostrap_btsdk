@@ -26,7 +26,7 @@ import Foundation
 	case rawAccelCompressedYADC			= 0xc4
 	case rawAccelCompressedZADC			= 0xc5
 	
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS || ALTER
 	case rawGyroXADC					= 0xc8
 	case rawGyroYADC					= 0xc9
 	case rawGyroZADC					= 0xca
@@ -35,7 +35,7 @@ import Foundation
 	case rawGyroCompressedZADC			= 0xcd
 	#endif
 
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS
 	case ppgCalibrationDone				= 0xd0
 	case motionLevel					= 0xd1
 	#endif
@@ -44,12 +44,12 @@ import Foundation
 	case rawPPGCompressedRed			= 0xd4
 	case rawPPGCompressedIR				= 0xd5
 
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS
 	case rawPPGCompressedWhiteIRRPD     = 0xd7
 	case rawPPGCompressedWhiteWhitePD   = 0xd8
 	#endif
 
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS
 	case ppgCalibrationStart			= 0xe0
 	#endif
 
@@ -60,7 +60,7 @@ import Foundation
 	case rawPPGIR						= 0xe5
 	case rawPPGFifoCount				= 0xe6
 	
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS
 	case rawPPGWhiteIRRPD				= 0xe8
 	case rawPPGWhiteWhitePD				= 0xe9
 	#endif
@@ -92,7 +92,7 @@ import Foundation
 		case "Raw Accel Compressed Y ADC"			: self	= .rawAccelCompressedYADC
 		case "Raw Accel Compressed Z ADC"			: self	= .rawAccelCompressedZADC
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS || ALTER
 		case "Raw Gyro X ADC"						: self	= .rawGyroXADC
 		case "Raw Gyro Y ADC"						: self	= .rawGyroYADC
 		case "Raw Gyro Z ADC"						: self	= .rawGyroZADC
@@ -101,7 +101,7 @@ import Foundation
 		case "Raw Gyro Compressed Z ADC"			: self	= .rawGyroCompressedZADC
 		#endif
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case "PPG Calibration Done"					: self	= .ppgCalibrationDone
 		case "Motion Level"							: self	= .motionLevel
 		#endif
@@ -110,7 +110,7 @@ import Foundation
 		case "Raw PPG Compressed Red"				: self	= .rawPPGCompressedRed
 		case "Raw PPG Compressed IR"				: self	= .rawPPGCompressedIR
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case "Raw PPG Compressed White IRR PD"		: self	= .rawPPGCompressedWhiteIRRPD
 		case "Raw PPG Compressed White White PD"	: self	= .rawPPGCompressedWhiteWhitePD
 		#endif
@@ -120,12 +120,12 @@ import Foundation
 		case "Raw PPG IR Sample"					: self	= .rawPPGIR
 		case "Raw PPG FIFO Count"					: self	= .rawPPGFifoCount
 			
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case "Raw PPG White Sample IRR PD"			: self	= .rawPPGWhiteIRRPD
 		case "Raw PPG White Sample White PD"		: self	= .rawPPGWhiteWhitePD
 		#endif
 	
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case "PPG Calibration Start"				: self	= .ppgCalibrationStart
 		#endif
 
@@ -157,7 +157,7 @@ import Foundation
 		case .rawAccelCompressedYADC				: return "Raw Accel Compressed Y ADC"
 		case .rawAccelCompressedZADC				: return "Raw Accel Compressed Z ADC"
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS || ALTER
 		case .rawGyroXADC							: return "Raw Gyro X ADC"
 		case .rawGyroYADC							: return "Raw Gyro Y ADC"
 		case .rawGyroZADC							: return "Raw Gyro Z ADC"
@@ -166,7 +166,7 @@ import Foundation
 		case .rawGyroCompressedZADC					: return "Raw Gyro Compressed Z ADC"
 		#endif
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .ppgCalibrationDone					: return "PPG Calibration Done"
 		case .motionLevel							: return "Motion Level"
 		#endif
@@ -175,7 +175,7 @@ import Foundation
 		case .rawPPGCompressedRed					: return "Raw PPG Compressed Red"
 		case .rawPPGCompressedIR					: return "Raw PPG Compressed IR"
 			
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .rawPPGCompressedWhiteIRRPD			: return "Raw PPG Compressed White IRR PD"
 		case .rawPPGCompressedWhiteWhitePD			: return "Raw PPG Compressed White White PD"
 		#endif
@@ -185,12 +185,12 @@ import Foundation
 		case .rawPPGIR								: return "Raw PPG IR Sample"
 		case .rawPPGFifoCount						: return "Raw PPG FIFO Count"
 			
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .rawPPGWhiteIRRPD						: return "Raw PPG White Sample IRR PD"
 		case .rawPPGWhiteWhitePD					: return "Raw PPG White Sample White PD"
 		#endif
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .ppgCalibrationStart					: return "PPG Calibration Start"
 		#endif
 
@@ -211,7 +211,7 @@ import Foundation
 		case .battery								: return 8
 		case .sleep									: return 9
 		case .diagnostic							: return 0 	// Done by calculation
-		case .rawAccelFifoCount						: return 6
+		case .rawAccelFifoCount						: return 10
 		case .rawPPGProximity						: return 5
 
 		case .rawAccelXADC							: return 3
@@ -221,7 +221,7 @@ import Foundation
 		case .rawAccelCompressedYADC				: return 0	// Done by calculation
 		case .rawAccelCompressedZADC				: return 0	// Done by calculation
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS || ALTER
 		case .rawGyroXADC							: return 3
 		case .rawGyroYADC							: return 3
 		case .rawGyroZADC							: return 3
@@ -230,16 +230,16 @@ import Foundation
 		case .rawGyroCompressedZADC					: return 0	// Done by calculation
 		#endif
 
-		#if ETHOS || UNIVERSAL
-		case .ppgCalibrationDone					: return 10
-		case .motionLevel							: return 6
+		#if UNIVERSAL || ETHOS
+		case .ppgCalibrationDone					: return 14
+		case .motionLevel							: return 10
 		#endif
 
 		case .rawPPGCompressedGreen					: return 0	// Done by calculation
 		case .rawPPGCompressedRed					: return 0	// Done by calculation
 		case .rawPPGCompressedIR					: return 0	// Done by calculation
 			
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .rawPPGCompressedWhiteIRRPD			: return 0	// Done by calculation
 		case .rawPPGCompressedWhiteWhitePD			: return 0	// Done by calculation
 		#endif
@@ -247,15 +247,15 @@ import Foundation
 		case .rawPPGGreen							: return 5
 		case .rawPPGRed								: return 5
 		case .rawPPGIR								: return 5
-		case .rawPPGFifoCount						: return 6
+		case .rawPPGFifoCount						: return 10
 			
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .rawPPGWhiteIRRPD						: return 5
 		case .rawPPGWhiteWhitePD					: return 5
 		#endif
 			
-		#if ETHOS || UNIVERSAL
-		case .ppgCalibrationStart					: return 5
+		#if UNIVERSAL || ETHOS
+		case .ppgCalibrationStart					: return 9
 		#endif
 			
 		case .milestone								: return 7

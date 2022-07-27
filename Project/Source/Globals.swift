@@ -17,6 +17,7 @@ var dfu				= nordicDFU()
 
 var gblLimitLivotal	= false
 var gblLimitEthos	= false
+var gblLimitAlter	= false
 
 //--------------------------------------------------------------------------------
 //

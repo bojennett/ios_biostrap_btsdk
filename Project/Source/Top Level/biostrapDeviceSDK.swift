@@ -56,7 +56,33 @@ import iOSDFULibrary
 		}
 	}
 	#endif
-	
+
+	#if UNIVERSAL || ALTER
+	@objc public enum alterLEDMode: Int {
+		case blink		= 0
+		case fade		= 1
+		case sweep		= 2
+		case pulse		= 3
+		case sparkle	= 4
+		case percent	= 5
+		
+		public var title: String {
+			switch (self) {
+			case .blink		: return "Blink"
+			case .fade		: return "Fade"
+			case .sweep		: return "Sweep"
+			case .pulse		: return "Pulse"
+			case .sparkle	: return "Sparkle"
+			case .percent	: return "Percent"
+			}
+		}
+		
+		public var value: UInt8 {
+			return UInt8(self.rawValue)
+		}
+	}
+	#endif
+
 	// Lambdas
 	@objc public var logV: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
 	@objc public var logD: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
@@ -115,7 +141,7 @@ import iOSDFULibrary
 	@objc public var manufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var manufacturingTestResult: ((_ id: String, _ valid: Bool, _ result: String)->())?
 
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS
 	@objc public var startLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var stopLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
@@ -480,6 +506,11 @@ import iOSDFULibrary
 		if let device = mConnectedDevices?[id] { device.ethosLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
 		else { self.ledComplete?(id, false) }
 	}
+
+	@objc public func alterLED(_ id: String, red: Int, green: Int, blue: Int, mode: alterLEDMode, seconds: Int, percent: Int) {
+		if let device = mConnectedDevices?[id] { device.alterLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
+		else { self.ledComplete?(id, false) }
+	}
 	#endif
 
 	#if LIVOTAL
@@ -492,6 +523,13 @@ import iOSDFULibrary
 	#if ETHOS
 	@objc public func led(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
 		if let device = mConnectedDevices?[id] { device.ethosLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
+		else { self.ledComplete?(id, false) }
+	}
+	#endif
+
+	#if ALTER
+	@objc public func led(_ id: String, red: Int, green: Int, blue: Int, mode: alterLEDMode, seconds: Int, percent: Int) {
+		if let device = mConnectedDevices?[id] { device.alterLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
@@ -618,7 +656,7 @@ import iOSDFULibrary
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------

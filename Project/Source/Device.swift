@@ -12,8 +12,15 @@ public class Device: NSObject {
 	
 	
 	enum services: String {
+		#if UNIVERSAL || ALTER
+		case alterService			= "883BBA2C-8E31-40BB-A859-D59A2FB38EC0"
+		#endif
+		
 		#if UNIVERSAL || ETHOS
 		case ethosService			= "B30E0F19-A021-45F3-8661-4255CBD49E10"
+		#endif
+
+		#if UNIVERSAL || ALTER || ETHOS
 		case ambiqOTAService		= "00002760-08C2-11E1-9073-0E8AC72E1001"
 		#endif
 		
@@ -28,8 +35,15 @@ public class Device: NSObject {
 		
 		var title: String {
 			switch (self) {
+			#if UNIVERSAL || ALTER
+			case .alterService		: return "Alter Service"
+			#endif
+
 			#if UNIVERSAL || ETHOS
 			case .ethosService		: return "Ethos Service"
+			#endif
+
+			#if UNIVERSAL || ETHOS || ALTER
 			case .ambiqOTAService	: return "Ambiq OTA Service"
 			#endif
 
@@ -42,8 +56,15 @@ public class Device: NSObject {
 	}
 
 	enum characteristics: String {
+		#if UNIVERSAL || ALTER
+		case alterCharacteristic		= "883BBA2C-8E31-40BB-A859-D59A2FB38EC1"
+		#endif
+
 		#if UNIVERSAL || ETHOS
 		case ethosCharacteristic		= "B30E0F19-A021-45F3-8661-4255CBD49E11"
+		#endif
+		
+		#if UNIVERSAL || ETHOS || ALTER
 		case ambiqOTARXCharacteristic	= "00002760-08C2-11E1-9073-0E8AC72E0001"
 		case ambiqOTATXCharacteristic	= "00002760-08C2-11E1-9073-0E8AC72E0002"
 		#endif
@@ -59,8 +80,15 @@ public class Device: NSObject {
 		
 		var title: String {
 			switch (self) {
+			#if UNIVERSAL || ALTER
+			case .alterCharacteristic		: return "Alter Characteristic"
+			#endif
+
 			#if UNIVERSAL || ETHOS
 			case .ethosCharacteristic		: return "Ethos Characteristic"
+			#endif
+
+			#if UNIVERSAL || ETHOS || ALTER
 			case .ambiqOTARXCharacteristic	: return "Ambiq OTA RX Characteristic"
 			case .ambiqOTATXCharacteristic	: return "Ambiq OTA TX Characteristic"
 			#endif
@@ -133,7 +161,7 @@ public class Device: NSObject {
 	var manufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
 	var manufacturingTestResult: ((_ id: String, _ valid: Bool, _ result: String)->())?
 	
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS || ALTER
 	var startLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
 	var stopLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
 	var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
@@ -183,11 +211,12 @@ public class Device: NSObject {
 	
 	internal var mBatteryLevelCharacteristic	: batteryLevelCharacteristic?
 	internal var mCustomCharacteristic			: customCharacteristic?
+
 	#if UNIVERSAL || LIVOTAL
 	internal var mNordicDFUCharacteristic		: nordicDFUCharacteristic?
 	#endif
 
-	#if UNIVERSAL || ETHOS
+	#if UNIVERSAL || ETHOS || ALTER
 	internal var mAmbiqOTARXCharacteristic		: ambiqOTARXCharacteristic?
 	internal var mAmbiqOTATXCharacteristic		: ambiqOTATXCharacteristic?
 	#endif
@@ -197,15 +226,27 @@ public class Device: NSObject {
 		if (gblLimitLivotal) {
 			return [services.livotalService.UUID, services.nordicDFUService.UUID]
 		}
-		else {
-			return [services.livotalService.UUID, services.nordicDFUService.UUID, services.ethosService.UUID]
+		else if (gblLimitEthos) {
+			return [services.ethosService.UUID]
 		}
-		#elseif LIVOTAL
+		else if (gblLimitAlter) {
+			return [services.alterService.UUID]
+		}
+		else {
+			return [services.livotalService.UUID, services.nordicDFUService.UUID, services.ethosService.UUID, services.alterService.UUID]
+		}
+		#endif
+		
+		#if LIVOTAL
 		return [services.livotalService.UUID, services.nordicDFUService.UUID]
-		#elseif ETHOS
+		#endif
+		
+		#if ETHOS
 		return [services.ethosService.UUID]
-		#else
-		return []
+		#endif
+
+		#if ALTER
+		return [services.alterService.UUID]
 		#endif
 	}
 	
@@ -351,6 +392,7 @@ public class Device: NSObject {
 		case .alter: return false
 		case .unknown: return false
 		}
+		
 		#elseif LIVOTAL
 		if let firmwareVersion = mFirmwareVersion {
 			if (firmwareVersion.value < "1.2.4") {
@@ -388,6 +430,7 @@ public class Device: NSObject {
 			}
 		}
 		else { return (false) }
+		
 		#elseif ETHOS
 		if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 			
@@ -403,13 +446,26 @@ public class Device: NSObject {
 					ambiqOTATXCharacteristic.configured
 			)
 		}
-		else {
-			return (false)
-		}
+		else { return (false) }
 		
 		#elseif ALTER
-		return (false)
+		if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+			
+			//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+
+			return (modelNumber.configured &&
+					hardwareRevision.configured &&
+					firmwareVersion.configured &&
+					manufacturerName.configured &&
+					batteryCharacteristic.configured &&
+					customCharacteristic.configured &&
+					ambiqOTARXCharacteristic.configured &&
+					ambiqOTATXCharacteristic.configured
+			)
+		}
+		else { return (false) }
 		
+
 		#else
 		return (false)
 		#endif
@@ -593,6 +649,15 @@ public class Device: NSObject {
 	func ethosLED(_ id: String, red: Int, green: Int, blue: Int, mode: biostrapDeviceSDK.ethosLEDMode, seconds: Int, percent: Int) {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.ethosLED(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent)
+		}
+		else { self.ledComplete?(id, false) }
+	}
+	#endif
+
+	#if UNIVERSAL || ALTER
+	func alterLED(_ id: String, red: Int, green: Int, blue: Int, mode: biostrapDeviceSDK.alterLEDMode, seconds: Int, percent: Int) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.alterLED(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent)
 		}
 		else { self.ledComplete?(id, false) }
 	}
@@ -1059,7 +1124,67 @@ public class Device: NSObject {
 						else { self.chargingStatus = "Not Charging" }
 						self.deviceChargingStatus?(self.mID, charging, on_charger, error) }
 					mCustomCharacteristic?.discoverDescriptors()
-					
+				#endif
+
+				#if UNIVERSAL || ALTER
+				case .alterCharacteristic:
+					mCustomCharacteristic	= customCharacteristic(peripheral, characteristic: characteristic)
+					#if UNIVERSAL
+					mCustomCharacteristic?.type	= .alter
+					#endif
+					mCustomCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.mID, successful) }
+					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.mID, successful) }
+					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.mID, successful) }
+					mCustomCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.mID, successful) }
+					mCustomCharacteristic?.writeSerialNumberComplete = { successful in self.writeSerialNumberComplete?(self.mID, successful) }
+					mCustomCharacteristic?.readSerialNumberComplete = { successful, partID in self.readSerialNumberComplete?(self.mID, successful, partID) }
+					mCustomCharacteristic?.deleteSerialNumberComplete = { successful in self.deleteSerialNumberComplete?(self.mID, successful) }
+					mCustomCharacteristic?.writeAdvIntervalComplete = { successful in self.writeAdvIntervalComplete?(self.mID, successful) }
+					mCustomCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.readAdvIntervalComplete?(self.mID, successful, seconds) }
+					mCustomCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.mID, successful) }
+					mCustomCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.mID, successful) }
+					mCustomCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.mID, successful, cycles) }
+					mCustomCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.mID, successful) }
+					mCustomCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.mID, successful)}
+					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.mID, successful, code, value )}
+					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.mID, successful) }
+					mCustomCharacteristic?.manualResult = { successful, packet in self.manualResult?(self.mID, successful, packet) }
+					mCustomCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.mID, code) }
+					mCustomCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.mID, successful) }
+					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.mID, successful,  value) }
+					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.mID, successful) }
+					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.mID, successful) }
+					mCustomCharacteristic?.getNextPacketComplete = { successful, packet in self.getNextPacketComplete?(self.mID, successful, packet) }
+					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.mID, successful, count) }
+					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.mID, successful) }
+					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.mID, successful) }
+					mCustomCharacteristic?.dataPackets = { packets in self.dataPackets?(self.mID, packets) }
+					mCustomCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.mID, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mCustomCharacteristic?.dataFailure = { self.dataFailure?(self.mID) }
+					mCustomCharacteristic?.deviceWornStatus = { isWorn in
+						if (isWorn) { self.wornStatus = "Worn" }
+						else { self.wornStatus = "Not Worn" }
+						self.deviceWornStatus?(self.mID, isWorn)
+					}
+					mCustomCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.mID, successful, parameter) }
+					mCustomCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.mID, successful, parameter, value) }
+					mCustomCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.mID, successful) }
+					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.mID, successful) }
+					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.mID, successful) }
+					mCustomCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.mID, valid, result) }
+					mCustomCharacteristic?.startLiveSyncComplete		= { successful in self.startLiveSyncComplete?(self.mID, successful) }
+					mCustomCharacteristic?.stopLiveSyncComplete			= { successful in self.stopLiveSyncComplete?(self.mID, successful) }
+					mCustomCharacteristic?.recalibratePPGComplete		= { successful in self.recalibratePPGComplete?(self.mID, successful) }
+					mCustomCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
+						if (charging) { self.chargingStatus	= "Charging" }
+						else if (on_charger) { self.chargingStatus = "On Charger" }
+						else if (error) { self.chargingStatus = "Charging Error" }
+						else { self.chargingStatus = "Not Charging" }
+						self.deviceChargingStatus?(self.mID, charging, on_charger, error) }
+					mCustomCharacteristic?.discoverDescriptors()
+				#endif
+
+				#if UNIVERSAL || ETHOS || ALTER
 				case .ambiqOTARXCharacteristic:
 					if let service = characteristic.service {
 						log?.v ("\(mID) for service: \(service.prettyID) - '\(testCharacteristic.title)'")
@@ -1183,6 +1308,13 @@ public class Device: NSObject {
 					switch (enumerated) {
 					#if UNIVERSAL || ETHOS
 					case .ethosCharacteristic		: mCustomCharacteristic?.didDiscoverDescriptor()
+					#endif
+
+					#if UNIVERSAL || ALTER
+					case .alterCharacteristic		: mCustomCharacteristic?.didDiscoverDescriptor()
+					#endif
+
+					#if UNIVERSAL || ETHOS || ALTER
 					case .ambiqOTARXCharacteristic	: log?.e ("\(mID) '\(enumerated.title)' - should not be here")
 					case .ambiqOTATXCharacteristic	: mAmbiqOTATXCharacteristic?.didDiscoverDescriptor()
 					#endif
@@ -1244,6 +1376,13 @@ public class Device: NSObject {
 			switch (enumerated) {
 			#if UNIVERSAL || ETHOS
 			case .ethosCharacteristic		: mCustomCharacteristic?.didUpdateValue()
+			#endif
+
+			#if UNIVERSAL || ALTER
+			case .alterCharacteristic		: mCustomCharacteristic?.didUpdateValue()
+			#endif
+
+			#if UNIVERSAL || ETHOS || ALTER
 			case .ambiqOTARXCharacteristic	: log?.e ("\(mID) '\(enumerated.title)' - should not be here")
 			case .ambiqOTATXCharacteristic	:
 				// Commands to RX come in on TX, causes RX to do next step
@@ -1282,6 +1421,13 @@ public class Device: NSObject {
 					switch (enumerated) {
 					#if UNIVERSAL || ETHOS
 					case .ethosCharacteristic		: mCustomCharacteristic?.didUpdateNotificationState()
+					#endif
+
+					#if UNIVERSAL || ALTER
+					case .alterCharacteristic		: mCustomCharacteristic?.didUpdateNotificationState()
+					#endif
+
+					#if UNIVERSAL || ETHOS || ALTER
 					case .ambiqOTARXCharacteristic	: log?.e ("\(mID) '\(enumerated.title)' - should not be here")
 					case .ambiqOTATXCharacteristic	: mAmbiqOTATXCharacteristic?.didUpdateNotificationState()
 					#endif

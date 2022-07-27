@@ -16,6 +16,10 @@ end
 target 'ethosBTSDK' do
 	use_frameworks!
 	project 'Project/biostrapDeviceSDK.xcodeproj'
-	pod 'iOSDFULibrary'
+end
+
+target 'alterBTSDK' do
+	use_frameworks!
+	project 'Project/biostrapDeviceSDK.xcodeproj'
 end
 

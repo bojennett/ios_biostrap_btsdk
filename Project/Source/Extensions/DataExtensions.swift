@@ -48,7 +48,29 @@ extension Data {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	var leInt: Int {
+	var leInt64: Int {
+		if (self.count != 8) { return 0 }
+		
+		let byte0	= UInt64(self[0]) <<  0
+		let byte1	= UInt64(self[1]) <<  8
+		let byte2	= UInt64(self[2]) << 16
+		let byte3	= UInt64(self[3]) << 24
+		let byte4	= UInt64(self[4]) << 32
+		let byte5	= UInt64(self[5]) << 40
+		let byte6	= UInt64(self[6]) << 48
+		let byte7	= UInt64(self[7]) << 56
+
+		return (Int(byte7 | byte6 | byte5 | byte4 | byte3 | byte2 | byte1 | byte0))
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	var leInt32: Int {
 		if (self.count != 4) { return 0 }
 		
 		let byte0	= UInt32(self[0])

@@ -4,24 +4,34 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>ethosBTSDK.xcscheme_^#shared#^_</key>
+		<key>alterBTSDK.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
-		<key>livotalBTSDK.xcscheme_^#shared#^_</key>
+		<key>ethosBTSDK.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
-		<key>universalBTSDK.xcscheme_^#shared#^_</key>
+		<key>livotalBTSDK.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>2</integer>
 		</dict>
+		<key>universalBTSDK.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>3B2602A62890541E00D5CAAA</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>3BD01F822615358B0014CEF0</key>
 		<dict>
 			<key>primary</key>

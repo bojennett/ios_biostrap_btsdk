@@ -31,7 +31,7 @@ class customCharacteristic: Characteristic {
 		case delDeviceParam		= 0x72
 		case setSessionParam	= 0x80
 		case getSessionParam	= 0x81
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS || ALTER
 		case recalibratePPG		= 0xed
 		case startLiveSync		= 0xee
 		case stopLiveSync		= 0xef
@@ -108,7 +108,7 @@ class customCharacteristic: Characteristic {
 	var manufacturingTestComplete: ((_ successful: Bool)->())?
 	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
 	
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS || ALTER
 	var startLiveSyncComplete: ((_ successful: Bool)->())?
 	var stopLiveSyncComplete: ((_ successful: Bool)->())?
 	var recalibratePPGComplete: ((_ successful: Bool)->())?
@@ -427,6 +427,33 @@ class customCharacteristic: Characteristic {
 	}
 	#endif
 		
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || ALTER
+	func alterLED(red: Int, green: Int, blue: Int, mode: biostrapDeviceSDK.alterLEDMode, seconds: Int, percent: Int) {
+		log?.v("\(pID): Red: \(String(format: "0x%02X", red)), Green: \(String(format: "0x%02X", green)), Blue: \(String(format: "0x%02X", blue)), Mode: \(mode.title), Seconds: \(seconds), Percent: \(percent)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.led.rawValue)
+			data.append(UInt8(red & 0xff))		// Red
+			data.append(UInt8(green & 0xff))	// Green
+			data.append(UInt8(blue & 0xff))		// Blue
+			data.append(UInt8(mode.value))		// Mode
+			data.append(UInt8(seconds & 0xff))	// Seconds
+			data.append(UInt8(percent & 0xff))	// Percent
+
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.ledComplete?(false) }
+	}
+	#endif
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -958,6 +985,7 @@ class customCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mParseSinglePacket(_ data: Data, index: Int) -> (Bool, packetType, biostrapDataPacket) {
+		//log?.v ("\(index): \(String(format: "0x%02X", data[index]))")
 		if let type = packetType(rawValue: data[index]) {
 			switch (type) {
 			case .diagnostic:
@@ -1032,8 +1060,14 @@ class customCharacteristic: Characteristic {
 				return (false, type, biostrapDataPacket())
 				
 			default:
-				let packetData = data.subdata(in: Range((index)...(index + type.length - 1)))
-				return (true, type, biostrapDataPacket(packetData))
+				if ((index + type.length) <= data.count) {
+					let packetData = data.subdata(in: Range((index)...(index + type.length - 1)))
+					return (true, type, biostrapDataPacket(packetData))
+				}
+				else {
+					log?.e ("\(type.title): '\(type.length)' from '\(index)' exceeds length of data '\(data.count)'")
+					return (false, type, biostrapDataPacket())
+				}
 			}
 			
 		}
@@ -1064,6 +1098,7 @@ class customCharacteristic: Characteristic {
 				case .diagnostic:
 					index = index + packet.raw_data.count
 					dataPackets.append(packet)
+					
 				case .rawPPGCompressedGreen,
 					 .rawPPGCompressedIR,
 					 .rawPPGCompressedRed:
@@ -1136,7 +1171,7 @@ class customCharacteristic: Characteristic {
 						case .writeEpoch	: self.writeEpochComplete?(successful)
 						case .readEpoch		:
 							if (data.count == 7) {
-								let epoch = data.subdata(in: Range(3...6)).leInt
+								let epoch = data.subdata(in: Range(3...6)).leInt32
 								self.readEpochComplete?(successful, epoch)
 							}
 							else {
@@ -1171,7 +1206,7 @@ class customCharacteristic: Characteristic {
 						case .getPacketCount:
 							if (successful) {
 								if (data.count == 7) {
-									let count = data.subdata(in: Range(3...6)).leInt
+									let count = data.subdata(in: Range(3...6)).leInt32
 									self.getPacketCountComplete?(true, count)
 								}
 								else {
@@ -1203,7 +1238,7 @@ class customCharacteristic: Characteristic {
 								if (data.count == 20) {
 									switch (parameter) {
 									case .advertisingInterval	:
-										let seconds = data.subdata(in: Range(4...7)).leInt
+										let seconds = data.subdata(in: Range(4...7)).leInt32
 										self.readAdvIntervalComplete?(successful, seconds)
 									case .serialNumber			:
 										let snData		= String(decoding: data.subdata(in: Range(4...19)), as: UTF8.self)
@@ -1262,7 +1297,7 @@ class customCharacteristic: Characteristic {
 								case .ppgCapturePeriod,
 									 .ppgCaptureDuration,
 									 .tag		:
-									let value = data.subdata(in: Range(4...7)).leInt
+									let value = data.subdata(in: Range(4...7)).leInt32
 									getSessionParamComplete?(successful, enumParameter, value)
 									break
 								case .reset		: resetSessionParamsComplete?(false)		// Shouldn't get this on a get
@@ -1278,7 +1313,7 @@ class customCharacteristic: Characteristic {
 							}
 
 						case .manufacturingTest	: self.manufacturingTestComplete?(successful)
-						#if ETHOS || UNIVERSAL
+						#if UNIVERSAL || ETHOS || ALTER
 						case .startLiveSync		: self.startLiveSyncComplete?(successful)
 						case .stopLiveSync		: self.stopLiveSyncComplete?(successful)
 						case .recalibratePPG	: self.recalibratePPGComplete?(successful)
@@ -1287,7 +1322,7 @@ class customCharacteristic: Characteristic {
 						case .wornCheck			:
 							if (data.count == 8) {
 								if let code = wornResult(rawValue: data[3]) {
-									let value = data.subdata(in: Range(4...7)).leInt
+									let value = data.subdata(in: Range(4...7)).leInt32
 								
 									if code == .ran {
 										self.wornCheckComplete?(true, code.message, value)
@@ -1323,7 +1358,7 @@ class customCharacteristic: Characteristic {
 						//log?.v ("Sequence Number Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")
 					}
 					else {
-						log?.e ("$response - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
+						log?.e ("\(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
 						mCRCOK	= false
 					}
 					mExpectedSequenceNumber = mExpectedSequenceNumber + 1
@@ -1504,7 +1539,23 @@ class customCharacteristic: Characteristic {
 						self.manufacturingTestResult?(false, "")
 					}
 
-				case .alter		: break
+				case .alter		:
+					let testResult = alterManufacturingTestResult(data.subdata(in: Range(1...4)))
+					do {
+						let jsonData = try JSONEncoder().encode(testResult)
+						if let jsonString = String(data: jsonData, encoding: .utf8) {
+							self.manufacturingTestResult?(true, jsonString)
+						}
+						else {
+							log?.e ("Result jsonString Failed")
+							self.manufacturingTestResult?(false, "")
+						}
+					}
+					catch {
+						log?.e ("Result jsonData Failed")
+						self.manufacturingTestResult?(false, "")
+					}
+
 				case .unknown	: break
 				}
 				#endif
@@ -1537,7 +1588,7 @@ class customCharacteristic: Characteristic {
 				// Packets have to be at least a header + CRC.  If not, do not parse
 				if (data.count >= 4) {
 					// Get the CRC.  Only process the packet if the CRC is good.
-					let crc_received	= data.subdata(in: Range((data.count - 4)...(data.count - 1))).leInt
+					let crc_received	= data.subdata(in: Range((data.count - 4)...(data.count - 1))).leInt32
 					var input_bytes 	= data.subdata(in: Range(0...(data.count - 5))).bytes
 					let crc_calculated	= crc32(uLong(0), &input_bytes, uInt(input_bytes.count))
 

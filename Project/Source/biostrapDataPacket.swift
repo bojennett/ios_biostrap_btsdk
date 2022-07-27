@@ -13,7 +13,7 @@ import Foundation
 	public var epoch					: Int			= 0
 	public var end_epoch				: Int			= 0
 	public var worn						: Bool			= false
-	public var elapsed_ms				: Int			= 0
+	public var epoch_ms					: Int			= 0
 	public var seconds					: Int			= 0
 	public var value					: Int			= 0
 	public var voltage					: Int			= 0
@@ -53,7 +53,7 @@ import Foundation
 		case end_epoch
 		case worn
 		case voltage
-		case elapsed_ms
+		case epoch_ms
 		case seconds
 		case temperature
 		case hr_valid
@@ -99,7 +99,7 @@ import Foundation
 		case .battery						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(value),\(voltage)")
 		case .sleep							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(end_epoch)")
 		case .rawPPGFifoCount,
-			 .rawAccelFifoCount				: return ("\(raw_data.hexString),\(type.title),\(value),\(elapsed_ms)")
+			 .rawAccelFifoCount				: return ("\(raw_data.hexString),\(type.title),\(value),\(epoch_ms)")
 		case .rawPPGProximity				: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawPPGRed						: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawPPGIR						: return ("\(raw_data.hexString),\(type.title),\(value)")
@@ -112,7 +112,7 @@ import Foundation
 		case .rawAccelCompressedYADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawAccelCompressedZADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS || ALTER
 		case .rawGyroXADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawGyroYADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawGyroZADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
@@ -121,27 +121,27 @@ import Foundation
 		case .rawGyroCompressedZADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
 		#endif
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .ppgCalibrationDone			: return ("\(raw_data.hexString),\(type.title),\(epoch),\(green_led_current),\(red_led_current),\(ir_led_current),\(white_irr_led_current),\(white_white_led_current)")
-		case .motionLevel					: return ("\(raw_data.hexString),\(type.title),\(value),\(elapsed_ms)")
+		case .motionLevel					: return ("\(raw_data.hexString),\(type.title),\(value),\(epoch_ms)")
 		#endif
 
 		case .rawPPGCompressedGreen,
 			 .rawPPGCompressedIR,
 			 .rawPPGCompressedRed			: return ("\(raw_data.hexString),\(type.title),\(value)")
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .rawPPGCompressedWhiteIRRPD,
 			 .rawPPGCompressedWhiteWhitePD	: return ("\(raw_data.hexString),\(type.title),\(value)")
 		#endif
 			
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .rawPPGWhiteIRRPD,
 			 .rawPPGWhiteWhitePD			: return ("\(raw_data.hexString),\(type.title),\(value)")
 		#endif
 
-		#if ETHOS || UNIVERSAL
-		case .ppgCalibrationStart			: return ("\(raw_data.hexString),\(type.title),\(epoch)")
+		#if UNIVERSAL || ETHOS
+		case .ppgCalibrationStart			: return ("\(raw_data.hexString),\(type.title),\(epoch_ms)")
 		#endif
 
 		case .ppg							:
@@ -201,21 +201,21 @@ import Foundation
 
 			switch (type) {
 			case .activity:
-				epoch		= data.subdata(in: Range(1...4)).leInt
+				epoch		= data.subdata(in: Range(1...4)).leInt32
 				seconds		= Int(data[5])
-				value		= data.subdata(in: Range(6...9)).leInt
+				value		= data.subdata(in: Range(6...9)).leInt32
 
 			case .temp:
-				epoch		= data.subdata(in: Range(1...4)).leInt
+				epoch		= data.subdata(in: Range(1...4)).leInt32
 				temperature	= data.subdata(in: Range(5...8)).leFloat
 
 			case .worn:
-				epoch		= data.subdata(in: Range(1...4)).leInt
+				epoch		= data.subdata(in: Range(1...4)).leInt32
 				worn		= (data[5] == 0x01)
 				
 			case .sleep:
-				epoch		= data.subdata(in: Range(1...4)).leInt
-				end_epoch	= data.subdata(in: Range(5...8)).leInt
+				epoch		= data.subdata(in: Range(1...4)).leInt32
+				end_epoch	= data.subdata(in: Range(5...8)).leInt32
 				
 			case .diagnostic:
 				if (raw_data.count >= 2) {
@@ -227,13 +227,13 @@ import Foundation
 			case .rawPPGFifoCount,
 				 .rawAccelFifoCount:
 				value		= Int(data[1])
-				elapsed_ms	= data.subdata(in: Range(2...5)).leInt
+				epoch_ms	= data.subdata(in: Range(2...9)).leInt64
 
 			case .rawPPGCompressedGreen,
 				 .rawPPGCompressedIR,
 				 .rawPPGCompressedRed:	break	// use raw_data
 
-			#if ETHOS || UNIVERSAL
+			#if UNIVERSAL || ETHOS
 			case .rawPPGCompressedWhiteIRRPD,
 				 .rawPPGCompressedWhiteWhitePD	:	break	// use raw_data
 			#endif
@@ -241,7 +241,7 @@ import Foundation
 			case .rawPPGRed,
 				 .rawPPGIR,
 				 .rawPPGGreen:
-				value				= data.subdata(in: Range(1...4)).leInt
+				value				= data.subdata(in: Range(1...4)).leInt32
 
 			case .rawAccelXADC,
 				 .rawAccelYADC,
@@ -252,7 +252,7 @@ import Foundation
 				 .rawAccelCompressedYADC,
 				 .rawAccelCompressedZADC: break // use raw_data
 
-			#if ETHOS || UNIVERSAL
+			#if UNIVERSAL || ETHOS || ALTER
 			case .rawGyroXADC,
 				 .rawGyroYADC,
 				 .rawGyroZADC:
@@ -263,39 +263,39 @@ import Foundation
 				 .rawGyroCompressedZADC: break // use raw_data
 			#endif
 
-			#if ETHOS || UNIVERSAL
+			#if UNIVERSAL || ETHOS
 			case .rawPPGWhiteIRRPD,
 				 .rawPPGWhiteWhitePD:
-				value				= data.subdata(in: Range(1...4)).leInt
+				value				= data.subdata(in: Range(1...4)).leInt32
 			#endif
 
 				
-			#if ETHOS || UNIVERSAL
+			#if UNIVERSAL || ETHOS
 			case .ppgCalibrationStart:
-				epoch				= data.subdata(in: Range(1...4)).leInt
+				epoch_ms				= data.subdata(in: Range(1...8)).leInt64
 				
 			case .ppgCalibrationDone:
-				epoch					= data.subdata(in: Range(1...4)).leInt
-				green_led_current		= Int(data[5])
-				red_led_current			= Int(data[6])
-				ir_led_current			= Int(data[7])
-				white_irr_led_current	= Int(data[8])
-				white_white_led_current	= Int(data[9])
+				epoch					= data.subdata(in: Range(1...8)).leInt64
+				green_led_current		= Int(data[ 9])
+				red_led_current			= Int(data[10])
+				ir_led_current			= Int(data[11])
+				white_irr_led_current	= Int(data[12])
+				white_white_led_current	= Int(data[13])
 				
 			case .motionLevel:
 				value					= Int(data[2])
-				elapsed_ms				= data.subdata(in: Range(2...5)).leInt
+				epoch_ms				= data.subdata(in: Range(2...9)).leInt64
 			#endif
 
 			case .rawPPGProximity:
-				value				= data.subdata(in: Range(1...4)).leInt
+				value				= data.subdata(in: Range(1...4)).leInt32
 				
 			case .steps:
-				epoch				= data.subdata(in: Range(1...4)).leInt
+				epoch				= data.subdata(in: Range(1...4)).leInt32
 				value				= data.subdata(in: Range(5...6)).leUInt16
 
 			case .ppg:
-				epoch				= data.subdata(in: Range(1...4)).leInt
+				epoch				= data.subdata(in: Range(1...4)).leInt32
 				hr_result			= data.subdata(in: Range(5...6)).leFloat16
 				hr_uncertainty		= mDecodeUncertainty(data[7])
 				hr_valid			= (data[7] != 0xff)
@@ -310,17 +310,17 @@ import Foundation
 				spo2_valid			= (data[16] != 0xff)
 
 			case .ppg_failed:
-				epoch				= data.subdata(in: Range(1...4)).leInt
+				epoch				= data.subdata(in: Range(1...4)).leInt32
 				if let test = ppgFailedType(rawValue: raw_data[5]) { ppg_failed_type = test }
 				else { ppg_failed_type = .unknown }
 
 			case .battery:
-				epoch				= data.subdata(in: Range(1...4)).leInt
+				epoch				= data.subdata(in: Range(1...4)).leInt32
 				value				= Int(data[5])
 				voltage				= data.subdata(in: Range(6...7)).leUInt16
 
 			case .milestone:
-				epoch				= data.subdata(in: Range(1...4)).leInt
+				epoch				= data.subdata(in: Range(1...4)).leInt32
 				if let testTag = String(data: data.subdata(in: Range(5...6)), encoding: .utf8) { tag = testTag }
 				else { tag			= "UK" }
 				
@@ -375,7 +375,7 @@ import Foundation
 			 .rawAccelCompressedZADC:
 			value				= try values.decode(Int.self, forKey: .value)
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS || ALTER
 		case .rawGyroXADC,
 			 .rawGyroYADC,
 			 .rawGyroZADC:
@@ -392,7 +392,7 @@ import Foundation
 			 .rawPPGCompressedRed:
 			value				= try values.decode(Int.self, forKey: .value)
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .rawPPGCompressedWhiteIRRPD,
 			 .rawPPGCompressedWhiteWhitePD:
 			value				= try values.decode(Int.self, forKey: .value)
@@ -404,7 +404,7 @@ import Foundation
 		case .rawPPGFifoCount,
 			 .rawAccelFifoCount:
 			value				= try values.decode(Int.self, forKey: .value)
-			elapsed_ms			= try values.decode(Int.self, forKey: .elapsed_ms)
+			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
 			
 		case .steps:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
@@ -416,15 +416,15 @@ import Foundation
 			 .rawPPGProximity:
 			value				= try values.decode(Int.self, forKey: .value)
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .rawPPGWhiteIRRPD,
 			 .rawPPGWhiteWhitePD:
 			value				= try values.decode(Int.self, forKey: .value)
 		#endif
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .ppgCalibrationStart:
-			epoch				= try values.decode(Int.self, forKey: .epoch)
+			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
 			
 		case .ppgCalibrationDone:
 			epoch					= try values.decode(Int.self, forKey: .epoch)
@@ -436,7 +436,7 @@ import Foundation
 			
 		case .motionLevel:
 			value				= try values.decode(Int.self, forKey: .value)
-			elapsed_ms			= try values.decode(Int.self, forKey: .elapsed_ms)
+			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
 		#endif
 
 		case .ppg:
@@ -527,7 +527,7 @@ import Foundation
 			 .rawAccelCompressedZADC:
 			try container.encode(value, forKey: .value)
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS || ALTER
 		case .rawGyroXADC,
 			 .rawGyroYADC,
 			 .rawGyroZADC:
@@ -544,7 +544,7 @@ import Foundation
 			 .rawPPGCompressedRed:
 			try container.encode(value, forKey: .value)
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .rawPPGCompressedWhiteIRRPD,
 			 .rawPPGCompressedWhiteWhitePD:
 			try container.encode(value, forKey: .value)
@@ -553,7 +553,7 @@ import Foundation
 		case .rawPPGFifoCount,
 			 .rawAccelFifoCount:
 			try container.encode(value, forKey: .value)
-			try container.encode(elapsed_ms, forKey: .elapsed_ms)
+			try container.encode(epoch_ms, forKey: .epoch_ms)
 						
 		case .rawPPGRed:
 			try container.encode(value, forKey: .value)
@@ -567,7 +567,7 @@ import Foundation
 		case .rawPPGGreen:
 			try container.encode(value, forKey: .value)
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .rawPPGWhiteIRRPD:
 			try container.encode(value, forKey: .value)
 
@@ -575,9 +575,9 @@ import Foundation
 			try container.encode(value, forKey: .value)
 		#endif
 
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		case .ppgCalibrationStart:
-			try container.encode(epoch, forKey: .epoch)
+			try container.encode(epoch_ms, forKey: .epoch_ms)
 
 		case .ppgCalibrationDone:
 			try container.encode(epoch, forKey: .epoch)
@@ -589,7 +589,7 @@ import Foundation
 			
 		case .motionLevel:
 			try container.encode(value, forKey: .value)
-			try container.encode(elapsed_ms, forKey: .elapsed_ms)
+			try container.encode(epoch_ms, forKey: .epoch_ms)
 		#endif
 
 		case .ppg:
