@@ -849,7 +849,7 @@ class customCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mValidateCRC() {
-		log?.v("\(pID): \(mCRCOK)")
+		//log?.v("\(pID): \(mCRCOK)")
 		
 		if (mCRCOK == false) {
 			mCRCFailCount	= mCRCFailCount + 1
@@ -1166,7 +1166,7 @@ class customCharacteristic: Characteristic {
 				if (data.count >= 3) {
 					if let command = commands(rawValue: data[1]) {
 						let successful = (data[2] == 0x01)
-						log?.v ("\(pID): Got completion for '\(command)' with \(successful) status: Bytes = \(data.hexString)")
+						//log?.v ("\(pID): Got completion for '\(command)' with \(successful) status: Bytes = \(data.hexString)")
 						switch (command) {
 						case .writeEpoch	: self.writeEpochComplete?(successful)
 						case .readEpoch		:
@@ -1337,8 +1337,8 @@ class customCharacteristic: Characteristic {
 							}
 						case .logRaw			: self.rawLoggingComplete?(successful)
 						case .reset				: self.resetComplete?(successful)
-						case .validateCRC		:
-							log?.v ("Got Validate CRC completion: \(data.hexString)")
+						case .validateCRC		: break
+							//log?.v ("Got Validate CRC completion: \(data.hexString)")
 						}
 					}
 					else {
@@ -1419,7 +1419,7 @@ class customCharacteristic: Characteristic {
 				}
 				
 			case .validateCRC:
-				log?.v ("\(response) - \(data.hexString)")
+				//log?.v ("\(response) - \(data.hexString)")
 				
 				let sequence_number = data.subdata(in: Range(1...2)).leUInt16
 				if (sequence_number == mExpectedSequenceNumber) {

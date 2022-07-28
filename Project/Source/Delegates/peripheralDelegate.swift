@@ -161,7 +161,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-		log?.v ("\(peripheral.prettyID): didWriteValueFor characteristic: \(characteristic.prettyID)")
+		//log?.v ("\(peripheral.prettyID): didWriteValueFor characteristic: \(characteristic.prettyID)")
 	}
 		
 	//--------------------------------------------------------------------------------
