@@ -161,12 +161,26 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
-	@objc public var connectedDevices: [ String : Device ] {
-		if let devices = mConnectedDevices {
-			return (devices)
+	internal func mGetDevicesSortedByTime(_ devices: [ String : Device]) -> [ Device ] {
+		var list			= [ Device ]()
+		var devDictionary	= [ TimeInterval : Device ]()
+
+		let keys			= Array(devices.keys)
+		
+		for key in keys {
+			if let device = devices[key] {
+				devDictionary[device.epoch]	= device
+			}
+		}
+
+		let timeKeys	= Array(devDictionary.keys).sorted()
+		for timeKey in timeKeys {
+			if let device = devDictionary[timeKey] {
+				list.append(device)
+			}
 		}
 		
-		return ([:])
+		return (list)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -174,12 +188,25 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
-	@objc public var discoveredDevices: [ String : Device ] {
-		if let devices = mDiscoveredDevices {
-			return (devices)
+	@objc public var connectedDevices: [ Device ] {
+		if let devices = mConnectedDevices {
+			return (mGetDevicesSortedByTime(devices))
 		}
 		
-		return ([:])
+		return ([])
+	}
+	
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public var discoveredDevices: [ Device ] {
+		if let devices = mDiscoveredDevices {
+			return (mGetDevicesSortedByTime(devices))
+		}
+		
+		return ([])
 	}
 	
 	//--------------------------------------------------------------------------------
