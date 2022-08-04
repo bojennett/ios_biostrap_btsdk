@@ -128,6 +128,9 @@ public class Device: NSObject {
 	var startManualComplete: ((_ id: String, _ successful: Bool)->())?
 	var stopManualComplete: ((_ id: String, _ successful: Bool)->())?
 	var ledComplete: ((_ id: String, _ successful: Bool)->())?
+	#if UNIVERSAL || ETHOS
+	var motorComplete: ((_ id: String, _ successful: Bool)->())?
+	#endif
 	var enterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
 	var writeSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
 	var readSerialNumberComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
@@ -672,6 +675,22 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || ETHOS
+	func motor(_ id: String, milliseconds: Int, pulses: Int) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.motor(milliseconds: milliseconds, pulses: pulses)
+		}
+		else { self.motorComplete?(id, false) }
+	}
+	#endif
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	func enterShipMode(_ id: String) {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.enterShipMode()
@@ -1079,6 +1098,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.id, successful) }
 					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.id, successful) }
 					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.id, successful) }
+					mCustomCharacteristic?.motorComplete = { successful in self.motorComplete?(self.id, successful) }
 					mCustomCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.id, successful) }
 					mCustomCharacteristic?.writeSerialNumberComplete = { successful in self.writeSerialNumberComplete?(self.id, successful) }
 					mCustomCharacteristic?.readSerialNumberComplete = { successful, partID in self.readSerialNumberComplete?(self.id, successful, partID) }

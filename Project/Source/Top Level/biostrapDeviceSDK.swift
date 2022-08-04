@@ -109,6 +109,9 @@ import iOSDFULibrary
 	@objc public var startManualComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var stopManualComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var ledComplete: ((_ id: String, _ successful: Bool)->())?
+	#if UNIVERSAL || ETHOS
+	@objc public var motorComplete: ((_ id: String, _ successful: Bool)->())?
+	#endif
 	@objc public var enterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var writeSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var readSerialNumberComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
@@ -558,6 +561,20 @@ import iOSDFULibrary
 	@objc public func led(_ id: String, red: Int, green: Int, blue: Int, mode: alterLEDMode, seconds: Int, percent: Int) {
 		if let device = mConnectedDevices?[id] { device.alterLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
 		else { self.ledComplete?(id, false) }
+	}
+	#endif
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || ETHOS
+	@objc public func motor(_ id: String, milliseconds: Int, pulses: Int) {
+		if let device = mConnectedDevices?[id] { device.motor(id, milliseconds: milliseconds, pulses: pulses) }
+		else { self.motorComplete?(id, false) }
 	}
 	#endif
 

@@ -306,7 +306,11 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								device.ledComplete			= { id, successful in
 									DispatchQueue.main.async { self.ledComplete?(id, successful) }
 								}
-								
+
+								device.motorComplete			= { id, successful in
+									DispatchQueue.main.async { self.motorComplete?(id, successful) }
+								}
+
 								device.enterShipModeComplete	= { id, successful in
 									DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) }
 								}

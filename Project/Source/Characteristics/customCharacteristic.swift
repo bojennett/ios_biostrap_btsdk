@@ -26,6 +26,9 @@ class customCharacteristic: Characteristic {
 		case enterShipMode		= 0x11
 		case readEpoch			= 0x12
 		case endSleep			= 0x13
+		#if UNIVERSAL || ETHOS
+		case motor				= 0x14
+		#endif
 		case setDeviceParam		= 0x70
 		case getDeviceParam		= 0x71
 		case delDeviceParam		= 0x72
@@ -81,6 +84,9 @@ class customCharacteristic: Characteristic {
 	var startManualComplete: ((_ successful: Bool)->())?
 	var stopManualComplete: ((_ successful: Bool)->())?
 	var ledComplete: ((_ successful: Bool)->())?
+	#if UNIVERSAL || ETHOS
+	var motorComplete: ((_ successful: Bool)->())?
+	#endif
 	var enterShipModeComplete: ((_ successful: Bool)->())?
 	var writeSerialNumberComplete: ((_ successful: Bool)->())?
 	var readSerialNumberComplete: ((_ successful: Bool, _ partID: String)->())?
@@ -453,6 +459,30 @@ class customCharacteristic: Characteristic {
 		else { self.ledComplete?(false) }
 	}
 	#endif
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || ETHOS
+	func motor(milliseconds: Int, pulses: Int) {
+		log?.v("\(pID): milliseconds: \(milliseconds), pulses: \(pulses)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.motor.rawValue)
+			data.append(contentsOf: milliseconds.leData32)
+			data.append(UInt8(pulses & 0xff))
+
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.motorComplete?(false) }
+	}
+	#endif
+		
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -1221,6 +1251,9 @@ class customCharacteristic: Characteristic {
 						case .startManual		: self.startManualComplete?(successful)
 						case .stopManual		: self.stopManualComplete?(successful)
 						case .led				: self.ledComplete?(successful)
+						#if UNIVERSAL || ETHOS
+						case .motor				: self.motorComplete?(successful)
+						#endif
 						case .enterShipMode		: self.enterShipModeComplete?(successful)
 						case .setDeviceParam	:
 							if let parameter = deviceParameterType(rawValue: data[3]) {
