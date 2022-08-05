@@ -122,7 +122,7 @@ import Foundation
 		#endif
 
 		#if UNIVERSAL || ETHOS
-		case .ppgCalibrationDone			: return ("\(raw_data.hexString),\(type.title),\(epoch),\(green_led_current),\(red_led_current),\(ir_led_current),\(white_irr_led_current),\(white_white_led_current)")
+		case .ppgCalibrationDone			: return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(green_led_current),\(red_led_current),\(ir_led_current),\(white_irr_led_current),\(white_white_led_current)")
 		case .motionLevel					: return ("\(raw_data.hexString),\(type.title),\(value),\(epoch_ms)")
 		#endif
 
@@ -275,7 +275,7 @@ import Foundation
 				epoch_ms				= data.subdata(in: Range(1...8)).leInt64
 				
 			case .ppgCalibrationDone:
-				epoch					= data.subdata(in: Range(1...8)).leInt64
+				epoch_ms				= data.subdata(in: Range(1...8)).leInt64
 				green_led_current		= Int(data[ 9])
 				red_led_current			= Int(data[10])
 				ir_led_current			= Int(data[11])
@@ -427,7 +427,7 @@ import Foundation
 			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
 			
 		case .ppgCalibrationDone:
-			epoch					= try values.decode(Int.self, forKey: .epoch)
+			epoch_ms				= try values.decode(Int.self, forKey: .epoch_ms)
 			green_led_current		= try values.decode(Int.self, forKey: .green_led_current)
 			red_led_current			= try values.decode(Int.self, forKey: .red_led_current)
 			ir_led_current			= try values.decode(Int.self, forKey: .ir_led_current)
@@ -580,7 +580,7 @@ import Foundation
 			try container.encode(epoch_ms, forKey: .epoch_ms)
 
 		case .ppgCalibrationDone:
-			try container.encode(epoch, forKey: .epoch)
+			try container.encode(epoch_ms, forKey: .epoch_ms)
 			try container.encode(green_led_current, forKey: .green_led_current)
 			try container.encode(red_led_current, forKey: .red_led_current)
 			try container.encode(ir_led_current, forKey: .ir_led_current)
