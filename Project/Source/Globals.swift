@@ -118,6 +118,24 @@ var gblLimitAlter	= false
 	}
 }
 
+//--------------------------------------------------------------------------------
+//
+//
+//
+//--------------------------------------------------------------------------------
+@objc public enum debugDevice: UInt8, Codable {
+	case spectralParameters	= 0x00
+	case unknownDevice		= 0xff
+	
+	public var name: String {
+		switch (self) {
+		case .spectralParameters	: return "Spectral Sensor Parameters"
+		case .unknownDevice			: return "Unknown Device"
+		}
+	}
+}
+
+
 
 //--------------------------------------------------------------------------------
 // Function Name:

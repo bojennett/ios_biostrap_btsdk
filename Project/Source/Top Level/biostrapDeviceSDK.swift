@@ -103,6 +103,9 @@ import iOSDFULibrary
 	@objc public var writeEpochComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var readEpochComplete: ((_ id: String, _ successful: Bool, _ value: Int)->())?
 	@objc public var endSleepComplete: ((_ id: String, _ successful: Bool)->())?
+	#if UNIVERSAL || ETHOS
+	@objc public var debugComplete: ((_ id: String, _ successful: Bool, _ device: debugDevice, _ data: Data)->())?
+	#endif
 	@objc public var getAllPacketsComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var getNextPacketComplete: ((_ id: String, _ successful: Bool, _ packet: String)->())?
 	@objc public var getPacketCountComplete: ((_ id: String, _ successful: Bool, _ count: Int)->())?
@@ -417,6 +420,22 @@ import iOSDFULibrary
 		if let device = mConnectedDevices?[id] { device.endSleep(id) }
 		else { self.endSleepComplete?(id, false) }
 	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || ETHOS
+	@objc public func debug(_ id: String, device: debugDevice, data: Data) {
+		log?.v("\(id): \(device.name) -> \(data.hexString)")
+		
+		if let connectedDevice = mConnectedDevices?[id] { connectedDevice.debug(id, device: device, data: data) }
+		else { self.debugComplete?(id, false, device, data) }
+	}
+	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:

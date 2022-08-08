@@ -26,6 +26,9 @@ class customCharacteristic: Characteristic {
 		case enterShipMode		= 0x11
 		case readEpoch			= 0x12
 		case endSleep			= 0x13
+		#if UNIVERSAL || ETHOS
+		case debug				= 0x20
+		#endif
 		case setDeviceParam		= 0x70
 		case getDeviceParam		= 0x71
 		case delDeviceParam		= 0x72
@@ -100,6 +103,9 @@ class customCharacteristic: Characteristic {
 	var disableWornDetectComplete: ((_ successful: Bool)->())?
 	var enableWornDetectComplete: ((_ successful: Bool)->())?
 	var endSleepComplete: ((_ successful: Bool)->())?
+	#if UNIVERSAL || ETHOS
+	var debugComplete: ((_ successful: Bool, _ device: debugDevice, _ data: Data)->())?
+	#endif
 
 	var dataPackets: ((_ packets: String)->())?
 	var dataComplete: ((_ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
@@ -255,6 +261,31 @@ class customCharacteristic: Characteristic {
 		}
 		else { self.endSleepComplete?(false) }
 	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || ETHOS
+	func debug(_ device: debugDevice, data: Data) {
+		log?.v("\(pID): \(device.name) -> \(data.hexString)")
+
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var commandData = Data()
+			commandData.append(commands.debug.rawValue)
+			commandData.append(device.rawValue)
+			commandData.append(contentsOf: data)
+			
+			log?.w ("\(commandData.hexString)")
+
+			peripheral.writeValue(commandData, for: characteristic, type: .withResponse)
+		}
+		else { self.debugComplete?(false, device, Data()) }
+	}
+	#endif
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -1216,6 +1247,22 @@ class customCharacteristic: Characteristic {
 							else {
 								self.getPacketCountComplete?(false, 0)
 							}
+
+						#if UNIVERSAL || ETHOS
+						case .debug:
+							if (successful) {
+								if (data.count == 12) {
+									if let device = debugDevice(rawValue: data[3]) {
+										let response_data = data.subdata(in: Range(4...11))
+										self.debugComplete?(true, device, response_data)
+									}
+									else { self.debugComplete?(false, .unknownDevice, Data()) }
+								}
+								else { self.debugComplete?(false, .unknownDevice, Data()) }
+							}
+							else { self.debugComplete?(false, .unknownDevice, Data()) }
+						#endif
+							
 						case .disableWornDetect	: self.disableWornDetectComplete?(successful)
 						case .enableWornDetect	: self.enableWornDetectComplete?(successful)
 						case .startManual		: self.startManualComplete?(successful)

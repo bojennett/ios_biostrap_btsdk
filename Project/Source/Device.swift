@@ -147,6 +147,9 @@ public class Device: NSObject {
 	var ppgFailed: ((_ id: String, _ code: Int)->())?
 	var disableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 	var enableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
+	#if UNIVERSAL || ETHOS
+	var debugComplete: ((_ id: String, _ successful: Bool, _ device: debugDevice, _ data: Data)->())?
+	#endif
 
 	var dataPackets: ((_ id: String, _ packets: String)->())?
 	var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
@@ -532,6 +535,22 @@ public class Device: NSObject {
 		}
 		else { self.endSleepComplete?(id, false) }
 	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || ETHOS
+	func debug(_ id: String, device: debugDevice, data: Data) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.debug(device, data: data)
+		}
+		else { self.debugComplete?(id, false, device, data) }
+	}
+	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -1097,6 +1116,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.id, successful) }
 					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
 					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
+					mCustomCharacteristic?.debugComplete = { successful, device, data in self.debugComplete?(self.id, successful, device, data) }
 					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
 					mCustomCharacteristic?.getNextPacketComplete = { successful, packet in self.getNextPacketComplete?(self.id, successful, packet) }
 					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }

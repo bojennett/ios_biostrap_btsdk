@@ -282,6 +282,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								device.endSleepComplete			= { id, successful in
 									DispatchQueue.main.async { self.endSleepComplete?(id, successful) }
 								}
+								
+								device.debugComplete			= { id, successful, device, data in
+									DispatchQueue.main.async { self.debugComplete?(id, successful, device, data) }
+								}
 
 								device.getAllPacketsComplete	= { id, successful in
 									DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) }
