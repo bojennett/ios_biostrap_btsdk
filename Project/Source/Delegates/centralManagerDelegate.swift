@@ -185,7 +185,12 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								}
 
 								device.dataPackets				= { id, packets in
-									DispatchQueue.main.async { self.dataPackets?(id, packets) }
+									if (self.dataPacketsOnBackgroundThread) {
+										self.dataPackets?(id, packets)
+									}
+									else {
+										DispatchQueue.main.async { self.dataPackets?(id, packets) }
+									}
 								}
 
 								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
@@ -380,7 +385,12 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								}
 
 								device.dataPackets				= { id, packets in
-									DispatchQueue.main.async { self.dataPackets?(id, packets) }
+									if (self.dataPacketsOnBackgroundThread) {
+										self.dataPackets?(id, packets)
+									}
+									else {
+										DispatchQueue.main.async { self.dataPackets?(id, packets) }
+									}
 								}
 
 								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
@@ -587,7 +597,12 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								}
 
 								device.dataPackets				= { id, packets in
-									DispatchQueue.main.async { self.dataPackets?(id, packets) }
+									if (self.dataPacketsOnBackgroundThread) {
+										self.dataPackets?(id, packets)
+									}
+									else {
+										DispatchQueue.main.async { self.dataPackets?(id, packets) }
+									}
 								}
 
 								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in

@@ -13,6 +13,8 @@ import iOSDFULibrary
 
 @objc public class biostrapDeviceSDK: NSObject {
 	
+	var dataPacketsOnBackgroundThread	= false
+	
 	#if UNIVERSAL
 	@objc public enum biostrapDeviceType: Int {
 		case livotal	= 1

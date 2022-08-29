@@ -41,6 +41,8 @@ import Foundation
 	public var ir_led_current			: Int			= 0
 	public var white_irr_led_current	: Int			= 0
 	public var white_white_led_current	: Int			= 0
+	public var charging					: Bool			= false
+	public var charge_full				: Bool			= false
 
 	//--------------------------------------------------------------------------------
 	//
@@ -81,6 +83,8 @@ import Foundation
 		case ir_led_current
 		case white_irr_led_current
 		case white_white_led_current
+		case charging
+		case charge_full
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -97,6 +101,7 @@ import Foundation
 		case .worn							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(worn)")
 		case .ppg_failed					: return ("\(raw_data.hexString),\(type.title),\(epoch),\(ppg_failed_type.title)")
 		case .battery						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(value),\(voltage)")
+		case .charger						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(charging),\(charge_full)")
 		case .sleep							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(end_epoch)")
 		case .rawPPGFifoCount,
 			 .rawAccelFifoCount				: return ("\(raw_data.hexString),\(type.title),\(value),\(epoch_ms)")
@@ -318,6 +323,11 @@ import Foundation
 				epoch				= data.subdata(in: Range(1...4)).leInt32
 				value				= Int(data[5])
 				voltage				= data.subdata(in: Range(6...7)).leUInt16
+				
+			case .charger:
+				epoch				= data.subdata(in: Range(1...4)).leInt32
+				charging			= (data[5] != 0)
+				charge_full			= (data[6] != 0)
 
 			case .milestone:
 				epoch				= data.subdata(in: Range(1...4)).leInt32
@@ -462,6 +472,11 @@ import Foundation
 			epoch				= try values.decode(Int.self, forKey: .epoch)
 			value				= try values.decode(Int.self, forKey: .value)
 			voltage				= try values.decode(Int.self, forKey: .voltage)
+
+		case .charger:
+			epoch				= try values.decode(Int.self, forKey: .epoch)
+			charging			= try values.decode(Bool.self, forKey: .charging)
+			charge_full			= try values.decode(Bool.self, forKey: .charge_full)
 
 		case .milestone:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
@@ -615,6 +630,11 @@ import Foundation
 			try container.encode(epoch, forKey: .epoch)
 			try container.encode(value, forKey: .value)
 			try container.encode(voltage, forKey: .voltage)
+
+		case .charger:
+			try container.encode(epoch, forKey: .epoch)
+			try container.encode(charging, forKey: .charging)
+			try container.encode(charge_full, forKey: .charge_full)
 
 		case .milestone:
 			try container.encode(epoch, forKey: .epoch)

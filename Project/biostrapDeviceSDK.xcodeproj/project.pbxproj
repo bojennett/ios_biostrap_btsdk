@@ -897,7 +897,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 2.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D LIVOTAL";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.livotalBTSDK;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -953,7 +953,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -968,7 +968,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 2.0;
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "-D ETHOS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.ethosBTSDK;

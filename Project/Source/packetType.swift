@@ -18,6 +18,7 @@ import Foundation
 	case diagnostic						= 0x87
 	case ppg_failed						= 0x88
 	case battery						= 0x89
+	case charger						= 0x8a
 	
 	case rawAccelXADC					= 0xc0
 	case rawAccelYADC					= 0xc1
@@ -80,6 +81,7 @@ import Foundation
 		case "Temperature"							: self	= .temp
 		case "Worn"									: self	= .worn
 		case "Battery"								: self	= .battery
+		case "Charger"								: self	= .charger
 		case "Sleep"								: self	= .sleep
 		case "Diagnostic"							: self	= .diagnostic
 		case "Raw Accel FIFO Count"					: self	= .rawAccelFifoCount
@@ -145,6 +147,7 @@ import Foundation
 		case .temp									: return "Temperature"
 		case .worn									: return "Worn"
 		case .battery								: return "Battery"
+		case .charger								: return "Charger"
 		case .sleep									: return "Sleep"
 		case .diagnostic							: return "Diagnostic"
 		case .rawAccelFifoCount						: return "Raw Accel FIFO Count"
@@ -209,6 +212,7 @@ import Foundation
 		case .temp									: return 9
 		case .worn									: return 6
 		case .battery								: return 8
+		case .charger								: return 7
 		case .sleep									: return 9
 		case .diagnostic							: return 0 	// Done by calculation
 		case .rawAccelFifoCount						: return 10
