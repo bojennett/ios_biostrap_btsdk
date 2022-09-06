@@ -80,6 +80,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.batteryLevel?(id, percentage) }
 								}
 
+								device.heartRateUpdated			= { id, hr, rr in
+									DispatchQueue.main.async { self.heartRate?(id, hr, rr) }
+								}
+
 								device.writeEpochComplete		= { id, successful in
 									DispatchQueue.main.async { self.writeEpochComplete?(id, successful) }
 								}
@@ -114,6 +118,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 
 								device.ledComplete			= { id, successful in
 									DispatchQueue.main.async { self.ledComplete?(id, successful) }
+								}
+
+								device.hrmComplete			= { id, successful in
+									DispatchQueue.main.async { self.hrmComplete?(id, successful) }
 								}
 
 								device.enterShipModeComplete	= { id, successful in
@@ -275,7 +283,11 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								device.batteryLevelUpdated		= { id, percentage in
 									DispatchQueue.main.async { self.batteryLevel?(id, percentage) }
 								}
-								
+
+								device.heartRateUpdated			= { id, hr, rr in
+									DispatchQueue.main.async { self.heartRate?(id, hr, rr) }
+								}
+
 								device.writeEpochComplete		= { id, successful in
 									DispatchQueue.main.async { self.writeEpochComplete?(id, successful) }
 								}
@@ -314,6 +326,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 
 								device.motorComplete			= { id, successful in
 									DispatchQueue.main.async { self.motorComplete?(id, successful) }
+								}
+
+								device.hrmComplete			= { id, successful in
+									DispatchQueue.main.async { self.hrmComplete?(id, successful) }
 								}
 
 								device.enterShipModeComplete	= { id, successful in

@@ -29,6 +29,9 @@ class customCharacteristic: Characteristic {
 		#if UNIVERSAL || ETHOS
 		case motor				= 0x14
 		#endif
+		#if UNIVERSAL || ETHOS || ALTER
+		case hrm				= 0x15
+		#endif
 		case setDeviceParam		= 0x70
 		case getDeviceParam		= 0x71
 		case delDeviceParam		= 0x72
@@ -86,6 +89,9 @@ class customCharacteristic: Characteristic {
 	var ledComplete: ((_ successful: Bool)->())?
 	#if UNIVERSAL || ETHOS
 	var motorComplete: ((_ successful: Bool)->())?
+	#endif
+	#if UNIVERSAL || ETHOS || ALTER
+	var hrmComplete: ((_ successful: Bool)->())?
 	#endif
 	var enterShipModeComplete: ((_ successful: Bool)->())?
 	var writeSerialNumberComplete: ((_ successful: Bool)->())?
@@ -482,7 +488,42 @@ class customCharacteristic: Characteristic {
 		else { self.motorComplete?(false) }
 	}
 	#endif
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || ETHOS || ALTER
+	func enableHRM() {
+		log?.v("\(pID)")
 		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.hrm.rawValue)
+			data.append(0x01)
+
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.hrmComplete?(false) }
+	}
+
+	func disableHRM() {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.hrm.rawValue)
+			data.append(0x00)
+
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.hrmComplete?(false) }
+	}
+	#endif
+
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -1254,6 +1295,11 @@ class customCharacteristic: Characteristic {
 						#if UNIVERSAL || ETHOS
 						case .motor				: self.motorComplete?(successful)
 						#endif
+
+						#if UNIVERSAL || ETHOS || ALTER
+						case .hrm				: self.hrmComplete?(successful)
+						#endif
+
 						case .enterShipMode		: self.enterShipModeComplete?(successful)
 						case .setDeviceParam	:
 							if let parameter = deviceParameterType(rawValue: data[3]) {
