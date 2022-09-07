@@ -218,7 +218,7 @@ import Foundation
 				end_epoch	= data.subdata(in: Range(5...8)).leInt32
 				
 			case .diagnostic:
-				if (raw_data.count >= 2) {
+				if raw_data.count > 2 {
 					if let test = diagnosticType(rawValue: raw_data[2]) { diagnostic_type = test }
 					else { diagnostic_type = .unknown }
 				}
