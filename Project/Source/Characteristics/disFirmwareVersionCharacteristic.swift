@@ -57,7 +57,7 @@ class disFirmwareVersionCharacteristic: Characteristic {
 					if let test = Int(values[0]) { mMajor = test }
 					if let test = Int(values[1]) { mMinor = test }
 					if let test = Int(values[2]) { mBuild = test }
-				}				
+				}
 			}
 			else { log?.e ("\(pID): Missing data") }
 		}

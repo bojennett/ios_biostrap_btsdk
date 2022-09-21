@@ -1060,40 +1060,58 @@ class customCharacteristic: Characteristic {
 		if let type = packetType(rawValue: data[index]) {
 			switch (type) {
 			case .diagnostic:
-				let length = Int(data[index + 1]) + 1
-				
-				if ((index + length) <= data.count) {
-					let packetData = data.subdata(in: Range(index...(index + length - 1)))
-					return (true, type, biostrapDataPacket(packetData))
+				if ((index + 1) < data.count) {
+					let length = Int(data[index + 1]) + 1
+					
+					if ((index + length) <= data.count) {
+						let packetData = data.subdata(in: Range(index...(index + length - 1)))
+						return (true, type, biostrapDataPacket(packetData))
+					}
+					else {
+						log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						return (false, .unknown, biostrapDataPacket())
+					}
 				}
 				else {
-					log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+					log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
-				
+
 			case .rawPPGCompressedGreen,
 				 .rawPPGCompressedIR,
 				 .rawPPGCompressedRed:
-				let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
-				if ((index + length) <= data.count) {
-					let packetData = data.subdata(in: Range(index...(index + length - 1)))
-					return (true, type, biostrapDataPacket(packetData))
+				if ((index + 1) < data.count) {
+					let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
+					if ((index + length) <= data.count) {
+						let packetData = data.subdata(in: Range(index...(index + length - 1)))
+						return (true, type, biostrapDataPacket(packetData))
+					}
+					else {
+						log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						return (false, .unknown, biostrapDataPacket())
+					}
 				}
 				else {
-					log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+					log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 
 			#if ETHOS || UNIVERSAL
 			case .rawPPGCompressedWhiteIRRPD,
 				 .rawPPGCompressedWhiteWhitePD:
-				let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
-				if ((index + length) <= data.count) {
-					let packetData = data.subdata(in: Range(index...(index + length - 1)))
-					return (true, type, biostrapDataPacket(packetData))
+				if ((index + 1) < data.count) {
+					let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
+					if ((index + length) <= data.count) {
+						let packetData = data.subdata(in: Range(index...(index + length - 1)))
+						return (true, type, biostrapDataPacket(packetData))
+					}
+					else {
+						log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						return (false, .unknown, biostrapDataPacket())
+					}
 				}
 				else {
-					log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+					log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 			#endif
@@ -1101,13 +1119,19 @@ class customCharacteristic: Characteristic {
 			case .rawAccelCompressedXADC,
 				 .rawAccelCompressedYADC,
 				 .rawAccelCompressedZADC:
-				let length = Int(data[index + 1]) + 1 + 1 + 2 + 2
-				if ((index + length) <= data.count) {
-					let packetData = data.subdata(in: Range(index...(index + length - 1)))
-					return (true, type, biostrapDataPacket(packetData))
+				if ((index + 1) < data.count) {
+					let length = Int(data[index + 1]) + 1 + 1 + 2 + 2
+					if ((index + length) <= data.count) {
+						let packetData = data.subdata(in: Range(index...(index + length - 1)))
+						return (true, type, biostrapDataPacket(packetData))
+					}
+					else {
+						log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						return (false, .unknown, biostrapDataPacket())
+					}
 				}
 				else {
-					log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+					log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
@@ -1115,19 +1139,25 @@ class customCharacteristic: Characteristic {
 			case .rawGyroCompressedXADC,
 				 .rawGyroCompressedYADC,
 				 .rawGyroCompressedZADC:
-				let length = Int(data[index + 1]) + 1 + 1 + 2 + 2
-				if ((index + length) <= data.count) {
-					let packetData = data.subdata(in: Range(index...(index + length - 1)))
-					return (true, type, biostrapDataPacket(packetData))
+				if ((index + 1) < data.count) {
+					let length = Int(data[index + 1]) + 1 + 1 + 2 + 2
+					if ((index + length) <= data.count) {
+						let packetData = data.subdata(in: Range(index...(index + length - 1)))
+						return (true, type, biostrapDataPacket(packetData))
+					}
+					else {
+						log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						return (false, .unknown, biostrapDataPacket())
+					}
 				}
 				else {
-					log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+					log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 			#endif
 
 			case .unknown:
-				log?.v ("\(type.title): Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+				log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
 				return (false, type, biostrapDataPacket())
 				
 			default:

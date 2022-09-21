@@ -126,10 +126,9 @@ import Foundation
 		case .rawGyroCompressedZADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
 		#endif
 
-		#if UNIVERSAL || ETHOS
+		case .ppgCalibrationStart			: return ("\(raw_data.hexString),\(type.title),\(epoch_ms)")
 		case .ppgCalibrationDone			: return ("\(raw_data.hexString),\(type.title),\(epoch),\(green_led_current),\(red_led_current),\(ir_led_current),\(white_irr_led_current),\(white_white_led_current)")
 		case .motionLevel					: return ("\(raw_data.hexString),\(type.title),\(value),\(epoch_ms)")
-		#endif
 
 		case .rawPPGCompressedGreen,
 			 .rawPPGCompressedIR,
@@ -143,10 +142,6 @@ import Foundation
 		#if UNIVERSAL || ETHOS
 		case .rawPPGWhiteIRRPD,
 			 .rawPPGWhiteWhitePD			: return ("\(raw_data.hexString),\(type.title),\(value)")
-		#endif
-
-		#if UNIVERSAL || ETHOS
-		case .ppgCalibrationStart			: return ("\(raw_data.hexString),\(type.title),\(epoch_ms)")
 		#endif
 
 		case .ppg							:
@@ -223,7 +218,7 @@ import Foundation
 				end_epoch	= data.subdata(in: Range(5...8)).leInt32
 				
 			case .diagnostic:
-				if (raw_data.count >= 2) {
+				if (raw_data.count > 2) {
 					if let test = diagnosticType(rawValue: raw_data[2]) { diagnostic_type = test }
 					else { diagnostic_type = .unknown }
 				}
@@ -275,7 +270,6 @@ import Foundation
 			#endif
 
 				
-			#if UNIVERSAL || ETHOS
 			case .ppgCalibrationStart:
 				epoch_ms				= data.subdata(in: Range(1...8)).leInt64
 				
@@ -290,7 +284,6 @@ import Foundation
 			case .motionLevel:
 				value					= Int(data[2])
 				epoch_ms				= data.subdata(in: Range(2...9)).leInt64
-			#endif
 
 			case .rawPPGProximity:
 				value				= data.subdata(in: Range(1...4)).leInt32
@@ -432,7 +425,6 @@ import Foundation
 			value				= try values.decode(Int.self, forKey: .value)
 		#endif
 
-		#if UNIVERSAL || ETHOS
 		case .ppgCalibrationStart:
 			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
 			
@@ -447,7 +439,6 @@ import Foundation
 		case .motionLevel:
 			value				= try values.decode(Int.self, forKey: .value)
 			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
-		#endif
 
 		case .ppg:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
@@ -590,7 +581,6 @@ import Foundation
 			try container.encode(value, forKey: .value)
 		#endif
 
-		#if UNIVERSAL || ETHOS
 		case .ppgCalibrationStart:
 			try container.encode(epoch_ms, forKey: .epoch_ms)
 
@@ -605,7 +595,6 @@ import Foundation
 		case .motionLevel:
 			try container.encode(value, forKey: .value)
 			try container.encode(epoch_ms, forKey: .epoch_ms)
-		#endif
 
 		case .ppg:
 			try container.encode(epoch, forKey: .epoch)
