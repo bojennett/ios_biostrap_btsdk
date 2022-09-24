@@ -20,22 +20,27 @@ import Foundation
 	public var temperature				: Float			= 0.0
 	public var hr_valid					: Bool			= false
 	public var hr_result				: Float			= 0.0
-	public var hr_uncertainty			: Float			= 0.0
 	public var hrv_valid				: Bool			= false
 	public var hrv_result				: Float			= 0.0
-	public var hrv_uncertainty			: Float			= 0.0
 	public var rr_valid					: Bool			= false
 	public var rr_result				: Float			= 0.0
-	public var rr_uncertainty			: Float			= 0.0
 	public var spo2_valid				: Bool			= false
 	public var spo2_result				: Float			= 0.0
+	#if LIVOTAL || UNIVERSAL
+	public var hr_uncertainty			: Float			= 0.0
+	public var hrv_uncertainty			: Float			= 0.0
+	public var rr_uncertainty			: Float			= 0.0
 	public var spo2_uncertainty			: Float			= 0.0
+	#endif
 	public var tag						: String		= ""
 	public var settings_value			: Float			= 0.0
 	public var raw_data					: Data			= Data()
 	public var raw_data_string			: String		= ""
 	public var diagnostic_type			: diagnosticType	= .unknown
 	public var ppg_failed_type			: ppgFailedType		= .unknown
+	#if ALTER || ETHOS || UNIVERSAL
+	public var ppg_metrics_status		: Int			= 0
+	#endif
 	public var green_led_current		: Int			= 0
 	public var red_led_current			: Int			= 0
 	public var ir_led_current			: Int			= 0
@@ -78,6 +83,7 @@ import Foundation
 		case raw_data_string
 		case diagnostic_type
 		case ppg_failed_type
+		case ppg_metrics_status
 		case green_led_current
 		case red_led_current
 		case ir_led_current
@@ -144,6 +150,7 @@ import Foundation
 			 .rawPPGWhiteWhitePD			: return ("\(raw_data.hexString),\(type.title),\(value)")
 		#endif
 
+		#if UNIVERSAL || LIVOTAL
 		case .ppg							:
 			let root	= "\(raw_data.hexString),\(type.title),\(epoch)"
 			let hr		= "\(root),HR,\(hr_valid),\(hr_result),\(hr_uncertainty)"
@@ -151,7 +158,18 @@ import Foundation
 			let rr		= "\(root),RR,\(rr_valid),\(rr_result),\(rr_uncertainty)"
 			let spo2	= "\(root),SPO2,\(spo2_valid),\(spo2_result),\(spo2_uncertainty)"
 			return ("\(hr)\n\(hrv)\n\(rr)\n\(spo2)")
-			
+		#endif
+
+		#if UNIVERSAL || ALTER || ETHOS
+		case .ppg_metrics					:
+			let root	= "\(raw_data.hexString),\(type.title),\(epoch_ms),\(ppg_metrics_status)"
+			let hr		= "\(root),HR,\(hr_valid),\(hr_result)"
+			let hrv		= "\(root),HRV,\(hrv_valid),\(hrv_result)"
+			let rr		= "\(root),RR,\(rr_valid),\(rr_result)"
+			let spo2	= "\(root),SPO2,\(spo2_valid),\(spo2_result)"
+			return ("\(hr)\n\(hrv)\n\(rr)\n\(spo2)")
+		#endif
+
 		case .unknown						: return ("\(raw_data.hexString),\(type.title)")
 		case .steps							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(value)")
 		case .diagnostic					: return ("\(raw_data.hexString),\(type.title),\(diagnostic_type.title)")
@@ -292,6 +310,7 @@ import Foundation
 				epoch				= data.subdata(in: Range(1...4)).leInt32
 				value				= data.subdata(in: Range(5...6)).leUInt16
 
+			#if UNIVERSAL || LIVOTAL
 			case .ppg:
 				epoch				= data.subdata(in: Range(1...4)).leInt32
 				hr_result			= data.subdata(in: Range(5...6)).leFloat16
@@ -306,7 +325,22 @@ import Foundation
 				spo2_result			= data.subdata(in: Range(14...15)).leFloat16
 				spo2_uncertainty	= mDecodeUncertainty(data[16])
 				spo2_valid			= (data[16] != 0xff)
-
+			#endif
+				
+			#if UNIVERSAL || ALTER || ETHOS
+			case .ppg_metrics:
+				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
+				ppg_metrics_status	= Int(data[9])
+				hr_valid			= (((data[10] >> 0) & 0x01) != 0)
+				hrv_valid			= (((data[10] >> 1) & 0x01) != 0)
+				rr_valid			= (((data[10] >> 2) & 0x01) != 0)
+				spo2_valid			= (((data[10] >> 3) & 0x01) != 0)
+				spo2_result			= data.subdata(in: Range(11...12)).leFloat16
+				rr_result			= data.subdata(in: Range(13...14)).leFloat16
+				hrv_result			= data.subdata(in: Range(15...16)).leFloat16
+				hr_result			= data.subdata(in: Range(17...18)).leFloat16
+			#endif
+				
 			case .ppg_failed:
 				epoch				= data.subdata(in: Range(1...4)).leInt32
 				if let test = ppgFailedType(rawValue: raw_data[5]) { ppg_failed_type = test }
@@ -440,6 +474,7 @@ import Foundation
 			value				= try values.decode(Int.self, forKey: .value)
 			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
 
+		#if UNIVERSAL || LIVOTAL
 		case .ppg:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
 			hr_valid			= try values.decode(Bool.self, forKey: .hr_valid)
@@ -454,6 +489,21 @@ import Foundation
 			spo2_valid			= try values.decode(Bool.self, forKey: .spo2_valid)
 			spo2_result			= try values.decode(Float.self, forKey: .spo2_result)
 			spo2_uncertainty	= try values.decode(Float.self, forKey: .spo2_uncertainty)
+		#endif
+			
+		#if UNIVERSAL || ALTER || ETHOS
+		case .ppg_metrics:
+			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
+			ppg_metrics_status	= try values.decode(Int.self, forKey: .ppg_metrics_status)
+			hr_valid			= try values.decode(Bool.self, forKey: .hr_valid)
+			hr_result			= try values.decode(Float.self, forKey: .hr_result)
+			hrv_valid			= try values.decode(Bool.self, forKey: .hrv_valid)
+			hrv_result			= try values.decode(Float.self, forKey: .hrv_result)
+			rr_valid			= try values.decode(Bool.self, forKey: .rr_valid)
+			rr_result			= try values.decode(Float.self, forKey: .rr_result)
+			spo2_valid			= try values.decode(Bool.self, forKey: .spo2_valid)
+			spo2_result			= try values.decode(Float.self, forKey: .spo2_result)
+		#endif
 			
 		case .ppg_failed:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
@@ -596,6 +646,7 @@ import Foundation
 			try container.encode(value, forKey: .value)
 			try container.encode(epoch_ms, forKey: .epoch_ms)
 
+		#if UNIVERSAL || LIVOTAL
 		case .ppg:
 			try container.encode(epoch, forKey: .epoch)
 			try container.encode(hr_valid, forKey: .hr_valid)
@@ -610,6 +661,21 @@ import Foundation
 			try container.encode(spo2_valid, forKey: .spo2_valid)
 			try container.encode(spo2_result, forKey: .spo2_result)
 			try container.encode(spo2_uncertainty, forKey: .spo2_uncertainty)
+		#endif
+			
+		#if UNIVERSAL || ALTER || ETHOS
+		case .ppg_metrics:
+			try container.encode(epoch_ms, forKey: .epoch_ms)
+			try container.encode(ppg_metrics_status, forKey: .ppg_metrics_status)
+			try container.encode(hr_valid, forKey: .hr_valid)
+			try container.encode(hr_result, forKey: .hr_result)
+			try container.encode(hrv_valid, forKey: .hrv_valid)
+			try container.encode(hrv_result, forKey: .hrv_result)
+			try container.encode(rr_valid, forKey: .rr_valid)
+			try container.encode(rr_result, forKey: .rr_result)
+			try container.encode(spo2_valid, forKey: .spo2_valid)
+			try container.encode(spo2_result, forKey: .spo2_result)
+		#endif
 			
 		case .ppg_failed:
 			try container.encode(epoch, forKey: .epoch)

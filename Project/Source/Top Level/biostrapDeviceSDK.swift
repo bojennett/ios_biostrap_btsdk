@@ -130,7 +130,12 @@ import iOSDFULibrary
 	@objc public var wornCheckComplete: ((_ id: String, _ successful: Bool, _ code: String, _ value: Int)->())?
 	@objc public var rawLoggingComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var resetComplete: ((_ id: String, _ successful: Bool)->())?
-	@objc public var manualResult: ((_ id: String, _ successful: Bool, _ packet : String)->())?
+	#if LIVOTAL || UNIVERSAL
+	@objc public var manualResult: ((_ id: String, _ successful: Bool, _ packet: String)->())?
+	#endif
+	#if ALTER || ETHOS || UNIVERSAL
+	@objc public var ppgMetrics: ((_ id: String, _ successful: Bool, _ packet: String)->())?
+	#endif
 	@objc public var ppgFailed: ((_ id: String, _ code: Int)->())?
 	@objc public var disableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var enableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?

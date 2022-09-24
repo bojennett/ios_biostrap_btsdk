@@ -184,8 +184,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.enableWornDetectComplete?(id, successful) }
 								}
 
-								device.manualResult     		= { id, successful, packet in
-									DispatchQueue.main.async { self.manualResult?(id, successful, packet) }
+								device.ppgMetrics     		= { id, successful, packet in
+									DispatchQueue.main.async { self.ppgMetrics?(id, successful, packet) }
 								}
 
 								device.ppgFailed				= { id, code in
@@ -392,10 +392,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.enableWornDetectComplete?(id, successful) }
 								}
 
-								device.manualResult     		= { id, successful, packet in
-									DispatchQueue.main.async { self.manualResult?(id, successful, packet) }
+								device.ppgMetrics     		= { id, successful, packet in
+									DispatchQueue.main.async { self.ppgMetrics?(id, successful, packet) }
 								}
-								
+
 								device.ppgFailed				= { id, code in
 									DispatchQueue.main.async { self.ppgFailed?(id, code) }
 								}
