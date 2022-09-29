@@ -27,14 +27,11 @@ class customCharacteristic: Characteristic {
 		case readEpoch			= 0x12
 		case endSleep			= 0x13
 		#if UNIVERSAL || ETHOS
-<<<<<<< HEAD
 		case motor				= 0x14
 		#endif
 		#if UNIVERSAL || ETHOS || ALTER
 		case hrm				= 0x15
-=======
 		case debug				= 0x20
->>>>>>> main
 		#endif
 		case setDeviceParam		= 0x70
 		case getDeviceParam		= 0x71

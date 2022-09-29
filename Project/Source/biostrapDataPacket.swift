@@ -39,7 +39,7 @@ import Foundation
 	public var diagnostic_type			: diagnosticType	= .unknown
 	public var ppg_failed_type			: ppgFailedType		= .unknown
 	#if ALTER || ETHOS || UNIVERSAL
-	public var ppg_metrics_status		: Int			= 0
+	public var ppg_metrics_status		: ppgStatusType		= .unknown
 	#endif
 	public var green_led_current		: Int			= 0
 	public var red_led_current			: Int			= 0
@@ -162,11 +162,16 @@ import Foundation
 
 		#if UNIVERSAL || ALTER || ETHOS
 		case .ppg_metrics					:
-			let root	= "\(raw_data.hexString),\(type.title),\(epoch_ms),\(ppg_metrics_status)"
-			let hr		= "\(root),HR,\(hr_valid),\(hr_result)"
-			let hrv		= "\(root),HRV,\(hrv_valid),\(hrv_result)"
-			let rr		= "\(root),RR,\(rr_valid),\(rr_result)"
-			let spo2	= "\(root),SPO2,\(spo2_valid),\(spo2_result)"
+			var hr		= ""
+			var hrv		= ""
+			var rr		= ""
+			var spo2	= ""
+			
+			let root	= "\(raw_data.hexString),\(type.title),\(epoch_ms),\(ppg_metrics_status.title)"
+			if (hr_valid)	{ hr	= "\(root),HR,\(hr_valid),\(hr_result)"			}
+			if (hrv_valid)	{ hrv	= "\(root),HRV,\(hrv_valid),\(hrv_result)"		}
+			if (rr_valid)	{ rr	= "\(root),RR,\(rr_valid),\(rr_result)"			}
+			if (spo2_valid) { spo2	= "\(root),SPO2,\(spo2_valid),\(spo2_result)"	}
 			return ("\(hr)\n\(hrv)\n\(rr)\n\(spo2)")
 		#endif
 
@@ -330,7 +335,8 @@ import Foundation
 			#if UNIVERSAL || ALTER || ETHOS
 			case .ppg_metrics:
 				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
-				ppg_metrics_status	= Int(data[9])
+				if let test = ppgStatusType(rawValue: raw_data[9]) { ppg_metrics_status = test }
+				else { ppg_metrics_status = .unknown }
 				hr_valid			= (((data[10] >> 0) & 0x01) != 0)
 				hrv_valid			= (((data[10] >> 1) & 0x01) != 0)
 				rr_valid			= (((data[10] >> 2) & 0x01) != 0)
@@ -494,7 +500,7 @@ import Foundation
 		#if UNIVERSAL || ALTER || ETHOS
 		case .ppg_metrics:
 			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
-			ppg_metrics_status	= try values.decode(Int.self, forKey: .ppg_metrics_status)
+			ppg_metrics_status	= try values.decode(ppgStatusType.self, forKey: .ppg_metrics_status)
 			hr_valid			= try values.decode(Bool.self, forKey: .hr_valid)
 			hr_result			= try values.decode(Float.self, forKey: .hr_result)
 			hrv_valid			= try values.decode(Bool.self, forKey: .hrv_valid)
@@ -666,7 +672,7 @@ import Foundation
 		#if UNIVERSAL || ALTER || ETHOS
 		case .ppg_metrics:
 			try container.encode(epoch_ms, forKey: .epoch_ms)
-			try container.encode(ppg_metrics_status, forKey: .ppg_metrics_status)
+			try container.encode(ppg_metrics_status.title, forKey: .ppg_metrics_status)
 			try container.encode(hr_valid, forKey: .hr_valid)
 			try container.encode(hr_result, forKey: .hr_result)
 			try container.encode(hrv_valid, forKey: .hrv_valid)

@@ -54,6 +54,10 @@
 		3B260316289088DA00D5CAAA /* diagnosticType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260297288A061D00D5CAAA /* diagnosticType.swift */; };
 		3B260317289088DD00D5CAAA /* settingsType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260291288A05CE00D5CAAA /* settingsType.swift */; };
 		3B260318289088E000D5CAAA /* ppgFailedType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260294288A05F600D5CAAA /* ppgFailedType.swift */; };
+		3B28D46928E4B72900F6953A /* ppgStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B28D46828E4B72900F6953A /* ppgStatusType.swift */; };
+		3B28D46A28E4B72900F6953A /* ppgStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B28D46828E4B72900F6953A /* ppgStatusType.swift */; };
+		3B28D46B28E4B72900F6953A /* ppgStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B28D46828E4B72900F6953A /* ppgStatusType.swift */; };
+		3B28D46C28E4B72900F6953A /* ppgStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B28D46828E4B72900F6953A /* ppgStatusType.swift */; };
 		3B29C547264C3D59006BC11B /* nordicDFUCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C546264C3D59006BC11B /* nordicDFUCharacteristic.swift */; };
 		3B29C555264C5A5B006BC11B /* Characteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C554264C5A5B006BC11B /* Characteristic.swift */; };
 		3B29C557264C5B53006BC11B /* customCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C556264C5B53006BC11B /* customCharacteristic.swift */; };
@@ -141,6 +145,7 @@
 		3B2602CA2890541E00D5CAAA /* alterBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = alterBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B2602CC289054D200D5CAAA /* alterBTSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = alterBTSDK.swift; sourceTree = "<group>"; };
 		3B2602D02890592700D5CAAA /* alterManufacturingTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = alterManufacturingTestResult.swift; sourceTree = "<group>"; };
+		3B28D46828E4B72900F6953A /* ppgStatusType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ppgStatusType.swift; sourceTree = "<group>"; };
 		3B29C546264C3D59006BC11B /* nordicDFUCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nordicDFUCharacteristic.swift; sourceTree = "<group>"; };
 		3B29C554264C5A5B006BC11B /* Characteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Characteristic.swift; sourceTree = "<group>"; };
 		3B29C556264C5B53006BC11B /* customCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = customCharacteristic.swift; sourceTree = "<group>"; };
@@ -298,6 +303,7 @@
 				3B260297288A061D00D5CAAA /* diagnosticType.swift */,
 				3B260291288A05CE00D5CAAA /* settingsType.swift */,
 				3B260294288A05F600D5CAAA /* ppgFailedType.swift */,
+				3B28D46828E4B72900F6953A /* ppgStatusType.swift */,
 				3BD01F9C26153EF10014CEF0 /* Device.swift */,
 				3B29C59C264C9E72006BC11B /* nordicDFU.swift */,
 				3BF3FEC226C58BCF005AF135 /* biostrapDataPacket.swift */,
@@ -642,6 +648,7 @@
 				3B2602AB2890541E00D5CAAA /* ambiqOTATXCharacteristic.swift in Sources */,
 				3B2602AC2890541E00D5CAAA /* Globals.swift in Sources */,
 				3B2602AD2890541E00D5CAAA /* customCharacteristic.swift in Sources */,
+				3B28D46928E4B72900F6953A /* ppgStatusType.swift in Sources */,
 				3B2602AE2890541E00D5CAAA /* nordicDFU.swift in Sources */,
 				3B2602AF2890541E00D5CAAA /* Characteristic.swift in Sources */,
 				3B2602B02890541E00D5CAAA /* CoreBluetoothExtensions.swift in Sources */,
@@ -686,6 +693,7 @@
 				3BD01F90261539630014CEF0 /* biostrapDeviceSDK.swift in Sources */,
 				3BD01F9626153AF20014CEF0 /* Logging.swift in Sources */,
 				3BF3FEC326C58BCF005AF135 /* biostrapDataPacket.swift in Sources */,
+				3B28D46B28E4B72900F6953A /* ppgStatusType.swift in Sources */,
 				3BD01FAE261632830014CEF0 /* BluetoothIDs.swift in Sources */,
 				3B29C547264C3D59006BC11B /* nordicDFUCharacteristic.swift in Sources */,
 				3BD10BDA28BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift in Sources */,
@@ -711,6 +719,7 @@
 				3B260299288A061D00D5CAAA /* diagnosticType.swift in Sources */,
 				3B260293288A05CE00D5CAAA /* settingsType.swift in Sources */,
 				3BD10BDB28BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift in Sources */,
+				3B28D46C28E4B72900F6953A /* ppgStatusType.swift in Sources */,
 				3BF807C227A1AFA000595493 /* Globals.swift in Sources */,
 				3B5BFCDB285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */,
 				3BF807EE27A2057700595493 /* CrcCalculator.swift in Sources */,
@@ -752,6 +761,7 @@
 				3BF809B827BD774400595493 /* ambiqOTATXCharacteristic.swift in Sources */,
 				3B2602D12890592700D5CAAA /* alterManufacturingTestResult.swift in Sources */,
 				3BF8099C27BD766D00595493 /* Globals.swift in Sources */,
+				3B28D46A28E4B72900F6953A /* ppgStatusType.swift in Sources */,
 				3BF8099D27BD766D00595493 /* customCharacteristic.swift in Sources */,
 				3BF8099E27BD766D00595493 /* nordicDFU.swift in Sources */,
 				3BF8099F27BD766D00595493 /* Characteristic.swift in Sources */,
