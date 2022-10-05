@@ -23,6 +23,7 @@ import Foundation
 	case charger						= 0x8a
 	#if UNIVERSAL || ETHOS || ALTER
 	case ppg_metrics					= 0x8b
+	case continuous_hr					= 0x8c
 	#endif
 	
 	case rawAccelXADC					= 0xc0
@@ -90,6 +91,7 @@ import Foundation
 		case "Diagnostic"							: self	= .diagnostic
 		#if UNIVERSAL || ETHOS || ALTER
 		case "PPG Metrics"							: self	= .ppg_metrics
+		case "Continuous Heart Rate"				: self	= .continuous_hr
 		#endif
 		case "Raw Accel FIFO Count"					: self	= .rawAccelFifoCount
 		case "Raw PPG Proximity"					: self	= .rawPPGProximity
@@ -157,6 +159,7 @@ import Foundation
 		case .diagnostic							: return "Diagnostic"
 		#if UNIVERSAL || ETHOS || ALTER
 		case .ppg_metrics							: return "PPG Metrics"
+		case .continuous_hr							: return "Continuous Heart Rate"
 		#endif
 		case .rawAccelFifoCount						: return "Raw Accel FIFO Count"
 		case .rawPPGProximity						: return "Raw PPG Proximity"
@@ -223,6 +226,7 @@ import Foundation
 		case .diagnostic							: return 0 	// Done by calculation
 		#if UNIVERSAL || ETHOS || ALTER
 		case .ppg_metrics							: return 19
+		case .continuous_hr							: return 19
 		#endif
 		case .rawAccelFifoCount						: return 10
 		case .rawPPGProximity						: return 5

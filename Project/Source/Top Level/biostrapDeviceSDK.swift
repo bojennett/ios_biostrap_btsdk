@@ -745,12 +745,39 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	#if LIVOTAL
 	@objc public func manufacturingTest(_ id: String) {
 		log?.v ("\(id)")
 		
 		if let device = mConnectedDevices?[id] { device.manufacturingTest(id) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
+	#endif
+	
+	#if ALTER || ETHOS
+	@objc public func manufacturingTest(_ id: String, test: manufacturingTestType) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.manufacturingTest(id, test: test) }
+		else { self.manufacturingTestComplete?(id, false) }
+	}
+	#endif
+
+	#if UNIVERSAL
+	@objc public func livotalManufacturingTest(_ id: String) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.livotalManufacturingTest(id) }
+		else { self.manufacturingTestComplete?(id, false) }
+	}
+
+	@objc public func ethosManufacturingTest(_ id: String, test: ethosManufacturingTestType) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.ethosManufacturingTest(id, test: test) }
+		else { self.manufacturingTestComplete?(id, false) }
+	}
+	#endif
 
 	#if UNIVERSAL || ETHOS
 	//--------------------------------------------------------------------------------

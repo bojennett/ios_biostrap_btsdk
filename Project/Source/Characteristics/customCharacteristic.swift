@@ -895,6 +895,7 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
+	#if LIVOTAL
 	func manufacturingTest() {
 		log?.v("")
 		
@@ -905,7 +906,47 @@ class customCharacteristic: Characteristic {
 		}
 		else { self.manufacturingTestComplete?(false) }
 	}
+	#endif
+
+	#if ALTER || ETHOS
+	func manufacturingTest(_ test: manufacturingTestType) {
+		log?.v("")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.manufacturingTest.rawValue)
+			data.append(test.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.manufacturingTestComplete?(false) }
+	}
+	#endif
 	
+	#if UNIVERSAL
+	func livotalManufacturingTest() {
+		log?.v("")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.manufacturingTest.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.manufacturingTestComplete?(false) }
+	}
+
+	func ethosManufacturingTest(_ test: ethosManufacturingTestType) {
+		log?.v("")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.manufacturingTest.rawValue)
+			data.append(test.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.manufacturingTestComplete?(false) }
+	}
+	#endif
+
 	#if ETHOS || UNIVERSAL
 	//--------------------------------------------------------------------------------
 	// Function Name: Live Sync start and stop
@@ -1668,19 +1709,24 @@ class customCharacteristic: Characteristic {
 				#endif
 				
 				#if ETHOS
-				let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...4)))
-				do {
-					let jsonData = try JSONEncoder().encode(testResult)
-					if let jsonString = String(data: jsonData, encoding: .utf8) {
-						self.manufacturingTestResult?(true, jsonString)
+				if (data.count == 3) {
+					let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...2)))
+					do {
+						let jsonData = try JSONEncoder().encode(testResult)
+						if let jsonString = String(data: jsonData, encoding: .utf8) {
+							self.manufacturingTestResult?(true, jsonString)
+						}
+						else {
+							log?.e ("Result jsonString Failed")
+							self.manufacturingTestResult?(false, "")
+						}
 					}
-					else {
-						log?.e ("Result jsonString Failed")
+					catch {
+						log?.e ("Result jsonData Failed")
 						self.manufacturingTestResult?(false, "")
 					}
 				}
-				catch {
-					log?.e ("Result jsonData Failed")
+				else {
 					self.manufacturingTestResult?(false, "")
 				}
 				#endif
@@ -1705,19 +1751,24 @@ class customCharacteristic: Characteristic {
 					}
 
 				case .ethos		:
-					let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...4)))
-					do {
-						let jsonData = try JSONEncoder().encode(testResult)
-						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
+					if (data.count == 3) {
+						let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...2)))
+						do {
+							let jsonData = try JSONEncoder().encode(testResult)
+							if let jsonString = String(data: jsonData, encoding: .utf8) {
+								self.manufacturingTestResult?(true, jsonString)
+							}
+							else {
+								log?.e ("Result jsonString Failed")
+								self.manufacturingTestResult?(false, "")
+							}
 						}
-						else {
-							log?.e ("Result jsonString Failed")
+						catch {
+							log?.e ("Result jsonData Failed")
 							self.manufacturingTestResult?(false, "")
 						}
 					}
-					catch {
-						log?.e ("Result jsonData Failed")
+					else {
 						self.manufacturingTestResult?(false, "")
 					}
 

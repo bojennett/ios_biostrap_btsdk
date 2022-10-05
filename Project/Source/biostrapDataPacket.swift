@@ -40,6 +40,7 @@ import Foundation
 	public var ppg_failed_type			: ppgFailedType		= .unknown
 	#if ALTER || ETHOS || UNIVERSAL
 	public var ppg_metrics_status		: ppgStatusType		= .unknown
+	public var continuous_hr			: [Int]			= [Int]()
 	#endif
 	public var green_led_current		: Int			= 0
 	public var red_led_current			: Int			= 0
@@ -84,6 +85,7 @@ import Foundation
 		case diagnostic_type
 		case ppg_failed_type
 		case ppg_metrics_status
+		case continuous_hr
 		case green_led_current
 		case red_led_current
 		case ir_led_current
@@ -173,6 +175,9 @@ import Foundation
 			if (rr_valid)	{ rr	= "\(root),RR,\(rr_valid),\(rr_result)"			}
 			if (spo2_valid) { spo2	= "\(root),SPO2,\(spo2_valid),\(spo2_result)"	}
 			return ("\(hr)\n\(hrv)\n\(rr)\n\(spo2)")
+			
+		case .continuous_hr					:
+			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(mIntegerArrayToString(continuous_hr))")
 		#endif
 
 		case .unknown						: return ("\(raw_data.hexString),\(type.title)")
@@ -198,6 +203,41 @@ import Foundation
 		let UNCERTAINTY_ENCODE_C	= (UNCERTAINTY_ENCODE_A * (UNCERTAINTY_ENCODE_B - 1))
 		
 		return UNCERTAINTY_ENCODE_A * exp(UNCERTAINTY_ENCODE_B * Float(encoded)) + UNCERTAINTY_ENCODE_C
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	// Makes a comma deliminated string from an integer array
+	//
+	// Data goes in as ',<value>,<value>,<value>...'
+	// And then the first comma is thrown away
+	//
+	//--------------------------------------------------------------------------------
+	internal func mIntegerArrayToString(_ values: [Int]) -> String {
+		var arr_string = ""
+		for value in values { arr_string = "\(arr_string),\(value)" }
+		arr_string = String(arr_string.dropFirst())
+		
+		return arr_string
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	// Makes a comma deliminated string from an integer array
+	//
+	//--------------------------------------------------------------------------------
+	internal func mStringArrayToIntegerArray(_ value: String) -> [Int] {
+		var array = [Int]()
+		let strArray = value.components(separatedBy: ",")
+		for str in strArray {
+			if let test = Int(str) { array.append(test) }
+		}
+		
+		return array
 	}
 
 	//--------------------------------------------------------------------------------
@@ -345,6 +385,13 @@ import Foundation
 				rr_result			= data.subdata(in: Range(13...14)).leFloat16
 				hrv_result			= data.subdata(in: Range(15...16)).leFloat16
 				hr_result			= data.subdata(in: Range(17...18)).leFloat16
+				
+			case .continuous_hr:
+				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
+				continuous_hr.removeAll()
+				for i in (9...18) {
+					if (data[i] != 0xff) { continuous_hr.append(Int(data[i])) }
+				}
 			#endif
 				
 			case .ppg_failed:
@@ -384,6 +431,8 @@ import Foundation
 	//
 	//--------------------------------------------------------------------------------
 	public required init(from decoder: Decoder) throws {
+		super.init()
+		
 		let values = try decoder.container(keyedBy: CodingKeys.self)
 		type = try values.decode(packetType.self, forKey: .type)
 
@@ -509,6 +558,12 @@ import Foundation
 			rr_result			= try values.decode(Float.self, forKey: .rr_result)
 			spo2_valid			= try values.decode(Bool.self, forKey: .spo2_valid)
 			spo2_result			= try values.decode(Float.self, forKey: .spo2_result)
+			
+		case .continuous_hr:
+			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
+			let elements		= try values.decode(String.self, forKey: .continuous_hr)
+			continuous_hr		= mStringArrayToIntegerArray(elements)
+			
 		#endif
 			
 		case .ppg_failed:
@@ -681,6 +736,10 @@ import Foundation
 			try container.encode(rr_result, forKey: .rr_result)
 			try container.encode(spo2_valid, forKey: .spo2_valid)
 			try container.encode(spo2_result, forKey: .spo2_result)
+			
+		case .continuous_hr:
+			try container.encode(epoch_ms, forKey: .epoch_ms)
+			try container.encode(mIntegerArrayToString(continuous_hr), forKey: .continuous_hr)
 		#endif
 			
 		case .ppg_failed:

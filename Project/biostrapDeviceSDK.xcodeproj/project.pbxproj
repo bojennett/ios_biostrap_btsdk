@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		00F5E9227AFEE395C47CCA18 /* Pods_livotalBTSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD7D189D7BA1B2AD11D01279 /* Pods_livotalBTSDK.framework */; };
+		3B14E9BF28EB921C000E85F2 /* manufacturingTestType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */; };
+		3B14E9C028EB921C000E85F2 /* manufacturingTestType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */; };
+		3B14E9C128EB921C000E85F2 /* manufacturingTestType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */; };
+		3B14E9C228EB921C000E85F2 /* manufacturingTestType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */; };
 		3B26027C28877C3B00D5CAAA /* ethosManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B26027B28877C3B00D5CAAA /* ethosManufacturingTestResult.swift */; };
 		3B26027D28877C3B00D5CAAA /* ethosManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B26027B28877C3B00D5CAAA /* ethosManufacturingTestResult.swift */; };
 		3B26028F288A04F700D5CAAA /* packetType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B26028E288A04F700D5CAAA /* packetType.swift */; };
@@ -137,6 +141,7 @@
 
 /* Begin PBXFileReference section */
 		331A1546F82DD6F1138DBC0F /* Pods-livotalBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-livotalBTSDK.release.xcconfig"; path = "Target Support Files/Pods-livotalBTSDK/Pods-livotalBTSDK.release.xcconfig"; sourceTree = "<group>"; };
+		3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = manufacturingTestType.swift; sourceTree = "<group>"; };
 		3B26027B28877C3B00D5CAAA /* ethosManufacturingTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ethosManufacturingTestResult.swift; sourceTree = "<group>"; };
 		3B26028E288A04F700D5CAAA /* packetType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = packetType.swift; sourceTree = "<group>"; };
 		3B260291288A05CE00D5CAAA /* settingsType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = settingsType.swift; sourceTree = "<group>"; };
@@ -231,6 +236,19 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		3B14E9C328EB9229000E85F2 /* Enumerations */ = {
+			isa = PBXGroup;
+			children = (
+				3B26028E288A04F700D5CAAA /* packetType.swift */,
+				3B260297288A061D00D5CAAA /* diagnosticType.swift */,
+				3B260291288A05CE00D5CAAA /* settingsType.swift */,
+				3B260294288A05F600D5CAAA /* ppgFailedType.swift */,
+				3B28D46828E4B72900F6953A /* ppgStatusType.swift */,
+				3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */,
+			);
+			path = Enumerations;
+			sourceTree = "<group>";
+		};
 		3B2602CF2890591200D5CAAA /* Alter */ = {
 			isa = PBXGroup;
 			children = (
@@ -299,14 +317,10 @@
 				3BD01F9526153AF20014CEF0 /* Logging.swift */,
 				3BD01FAD261632830014CEF0 /* BluetoothIDs.swift */,
 				3BD01F9826153B280014CEF0 /* Globals.swift */,
-				3B26028E288A04F700D5CAAA /* packetType.swift */,
-				3B260297288A061D00D5CAAA /* diagnosticType.swift */,
-				3B260291288A05CE00D5CAAA /* settingsType.swift */,
-				3B260294288A05F600D5CAAA /* ppgFailedType.swift */,
-				3B28D46828E4B72900F6953A /* ppgStatusType.swift */,
 				3BD01F9C26153EF10014CEF0 /* Device.swift */,
 				3B29C59C264C9E72006BC11B /* nordicDFU.swift */,
 				3BF3FEC226C58BCF005AF135 /* biostrapDataPacket.swift */,
+				3B14E9C328EB9229000E85F2 /* Enumerations */,
 				3BF8082127A4526900595493 /* Extensions */,
 				3BF8082827A4550B00595493 /* Top Level */,
 				3B2602CF2890591200D5CAAA /* Alter */,
@@ -652,6 +666,7 @@
 				3B2602AE2890541E00D5CAAA /* nordicDFU.swift in Sources */,
 				3B2602AF2890541E00D5CAAA /* Characteristic.swift in Sources */,
 				3B2602B02890541E00D5CAAA /* CoreBluetoothExtensions.swift in Sources */,
+				3B14E9BF28EB921C000E85F2 /* manufacturingTestType.swift in Sources */,
 				3B2602B12890541E00D5CAAA /* biostrapDeviceSDK.swift in Sources */,
 				3B2602B22890541E00D5CAAA /* ambiqOTARXCharacteristic.swift in Sources */,
 				3B2602B32890541E00D5CAAA /* liveSyncConfiguration.swift in Sources */,
@@ -690,6 +705,7 @@
 				3B29C555264C5A5B006BC11B /* Characteristic.swift in Sources */,
 				3B260318289088E000D5CAAA /* ppgFailedType.swift in Sources */,
 				3BF8083127A4585900595493 /* CoreBluetoothExtensions.swift in Sources */,
+				3B14E9C128EB921C000E85F2 /* manufacturingTestType.swift in Sources */,
 				3BD01F90261539630014CEF0 /* biostrapDeviceSDK.swift in Sources */,
 				3BD01F9626153AF20014CEF0 /* Logging.swift in Sources */,
 				3BF3FEC326C58BCF005AF135 /* biostrapDataPacket.swift in Sources */,
@@ -717,6 +733,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B260299288A061D00D5CAAA /* diagnosticType.swift in Sources */,
+				3B14E9C228EB921C000E85F2 /* manufacturingTestType.swift in Sources */,
 				3B260293288A05CE00D5CAAA /* settingsType.swift in Sources */,
 				3BD10BDB28BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift in Sources */,
 				3B28D46C28E4B72900F6953A /* ppgStatusType.swift in Sources */,
@@ -765,6 +782,7 @@
 				3BF8099D27BD766D00595493 /* customCharacteristic.swift in Sources */,
 				3BF8099E27BD766D00595493 /* nordicDFU.swift in Sources */,
 				3BF8099F27BD766D00595493 /* Characteristic.swift in Sources */,
+				3B14E9C028EB921C000E85F2 /* manufacturingTestType.swift in Sources */,
 				3BF809A027BD766D00595493 /* CoreBluetoothExtensions.swift in Sources */,
 				3BF809A127BD766D00595493 /* biostrapDeviceSDK.swift in Sources */,
 				3BF809B727BD774200595493 /* ambiqOTARXCharacteristic.swift in Sources */,
@@ -973,7 +991,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;

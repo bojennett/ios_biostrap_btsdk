@@ -874,12 +874,39 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
+	#if LIVOTAL
 	func manufacturingTest(_ id: String) {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.manufacturingTest()
 		}
 		else { self.manufacturingTestComplete?(id, false) }
 	}
+	#endif
+
+	#if ALTER || ETHOS
+	func manufacturingTest(_ id: String, test: manufacturingTestType) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.manufacturingTest(test)
+		}
+		else { self.manufacturingTestComplete?(id, false) }
+	}
+	#endif
+	
+	#if UNIVERSAL
+	func livotalManufacturingTest(_ id: String) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.livotalManufacturingTest()
+		}
+		else { self.manufacturingTestComplete?(id, false) }
+	}
+
+	func ethosManufacturingTest(_ id: String, test: ethosManufacturingTestType) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.ethosManufacturingTest(test)
+		}
+		else { self.manufacturingTestComplete?(id, false) }
+	}
+	#endif
 
 	#if ETHOS || UNIVERSAL
 	//--------------------------------------------------------------------------------

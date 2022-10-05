@@ -1,5 +1,5 @@
 //
-//  livotalAlgorithmConfiguration.swift
+//  ppgAlgorithmConfiguration.swift
 //  biostrapDeviceSDK
 //
 //  Created by Joseph A. Bennett on 8/26/21.
@@ -18,7 +18,10 @@ import Foundation
 	public var rr			: Bool
 	public var spo2			: Bool
 	#if ETHOS || UNIVERSAL
-	public var white_spo2	: Bool
+	public var fda_spo2		: Bool
+	#endif
+	#if ALTER || ETHOS || UNIVERSAL
+	public var continuous	: Bool
 	#endif
 	
 	override public init() {
@@ -26,8 +29,13 @@ import Foundation
 		hrv			= false
 		rr			= false
 		spo2		= false
+		
 		#if ETHOS || UNIVERSAL
-		white_spo2	= false
+		fda_spo2	= false
+		#endif
+		
+		#if ALTER || ETHOS || UNIVERSAL
+		continuous	= false
 		#endif
 	}
 	
@@ -38,8 +46,13 @@ import Foundation
 		if (hrv)		{ result = result | 0x02 }
 		if (rr)			{ result = result | 0x04 }
 		if (spo2)		{ result = result | 0x08 }
+		
 		#if ETHOS || UNIVERSAL
-		if (white_spo2)	{ result = result | 0x10 }
+		if (fda_spo2)	{ result = result | 0x10 }
+		#endif
+		
+		#if ALTER || ETHOS || UNIVERSAL
+		if (continuous)	{ result = result | 0x80 }
 		#endif
 
 		return result
@@ -52,8 +65,13 @@ import Foundation
 		if (hrv)		{ if (result != "") { result = "\(result)," }; result = "\(result)HRV" }
 		if (rr)			{ if (result != "") { result = "\(result)," }; result = "\(result)RR" }
 		if (spo2)		{ if (result != "") { result = "\(result)," }; result = "\(result)SPO2" }
+		
 		#if ETHOS || UNIVERSAL
-		if (white_spo2)	{ if (result != "") { result = "\(result)," }; result = "\(result)WHITE_SPO2" }
+		if (fda_spo2)	{ if (result != "") { result = "\(result)," }; result = "\(result)FDA_SPO2" }
+		#endif
+
+		#if ALTER || ETHOS || UNIVERSAL
+		if (continuous)	{ if (result != "") { result = "\(result)," }; result = "\(result)Continous" }
 		#endif
 
 		return result
