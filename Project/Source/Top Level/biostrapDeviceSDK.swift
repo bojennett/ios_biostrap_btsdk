@@ -117,9 +117,6 @@ import iOSDFULibrary
 	#if UNIVERSAL || ETHOS
 	@objc public var motorComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
-	#if UNIVERSAL || ETHOS || ALTER
-	@objc public var hrmComplete: ((_ id: String, _ successful: Bool)->())?
-	#endif
 	@objc public var enterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var writeSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var readSerialNumberComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
@@ -171,7 +168,11 @@ import iOSDFULibrary
 	@objc public var acceptSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
 
 	@objc public var batteryLevel: ((_ id: String, _ percentage: Int)->())?
-	
+
+	#if UNIVERSAL || ETHOS
+	@objc public var pulseOx: ((_ id: String, _ spo2: Float, _ hr: Float)->())?
+	#endif
+
 	#if UNIVERSAL || ETHOS || ALTER
 	@objc public var heartRate: ((_ id: String, _ hr: Int, _ rr: [Double])->())?
 	#endif
@@ -608,25 +609,6 @@ import iOSDFULibrary
 	@objc public func motor(_ id: String, milliseconds: Int, pulses: Int) {
 		if let device = mConnectedDevices?[id] { device.motor(id, milliseconds: milliseconds, pulses: pulses) }
 		else { self.motorComplete?(id, false) }
-	}
-	#endif
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || ETHOS || ALTER
-	@objc public func enableHRM(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.enableHRM(id) }
-		else { self.hrmComplete?(id, false) }
-	}
-	
-	@objc public func disableHRM(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.disableHRM(id) }
-		else { self.hrmComplete?(id, false) }
 	}
 	#endif
 
