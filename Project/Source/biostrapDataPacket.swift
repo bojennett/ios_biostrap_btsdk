@@ -164,16 +164,11 @@ import Foundation
 
 		#if UNIVERSAL || ALTER || ETHOS
 		case .ppg_metrics					:
-			var hr		= ""
-			var hrv		= ""
-			var rr		= ""
-			var spo2	= ""
-			
 			let root	= "\(raw_data.hexString),\(type.title),\(epoch_ms),\(ppg_metrics_status.title)"
-			if (hr_valid)	{ hr	= "\(root),HR,\(hr_valid),\(hr_result)"			}
-			if (hrv_valid)	{ hrv	= "\(root),HRV,\(hrv_valid),\(hrv_result)"		}
-			if (rr_valid)	{ rr	= "\(root),RR,\(rr_valid),\(rr_result)"			}
-			if (spo2_valid) { spo2	= "\(root),SPO2,\(spo2_valid),\(spo2_result)"	}
+			let hr		= "\(root),HR,\(hr_valid),\(hr_result)"
+			let hrv		= "\(root),HRV,\(hrv_valid),\(hrv_result)"
+			let rr		= "\(root),RR,\(rr_valid),\(rr_result)"
+			let spo2	= "\(root),SPO2,\(spo2_valid),\(spo2_result)"
 			return ("\(hr)\n\(hrv)\n\(rr)\n\(spo2)")
 			
 		case .continuous_hr					:
