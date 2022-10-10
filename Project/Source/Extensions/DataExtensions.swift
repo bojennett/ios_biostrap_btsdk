@@ -122,36 +122,8 @@ extension Data {
 	//
 	//--------------------------------------------------------------------------------
 	var leFloat16: Float {
-		if (self.count != 2) { return Float(0.0) }
-		
-		let half = self.leUInt16
-
-		let e = (UInt32(half) & 0x7C00) >> 10	// exponent
-		let m = (UInt32(half) & 0x03FF) << 13	// mantissa
-		let v = m >> 23							// evil log2 bit hack to count leading zeros in denormalized format
-		
-		let part1 = (UInt32(half) & 0x8000) << 16
-		
-		var part2: UInt32 = 0
-		if (e != 0) { part2 = ((e + 112) << 23 | m) }
-		
-		var part3: UInt32 = 0
-		if ((e == 0) && (m != 0)) {
-			part3 = ((v - 37) << 23 | ((m << (150 - v)) & 0x007FE000))
-		}
-		
-        return Float(bitPattern: (part1 | part2 | part3))
-		
-		/*
-		return Float(
-			(
-				(half & 0x8000) << 16 |
-				(e != 0) * ((e + 112) << 23 | m) |
-				((e == 0) & (m != 0)) *
-				((v - 37) << 23 | ((m << (150 - v)) & 0x007FE000))
-			)
-		)	// sign : normalized : denormalized
-		*/
+		if (self.count != 2) { return Float(0) }
+		return Float(Float16(bitPattern: UInt16(self.leUInt16)))
 	}
 
 }

@@ -246,6 +246,21 @@ import iOSDFULibrary
 	internal var mCentralManager	: CBCentralManager?
 	internal var mDiscoveredDevices	: [ String : Device ]?
 	internal var mConnectedDevices	: [ String : Device ]?
+	internal lazy var mPairedDeviceNames	= [ String: String ]()
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	// Manage device ids & name pair in paired devices.  In the background, iOS
+	// doesn't always look for both the advertisement packet and the scan response
+	// packet.  As such, in the background the name may be nil, and then we can't
+	// connect as a valid name is required
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func addPairedDeviceWithId(_ id: String, name: String) { mPairedDeviceNames[id] = name }
+	@objc public func removePairedDeviceWithId(_ id: String) { mPairedDeviceNames.removeValue(forKey: id) }
+	@objc public func clearPairedDevices() { mPairedDeviceNames.removeAll() }
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -276,7 +291,7 @@ import iOSDFULibrary
 		#endif
 		
 		let backgroundQueue	= DispatchQueue.global(qos: DispatchQoS.QoSClass.background)
-		mCentralManager		= CBCentralManager(delegate: self, queue: backgroundQueue, options: nil)
+		mCentralManager		= CBCentralManager(delegate: self, queue: backgroundQueue, options: [CBCentralManagerOptionRestoreIdentifierKey: Bundle.main.bundleIdentifier ?? ""])
 		
 		mDiscoveredDevices	= [ String : Device ]()
 		mConnectedDevices	= [ String : Device ]()

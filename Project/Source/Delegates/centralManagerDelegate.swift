@@ -58,8 +58,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 			}
 			else {
 				// Local Name
-				if let name = advertisementData[CBAdvertisementDataLocalNameKey] as? String {
-					
+				if let name = self.mPairedDeviceNames[peripheral.prettyID] ?? advertisementData[CBAdvertisementDataLocalNameKey] as? String {
 					let serviceUUIDs	= advertisementData[CBAdvertisementDataServiceUUIDsKey] as! Array<CBUUID>
 
 					for thisUUID in serviceUUIDs {
@@ -124,15 +123,15 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) }
 								}
 
-								device.writeSerialNumberComplete			= { id, successful in
+								device.writeSerialNumberComplete	= { id, successful in
 									DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) }
 								}
 
-								device.readSerialNumberComplete			= { id, successful, partID in
+								device.readSerialNumberComplete		= { id, successful, partID in
 									DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) }
 								}
 
-								device.deleteSerialNumberComplete			= { id, successful in
+								device.deleteSerialNumberComplete	= { id, successful in
 									DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) }
 								}
 
@@ -336,15 +335,15 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) }
 								}
 								
-								device.writeSerialNumberComplete			= { id, successful in
+								device.writeSerialNumberComplete	= { id, successful in
 									DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) }
 								}
 								
-								device.readSerialNumberComplete			= { id, successful, partID in
+								device.readSerialNumberComplete		= { id, successful, partID in
 									DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) }
 								}
 								
-								device.deleteSerialNumberComplete			= { id, successful in
+								device.deleteSerialNumberComplete	= { id, successful in
 									DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) }
 								}
 
@@ -806,5 +805,19 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		self.mProcessDisconnection(peripheral.prettyID)
 	}
 	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	public func centralManager(_ central: CBCentralManager, willRestoreState dict: [String : Any]) {
+		if let connectedperipherals = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral] {
+			for peripheral in connectedperipherals {
+				  connect(peripheral.prettyID)
+			}
+		}
+	}
 }
 
