@@ -57,17 +57,12 @@ class customCharacteristic: Characteristic {
 		case completion			= 0x00
 		case dataPacket			= 0x01
 		case worn				= 0x02
-		#if LIVOTAL || UNIVERSAL
-		case manualResult		= 0x03
-		#endif
 		case ppgFailed			= 0x04
 		case validateCRC		= 0x05
 		case dataCaughtUp		= 0x06
 		case manufacturingTest	= 0x07
 		case charging			= 0x08
-		#if ALTER || ETHOS || UNIVERSAL
 		case ppg_metrics		= 0x09
-		#endif
 	}
 	
 	enum wornResult: UInt8 {
@@ -109,12 +104,7 @@ class customCharacteristic: Characteristic {
 	var wornCheckComplete: ((_ successful: Bool, _ type: String, _ value: Int)->())?
 	var resetComplete: ((_ successful: Bool)->())?
 	var readEpochComplete: ((_ successful: Bool, _ value: Int)->())?
-	#if LIVOTAL || UNIVERSAL
-    var manualResult: ((_ successful: Bool, _ packet: String)->())?
-	#endif
-	#if ALTER || ETHOS || UNIVERSAL
 	var ppgMetrics: ((_ successful: Bool, _ packet: String)->())?
-	#endif
 	var ppgFailed: ((_ code: Int)->())?
 	var disableWornDetectComplete: ((_ successful: Bool)->())?
 	var enableWornDetectComplete: ((_ successful: Bool)->())?
@@ -1297,10 +1287,6 @@ class customCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mProcessUpdateValue(_ data: Data) {
-		
-		//#if ETHOS
-		//#endif
-		
 		if let response = notifications(rawValue: data[0]) {
 			switch (response) {
 			case .completion:
@@ -1541,25 +1527,7 @@ class customCharacteristic: Characteristic {
 				else {
 					log?.e ("Cannot parse worn status: \(data[1])")
 				}
-				
-			#if UNIVERSAL || LIVOTAL
-			case .manualResult:
-				log?.v ("Manual Result: \(data.hexString)")
-				let (_, type, packet) = mParseSinglePacket(data, index: 1)
-				if (type == .ppg) {
-					do {
-						let jsonData = try JSONEncoder().encode(packet)
-						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manualResult?(true, jsonString)
-						}
-						else { self.manualResult?(false, "") }
-					}
-					catch { self.manualResult?(false, "") }
-				}
-				else { self.manualResult?(false, "") }
-			#endif
-			
-			#if ALTER || ETHOS || UNIVERSAL
+							
 			case .ppg_metrics:
 				log?.v ("PPG Metrics: \(data.hexString)")
 				let (_, type, packet) = mParseSinglePacket(data, index: 1)
@@ -1567,13 +1535,13 @@ class customCharacteristic: Characteristic {
 					do {
 						let jsonData = try JSONEncoder().encode(packet)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
+							log?.v ("PPG Metrics JSON: \(jsonString)")
 							self.ppgMetrics?(true, jsonString)
 						}
 						else { self.ppgMetrics?(false, "") }
 					}
 					catch { self.ppgMetrics?(false, "") }
 				}
-			#endif
 				
 			case .ppgFailed:
 				log?.v ("PPG Failed: \(data.hexString)")

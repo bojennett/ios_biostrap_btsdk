@@ -10,9 +10,6 @@ import Foundation
 @objc public enum packetType: UInt8, Codable {
 	case unknown						= 0x00
 	case steps							= 0x81
-	#if UNIVERSAL || LIVOTAL
-	case ppg							= 0x82
-	#endif
 	case activity						= 0x83
 	case temp							= 0x84
 	case worn							= 0x85
@@ -21,8 +18,8 @@ import Foundation
 	case ppg_failed						= 0x88
 	case battery						= 0x89
 	case charger						= 0x8a
-	#if UNIVERSAL || ETHOS || ALTER
 	case ppg_metrics					= 0x8b
+	#if UNIVERSAL || ETHOS || ALTER
 	case continuous_hr					= 0x8c
 	#endif
 	
@@ -78,9 +75,6 @@ import Foundation
 		switch code {
 		case "Unknown"								: self	= .unknown
 		case "Steps"								: self	= .steps
-		#if UNIVERSAL || LIVOTAL
-		case "PPG Results"							: self	= .ppg
-		#endif
 		case "PPG Failed"							: self	= .ppg_failed
 		case "Activity"								: self	= .activity
 		case "Temperature"							: self	= .temp
@@ -89,8 +83,8 @@ import Foundation
 		case "Charger"								: self	= .charger
 		case "Sleep"								: self	= .sleep
 		case "Diagnostic"							: self	= .diagnostic
-		#if UNIVERSAL || ETHOS || ALTER
 		case "PPG Metrics"							: self	= .ppg_metrics
+		#if UNIVERSAL || ETHOS || ALTER
 		case "Continuous Heart Rate"				: self	= .continuous_hr
 		#endif
 		case "Raw Accel FIFO Count"					: self	= .rawAccelFifoCount
@@ -146,9 +140,6 @@ import Foundation
 		switch (self) {
 		case .unknown								: return "Unknown"
 		case .steps									: return "Steps"
-		#if UNIVERSAL || LIVOTAL
-		case .ppg									: return "PPG Results"
-		#endif
 		case .ppg_failed							: return "PPG Failed"
 		case .activity								: return "Activity"
 		case .temp									: return "Temperature"
@@ -157,8 +148,8 @@ import Foundation
 		case .charger								: return "Charger"
 		case .sleep									: return "Sleep"
 		case .diagnostic							: return "Diagnostic"
-		#if UNIVERSAL || ETHOS || ALTER
 		case .ppg_metrics							: return "PPG Metrics"
+		#if UNIVERSAL || ETHOS || ALTER
 		case .continuous_hr							: return "Continuous Heart Rate"
 		#endif
 		case .rawAccelFifoCount						: return "Raw Accel FIFO Count"
@@ -213,9 +204,6 @@ import Foundation
 		switch (self) {
 		case .unknown								: return 300
 		case .steps									: return 7
-		#if UNIVERSAL || LIVOTAL
-		case .ppg									: return 17
-		#endif
 		case .ppg_failed							: return 6
 		case .activity								: return 10
 		case .temp									: return 9
@@ -224,8 +212,8 @@ import Foundation
 		case .charger								: return 7
 		case .sleep									: return 9
 		case .diagnostic							: return 0 	// Done by calculation
-		#if UNIVERSAL || ETHOS || ALTER
 		case .ppg_metrics							: return 19
+		#if UNIVERSAL || ETHOS || ALTER
 		case .continuous_hr							: return 19
 		#endif
 		case .rawAccelFifoCount						: return 10

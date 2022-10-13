@@ -154,12 +154,7 @@ public class Device: NSObject {
 	var resetComplete: ((_ id: String, _ successful: Bool)->())?
 	var endSleepComplete: ((_ id: String, _ successful: Bool)->())?
 	var readEpochComplete: ((_ id: String, _ successful: Bool, _ value: Int)->())?
-	#if LIVOTAL || UNIVERSAL
-	var manualResult: ((_ id: String, _ successful: Bool, _ packet: String)->())?
-	#endif
-	#if ALTER || ETHOS || UNIVERSAL
 	var ppgMetrics: ((_ id: String, _ successful: Bool, _ packet: String)->())?
-	#endif
 	var ppgFailed: ((_ id: String, _ code: Int)->())?
 	var disableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 	var enableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
@@ -1324,7 +1319,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
 					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
 					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }
-					mCustomCharacteristic?.manualResult = { successful, packet in self.manualResult?(self.id, successful, packet) }
+					mCustomCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
 					mCustomCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
 					mCustomCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.id, successful) }
 					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
