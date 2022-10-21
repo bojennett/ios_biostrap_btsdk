@@ -131,7 +131,7 @@ public class Device: NSObject {
 
 	var writeEpochComplete: ((_ id: String, _ successful: Bool)->())?
 	var getAllPacketsComplete: ((_ id: String, _ successful: Bool)->())?
-	var getNextPacketComplete: ((_ id: String, _ successful: Bool, _ packet: String)->())?
+	var getNextPacketComplete: ((_ id: String, _ successful: Bool, _ caughtUp: Bool, _ packet: String)->())?
 	var getPacketCountComplete: ((_ id: String, _ successful: Bool, _ count: Int)->())?
 	var startManualComplete: ((_ id: String, _ successful: Bool)->())?
 	var stopManualComplete: ((_ id: String, _ successful: Bool)->())?
@@ -203,6 +203,11 @@ public class Device: NSObject {
 		else { return ("???") }
 	}
 
+	@objc public var softwareRevision : [String] {
+		if let softwareRevision = mSoftwareRevision { return softwareRevision.value }
+		else { return ([String]()) }
+	}
+
 	@objc public var hardwareRevision : String {
 		if let hardwareRevision = mHardwareRevision { return hardwareRevision.value }
 		else { return ("???") }
@@ -220,6 +225,7 @@ public class Device: NSObject {
 
 	internal var mModelNumber					: disStringCharacteristic?
 	internal var mFirmwareVersion				: disFirmwareVersionCharacteristic?
+	internal var mSoftwareRevision				: disSoftwareRevisionCharacteristic?
 	internal var mHardwareRevision				: disStringCharacteristic?
 	internal var mManufacturerName				: disStringCharacteristic?
 	internal var mSerialNumber					: disStringCharacteristic?
@@ -579,11 +585,11 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getNextPacket(_ id: String) {
+	func getNextPacket(_ id: String, single: Bool) {
 		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.getNextPacket()
+			customCharacteristic.getNextPacket(single)
 		}
-		else { self.getNextPacketComplete?(id, false, "") }
+		else { self.getNextPacketComplete?(id, false, true, "") }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1014,12 +1020,29 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func cancelFirmwareUpdate() {
-		#if UNIVERSAL || LIVOTAL
+#if LIVOTAL
 		if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.cancel() }
-		else { updateFirmwareFailed?(self.id, 10001, "No DFU characteristic to update") }
-		#else
-		updateFirmwareFailed?(self.id, 10001, "Cannot do this yet")
-		#endif
+		else { updateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
+#endif
+
+#if ETHOS || ALTER
+		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic { ambiqOTARXCharacteristic.cancel() }
+		else { updateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
+#endif
+		
+#if UNIVERSAL
+		switch (type) {
+		case .livotal:
+			if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.cancel() }
+			else { updateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
+		case .alter, .ethos:
+			if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic { ambiqOTARXCharacteristic.cancel() }
+			else { updateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
+		default:
+			log?.e ("Do now know device type")
+			updateFirmwareFailed?(self.id, 10001, "Do not know device type: \(type.title)")
+		}
+#endif
 	}
 
 	
@@ -1108,6 +1131,9 @@ public class Device: NSObject {
 				case .firmware_revision_string:
 					mFirmwareVersion = disFirmwareVersionCharacteristic(peripheral, characteristic: characteristic)
 					mFirmwareVersion?.read()
+				case .software_revision_string:
+					mSoftwareRevision = disSoftwareRevisionCharacteristic(peripheral, characteristic: characteristic)
+					mSoftwareRevision?.read()
 				case .manufacturer_name_string:
 					mManufacturerName = disStringCharacteristic(peripheral, characteristic: characteristic)
 					mManufacturerName?.read()
@@ -1182,7 +1208,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
 					mCustomCharacteristic?.debugComplete = { successful, device, data in self.debugComplete?(self.id, successful, device, data) }
 					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
-					mCustomCharacteristic?.getNextPacketComplete = { successful, packet in self.getNextPacketComplete?(self.id, successful, packet) }
+					mCustomCharacteristic?.getNextPacketComplete = { successful, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, caughtUp, packet) }
 					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
 					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
 					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
@@ -1240,7 +1266,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
 					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
 					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
-					mCustomCharacteristic?.getNextPacketComplete = { successful, packet in self.getNextPacketComplete?(self.id, successful, packet) }
+					mCustomCharacteristic?.getNextPacketComplete = { successful, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, caughtUp, packet) }
 					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
 					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
 					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
@@ -1325,7 +1351,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
 					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
 					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
-					mCustomCharacteristic?.getNextPacketComplete = { successful, packet in self.getNextPacketComplete?(self.id, successful, packet) }
+					mCustomCharacteristic?.getNextPacketComplete = { successful, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, caughtUp, packet) }
 					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
 					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
 					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
@@ -1449,9 +1475,8 @@ public class Device: NSObject {
 			switch (enumerated) {
 			case .model_number_string			: mModelNumber?.didUpdateValue()
 			case .hardware_revision_string		: mHardwareRevision?.didUpdateValue()
-			case .firmware_revision_string		:
-				mFirmwareVersion?.didUpdateValue()
-				
+			case .firmware_revision_string		: mFirmwareVersion?.didUpdateValue()
+			case .software_revision_string		: mSoftwareRevision?.didUpdateValue()
 			case .manufacturer_name_string		: mManufacturerName?.didUpdateValue()
 			case .serial_number_string			: mSerialNumber?.didUpdateValue()
 			case .battery_level					: mBatteryLevelCharacteristic?.didUpdateValue()

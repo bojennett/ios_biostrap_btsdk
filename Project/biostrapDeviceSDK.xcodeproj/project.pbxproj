@@ -138,6 +138,10 @@
 		3BF809BD27BD787300595493 /* ethosBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF809BA27BD787300595493 /* ethosBTSDK.swift */; };
 		3BFAC25B2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */; };
 		3BFAC25C2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */; };
+		3BFF754228F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */; };
+		3BFF754328F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */; };
+		3BFF755B28FA18EE0039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */; };
+		3BFF755C28FA18EF0039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -184,6 +188,7 @@
 		3BF809B527BD766D00595493 /* ethosBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ethosBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BF809BA27BD787300595493 /* ethosBTSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ethosBTSDK.swift; sourceTree = "<group>"; };
 		3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = livotalManufacturingTestResult.swift; sourceTree = "<group>"; };
+		3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = disSoftwareRevisionCharacteristic.swift; sourceTree = "<group>"; };
 		45FB47FAAB8CA00CE5244F58 /* Pods-livotalBTSDK.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-livotalBTSDK.debug.xcconfig"; path = "Target Support Files/Pods-livotalBTSDK/Pods-livotalBTSDK.debug.xcconfig"; sourceTree = "<group>"; };
 		5D3047CFC230344A0899B985 /* Pods_universalBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_universalBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9293CBFFFE9969D4D4CD5CF1 /* Pods-ethosBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ethosBTSDK.release.xcconfig"; path = "Target Support Files/Pods-ethosBTSDK/Pods-ethosBTSDK.release.xcconfig"; sourceTree = "<group>"; };
@@ -276,6 +281,7 @@
 				3B29C554264C5A5B006BC11B /* Characteristic.swift */,
 				3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */,
 				3BD10BD728BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift */,
+				3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */,
 				3B29C556264C5B53006BC11B /* customCharacteristic.swift */,
 				3B29C560264C6C1A006BC11B /* batteryLevelCharacteristic.swift */,
 				3B29C566264C7033006BC11B /* heartRateMeasurementCharacteristic.swift */,
@@ -672,6 +678,7 @@
 				3B14E9BF28EB921C000E85F2 /* manufacturingTestType.swift in Sources */,
 				3B2602B12890541E00D5CAAA /* biostrapDeviceSDK.swift in Sources */,
 				3B2602B22890541E00D5CAAA /* ambiqOTARXCharacteristic.swift in Sources */,
+				3BFF755C28FA18EF0039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */,
 				3B2602B32890541E00D5CAAA /* liveSyncConfiguration.swift in Sources */,
 				3B2602B42890541E00D5CAAA /* Logging.swift in Sources */,
 				3B2602B52890541E00D5CAAA /* biostrapDataPacket.swift in Sources */,
@@ -709,6 +716,7 @@
 				3B260318289088E000D5CAAA /* ppgFailedType.swift in Sources */,
 				3BF8083127A4585900595493 /* CoreBluetoothExtensions.swift in Sources */,
 				3B14E9C128EB921C000E85F2 /* manufacturingTestType.swift in Sources */,
+				3BFF755B28FA18EE0039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */,
 				3BD01F90261539630014CEF0 /* biostrapDeviceSDK.swift in Sources */,
 				3BD01F9626153AF20014CEF0 /* Logging.swift in Sources */,
 				3BF3FEC326C58BCF005AF135 /* biostrapDataPacket.swift in Sources */,
@@ -756,6 +764,7 @@
 				3BF807CA27A1AFA000595493 /* BluetoothIDs.swift in Sources */,
 				3B2602CE289054D200D5CAAA /* alterBTSDK.swift in Sources */,
 				3BF807CB27A1AFA000595493 /* nordicDFUCharacteristic.swift in Sources */,
+				3BFF754328F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */,
 				3B26027D28877C3B00D5CAAA /* ethosManufacturingTestResult.swift in Sources */,
 				3BF807CC27A1AFA000595493 /* DataExtensions.swift in Sources */,
 				3B14EA2B28EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift in Sources */,
@@ -798,6 +807,7 @@
 				3B26027C28877C3B00D5CAAA /* ethosManufacturingTestResult.swift in Sources */,
 				3BF809A927BD766D00595493 /* centralManagerDelegate.swift in Sources */,
 				3B26028F288A04F700D5CAAA /* packetType.swift in Sources */,
+				3BFF754228F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */,
 				3B14EA2A28EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift in Sources */,
 				3B49444028388D300074F569 /* ppgAlgorithmConfiguration.swift in Sources */,
 				3BF809AA27BD766D00595493 /* batteryLevelCharacteristic.swift in Sources */,
@@ -927,7 +937,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 6;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -963,7 +973,7 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 13;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1000,7 +1010,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 13;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;

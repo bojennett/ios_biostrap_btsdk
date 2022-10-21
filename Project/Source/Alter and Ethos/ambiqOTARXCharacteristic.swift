@@ -26,6 +26,7 @@ internal enum amotaStatus: UInt8 {
 	case APP_MISSING_OBJECTS	= 0x82
 	case APP_MISSING_FILE		= 0x83
 	case APP_MISSING_DEVICE		= 0x84
+	case APP_EXISTING_OTA		= 0x85
 	
 	var title: String {
 		switch (self) {
@@ -41,6 +42,7 @@ internal enum amotaStatus: UInt8 {
 		case .APP_MISSING_OBJECTS	: return "Failed: Missing OS Bluetooth Objects"
 		case .APP_MISSING_FILE		: return "Failed: Missing FW Data File"
 		case .APP_MISSING_DEVICE	: return "Failed: Missing Device"
+		case .APP_EXISTING_OTA		: return "Failed: Previous incomplete OTA exists - please reset device"
 		}
 	}
 }
@@ -266,6 +268,8 @@ class ambiqOTARXCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func didUpdateTXValue(_ value: Data) {
+		
+		if (mState == .CANCEL) { return }
 
 		if let cmd = otaCommand(rawValue: value[2]), let status = amotaStatus(rawValue: value[3]) {
 			if (cmd == .AMOTA_CMD_UNKNOWN) {
@@ -284,11 +288,20 @@ class ambiqOTARXCharacteristic: Characteristic {
 			case .IDLE: break
 
 			case .HEADER:
-				log?.v("Finished the header -> send data blocks")
-				mState		= .DATA
-				mDataIndex	= 0
-				mFrameIndex	= 0
-				mSendFrame(data: mDataPackets[mDataIndex][mFrameIndex])
+				log?.v ("Offset: \(value.subdata(in: Range(4...7)).hexString)")
+				let offset	= value.subdata(in: Range(4...7)).leInt32
+				if (offset == 0) {
+					log?.v("Finished the header -> send data blocks")
+					mState		= .DATA
+					mDataIndex	= 0
+					mFrameIndex	= 0
+					mSendFrame(data: mDataPackets[mDataIndex][mFrameIndex])
+				}
+				else {
+					log?.e("Finished the header -> pre-existing OTA exists - do not continue!")
+					mState		= .CANCEL
+					failed?(Int(amotaStatus.APP_EXISTING_OTA.rawValue), amotaStatus.APP_EXISTING_OTA.title)
+				}
 
 			case .DATA:
 				mDataIndex = mDataIndex + 1
@@ -317,7 +330,10 @@ class ambiqOTARXCharacteristic: Characteristic {
 				
 				finished?()
 
-			default: log?.e ("Unknown state: \(mState)")
+			default:
+				log?.e ("Unknown state: \(mState)")
+				mState = .CANCEL
+				self.failed?(Int(amotaStatus.UNKNOWN_ERROR.rawValue), amotaStatus.UNKNOWN_ERROR.title)
 			}
 
 		}

@@ -82,7 +82,7 @@ class customCharacteristic: Characteristic {
 	// MARK: Callbacks
 	var writeEpochComplete: ((_ successful: Bool)->())?
 	var getAllPacketsComplete: ((_ successful: Bool)->())?
-	var getNextPacketComplete: ((_ successful: Bool, _ packet: String)->())?
+	var getNextPacketComplete: ((_ successful: Bool, _ caughtUp: Bool, _ packet: String)->())?
 	var getPacketCountComplete: ((_ successful: Bool, _ count: Int)->())?
 	var startManualComplete: ((_ successful: Bool)->())?
 	var stopManualComplete: ((_ successful: Bool)->())?
@@ -318,10 +318,17 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getNextPacket() {
-		log?.v("\(pID)")
+	func getNextPacket(_ single: Bool) {
+		log?.v("\(pID): Single? \(single)")
 
-		if (!mSimpleCommand(.getNextPacket)) { self.getNextPacketComplete?(false, "") }
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getNextPacket.rawValue)
+			data.append(single ? 0x01 : 0x00)
+
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getNextPacketComplete?(false, true, "") }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1311,24 +1318,19 @@ class customCharacteristic: Characteristic {
 							self.getAllPacketsComplete?(successful)
 						case .getNextPacket :
 							if (successful) {
-								let (found, _, packet) = mParseSinglePacket(data, index: 3)
-								
-								if (found) {
-									do {
-										let jsonData = try JSONEncoder().encode(packet)
-										if let jsonString = String(data: jsonData, encoding: .utf8) {
-											self.getNextPacketComplete?(true, jsonString)
-										}
-										else { self.getNextPacketComplete?(false, "") }
+								let caughtUp	= (data[3] == 0x01)
+								let dataPackets = self.mParsePackets(data.subdata(in: Range(4...(data.count - 1))))
+								do {
+									let jsonData = try JSONEncoder().encode(dataPackets)
+									if let jsonString = String(data: jsonData, encoding: .utf8) {
+										self.getNextPacketComplete?(true, caughtUp, jsonString)
 									}
-									catch { self.getNextPacketComplete?(false, "") }
+									else { self.getNextPacketComplete?(false, true, "") }
 								}
-								else {
-									self.getNextPacketComplete?(false, "")
-								}
+								catch { self.getNextPacketComplete?(false, true, "") }
 							}
 							else {
-								self.getNextPacketComplete?(false, "")
+								self.getNextPacketComplete?(false, true, "")
 							}
 						case .getPacketCount:
 							if (successful) {
@@ -1749,15 +1751,13 @@ class customCharacteristic: Characteristic {
 					var input_bytes 	= data.subdata(in: Range(0...(data.count - 5))).bytes
 					let crc_calculated	= crc32(uLong(0), &input_bytes, uInt(input_bytes.count))
 
-					if (crc_received == crc_calculated) {
-						mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
-					}
-					else {
-						log?.e ("Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
-						mCRCOK = false
+					if (crc_received != crc_calculated) {
+						log?.e ("Hmmm..... Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
+						mCRCOK = false;
 						mExpectedSequenceNumber = mExpectedSequenceNumber + 1	// go ahead and increase the expected sequence number.  already going to create retransmit.  this avoids other expected sequence checks from failling
-						return
 					}
+
+					mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
 				}
 				else {
 					log?.e ("Cannot calculate packet CRC: Not enough data.  Length = \(data.count): \(data.hexString)")
