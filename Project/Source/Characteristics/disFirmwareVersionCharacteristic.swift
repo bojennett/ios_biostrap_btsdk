@@ -50,7 +50,7 @@ class disFirmwareVersionCharacteristic: Characteristic {
 		
 		if let characteristic = pCharacteristic {
 			if let data = characteristic.value {
-				value = String(decoding: data, as: UTF8.self)
+				value = String(decoding: data, as: UTF8.self).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"])))
 				let values = value.split(separator: ".")
 				
 				if (values.count == 3) {
