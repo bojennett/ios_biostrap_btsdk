@@ -229,6 +229,8 @@ public class Device: NSObject {
 	internal var mHardwareRevision				: disStringCharacteristic?
 	internal var mManufacturerName				: disStringCharacteristic?
 	internal var mSerialNumber					: disStringCharacteristic?
+	internal var mDISCharacteristicCount		: Int = 0
+	internal var mDISCharacteristicsDiscovered	: Bool = false
 	
 	internal var mBatteryLevelCharacteristic	: batteryLevelCharacteristic?
 	internal var mCustomCharacteristic			: customCharacteristic?
@@ -305,14 +307,16 @@ public class Device: NSObject {
 	}
 
 	override init() {
-		self.mState						= .disconnected
+		self.mState							= .disconnected
 		
-		self.name						= "UNKNOWN"
-		self.id							= "UNKNOWN"
-		self.epoch						= TimeInterval(0)
+		self.name							= "UNKNOWN"
+		self.id								= "UNKNOWN"
+		self.epoch							= TimeInterval(0)
+		self.mDISCharacteristicCount		= 0
+		self.mDISCharacteristicsDiscovered	= false
 		
 		#if UNIVERSAL
-		self.type						= .unknown
+		self.type							= .unknown
 		#endif
 	}
 
@@ -357,40 +361,14 @@ public class Device: NSObject {
 
 	#if UNIVERSAL || LIVOTAL
 	private var mLivotalConfigured: Bool {
-		if let firmwareVersion = mFirmwareVersion {
-			if (firmwareVersion.lessThan("1.2.4")) {
-				if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let manufacturerName = mManufacturerName, let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
-					
-					//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
+		if let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+			
+			//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), SN: \(serialNumber.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
 
-					return (modelNumber.configured &&
-							hardwareRevision.configured &&
-							firmwareVersion.configured &&
-							manufacturerName.configured &&
-							batteryCharacteristic.configured &&
-							customCharacteristic.configured &&
-							nordicDFUCharacteristic.configured)
-				}
-				else {
-					return (false)
-				}
-			}
-			else {
-				if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let manufacturerName = mManufacturerName, let serialNumber = mSerialNumber, let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
-					
-					//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), SN: \(serialNumber.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
-
-					return (modelNumber.configured &&
-							hardwareRevision.configured &&
-							firmwareVersion.configured &&
-							manufacturerName.configured &&
-							serialNumber.configured &&
-							batteryCharacteristic.configured &&
-							customCharacteristic.configured &&
-							nordicDFUCharacteristic.configured)
-				}
-				else { return (false) }
-			}
+			return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
+					batteryCharacteristic.configured &&
+					customCharacteristic.configured &&
+					nordicDFUCharacteristic.configured)
 		}
 		else { return (false) }
 	}
@@ -400,14 +378,11 @@ public class Device: NSObject {
 	private var mEthosConfigured: Bool {
 		if let firmwareVersion = mFirmwareVersion {
 			if (firmwareVersion.lessThan("1.0.0")) {
-				if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+				if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 					
-					//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+					//log?.v ("ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 
-					return (modelNumber.configured &&
-							hardwareRevision.configured &&
-							firmwareVersion.configured &&
-							manufacturerName.configured &&
+					return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
 							batteryCharacteristic.configured &&
 							customCharacteristic.configured &&
 							ambiqOTARXCharacteristic.configured &&
@@ -417,20 +392,17 @@ public class Device: NSObject {
 				else { return (false) }
 			}
 			else {
-				if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic, let heartRateMeasurementCharacteristic = mHeartRateMeasurementCharacteristic, let pulseOxContinuousCharacteristic = mPulseOxContinuousCharacteristic {
+				if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic, let heartRateMeasurementCharacteristic = mHeartRateMeasurementCharacteristic, let pulseOxContinuousCharacteristic = mPulseOxContinuousCharacteristic {
 					
-					//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), HRM: \(heartRateMeasurementCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+					//log?.v ("ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), HRM: \(heartRateMeasurementCharacteristic.configured), PULSOX: \(pulseOxContinuousCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 
-					return (modelNumber.configured &&
-							hardwareRevision.configured &&
-							firmwareVersion.configured &&
-							manufacturerName.configured &&
+					return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
 							batteryCharacteristic.configured &&
-							heartRateMeasurementCharacteristic.configured &&
-							pulseOxContinuousCharacteristic.configured &&
 							customCharacteristic.configured &&
 							ambiqOTARXCharacteristic.configured &&
-							ambiqOTATXCharacteristic.configured
+							ambiqOTATXCharacteristic.configured &&
+							heartRateMeasurementCharacteristic.configured &&
+							pulseOxContinuousCharacteristic.configured
 					)
 				}
 				else { return (false) }
@@ -442,14 +414,11 @@ public class Device: NSObject {
 	
 	#if UNIVERSAL || ALTER
 	private var mAlterConfigured: Bool {
-		if let modelNumber = mModelNumber, let hardwareRevision = mHardwareRevision, let firmwareVersion = mFirmwareVersion, let manufacturerName = mManufacturerName, let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 			
-			//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+			//log?.v ("ALTER: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 
-			return (modelNumber.configured &&
-					hardwareRevision.configured &&
-					firmwareVersion.configured &&
-					manufacturerName.configured &&
+			return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
 					batteryCharacteristic.configured &&
 					customCharacteristic.configured &&
 					ambiqOTARXCharacteristic.configured &&
@@ -1123,21 +1092,33 @@ public class Device: NSObject {
 			if let testCharacteristic = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
 				switch (testCharacteristic) {
 				case .model_number_string:
+					mDISCharacteristicsDiscovered	= true
+					mDISCharacteristicCount = mDISCharacteristicCount + 1
 					mModelNumber = disStringCharacteristic(peripheral, characteristic: characteristic)
 					mModelNumber?.read()
 				case .hardware_revision_string:
+					mDISCharacteristicsDiscovered	= true
+					mDISCharacteristicCount = mDISCharacteristicCount + 1
 					mHardwareRevision = disStringCharacteristic(peripheral, characteristic: characteristic)
 					mHardwareRevision?.read()
 				case .firmware_revision_string:
+					mDISCharacteristicsDiscovered	= true
+					mDISCharacteristicCount = mDISCharacteristicCount + 1
 					mFirmwareVersion = disFirmwareVersionCharacteristic(peripheral, characteristic: characteristic)
 					mFirmwareVersion?.read()
 				case .software_revision_string:
+					mDISCharacteristicsDiscovered	= true
+					mDISCharacteristicCount = mDISCharacteristicCount + 1
 					mSoftwareRevision = disSoftwareRevisionCharacteristic(peripheral, characteristic: characteristic)
 					mSoftwareRevision?.read()
 				case .manufacturer_name_string:
+					mDISCharacteristicsDiscovered	= true
+					mDISCharacteristicCount = mDISCharacteristicCount + 1
 					mManufacturerName = disStringCharacteristic(peripheral, characteristic: characteristic)
 					mManufacturerName?.read()
 				case .serial_number_string:
+					mDISCharacteristicsDiscovered	= true
+					mDISCharacteristicCount = mDISCharacteristicCount + 1
 					mSerialNumber = disStringCharacteristic(peripheral, characteristic: characteristic)
 					mSerialNumber?.read()
 				case .battery_level:
@@ -1473,12 +1454,30 @@ public class Device: NSObject {
 	func didUpdateValue (_ characteristic: CBCharacteristic) {
 		if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
 			switch (enumerated) {
-			case .model_number_string			: mModelNumber?.didUpdateValue()
-			case .hardware_revision_string		: mHardwareRevision?.didUpdateValue()
-			case .firmware_revision_string		: mFirmwareVersion?.didUpdateValue()
-			case .software_revision_string		: mSoftwareRevision?.didUpdateValue()
-			case .manufacturer_name_string		: mManufacturerName?.didUpdateValue()
-			case .serial_number_string			: mSerialNumber?.didUpdateValue()
+			case .model_number_string			:
+				mModelNumber?.didUpdateValue()
+				mDISCharacteristicCount			= mDISCharacteristicCount - 1
+
+			case .hardware_revision_string		:
+				mHardwareRevision?.didUpdateValue()
+				mDISCharacteristicCount			= mDISCharacteristicCount - 1
+
+			case .firmware_revision_string		:
+				mFirmwareVersion?.didUpdateValue()
+				mDISCharacteristicCount			= mDISCharacteristicCount - 1
+
+			case .software_revision_string		:
+				mSoftwareRevision?.didUpdateValue()
+				mDISCharacteristicCount			= mDISCharacteristicCount - 1
+
+			case .manufacturer_name_string		:
+				mManufacturerName?.didUpdateValue()
+				mDISCharacteristicCount			= mDISCharacteristicCount - 1
+
+			case .serial_number_string			:
+				mSerialNumber?.didUpdateValue()
+				mDISCharacteristicCount			= mDISCharacteristicCount - 1
+
 			case .battery_level					: mBatteryLevelCharacteristic?.didUpdateValue()
 			#if UNIVERSAL || ETHOS
 			case .plx_continuous_measurement	: mPulseOxContinuousCharacteristic?.didUpdateValue()

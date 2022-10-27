@@ -206,7 +206,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 		DispatchQueue.main.async {
 			if let error = error {
 				log?.e ("\(peripheral.prettyID): didDiscoverDescriptors for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Skipping")
-				//self.mCentralManager?.cancelPeripheralConnection(peripheral)
+				self.mCentralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 			
@@ -246,7 +246,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 		DispatchQueue.main.async {
 			if let error = error {
 				log?.e ("\(peripheral.prettyID): didUpdateNotificationState for characteristic: \(characteristic.prettyID) - Error: '\(error.localizedDescription)'  Skipping")
-				//self.mCentralManager?.cancelPeripheralConnection(peripheral)
+				self.mCentralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 
