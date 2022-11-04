@@ -99,8 +99,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) }
 								}
 
-								device.getNextPacketComplete	= { id, successful, caughtUp, packet in
-									DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, caughtUp, packet) }
+								device.getNextPacketComplete	= { id, successful, error_code, caughtUp, packet in
+									DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) }
 								}
 
 								device.getPacketCountComplete	= { id, successful, count in
@@ -307,8 +307,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) }
 								}
 
-								device.getNextPacketComplete	= { id, successful, caughtUp, packet in
-									DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, caughtUp, packet) }
+								device.getNextPacketComplete	= { id, successful, error_code, caughtUp, packet in
+									DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) }
 								}
 
 								device.getPacketCountComplete	= { id, successful, count in
@@ -523,8 +523,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) }
 								}
 
-								device.getNextPacketComplete	= { id, successful, caughtUp, packet in
-									DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, caughtUp, packet) }
+								device.getNextPacketComplete	= { id, successful, error_code, caughtUp, packet in
+									DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) }
 								}
 
 								device.getPacketCountComplete		= { id, successful, count in

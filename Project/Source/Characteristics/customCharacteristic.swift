@@ -82,7 +82,7 @@ class customCharacteristic: Characteristic {
 	// MARK: Callbacks
 	var writeEpochComplete: ((_ successful: Bool)->())?
 	var getAllPacketsComplete: ((_ successful: Bool)->())?
-	var getNextPacketComplete: ((_ successful: Bool, _ caughtUp: Bool, _ packet: String)->())?
+	var getNextPacketComplete: ((_ successful: Bool, _ error: nextPacketStatusType, _ caughtUp: Bool, _ packet: String)->())?
 	var getPacketCountComplete: ((_ successful: Bool, _ count: Int)->())?
 	var startManualComplete: ((_ successful: Bool)->())?
 	var stopManualComplete: ((_ successful: Bool)->())?
@@ -328,7 +328,7 @@ class customCharacteristic: Characteristic {
 
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
-		else { self.getNextPacketComplete?(false, true, "") }
+		else { self.getNextPacketComplete?(false, .missingDevice, true, "") }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1317,20 +1317,37 @@ class customCharacteristic: Characteristic {
 							mExpectedSequenceNumber	= 0
 							self.getAllPacketsComplete?(successful)
 						case .getNextPacket :
-							if (successful) {
-								let caughtUp	= (data[3] == 0x01)
-								let dataPackets = self.mParsePackets(data.subdata(in: Range(4...(data.count - 1))))
-								do {
-									let jsonData = try JSONEncoder().encode(dataPackets)
-									if let jsonString = String(data: jsonData, encoding: .utf8) {
-										self.getNextPacketComplete?(true, caughtUp, jsonString)
+							if (data.count >= 5) {
+								let error_code	= nextPacketStatusType(rawValue: data[3])
+								let caughtUp	= (data[4] == 0x01)
+
+								if (successful) {
+									let dataPackets = self.mParsePackets(data.subdata(in: Range(5...(data.count - 1))))
+									do {
+										let jsonData = try JSONEncoder().encode(dataPackets)
+										if let jsonString = String(data: jsonData, encoding: .utf8) {
+											if let code = error_code {
+												self.getNextPacketComplete?(true, code, caughtUp, jsonString)
+											}
+											else {
+												self.getNextPacketComplete?(true, .unknown, caughtUp, jsonString)
+											}
+										}
+										else { self.getNextPacketComplete?(false, .badJSON, caughtUp, "") }
 									}
-									else { self.getNextPacketComplete?(false, true, "") }
+									catch { self.getNextPacketComplete?(false, .badSDKDecode, caughtUp, "") }
 								}
-								catch { self.getNextPacketComplete?(false, true, "") }
+								else {
+									if let code = error_code {
+										self.getNextPacketComplete?(false, code, caughtUp, "")
+									}
+									else {
+										self.getNextPacketComplete?(false, .unknown, caughtUp, "")
+									}
+								}
 							}
 							else {
-								self.getNextPacketComplete?(false, true, "")
+								self.getNextPacketComplete?(false, .unknown, false, "")
 							}
 						case .getPacketCount:
 							if (successful) {

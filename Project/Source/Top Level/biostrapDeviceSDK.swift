@@ -109,7 +109,7 @@ import iOSDFULibrary
 	@objc public var debugComplete: ((_ id: String, _ successful: Bool, _ device: debugDevice, _ data: Data)->())?
 	#endif
 	@objc public var getAllPacketsComplete: ((_ id: String, _ successful: Bool)->())?
-	@objc public var getNextPacketComplete: ((_ id: String, _ successful: Bool, _ caughtUp: Bool, _ packet: String)->())?
+	@objc public var getNextPacketComplete: ((_ id: String, _ successful: Bool, _ error_code: nextPacketStatusType, _ caughtUp: Bool, _ packet: String)->())?
 	@objc public var getPacketCountComplete: ((_ id: String, _ successful: Bool, _ count: Int)->())?
 	@objc public var startManualComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var stopManualComplete: ((_ id: String, _ successful: Bool)->())?
@@ -490,7 +490,7 @@ import iOSDFULibrary
 		log?.v ("\(id)")
 		
 		if let device = mConnectedDevices?[id] { device.getNextPacket(id, single: single) }
-		else { self.getNextPacketComplete?(id, false, true, "") }
+		else { self.getNextPacketComplete?(id, false, .missingDevice, true, "") }
 	}
 
 	//--------------------------------------------------------------------------------

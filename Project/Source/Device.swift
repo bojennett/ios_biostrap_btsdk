@@ -131,7 +131,7 @@ public class Device: NSObject {
 
 	var writeEpochComplete: ((_ id: String, _ successful: Bool)->())?
 	var getAllPacketsComplete: ((_ id: String, _ successful: Bool)->())?
-	var getNextPacketComplete: ((_ id: String, _ successful: Bool, _ caughtUp: Bool, _ packet: String)->())?
+	var getNextPacketComplete: ((_ id: String, _ successful: Bool, _ error_code: nextPacketStatusType, _ caughtUp: Bool, _ packet: String)->())?
 	var getPacketCountComplete: ((_ id: String, _ successful: Bool, _ count: Int)->())?
 	var startManualComplete: ((_ id: String, _ successful: Bool)->())?
 	var stopManualComplete: ((_ id: String, _ successful: Bool)->())?
@@ -558,7 +558,7 @@ public class Device: NSObject {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.getNextPacket(single)
 		}
-		else { self.getNextPacketComplete?(id, false, true, "") }
+		else { self.getNextPacketComplete?(id, false, .missingDevice, true, "") }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1189,7 +1189,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
 					mCustomCharacteristic?.debugComplete = { successful, device, data in self.debugComplete?(self.id, successful, device, data) }
 					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
-					mCustomCharacteristic?.getNextPacketComplete = { successful, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, caughtUp, packet) }
+					mCustomCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
 					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
 					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
 					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
@@ -1247,7 +1247,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
 					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
 					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
-					mCustomCharacteristic?.getNextPacketComplete = { successful, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, caughtUp, packet) }
+					mCustomCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
 					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
 					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
 					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
@@ -1332,7 +1332,7 @@ public class Device: NSObject {
 					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
 					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
 					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
-					mCustomCharacteristic?.getNextPacketComplete = { successful, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, caughtUp, packet) }
+					mCustomCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
 					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
 					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
 					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
