@@ -42,6 +42,8 @@ class customCharacteristic: Characteristic {
 		case startLiveSync		= 0xee
 		case stopLiveSync		= 0xef
 		#endif
+		case getRawLoggingStatus	= 0xf5
+		case getWornOverrideStatus	= 0xf6
 		case manufacturingTest	= 0xf7
 		case allowPPG			= 0xf8
 		case wornCheck			= 0xf9
@@ -91,6 +93,7 @@ class customCharacteristic: Characteristic {
 	var motorComplete: ((_ successful: Bool)->())?
 	#endif
 	var enterShipModeComplete: ((_ successful: Bool)->())?
+
 	var writeSerialNumberComplete: ((_ successful: Bool)->())?
 	var readSerialNumberComplete: ((_ successful: Bool, _ partID: String)->())?
 	var deleteSerialNumberComplete: ((_ successful: Bool)->())?
@@ -98,6 +101,9 @@ class customCharacteristic: Characteristic {
 	var readAdvIntervalComplete: ((_ successful: Bool, _ seconds: Int)->())?
 	var deleteAdvIntervalComplete: ((_ successful: Bool)->())?
 	var clearChargeCyclesComplete: ((_ successful: Bool)->())?
+	var readCanLogDiagnosticsComplete: ((_ successful: Bool, _ allow: Bool)->())?
+	var updateCanLogDiagnosticsComplete: ((_ successful: Bool)->())?
+
 	var readChargeCyclesComplete: ((_ successful: Bool, _ cycles: Float)->())?
 	var rawLoggingComplete: ((_ successful: Bool)->())?
 	var allowPPGComplete: ((_ successful: Bool)->())?
@@ -133,6 +139,8 @@ class customCharacteristic: Characteristic {
 	var resetSessionParamsComplete: ((_ successful: Bool)->())?
 	var acceptSessionParamsComplete: ((_ successful: Bool)->())?
 	
+	var getRawLoggingStatusComplete: ((_ successful: Bool, _ enabled: Bool)->())?
+	var getWornOverrideStatusComplete: ((_ successful: Bool, _ overridden: Bool)->())?
 	
 	var deviceWornStatus: ((_ isWorn: Bool)->())?
 	
@@ -479,18 +487,17 @@ class customCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || ALTER
-	func alterLED(red: Int, green: Int, blue: Int, mode: biostrapDeviceSDK.alterLEDMode, seconds: Int, percent: Int) {
-		log?.v("\(pID): Red: \(String(format: "0x%02X", red)), Green: \(String(format: "0x%02X", green)), Blue: \(String(format: "0x%02X", blue)), Mode: \(mode.title), Seconds: \(seconds), Percent: \(percent)")
+	func alterLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+		log?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
 			data.append(commands.led.rawValue)
-			data.append(UInt8(red & 0xff))		// Red
-			data.append(UInt8(green & 0xff))	// Green
-			data.append(UInt8(blue & 0xff))		// Blue
-			data.append(UInt8(mode.value))		// Mode
+			data.append(red ? 0x01 : 0x00)		// Red
+			data.append(green ? 0x01 : 0x00)	// Green
+			data.append(blue ? 0x01 : 0x00)		// Blue
+			data.append(blink ? 0x01 : 0x00)	// Blink
 			data.append(UInt8(seconds & 0xff))	// Seconds
-			data.append(UInt8(percent & 0xff))	// Percent
 
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
@@ -660,7 +667,7 @@ class customCharacteristic: Characteristic {
 		}
 		else { self.deleteAdvIntervalComplete?(false) }
 	}
-
+	
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -697,6 +704,48 @@ class customCharacteristic: Characteristic {
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
 		else { self.readChargeCyclesComplete?(false, 0.0) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func readCanLogDiagnostics() {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getDeviceParam.rawValue)
+			data.append(deviceParameterType.canLogDiagnostics.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.readCanLogDiagnosticsComplete?(false, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func updateCanLogDiagnostics(_ allow: Bool) {
+		log?.v("\(pID): \(allow)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.setDeviceParam.rawValue)
+			data.append(deviceParameterType.canLogDiagnostics.rawValue)
+			data.append(allow ? 0x01 : 0x00)
+			
+			log?.v ("\(data.hexString)")
+
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.updateCanLogDiagnosticsComplete?(false) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -753,6 +802,42 @@ class customCharacteristic: Characteristic {
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
 		else { self.rawLoggingComplete?(false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getRawLoggingStatus() {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getRawLoggingStatus.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getRawLoggingStatusComplete?(false, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getWornOverrideStatus() {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getWornOverrideStatus.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getWornOverrideStatusComplete?(false, false) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1294,6 +1379,7 @@ class customCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mProcessUpdateValue(_ data: Data) {
+		log?.v ("\(data.hexString)")
 		if let response = notifications(rawValue: data[0]) {
 			switch (response) {
 			case .completion:
@@ -1394,6 +1480,7 @@ class customCharacteristic: Characteristic {
 								case .advertisingInterval	: self.writeAdvIntervalComplete?(successful)
 								case .serialNumber			: self.writeSerialNumberComplete?(successful)
 								case .chargeCycle			: self.clearChargeCyclesComplete?(successful)
+								case .canLogDiagnostics		: self.updateCanLogDiagnosticsComplete?(successful)
 								}
 							}
 							else {
@@ -1415,6 +1502,10 @@ class customCharacteristic: Characteristic {
 										log?.v ("\(response): Data: \(data.hexString)")
 										let cycles = data.subdata(in: Range(4...7)).leFloat
 										self.readChargeCyclesComplete?(successful, cycles)
+									case .canLogDiagnostics		:
+										log?.v ("\(response): Data: \(data.hexString)")
+										let canLog = (data[4] != 0x00)
+										self.readCanLogDiagnosticsComplete?(true, canLog)
 									}
 								}
 								else {
@@ -1422,6 +1513,7 @@ class customCharacteristic: Characteristic {
 									case .advertisingInterval	: self.readAdvIntervalComplete?(false, 0)
 									case .serialNumber			: self.readSerialNumberComplete?(false, "")
 									case .chargeCycle			: self.readChargeCyclesComplete?(false, 0.0)
+									case .canLogDiagnostics		: self.readCanLogDiagnosticsComplete?(false, false)
 									}
 								}
 							}
@@ -1433,8 +1525,8 @@ class customCharacteristic: Characteristic {
 								switch (parameter) {
 								case .advertisingInterval	: self.deleteAdvIntervalComplete?(successful)
 								case .serialNumber			: self.deleteSerialNumberComplete?(successful)
-								case .chargeCycle			:
-									log?.e ("Should not have been able to delete \(parameter.title)")
+								case .chargeCycle			: log?.e ("Should not have been able to delete \(parameter.title)")
+								case .canLogDiagnostics		: log?.e ("Should not have been able to delete \(parameter.title)")
 								}
 							}
 							else {
@@ -1502,6 +1594,8 @@ class customCharacteristic: Characteristic {
 								}
 							}
 						case .logRaw			: self.rawLoggingComplete?(successful)
+						case .getRawLoggingStatus	: self.getRawLoggingStatusComplete?(successful, (data[3] != 0x00))
+						case .getWornOverrideStatus	: self.getWornOverrideStatusComplete?(successful, (data[3] != 0x00))
 						case .reset				: self.resetComplete?(successful)
 						case .validateCRC		: break
 							//log?.v ("Got Validate CRC completion: \(data.hexString)")

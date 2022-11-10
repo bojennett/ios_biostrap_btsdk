@@ -59,32 +59,6 @@ import iOSDFULibrary
 	}
 	#endif
 
-	#if UNIVERSAL || ALTER
-	@objc public enum alterLEDMode: Int {
-		case blink		= 0
-		case fade		= 1
-		case sweep		= 2
-		case pulse		= 3
-		case sparkle	= 4
-		case percent	= 5
-		
-		public var title: String {
-			switch (self) {
-			case .blink		: return "Blink"
-			case .fade		: return "Fade"
-			case .sweep		: return "Sweep"
-			case .pulse		: return "Pulse"
-			case .sparkle	: return "Sparkle"
-			case .percent	: return "Percent"
-			}
-		}
-		
-		public var value: UInt8 {
-			return UInt8(self.rawValue)
-		}
-	}
-	#endif
-
 	// Lambdas
 	@objc public var logV: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
 	@objc public var logD: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
@@ -118,6 +92,7 @@ import iOSDFULibrary
 	@objc public var motorComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 	@objc public var enterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
+	
 	@objc public var writeSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var readSerialNumberComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
 	@objc public var deleteSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
@@ -126,6 +101,9 @@ import iOSDFULibrary
 	@objc public var deleteAdvIntervalComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var clearChargeCyclesComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var readChargeCyclesComplete: ((_ id: String, _ successful: Bool, _ cycles: Float)->())?
+	@objc public var readCanLogDiagnosticsComplete: ((_ id: String, _ successful: Bool, _ allow: Bool)->())?
+	@objc public var updateCanLogDiagnosticsComplete: ((_ id: String, _ successful: Bool)->())?
+
 	@objc public var allowPPGComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var wornCheckComplete: ((_ id: String, _ successful: Bool, _ code: String, _ value: Int)->())?
 	@objc public var rawLoggingComplete: ((_ id: String, _ successful: Bool)->())?
@@ -154,6 +132,9 @@ import iOSDFULibrary
 	@objc public var stopLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
+
+	@objc public var getRawLoggingStatusComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool)->())?
+	@objc public var getWornOverrideStatusComplete: ((_ id: String, _ successful: Bool, _ overridden: Bool)->())?
 
 	@objc public var deviceChargingStatus: ((_ id: String, _ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
 
@@ -581,8 +562,8 @@ import iOSDFULibrary
 		else { self.ledComplete?(id, false) }
 	}
 
-	@objc public func alterLED(_ id: String, red: Int, green: Int, blue: Int, mode: alterLEDMode, seconds: Int, percent: Int) {
-		if let device = mConnectedDevices?[id] { device.alterLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
+	@objc public func alterLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+		if let device = mConnectedDevices?[id] { device.alterLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
@@ -602,8 +583,8 @@ import iOSDFULibrary
 	#endif
 
 	#if ALTER
-	@objc public func led(_ id: String, red: Int, green: Int, blue: Int, mode: alterLEDMode, seconds: Int, percent: Int) {
-		if let device = mConnectedDevices?[id] { device.alterLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
+	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+		if let device = mConnectedDevices?[id] { device.alterLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
@@ -737,6 +718,30 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@objc public func readCanLogDiagnostics(_ id: String) {
+		if let device = mConnectedDevices?[id] { device.readCanLogDiagnostics(id) }
+		else { self.readCanLogDiagnosticsComplete?(id, false, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func updateCanLogDiagnostics(_ id: String, allow: Bool) {
+		if let device = mConnectedDevices?[id] { device.updateCanLogDiagnostics(id, allow: allow) }
+		else { self.updateCanLogDiagnosticsComplete?(id, false) }
+	}
+		
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	#if LIVOTAL
 	@objc public func manufacturingTest(_ id: String) {
 		log?.v ("\(id)")
@@ -841,6 +846,34 @@ import iOSDFULibrary
 		
 		if let device = mConnectedDevices?[id] { device.rawLogging(id, enable: enable) }
 		else { self.rawLoggingComplete?(id, false) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func getRawLoggingStatus(_ id: String) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.getRawLoggingStatus(id) }
+		else { self.getRawLoggingStatusComplete?(id, false, false) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func getWornOverrideStatus(_ id: String) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.getWornOverrideStatus(id) }
+		else { self.getWornOverrideStatusComplete?(id, false, false) }
 	}
 
 	//--------------------------------------------------------------------------------

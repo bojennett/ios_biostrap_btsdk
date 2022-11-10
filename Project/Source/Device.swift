@@ -140,6 +140,7 @@ public class Device: NSObject {
 	var motorComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 	var enterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
+
 	var writeSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
 	var readSerialNumberComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
 	var deleteSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
@@ -148,6 +149,9 @@ public class Device: NSObject {
 	var deleteAdvIntervalComplete: ((_ id: String, _ successful: Bool)->())?
 	var clearChargeCyclesComplete: ((_ id: String, _ successful: Bool)->())?
 	var readChargeCyclesComplete: ((_ id: String, _ successful: Bool, _ cycles: Float)->())?
+	var readCanLogDiagnosticsComplete: ((_ id: String, _ successful: Bool, _ allow: Bool)->())?
+	var updateCanLogDiagnosticsComplete: ((_ id: String, _ successful: Bool)->())?
+
 	var allowPPGComplete: ((_ id: String, _ successful: Bool)->())?
 	var wornCheckComplete: ((_ id: String, _ successful: Bool, _ code: String, _ value: Int)->())?
 	var rawLoggingComplete: ((_ id: String, _ successful: Bool)->())?
@@ -181,6 +185,9 @@ public class Device: NSObject {
 	var stopLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
 	var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
+
+	var getRawLoggingStatusComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool)->())?
+	var getWornOverrideStatusComplete: ((_ id: String, _ successful: Bool, _ overridden: Bool)->())?
 
 	var deviceChargingStatus: ((_ id: String, _ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
 
@@ -657,9 +664,9 @@ public class Device: NSObject {
 	#endif
 
 	#if UNIVERSAL || ALTER
-	func alterLED(_ id: String, red: Int, green: Int, blue: Int, mode: biostrapDeviceSDK.alterLEDMode, seconds: Int, percent: Int) {
+	func alterLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.alterLED(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent)
+			customCharacteristic.alterLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
 		}
 		else { self.ledComplete?(id, false) }
 	}
@@ -814,6 +821,34 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
+	func readCanLogDiagnostics(_ id: String) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.readCanLogDiagnostics()
+		}
+		else { self.readCanLogDiagnosticsComplete?(id, false, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func updateCanLogDiagnostics(_ id: String, allow: Bool) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.updateCanLogDiagnostics(allow)
+		}
+		else { self.updateCanLogDiagnosticsComplete?(id, false) }
+	}
+		
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	func allowPPG(_ id: String, allow: Bool) {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.allowPPG(allow)
@@ -920,6 +955,34 @@ public class Device: NSObject {
 		else { self.rawLoggingComplete?(id, false) }
 	}
 
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getRawLoggingStatus(_ id: String) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.getRawLoggingStatus()
+		}
+		else { self.getRawLoggingStatusComplete?(id, false, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getWornOverrideStatus(_ id: String) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.getWornOverrideStatus()
+		}
+		else { self.getWornOverrideStatusComplete?(id, false, false) }
+	}
+	
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1158,13 +1221,13 @@ public class Device: NSObject {
 			}
 			else if let testCharacteristic = Device.characteristics(rawValue: characteristic.prettyID) {
 				switch (testCharacteristic) {
-
-				#if UNIVERSAL || ETHOS
+					
+#if UNIVERSAL || ETHOS
 				case .ethosCharacteristic:
 					mCustomCharacteristic	= customCharacteristic(peripheral, characteristic: characteristic)
-					#if UNIVERSAL
+#if UNIVERSAL
 					mCustomCharacteristic?.type	= .ethos
-					#endif
+#endif
 					mCustomCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.id, successful) }
 					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.id, successful) }
 					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.id, successful) }
@@ -1178,7 +1241,11 @@ public class Device: NSObject {
 					mCustomCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.id, successful) }
 					mCustomCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.id, successful) }
 					mCustomCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.id, successful, cycles) }
+					mCustomCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.readCanLogDiagnosticsComplete?(self.id, successful, allow) }
+					mCustomCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.updateCanLogDiagnosticsComplete?(self.id, successful) }
 					mCustomCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.id, successful) }
+					mCustomCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.getRawLoggingStatusComplete?(self.id, successful, enabled) }
+					mCustomCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.getWornOverrideStatusComplete?(self.id, successful, overridden) }
 					mCustomCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
 					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
 					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }
@@ -1237,7 +1304,11 @@ public class Device: NSObject {
 					mCustomCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.id, successful) }
 					mCustomCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.id, successful) }
 					mCustomCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.id, successful, cycles) }
+					mCustomCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.readCanLogDiagnosticsComplete?(self.id, successful, allow) }
+					mCustomCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.updateCanLogDiagnosticsComplete?(self.id, successful) }
 					mCustomCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.id, successful) }
+					mCustomCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.getRawLoggingStatusComplete?(self.id, successful, enabled) }
+					mCustomCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.getWornOverrideStatusComplete?(self.id, successful, overridden) }
 					mCustomCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
 					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
 					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }
@@ -1322,7 +1393,11 @@ public class Device: NSObject {
 					mCustomCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.id, successful) }
 					mCustomCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.id, successful) }
 					mCustomCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.id, successful, cycles) }
+					mCustomCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.readCanLogDiagnosticsComplete?(self.id, successful, allow) }
+					mCustomCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.updateCanLogDiagnosticsComplete?(self.id, successful) }
 					mCustomCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.id, successful) }
+					mCustomCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.getRawLoggingStatusComplete?(self.id, successful, enabled) }
+					mCustomCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.getWornOverrideStatusComplete?(self.id, successful, overridden) }
 					mCustomCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
 					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
 					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }

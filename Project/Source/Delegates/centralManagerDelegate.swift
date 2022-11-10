@@ -154,7 +154,15 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								device.readChargeCyclesComplete	= { id, successful, cycles in
 									DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) }
 								}
-
+								
+								device.readCanLogDiagnosticsComplete = { id, successful, allow in
+									DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) }
+								}
+								
+								device.updateCanLogDiagnosticsComplete = { id, successful in
+									DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) }
+								}
+								
 								device.allowPPGComplete			= { id, successful in
 									DispatchQueue.main.async { self.allowPPGComplete?(id, successful) }
 								}
@@ -165,6 +173,14 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 
 								device.rawLoggingComplete		= { id, successful in
 									DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) }
+								}
+								
+								device.getRawLoggingStatusComplete = { id, successful, enabled in
+									DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) }
+								}
+								
+								device.getWornOverrideStatusComplete = { id, successful, overridden in
+									DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) }
 								}
 
 								device.resetComplete			= { id, successful in
@@ -367,6 +383,14 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) }
 								}
 								
+								device.readCanLogDiagnosticsComplete = { id, successful, allow in
+									DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) }
+								}
+								
+								device.updateCanLogDiagnosticsComplete = { id, successful in
+									DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) }
+								}
+								
 								device.allowPPGComplete			= { id, successful in
 									DispatchQueue.main.async { self.allowPPGComplete?(id, successful) }
 								}
@@ -379,6 +403,14 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) }
 								}
 								
+								device.getRawLoggingStatusComplete = { id, successful, enabled in
+									DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) }
+								}
+								
+								device.getWornOverrideStatusComplete = { id, successful, overridden in
+									DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) }
+								}
+
 								device.resetComplete			= { id, successful in
 									DispatchQueue.main.async { self.resetComplete?(id, successful) }
 								}
@@ -578,6 +610,14 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								device.readChargeCyclesComplete	= { id, successful, cycles in
 									DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) }
 								}
+																
+								device.readCanLogDiagnosticsComplete = { id, successful, allow in
+									DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) }
+								}
+								
+								device.updateCanLogDiagnosticsComplete = { id, successful in
+									DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) }
+								}
 								
 								device.allowPPGComplete			= { id, successful in
 									DispatchQueue.main.async { self.allowPPGComplete?(id, successful) }
@@ -591,6 +631,14 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) }
 								}
 								
+								device.getRawLoggingStatusComplete = { id, successful, enabled in
+									DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) }
+								}
+								
+								device.getWornOverrideStatusComplete = { id, successful, overridden in
+									DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) }
+								}
+
 								device.resetComplete			= { id, successful in
 									DispatchQueue.main.async { self.resetComplete?(id, successful) }
 								}

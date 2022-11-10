@@ -108,12 +108,14 @@ var gblLimitAlter	= false
 	case serialNumber			= 0x01
 	case chargeCycle			= 0x02
 	case advertisingInterval	= 0x03
+	case canLogDiagnostics		= 0x04
 	
 	public var title: String {
 		switch (self) {
 		case .serialNumber			: return "serialNumber"
 		case .chargeCycle			: return "chargeCycle"
 		case .advertisingInterval	: return "advertisingInterval"
+		case .canLogDiagnostics		: return "canLogDiagnostics"
 		}
 	}
 }
