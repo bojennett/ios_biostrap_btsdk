@@ -14,6 +14,7 @@ import Foundation
 	case algorithm			= 0x03		// Algorithm library generated
 	case rotation			= 0x04		// Got a rotation callback
 	case pmicWatchdog		= 0x05		// The PMIC watchdog causes a change in charging status
+	case bluetoothPacket	= 0xfe		// The packet received over bluetooth minus the CRC
 	case unknown			= 0xff		// Unknown
 	
 	public var title: String {
@@ -24,6 +25,7 @@ import Foundation
 		case .algorithm			: return ("Algorithm")
 		case .rotation			: return ("Rotation")
 		case .pmicWatchdog		: return ("PMIC Watchdog")
+		case .bluetoothPacket	: return ("Bluetooth Packet")
 		case .unknown			: return ("Unknown")
 		}
 	}
@@ -38,6 +40,7 @@ import Foundation
 		case "Algorithm"		: self = .algorithm
 		case "Rotation"			: self = .rotation
 		case "PMIC Watchdog"	: self = .pmicWatchdog
+		case "Bluetooth Packet"	: self = .bluetoothPacket
 		default					: self = .unknown
 		}
 	}

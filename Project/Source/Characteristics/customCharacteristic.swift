@@ -1313,6 +1313,14 @@ class customCharacteristic: Characteristic {
 		var index = 0
 		var dataPackets = [biostrapDataPacket]()
 		
+		let incomingDataDiagnostic				= biostrapDataPacket()
+		incomingDataDiagnostic.raw_data			= data
+		incomingDataDiagnostic.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
+		incomingDataDiagnostic.type				= packetType.diagnostic
+		incomingDataDiagnostic.diagnostic_type	= diagnosticType.bluetoothPacket
+
+		dataPackets.append(incomingDataDiagnostic)
+		
 		while (index < data.count) {
 			let (found, type, packet) = mParseSinglePacket(data, index: index)
 
