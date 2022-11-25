@@ -1010,7 +1010,8 @@ public class Device: NSObject {
 		case .livotal:
 			if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.start(file) }
 			else { updateFirmwareFailed?(self.id, 10001, "No DFU characteristic to update") }
-		case .ethos:
+		case .ethos,
+			 .alter:
 			if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
 				do {
 					let contents = try Data(contentsOf: file)
@@ -1024,10 +1025,14 @@ public class Device: NSObject {
 			else { updateFirmwareFailed?(self.id, 10001, "No OTA RX characteristic to update") }
 		default: updateFirmwareFailed?(self.id, 10001, "Do not understand type to update: \(type.title)")
 		}
-		#elseif LIVOTAL
+		#endif
+		
+		#if LIVOTAL
 		if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.start(file) }
 		else { updateFirmwareFailed?(self.id, 10001, "No DFU characteristic to update") }
-		#elseif ETHOS
+		#endif
+		
+		#if ETHOS || ALTER
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
 			do {
 				let contents = try Data(contentsOf: file)
@@ -1039,8 +1044,6 @@ public class Device: NSObject {
 			}
 		}
 		else { updateFirmwareFailed?(self.id, 10001, "No OTA RX characteristic to update") }
-		#else
-		updateFirmwareFailed?(self.id, 10001, "Cannot do this yet")
 		#endif
 	}
 
