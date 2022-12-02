@@ -28,8 +28,6 @@ class customCharacteristic: Characteristic {
 		case endSleep			= 0x13
 		#if UNIVERSAL || ETHOS
 		case motor				= 0x14
-		#endif
-		#if UNIVERSAL || ETHOS || ALTER
 		case debug				= 0x20
 		#endif
 		case setDeviceParam		= 0x70
@@ -37,8 +35,8 @@ class customCharacteristic: Characteristic {
 		case delDeviceParam		= 0x72
 		case setSessionParam	= 0x80
 		case getSessionParam	= 0x81
-		#if UNIVERSAL || ETHOS || ALTER
 		case recalibratePPG		= 0xed
+		#if UNIVERSAL || ETHOS
 		case startLiveSync		= 0xee
 		case stopLiveSync		= 0xef
 		#endif
@@ -126,10 +124,11 @@ class customCharacteristic: Characteristic {
 	var manufacturingTestComplete: ((_ successful: Bool)->())?
 	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
 	
-	#if UNIVERSAL || ETHOS || ALTER
+	var recalibratePPGComplete: ((_ successful: Bool)->())?
+
+	#if UNIVERSAL || ETHOS
 	var startLiveSyncComplete: ((_ successful: Bool)->())?
 	var stopLiveSyncComplete: ((_ successful: Bool)->())?
-	var recalibratePPGComplete: ((_ successful: Bool)->())?
 	#endif
 	
 	var deviceChargingStatus: ((_ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
@@ -937,8 +936,8 @@ class customCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if LIVOTAL
-	func manufacturingTest() {
+	#if LIVOTAL || UNIVERSAL
+	func livotalManufacturingTest() {
 		log?.v("")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
@@ -950,8 +949,8 @@ class customCharacteristic: Characteristic {
 	}
 	#endif
 
-	#if ALTER || ETHOS
-	func manufacturingTest(_ test: manufacturingTestType) {
+	#if ETHOS || UNIVERSAL
+	func ethosManufacturingTest(_ test: ethosManufacturingTestType) {
 		log?.v("")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
@@ -963,20 +962,9 @@ class customCharacteristic: Characteristic {
 		else { self.manufacturingTestComplete?(false) }
 	}
 	#endif
-	
-	#if UNIVERSAL
-	func livotalManufacturingTest() {
-		log?.v("")
-		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.manufacturingTest.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.manufacturingTestComplete?(false) }
-	}
 
-	func ethosManufacturingTest(_ test: ethosManufacturingTestType) {
+	#if ALTER || UNIVERSAL
+	func alterManufacturingTest(_ test: alterManufacturingTestType) {
 		log?.v("")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
@@ -1019,7 +1007,15 @@ class customCharacteristic: Characteristic {
 		}
 		else { self.stopLiveSyncComplete?(false) }
 	}
-	
+	#endif
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	func recalibratePPG() {
 		log?.v("")
 		
@@ -1031,8 +1027,6 @@ class customCharacteristic: Characteristic {
 		else { self.recalibratePPGComplete?(false) }
 
 	}
-	#endif
-	
 	
 	//--------------------------------------------------------------------------------
 	// Function Name: Validate CRC
@@ -1579,10 +1573,10 @@ class customCharacteristic: Characteristic {
 							}
 
 						case .manufacturingTest	: self.manufacturingTestComplete?(successful)
-						#if UNIVERSAL || ETHOS || ALTER
+						case .recalibratePPG	: self.recalibratePPGComplete?(successful)
+						#if UNIVERSAL || ETHOS
 						case .startLiveSync		: self.startLiveSyncComplete?(successful)
 						case .stopLiveSync		: self.stopLiveSyncComplete?(successful)
-						case .recalibratePPG	: self.recalibratePPGComplete?(successful)
 						#endif
 						case .allowPPG			: self.allowPPGComplete?(successful)
 						case .wornCheck			:
@@ -1776,6 +1770,29 @@ class customCharacteristic: Characteristic {
 				}
 				#endif
 				
+				#if ALTER
+				if (data.count == 3) {
+					let testResult = alterManufacturingTestResult(data.subdata(in: Range(1...2)))
+					do {
+						let jsonData = try JSONEncoder().encode(testResult)
+						if let jsonString = String(data: jsonData, encoding: .utf8) {
+							self.manufacturingTestResult?(true, jsonString)
+						}
+						else {
+							log?.e ("Result jsonString Failed")
+							self.manufacturingTestResult?(false, "")
+						}
+					}
+					catch {
+						log?.e ("Result jsonData Failed")
+						self.manufacturingTestResult?(false, "")
+					}
+				}
+				else {
+					self.manufacturingTestResult?(false, "")
+				}
+				#endif
+
 				#if UNIVERSAL
 				switch (type) {
 				case .livotal	:

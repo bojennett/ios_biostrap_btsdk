@@ -179,11 +179,12 @@ public class Device: NSObject {
 
 	var manufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
 	var manufacturingTestResult: ((_ id: String, _ valid: Bool, _ result: String)->())?
-	
-	#if UNIVERSAL || ETHOS || ALTER
+
+	var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
+
+	#if UNIVERSAL || ETHOS
 	var startLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
 	var stopLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
-	var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 
 	var getRawLoggingStatusComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool)->())?
@@ -863,35 +864,28 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if LIVOTAL
-	func manufacturingTest(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.manufacturingTest()
-		}
-		else { self.manufacturingTestComplete?(id, false) }
-	}
-	#endif
-
-	#if ALTER || ETHOS
-	func manufacturingTest(_ id: String, test: manufacturingTestType) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.manufacturingTest(test)
-		}
-		else { self.manufacturingTestComplete?(id, false) }
-	}
-	#endif
-	
-	#if UNIVERSAL
+	#if LIVOTAL || UNIVERSAL
 	func livotalManufacturingTest(_ id: String) {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.livotalManufacturingTest()
 		}
 		else { self.manufacturingTestComplete?(id, false) }
 	}
+	#endif
 
+	#if ETHOS || UNIVERSAL
 	func ethosManufacturingTest(_ id: String, test: ethosManufacturingTestType) {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.ethosManufacturingTest(test)
+		}
+		else { self.manufacturingTestComplete?(id, false) }
+	}
+	#endif
+
+	#if ALTER || UNIVERSAL
+	func alterManufacturingTest(_ id: String, test: alterManufacturingTestType) {
+		if let customCharacteristic = mCustomCharacteristic {
+			customCharacteristic.alterManufacturingTest(test)
 		}
 		else { self.manufacturingTestComplete?(id, false) }
 	}
@@ -918,14 +912,21 @@ public class Device: NSObject {
 		}
 		else { self.stopLiveSyncComplete?(id, false) }
 	}
-	
+	#endif
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	func recalibratePPG(_ id: String) {
 		if let customCharacteristic = mCustomCharacteristic {
 			customCharacteristic.recalibratePPG()
 		}
 		else { self.recalibratePPGComplete?(id, false) }
 	}
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -1339,8 +1340,6 @@ public class Device: NSObject {
 					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
 					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
 					mCustomCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result) }
-					mCustomCharacteristic?.startLiveSyncComplete		= { successful in self.startLiveSyncComplete?(self.id, successful) }
-					mCustomCharacteristic?.stopLiveSyncComplete			= { successful in self.stopLiveSyncComplete?(self.id, successful) }
 					mCustomCharacteristic?.recalibratePPGComplete		= { successful in self.recalibratePPGComplete?(self.id, successful) }
 					mCustomCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
 						if (charging) { self.chargingStatus	= "Charging" }

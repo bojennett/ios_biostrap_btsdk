@@ -7,8 +7,67 @@
 
 import Foundation
 
-#if ALTER || ETHOS
-@objc public enum manufacturingTestType: UInt8, Codable, CaseIterable {
+#if LIVOTAL || UNIVERSAL
+@objc public enum livotalManufacturingTestType: Int, RawRepresentable, Codable, CaseIterable {
+	case pmic
+	case temp
+	case flash_if
+	case flash_array
+	case ppg_if
+	case ppg_fifo
+	case imu_if
+	case imu_fifo
+	case led
+	
+	public typealias RawValue = String
+
+	public var rawValue: RawValue {
+		switch (self) {
+		case .pmic			: return "pmic"
+		case .temp			: return "temp"
+		case .flash_if		: return "flash_if"
+		case .flash_array	: return "flash_array"
+		case .ppg_if		: return "ppg_if"
+		case .ppg_fifo		: return "ppg_fifo"
+		case .imu_if		: return "imu_if"
+		case .imu_fifo		: return "imu_fifo"
+		case .led			: return "led"
+		}
+	}
+
+	public init?(rawValue: RawValue) {
+		switch (rawValue) {
+		case "pmic"			: self = .pmic
+		case "temp"			: self = .temp
+		case "flash_if"		: self = .flash_if
+		case "flash_array"	: self = .flash_array
+		case "ppg_if"		: self = .ppg_if
+		case "ppg_fifo"		: self = .ppg_fifo
+		case "imu_if"		: self = .imu_if
+		case "imu_fifo"		: self = .imu_fifo
+		case "led"			: self = .led
+		default				: return nil
+		}
+	}
+
+	public var title: String {
+		switch (self) {
+		case .pmic			: return "PMIC"
+		case .temp			: return "Temp Sensor Interface"
+		case .flash_if		: return "Flash Interface"
+		case .flash_array	: return "Flash Array"
+		case .ppg_if		: return "PPG Interface"
+		case .ppg_fifo		: return "PPG FIFO"
+		case .imu_if		: return "IMU Interface"
+		case .imu_fifo		: return "IMU FIFO"
+		case .led			: return "User LEDs"
+		}
+	}
+}
+#endif
+
+#if ALTER || UNIVERSAL
+@objc public enum alterManufacturingTestType: UInt8, Codable, CaseIterable {
 	case temp			= 0x00
 	case flashIF		= 0x01
 	case flashArray		= 0x02
@@ -57,7 +116,7 @@ import Foundation
 }
 #endif
 
-#if UNIVERSAL
+#if ETHOS || UNIVERSAL
 @objc public enum ethosManufacturingTestType: UInt8, Codable, CaseIterable {
 	case temp			= 0x00
 	case flashIF		= 0x01

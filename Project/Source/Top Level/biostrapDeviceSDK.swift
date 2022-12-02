@@ -130,8 +130,9 @@ import iOSDFULibrary
 	#if UNIVERSAL || ETHOS
 	@objc public var startLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var stopLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
-	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
+
+	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
 
 	@objc public var getRawLoggingStatusComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool)->())?
 	@objc public var getWornOverrideStatusComplete: ((_ id: String, _ successful: Bool, _ overridden: Bool)->())?
@@ -746,16 +747,25 @@ import iOSDFULibrary
 	@objc public func manufacturingTest(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices?[id] { device.manufacturingTest(id) }
+		if let device = mConnectedDevices?[id] { device.livotalManufacturingTest(id) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
 	
-	#if ALTER || ETHOS
-	@objc public func manufacturingTest(_ id: String, test: manufacturingTestType) {
+	#if ALTER
+	@objc public func manufacturingTest(_ id: String, test: alterManufacturingTestType) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices?[id] { device.manufacturingTest(id, test: test) }
+		if let device = mConnectedDevices?[id] { device.alterManufacturingTest(id, test: test) }
+		else { self.manufacturingTestComplete?(id, false) }
+	}
+	#endif
+
+	#if ETHOS
+	@objc public func manufacturingTest(_ id: String, test: ethosManufacturingTestType) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.ethosManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
@@ -772,6 +782,13 @@ import iOSDFULibrary
 		log?.v ("\(id)")
 		
 		if let device = mConnectedDevices?[id] { device.ethosManufacturingTest(id, test: test) }
+		else { self.manufacturingTestComplete?(id, false) }
+	}
+	
+	@objc public func alterManufacturingTest(_ id: String, test: alterManufacturingTestType) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.alterManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
@@ -797,14 +814,21 @@ import iOSDFULibrary
 		if let device = mConnectedDevices?[id] { device.stopLiveSync(id) }
 		else { self.stopLiveSyncComplete?(id, false) }
 	}
-	
+	#endif
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	@objc public func recalibratePPG(_ id: String) {
 		log?.v ("\(id)")
 		
 		if let device = mConnectedDevices?[id] { device.recalibratePPG(id) }
 		else { self.recalibratePPGComplete?(id, false) }
 	}
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
