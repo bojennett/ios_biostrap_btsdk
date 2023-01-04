@@ -1671,7 +1671,7 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func isReady() {
-		#if UNIVERSAL || ETHOS
+		#if UNIVERSAL || ETHOS || ALTER
 		mAmbiqOTARXCharacteristic?.isReady()
 		#endif
 	}

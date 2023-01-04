@@ -169,9 +169,10 @@ class ambiqOTARXCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mSendFrame(data: Data) {
-		//if let peripheral = mPeripheral, let characteristic = mCharacteristic {
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			peripheral.writeValue(data, for: characteristic, type: .withoutResponse)
+			DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100), execute: {
+				peripheral.writeValue(data, for: characteristic, type: .withoutResponse)
+			})
 		}
 		else {
 			log?.e("Data write not successful: \(data.hexString)")
