@@ -130,6 +130,8 @@ class ambiqOTARXCharacteristic: Characteristic {
 		packet.append(UInt8((checksum >> 16) & 0xff))
 		packet.append(UInt8((checksum >> 24) & 0xff))
 		
+		//log?.v (packet.hexString)
+		
 		return packet
 	}
 	
@@ -170,9 +172,9 @@ class ambiqOTARXCharacteristic: Characteristic {
 	//--------------------------------------------------------------------------------
 	internal func mSendFrame(data: Data) {
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100), execute: {
+			DispatchQueue.main.async {
 				peripheral.writeValue(data, for: characteristic, type: .withoutResponse)
-			})
+			}
 		}
 		else {
 			log?.e("Data write not successful: \(data.hexString)")
@@ -216,19 +218,24 @@ class ambiqOTARXCharacteristic: Characteristic {
 			}
 			
 			let header = data.subdata(in: 0..<ambiqOTARXCharacteristic.FILE_HEADER_BLOCK)
-						
-			mFileSize = (Int(header[11]) << 24) | (Int(header[10]) << 16) | (Int(header[9]) << 8) | Int(header[8])
 			mHeaderPackets = mBuildFrames(data: mBuildPacket(command: otaCommand.AMOTA_CMD_FW_HEADER, data: header))
-			
+
+			// The file size doesn't account for the header of length FILE_HEADER_BLOCK
+			mFileSize = (Int(header[11]) << 24) | (Int(header[10]) << 16) | (Int(header[9]) << 8) | Int(header[8])
+						
 			var currentOffset = ambiqOTARXCharacteristic.FILE_HEADER_BLOCK
-			while (currentOffset < mFileSize) {				
+
+			// "At the end" needs to account for the fact that the file size doesn't account for the header
+			while (currentOffset < (mFileSize + ambiqOTARXCharacteristic.FILE_HEADER_BLOCK)) {
 				var length = 0
-				if (currentOffset + ambiqOTARXCharacteristic.FILE_HEADER_BLOCK + ambiqOTARXCharacteristic.DATA_BLOCK_SIZE) > mFileSize {
+				if (currentOffset + ambiqOTARXCharacteristic.DATA_BLOCK_SIZE) > (mFileSize + ambiqOTARXCharacteristic.FILE_HEADER_BLOCK) {
 					length = mFileSize + ambiqOTARXCharacteristic.FILE_HEADER_BLOCK - currentOffset
 				}
 				else {
 					length = ambiqOTARXCharacteristic.DATA_BLOCK_SIZE
 				}
+				
+				//log?.v ("Current offset: \(currentOffset), length: \(length), File Size: \(mFileSize), count: \(data.count), total file size: \(mFileSize + ambiqOTARXCharacteristic.FILE_HEADER_BLOCK)")
 				
 				let packet = mBuildPacket(command: otaCommand.AMOTA_CMD_FW_DATA, data: data.subdata(in: currentOffset..<(currentOffset + length)))
 				mDataPackets.append(mBuildFrames(data: packet))

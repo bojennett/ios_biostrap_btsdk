@@ -15,10 +15,16 @@ class Characteristic {
 	internal var pCharacteristic	: CBCharacteristic?
 	internal var pID				: String				= "UNKNOWN"
 	internal var pConfigured		: Bool					= false
+	internal var pDiscovered		: Bool					= false
 
 	// MARK: Public Variables
 	var configured: Bool {
 		return (pConfigured)
+	}
+
+	// MARK: Public Variables
+	var discovered: Bool {
+		return (pDiscovered)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -31,6 +37,7 @@ class Characteristic {
 		pPeripheral		= peripheral
 		pCharacteristic	= characteristic
 		pConfigured		= false
+		pDiscovered		= false
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -44,6 +51,17 @@ class Characteristic {
 		log?.e ("\(pID): Did you mean to override?")
 	}
 
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func didDiscover() {
+		log?.e ("\(pID): Did you mean to override?")
+	}
+	
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------

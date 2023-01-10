@@ -1,5 +1,5 @@
 //
-//  customCharacteristic.swift
+//  customMainCharacteristic.swift
 //  biostrapDeviceSDK
 //
 //  Created by Joseph A. Bennett on 5/12/21.
@@ -9,7 +9,7 @@ import Foundation
 import CoreBluetooth
 import zlib
 
-class customCharacteristic: Characteristic {
+class customMainCharacteristic: Characteristic {
 	
 	#if UNIVERSAL
 	var type:	biostrapDeviceSDK.biostrapDeviceType	= .unknown

@@ -57,11 +57,13 @@ public class Device: NSObject {
 
 	enum characteristics: String {
 		#if UNIVERSAL || ALTER
-		case alterCharacteristic		= "883BBA2C-8E31-40BB-A859-D59A2FB38EC1"
+		case alterMainCharacteristic	= "883BBA2C-8E31-40BB-A859-D59A2FB38EC1"
+		case alterDataCharacteristic	= "883BBA2C-8E31-40BB-A859-D59A2FB38EC2"
 		#endif
 
 		#if UNIVERSAL || ETHOS
-		case ethosCharacteristic		= "B30E0F19-A021-45F3-8661-4255CBD49E11"
+		case ethosMainCharacteristic	= "B30E0F19-A021-45F3-8661-4255CBD49E11"
+		case ethosDataCharacteristic	= "B30E0F19-A021-45F3-8661-4255CBD49E12"
 		#endif
 		
 		#if UNIVERSAL || ETHOS || ALTER
@@ -70,7 +72,8 @@ public class Device: NSObject {
 		#endif
 
 		#if UNIVERSAL || LIVOTAL
-		case livotalCharacteristic		= "58950001-A53F-11EB-BCBC-0242AC130002"
+		case livotalMainCharacteristic	= "58950001-A53F-11EB-BCBC-0242AC130002"
+		case livotalDataCharacteristic	= "58950002-A53F-11EB-BCBC-0242AC130002"
 		case nordicDFUCharacteristic	= "8EC90003-F315-4F60-9FB8-838830DAEA50"
 		#endif
 
@@ -81,11 +84,13 @@ public class Device: NSObject {
 		var title: String {
 			switch (self) {
 			#if UNIVERSAL || ALTER
-			case .alterCharacteristic		: return "Alter Characteristic"
+			case .alterMainCharacteristic	: return "Alter Main Characteristic"
+			case .alterDataCharacteristic	: return "Alter Data Characteristic"
 			#endif
 
 			#if UNIVERSAL || ETHOS
-			case .ethosCharacteristic		: return "Ethos Characteristic"
+			case .ethosMainCharacteristic	: return "Ethos Main Characteristic"
+			case .ethosDataCharacteristic	: return "Ethos Data Characteristic"
 			#endif
 
 			#if UNIVERSAL || ETHOS || ALTER
@@ -94,7 +99,8 @@ public class Device: NSObject {
 			#endif
 
 			#if UNIVERSAL || LIVOTAL
-			case .livotalCharacteristic		: return "Livotal Characteristic"
+			case .livotalMainCharacteristic	: return "Livotal Main Characteristic"
+			case .livotalDataCharacteristic	: return "Livotal Data Characteristic"
 			case .nordicDFUCharacteristic	: return "Nordic DFU Characteristic"
 			#endif
 			}
@@ -241,7 +247,8 @@ public class Device: NSObject {
 	internal var mDISCharacteristicsDiscovered	: Bool = false
 	
 	internal var mBatteryLevelCharacteristic	: batteryLevelCharacteristic?
-	internal var mCustomCharacteristic			: customCharacteristic?
+	internal var mMainCharacteristic			: customMainCharacteristic?
+	internal var mDataCharacteristic			: customDataCharacteristic?
 
 	#if UNIVERSAL || LIVOTAL
 	internal var mNordicDFUCharacteristic		: nordicDFUCharacteristic?
@@ -369,14 +376,26 @@ public class Device: NSObject {
 
 	#if UNIVERSAL || LIVOTAL
 	private var mLivotalConfigured: Bool {
-		if let nordicDFUCharacteristic = mNordicDFUCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
-			
-			//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), SN: \(serialNumber.configured), LIV: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
+		if let nordicDFUCharacteristic = mNordicDFUCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+						
+			if let dataCharacteristic = mDataCharacteristic {
+				//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), SN: \(serialNumber.configured), LIV MAIN: \(mainCharacteristic.configured), LIV DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
+				
+				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
+						batteryCharacteristic.configured &&
+						mainCharacteristic.configured &&
+						dataCharacteristic.configured &&
+						nordicDFUCharacteristic.configured)
+			}
+			else {
+				//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), SN: \(serialNumber.configured), LIV: \(mainCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
 
-			return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-					batteryCharacteristic.configured &&
-					customCharacteristic.configured &&
-					nordicDFUCharacteristic.configured)
+				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
+						batteryCharacteristic.configured &&
+						mainCharacteristic.configured &&
+						nordicDFUCharacteristic.configured)
+			}
+
 		}
 		else { return (false) }
 	}
@@ -386,13 +405,14 @@ public class Device: NSObject {
 	private var mEthosConfigured: Bool {
 		if let firmwareVersion = mFirmwareVersion {
 			if (firmwareVersion.lessThan("1.0.0")) {
-				if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+				if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 					
-					//log?.v ("ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+					//log?.v ("ETH: \(mainCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 
+					// Data characteristic doesn't exist for < 1.0.0
 					return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
 							batteryCharacteristic.configured &&
-							customCharacteristic.configured &&
+							mainCharacteristic.configured &&
 							ambiqOTARXCharacteristic.configured &&
 							ambiqOTATXCharacteristic.configured
 					)
@@ -400,18 +420,33 @@ public class Device: NSObject {
 				else { return (false) }
 			}
 			else {
-				if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic, let heartRateMeasurementCharacteristic = mHeartRateMeasurementCharacteristic, let pulseOxContinuousCharacteristic = mPulseOxContinuousCharacteristic {
+				if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic, let heartRateMeasurementCharacteristic = mHeartRateMeasurementCharacteristic, let pulseOxContinuousCharacteristic = mPulseOxContinuousCharacteristic {
 					
-					//log?.v ("ETH: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), HRM: \(heartRateMeasurementCharacteristic.configured), PULSOX: \(pulseOxContinuousCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
-
-					return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-							batteryCharacteristic.configured &&
-							customCharacteristic.configured &&
-							ambiqOTARXCharacteristic.configured &&
-							ambiqOTATXCharacteristic.configured &&
-							heartRateMeasurementCharacteristic.configured &&
-							pulseOxContinuousCharacteristic.configured
-					)
+					if let dataCharacteristic = mDataCharacteristic {
+						//log?.v ("ETH MAIN: \(mainCharacteristic.configured), ETH DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), HRM: \(heartRateMeasurementCharacteristic.configured), PULSOX: \(pulseOxContinuousCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+						
+						return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
+								batteryCharacteristic.configured &&
+								mainCharacteristic.configured &&
+								dataCharacteristic.configured &&
+								ambiqOTARXCharacteristic.configured &&
+								ambiqOTATXCharacteristic.configured &&
+								heartRateMeasurementCharacteristic.configured &&
+								pulseOxContinuousCharacteristic.configured
+						)
+					}
+					else {
+						//log?.v ("ETH: \(mainCharacteristic.configured), BAT: \(batteryCharacteristic.configured), HRM: \(heartRateMeasurementCharacteristic.configured), PULSOX: \(pulseOxContinuousCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+						
+						return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
+								batteryCharacteristic.configured &&
+								mainCharacteristic.configured &&
+								ambiqOTARXCharacteristic.configured &&
+								ambiqOTATXCharacteristic.configured &&
+								heartRateMeasurementCharacteristic.configured &&
+								pulseOxContinuousCharacteristic.configured
+						)
+					}
 				}
 				else { return (false) }
 			}
@@ -422,16 +457,29 @@ public class Device: NSObject {
 	
 	#if UNIVERSAL || ALTER
 	private var mAlterConfigured: Bool {
-		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let customCharacteristic = mCustomCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 			
-			//log?.v ("ALTER: \(customCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
-
-			return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-					batteryCharacteristic.configured &&
-					customCharacteristic.configured &&
-					ambiqOTARXCharacteristic.configured &&
-					ambiqOTATXCharacteristic.configured
-			)
+			if let dataCharacteristic = mDataCharacteristic {
+				//log?.v ("ALTER MAIN: \(mainCharacteristic.configured), ALTER DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+				
+				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
+						batteryCharacteristic.configured &&
+						mainCharacteristic.configured &&
+						dataCharacteristic.configured &&
+						ambiqOTARXCharacteristic.configured &&
+						ambiqOTATXCharacteristic.configured
+				)
+			}
+			else {
+				//log?.v ("ALTER: \(mainCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+				
+				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
+						batteryCharacteristic.configured &&
+						mainCharacteristic.configured &&
+						ambiqOTARXCharacteristic.configured &&
+						ambiqOTATXCharacteristic.configured
+				)
+			}
 		}
 		else { return (false) }
 	}
@@ -439,7 +487,7 @@ public class Device: NSObject {
 
 
 	var configured: Bool {
-		if let firmwareVesion = mFirmwareVersion, let customCharacteristic = mCustomCharacteristic {
+		if let firmwareVesion = mFirmwareVersion, let customCharacteristic = mMainCharacteristic {
 			customCharacteristic.firmwareVersion = firmwareVesion.value
 		}
 		
@@ -491,8 +539,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func writeEpoch(_ id: String, newEpoch: Int) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.writeEpoch(newEpoch)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.writeEpoch(newEpoch)
 		}
 		else { self.writeEpochComplete?(id, false) }
 	}
@@ -505,8 +553,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func readEpoch(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.readEpoch()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.readEpoch()
 		}
 		else { self.readEpochComplete?(id, false, 0) }
 	}
@@ -519,8 +567,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func endSleep(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.endSleep()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.endSleep()
 		}
 		else { self.endSleepComplete?(id, false) }
 	}
@@ -534,8 +582,8 @@ public class Device: NSObject {
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || ETHOS
 	func debug(_ id: String, device: debugDevice, data: Data) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.debug(device, data: data)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.debug(device, data: data)
 		}
 		else { self.debugComplete?(id, false, device, data) }
 	}
@@ -549,8 +597,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func getAllPackets(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.getAllPackets()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getAllPackets()
 		}
 		else { self.getAllPacketsComplete?(id, false) }
 	}
@@ -563,8 +611,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func getNextPacket(_ id: String, single: Bool) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.getNextPacket(single)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getNextPacket(single)
 		}
 		else { self.getNextPacketComplete?(id, false, .missingDevice, true, "") }
 	}
@@ -577,8 +625,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func getPacketCount(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.getPacketCount()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getPacketCount()
 		}
 		else { self.getPacketCountComplete?(id, false, 0) }
 	}
@@ -591,8 +639,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func disableWornDetect(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.disableWornDetect()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.disableWornDetect()
 		}
 		else { self.disableWornDetectComplete?(id, false) }
 	}
@@ -605,8 +653,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func enableWornDetect(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.enableWornDetect()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.enableWornDetect()
 		}
 		else { self.enableWornDetectComplete?(id, false) }
 	}
@@ -619,8 +667,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func startManual(_ id: String, algorithms: ppgAlgorithmConfiguration) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.startManual(algorithms)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.startManual(algorithms)
 		}
 		else { self.startManualComplete?(id, false) }
 	}
@@ -633,8 +681,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func stopManual(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.stopManual()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.stopManual()
 		}
 		else { self.stopManualComplete?(id, false) }
 	}
@@ -648,8 +696,8 @@ public class Device: NSObject {
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || LIVOTAL
 	func livotalLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.livotalLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.livotalLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
 		}
 		else { self.ledComplete?(id, false) }
 	}
@@ -657,8 +705,8 @@ public class Device: NSObject {
 
 	#if UNIVERSAL || ETHOS
 	func ethosLED(_ id: String, red: Int, green: Int, blue: Int, mode: biostrapDeviceSDK.ethosLEDMode, seconds: Int, percent: Int) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.ethosLED(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.ethosLED(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent)
 		}
 		else { self.ledComplete?(id, false) }
 	}
@@ -666,8 +714,8 @@ public class Device: NSObject {
 
 	#if UNIVERSAL || ALTER
 	func alterLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.alterLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.alterLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
 		}
 		else { self.ledComplete?(id, false) }
 	}
@@ -682,8 +730,8 @@ public class Device: NSObject {
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || ETHOS
 	func motor(_ id: String, milliseconds: Int, pulses: Int) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.motor(milliseconds: milliseconds, pulses: pulses)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.motor(milliseconds: milliseconds, pulses: pulses)
 		}
 		else { self.motorComplete?(id, false) }
 	}
@@ -697,8 +745,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func enterShipMode(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.enterShipMode()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.enterShipMode()
 		}
 		else { self.enterShipModeComplete?(id, false) }
 	}
@@ -711,8 +759,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func writeSerialNumber(_ id: String, partID: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.writeSerialNumber(partID)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.writeSerialNumber(partID)
 		}
 		else { self.writeSerialNumberComplete?(id, false) }
 	}
@@ -725,8 +773,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func readSerialNumber(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.readSerialNumber()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.readSerialNumber()
 		}
 		else { self.readSerialNumberComplete?(id, false, "") }
 	}
@@ -739,8 +787,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func deleteSerialNumber(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.deleteSerialNumber()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.deleteSerialNumber()
 		}
 		else { self.deleteSerialNumberComplete?(id, false) }
 	}
@@ -753,8 +801,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func writeAdvInterval(_ id: String, seconds: Int) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.writeAdvInterval(seconds)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.writeAdvInterval(seconds)
 		}
 		else { self.writeAdvIntervalComplete?(id, false) }
 	}
@@ -767,8 +815,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func readAdvInterval(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.readAdvInterval()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.readAdvInterval()
 		}
 		else { self.readAdvIntervalComplete?(id, false, 0) }
 	}
@@ -781,8 +829,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func deleteAdvInterval(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.deleteAdvInterval()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.deleteAdvInterval()
 		}
 		else { self.deleteAdvIntervalComplete?(id, false) }
 	}
@@ -795,8 +843,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func clearChargeCycles(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.clearChargeCycles()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.clearChargeCycles()
 		}
 		else { self.clearChargeCyclesComplete?(id, false) }
 	}
@@ -809,8 +857,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func readChargeCycles(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.readChargeCycles()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.readChargeCycles()
 		}
 		else { self.readChargeCyclesComplete?(id, false, 0.0) }
 	}
@@ -823,8 +871,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func readCanLogDiagnostics(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.readCanLogDiagnostics()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.readCanLogDiagnostics()
 		}
 		else { self.readCanLogDiagnosticsComplete?(id, false, false) }
 	}
@@ -837,8 +885,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func updateCanLogDiagnostics(_ id: String, allow: Bool) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.updateCanLogDiagnostics(allow)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.updateCanLogDiagnostics(allow)
 		}
 		else { self.updateCanLogDiagnosticsComplete?(id, false) }
 	}
@@ -851,8 +899,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func allowPPG(_ id: String, allow: Bool) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.allowPPG(allow)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.allowPPG(allow)
 		}
 		else { self.allowPPGComplete?(id, false) }
 	}
@@ -866,8 +914,8 @@ public class Device: NSObject {
 	//--------------------------------------------------------------------------------
 	#if LIVOTAL || UNIVERSAL
 	func livotalManufacturingTest(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.livotalManufacturingTest()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.livotalManufacturingTest()
 		}
 		else { self.manufacturingTestComplete?(id, false) }
 	}
@@ -875,8 +923,8 @@ public class Device: NSObject {
 
 	#if ETHOS || UNIVERSAL
 	func ethosManufacturingTest(_ id: String, test: ethosManufacturingTestType) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.ethosManufacturingTest(test)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.ethosManufacturingTest(test)
 		}
 		else { self.manufacturingTestComplete?(id, false) }
 	}
@@ -884,8 +932,8 @@ public class Device: NSObject {
 
 	#if ALTER || UNIVERSAL
 	func alterManufacturingTest(_ id: String, test: alterManufacturingTestType) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.alterManufacturingTest(test)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.alterManufacturingTest(test)
 		}
 		else { self.manufacturingTestComplete?(id, false) }
 	}
@@ -900,15 +948,15 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func startLiveSync(_ id: String, configuration: liveSyncConfiguration) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.startLiveSync(configuration)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.startLiveSync(configuration)
 		}
 		else { self.startLiveSyncComplete?(id, false) }
 	}
 	
 	func stopLiveSync(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.stopLiveSync()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.stopLiveSync()
 		}
 		else { self.stopLiveSyncComplete?(id, false) }
 	}
@@ -922,8 +970,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func recalibratePPG(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.recalibratePPG()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.recalibratePPG()
 		}
 		else { self.recalibratePPGComplete?(id, false) }
 	}
@@ -936,8 +984,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func wornCheck(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.wornCheck()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.wornCheck()
 		}
 		else { self.wornCheckComplete?(id, false, "Missing Characteristic", 0) }
 	}
@@ -950,8 +998,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func rawLogging(_ id: String, enable: Bool) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.rawLogging(enable)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.rawLogging(enable)
 		}
 		else { self.rawLoggingComplete?(id, false) }
 	}
@@ -964,8 +1012,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func getRawLoggingStatus(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.getRawLoggingStatus()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getRawLoggingStatus()
 		}
 		else { self.getRawLoggingStatusComplete?(id, false, false) }
 	}
@@ -978,8 +1026,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func getWornOverrideStatus(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.getWornOverrideStatus()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getWornOverrideStatus()
 		}
 		else { self.getWornOverrideStatusComplete?(id, false, false) }
 	}
@@ -992,8 +1040,8 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func reset(_ id: String) {
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.reset()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.reset()
 		}
 		else { self.resetComplete?(id, false) }
 	}
@@ -1092,8 +1140,8 @@ public class Device: NSObject {
 	func setSessionParam(_ parameter: sessionParameterType, value: Int) {
 		log?.v("\(self.id): \(parameter)")
 
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.setSessionParam(parameter, value: value)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.setSessionParam(parameter, value: value)
 		}
 		else { self.setSessionParamComplete?(self.id, false, parameter) }
 
@@ -1109,8 +1157,8 @@ public class Device: NSObject {
 	func getSessionParam(_ parameter: sessionParameterType) {
 		log?.v("\(self.id): \(parameter)")
 
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.getSessionParam(parameter)
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getSessionParam(parameter)
 		}
 		else { self.getSessionParamComplete?(self.id, false, parameter, 0) }
 	}
@@ -1125,8 +1173,8 @@ public class Device: NSObject {
 	func resetSessionParams() {
 		log?.v("\(self.id)")
 
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.resetSessionParams()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.resetSessionParams()
 		}
 		else { self.resetSessionParamsComplete?(self.id, false) }
 	}
@@ -1141,8 +1189,8 @@ public class Device: NSObject {
 	func acceptSessionParams() {
 		log?.v("\(self.id)")
 
-		if let customCharacteristic = mCustomCharacteristic {
-			customCharacteristic.acceptSessionParams()
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.acceptSessionParams()
 		}
 		else { self.acceptSessionParamsComplete?(self.id, false) }
 	}
@@ -1227,127 +1275,139 @@ public class Device: NSObject {
 				switch (testCharacteristic) {
 					
 #if UNIVERSAL || ETHOS
-				case .ethosCharacteristic:
-					mCustomCharacteristic	= customCharacteristic(peripheral, characteristic: characteristic)
+				case .ethosMainCharacteristic:
+					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic)
 #if UNIVERSAL
-					mCustomCharacteristic?.type	= .ethos
+					mMainCharacteristic?.type	= .ethos
 #endif
-					mCustomCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.id, successful) }
-					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.id, successful) }
-					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.id, successful) }
-					mCustomCharacteristic?.motorComplete = { successful in self.motorComplete?(self.id, successful) }
-					mCustomCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.id, successful) }
-					mCustomCharacteristic?.writeSerialNumberComplete = { successful in self.writeSerialNumberComplete?(self.id, successful) }
-					mCustomCharacteristic?.readSerialNumberComplete = { successful, partID in self.readSerialNumberComplete?(self.id, successful, partID) }
-					mCustomCharacteristic?.deleteSerialNumberComplete = { successful in self.deleteSerialNumberComplete?(self.id, successful) }
-					mCustomCharacteristic?.writeAdvIntervalComplete = { successful in self.writeAdvIntervalComplete?(self.id, successful) }
-					mCustomCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.readAdvIntervalComplete?(self.id, successful, seconds) }
-					mCustomCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.id, successful) }
-					mCustomCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.id, successful) }
-					mCustomCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.id, successful, cycles) }
-					mCustomCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.readCanLogDiagnosticsComplete?(self.id, successful, allow) }
-					mCustomCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.updateCanLogDiagnosticsComplete?(self.id, successful) }
-					mCustomCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.id, successful) }
-					mCustomCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.getRawLoggingStatusComplete?(self.id, successful, enabled) }
-					mCustomCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.getWornOverrideStatusComplete?(self.id, successful, overridden) }
-					mCustomCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
-					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
-					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }
-					mCustomCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
-					mCustomCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
-					mCustomCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.id, successful) }
-					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
-					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
-					mCustomCharacteristic?.debugComplete = { successful, device, data in self.debugComplete?(self.id, successful, device, data) }
-					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
-					mCustomCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
-					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
-					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
-					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
-					mCustomCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mCustomCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
-					mCustomCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
-					mCustomCharacteristic?.deviceWornStatus = { isWorn in
+					mMainCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.id, successful) }
+					mMainCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.id, successful) }
+					mMainCharacteristic?.ledComplete = { successful in self.ledComplete?(self.id, successful) }
+					mMainCharacteristic?.motorComplete = { successful in self.motorComplete?(self.id, successful) }
+					mMainCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.id, successful) }
+					mMainCharacteristic?.writeSerialNumberComplete = { successful in self.writeSerialNumberComplete?(self.id, successful) }
+					mMainCharacteristic?.readSerialNumberComplete = { successful, partID in self.readSerialNumberComplete?(self.id, successful, partID) }
+					mMainCharacteristic?.deleteSerialNumberComplete = { successful in self.deleteSerialNumberComplete?(self.id, successful) }
+					mMainCharacteristic?.writeAdvIntervalComplete = { successful in self.writeAdvIntervalComplete?(self.id, successful) }
+					mMainCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.readAdvIntervalComplete?(self.id, successful, seconds) }
+					mMainCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.id, successful) }
+					mMainCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.id, successful) }
+					mMainCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.id, successful, cycles) }
+					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.readCanLogDiagnosticsComplete?(self.id, successful, allow) }
+					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.updateCanLogDiagnosticsComplete?(self.id, successful) }
+					mMainCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.id, successful) }
+					mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.getRawLoggingStatusComplete?(self.id, successful, enabled) }
+					mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.getWornOverrideStatusComplete?(self.id, successful, overridden) }
+					mMainCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
+					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
+					mMainCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }
+					mMainCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
+					mMainCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
+					mMainCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.id, successful) }
+					mMainCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
+					mMainCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
+					mMainCharacteristic?.debugComplete = { successful, device, data in self.debugComplete?(self.id, successful, device, data) }
+					mMainCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
+					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
+					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
+					mMainCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
+					mMainCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
+					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mMainCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
+					mMainCharacteristic?.deviceWornStatus = { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
 						else { self.wornStatus = "Not Worn" }
 						self.deviceWornStatus?(self.id, isWorn)
 					}
-					mCustomCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.id, successful, parameter) }
-					mCustomCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.id, successful, parameter, value) }
-					mCustomCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
-					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
-					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
-					mCustomCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result) }
-					mCustomCharacteristic?.startLiveSyncComplete		= { successful in self.startLiveSyncComplete?(self.id, successful) }
-					mCustomCharacteristic?.stopLiveSyncComplete			= { successful in self.stopLiveSyncComplete?(self.id, successful) }
-					mCustomCharacteristic?.recalibratePPGComplete		= { successful in self.recalibratePPGComplete?(self.id, successful) }
-					mCustomCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
+					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.id, successful, parameter) }
+					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.id, successful, parameter, value) }
+					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
+					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
+					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
+					mMainCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result) }
+					mMainCharacteristic?.startLiveSyncComplete		= { successful in self.startLiveSyncComplete?(self.id, successful) }
+					mMainCharacteristic?.stopLiveSyncComplete			= { successful in self.stopLiveSyncComplete?(self.id, successful) }
+					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.recalibratePPGComplete?(self.id, successful) }
+					mMainCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
 						if (charging) { self.chargingStatus	= "Charging" }
 						else if (on_charger) { self.chargingStatus = "On Charger" }
 						else if (error) { self.chargingStatus = "Charging Error" }
 						else { self.chargingStatus = "Not Charging" }
 						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
-					mCustomCharacteristic?.discoverDescriptors()
+					mMainCharacteristic?.discoverDescriptors()
+					
+				case .ethosDataCharacteristic:
+					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
+					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mDataCharacteristic?.discoverDescriptors()
 				#endif
 
 				#if UNIVERSAL || ALTER
-				case .alterCharacteristic:
-					mCustomCharacteristic	= customCharacteristic(peripheral, characteristic: characteristic)
+				case .alterMainCharacteristic:
+					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic)
 					#if UNIVERSAL
-					mCustomCharacteristic?.type	= .alter
+					mMainCharacteristic?.type	= .alter
 					#endif
-					mCustomCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.id, successful) }
-					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.id, successful) }
-					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.id, successful) }
-					mCustomCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.id, successful) }
-					mCustomCharacteristic?.writeSerialNumberComplete = { successful in self.writeSerialNumberComplete?(self.id, successful) }
-					mCustomCharacteristic?.readSerialNumberComplete = { successful, partID in self.readSerialNumberComplete?(self.id, successful, partID) }
-					mCustomCharacteristic?.deleteSerialNumberComplete = { successful in self.deleteSerialNumberComplete?(self.id, successful) }
-					mCustomCharacteristic?.writeAdvIntervalComplete = { successful in self.writeAdvIntervalComplete?(self.id, successful) }
-					mCustomCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.readAdvIntervalComplete?(self.id, successful, seconds) }
-					mCustomCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.id, successful) }
-					mCustomCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.id, successful) }
-					mCustomCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.id, successful, cycles) }
-					mCustomCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.readCanLogDiagnosticsComplete?(self.id, successful, allow) }
-					mCustomCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.updateCanLogDiagnosticsComplete?(self.id, successful) }
-					mCustomCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.id, successful) }
-					mCustomCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.getRawLoggingStatusComplete?(self.id, successful, enabled) }
-					mCustomCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.getWornOverrideStatusComplete?(self.id, successful, overridden) }
-					mCustomCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
-					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
-					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }
-					mCustomCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
-					mCustomCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
-					mCustomCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.id, successful) }
-					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
-					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
-					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
-					mCustomCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
-					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
-					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
-					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
-					mCustomCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mCustomCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
-					mCustomCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
-					mCustomCharacteristic?.deviceWornStatus = { isWorn in
+					mMainCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.id, successful) }
+					mMainCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.id, successful) }
+					mMainCharacteristic?.ledComplete = { successful in self.ledComplete?(self.id, successful) }
+					mMainCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.id, successful) }
+					mMainCharacteristic?.writeSerialNumberComplete = { successful in self.writeSerialNumberComplete?(self.id, successful) }
+					mMainCharacteristic?.readSerialNumberComplete = { successful, partID in self.readSerialNumberComplete?(self.id, successful, partID) }
+					mMainCharacteristic?.deleteSerialNumberComplete = { successful in self.deleteSerialNumberComplete?(self.id, successful) }
+					mMainCharacteristic?.writeAdvIntervalComplete = { successful in self.writeAdvIntervalComplete?(self.id, successful) }
+					mMainCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.readAdvIntervalComplete?(self.id, successful, seconds) }
+					mMainCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.id, successful) }
+					mMainCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.id, successful) }
+					mMainCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.id, successful, cycles) }
+					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.readCanLogDiagnosticsComplete?(self.id, successful, allow) }
+					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.updateCanLogDiagnosticsComplete?(self.id, successful) }
+					mMainCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.id, successful) }
+					mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.getRawLoggingStatusComplete?(self.id, successful, enabled) }
+					mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.getWornOverrideStatusComplete?(self.id, successful, overridden) }
+					mMainCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
+					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
+					mMainCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }
+					mMainCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
+					mMainCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
+					mMainCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.id, successful) }
+					mMainCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
+					mMainCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
+					mMainCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
+					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
+					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
+					mMainCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
+					mMainCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
+					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mMainCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
+					mMainCharacteristic?.deviceWornStatus = { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
 						else { self.wornStatus = "Not Worn" }
 						self.deviceWornStatus?(self.id, isWorn)
 					}
-					mCustomCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.id, successful, parameter) }
-					mCustomCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.id, successful, parameter, value) }
-					mCustomCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
-					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
-					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
-					mCustomCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result) }
-					mCustomCharacteristic?.recalibratePPGComplete		= { successful in self.recalibratePPGComplete?(self.id, successful) }
-					mCustomCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
+					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.id, successful, parameter) }
+					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.id, successful, parameter, value) }
+					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
+					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
+					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
+					mMainCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result) }
+					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.recalibratePPGComplete?(self.id, successful) }
+					mMainCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
 						if (charging) { self.chargingStatus	= "Charging" }
 						else if (on_charger) { self.chargingStatus = "On Charger" }
 						else if (error) { self.chargingStatus = "Charging Error" }
 						else { self.chargingStatus = "Not Charging" }
 						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
-					mCustomCharacteristic?.discoverDescriptors()
+					mMainCharacteristic?.discoverDescriptors()
+					
+				case .alterDataCharacteristic:
+					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
+					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mDataCharacteristic?.discoverDescriptors()
 				#endif
 
 				#if UNIVERSAL || ETHOS || ALTER
@@ -1378,63 +1438,69 @@ public class Device: NSObject {
 				#endif
 				
 				#if UNIVERSAL || LIVOTAL
-				case .livotalCharacteristic:
-					mCustomCharacteristic	= customCharacteristic(peripheral, characteristic: characteristic)
+				case .livotalMainCharacteristic:
+					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic)
 					#if UNIVERSAL
-					mCustomCharacteristic?.type	= .livotal
+					mMainCharacteristic?.type	= .livotal
 					#endif
-					mCustomCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.id, successful) }
-					mCustomCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.id, successful) }
-					mCustomCharacteristic?.ledComplete = { successful in self.ledComplete?(self.id, successful) }
-					mCustomCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.id, successful) }
-					mCustomCharacteristic?.writeSerialNumberComplete = { successful in self.writeSerialNumberComplete?(self.id, successful) }
-					mCustomCharacteristic?.readSerialNumberComplete = { successful, partID in self.readSerialNumberComplete?(self.id, successful, partID) }
-					mCustomCharacteristic?.deleteSerialNumberComplete = { successful in self.deleteSerialNumberComplete?(self.id, successful) }
-					mCustomCharacteristic?.writeAdvIntervalComplete = { successful in self.writeAdvIntervalComplete?(self.id, successful) }
-					mCustomCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.readAdvIntervalComplete?(self.id, successful, seconds) }
-					mCustomCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.id, successful) }
-					mCustomCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.id, successful) }
-					mCustomCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.id, successful, cycles) }
-					mCustomCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.readCanLogDiagnosticsComplete?(self.id, successful, allow) }
-					mCustomCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.updateCanLogDiagnosticsComplete?(self.id, successful) }
-					mCustomCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.id, successful) }
-					mCustomCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.getRawLoggingStatusComplete?(self.id, successful, enabled) }
-					mCustomCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.getWornOverrideStatusComplete?(self.id, successful, overridden) }
-					mCustomCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
-					mCustomCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
-					mCustomCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }
-					mCustomCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
-					mCustomCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
-					mCustomCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.id, successful) }
-					mCustomCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
-					mCustomCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
-					mCustomCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
-					mCustomCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
-					mCustomCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
-					mCustomCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
-					mCustomCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
-					mCustomCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mCustomCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
-					mCustomCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
-					mCustomCharacteristic?.deviceWornStatus = { isWorn in
+					mMainCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.id, successful) }
+					mMainCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.id, successful) }
+					mMainCharacteristic?.ledComplete = { successful in self.ledComplete?(self.id, successful) }
+					mMainCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.id, successful) }
+					mMainCharacteristic?.writeSerialNumberComplete = { successful in self.writeSerialNumberComplete?(self.id, successful) }
+					mMainCharacteristic?.readSerialNumberComplete = { successful, partID in self.readSerialNumberComplete?(self.id, successful, partID) }
+					mMainCharacteristic?.deleteSerialNumberComplete = { successful in self.deleteSerialNumberComplete?(self.id, successful) }
+					mMainCharacteristic?.writeAdvIntervalComplete = { successful in self.writeAdvIntervalComplete?(self.id, successful) }
+					mMainCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.readAdvIntervalComplete?(self.id, successful, seconds) }
+					mMainCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.id, successful) }
+					mMainCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.id, successful) }
+					mMainCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.id, successful, cycles) }
+					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.readCanLogDiagnosticsComplete?(self.id, successful, allow) }
+					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.updateCanLogDiagnosticsComplete?(self.id, successful) }
+					mMainCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.id, successful) }
+					mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.getRawLoggingStatusComplete?(self.id, successful, enabled) }
+					mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.getWornOverrideStatusComplete?(self.id, successful, overridden) }
+					mMainCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
+					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
+					mMainCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }
+					mMainCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
+					mMainCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
+					mMainCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.id, successful) }
+					mMainCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
+					mMainCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
+					mMainCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
+					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
+					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
+					mMainCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
+					mMainCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
+					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mMainCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
+					mMainCharacteristic?.deviceWornStatus = { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
 						else { self.wornStatus = "Not Worn" }
 						self.deviceWornStatus?(self.id, isWorn)
 					}
-					mCustomCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.id, successful, parameter) }
-					mCustomCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.id, successful, parameter, value) }
-					mCustomCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
-					mCustomCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
-					mCustomCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
-					mCustomCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
-					mCustomCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
+					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.id, successful, parameter) }
+					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.id, successful, parameter, value) }
+					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
+					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
+					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
+					mMainCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
+					mMainCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
 						if (charging) { self.chargingStatus	= "Charging" }
 						else if (on_charger) { self.chargingStatus = "On Charger" }
 						else if (error) { self.chargingStatus = "Charging Error" }
 						else { self.chargingStatus = "Not Charging" }
 						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
-					mCustomCharacteristic?.discoverDescriptors()
-				
+					mMainCharacteristic?.discoverDescriptors()
+					
+				case .livotalDataCharacteristic:
+					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
+					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mDataCharacteristic?.discoverDescriptors()
+
 				case .nordicDFUCharacteristic:
 					if let name = peripheral.name {
 						mNordicDFUCharacteristic	= nordicDFUCharacteristic(peripheral, characteristic: characteristic, name: name)
@@ -1477,21 +1543,24 @@ public class Device: NSObject {
 					log?.v ("\(self.id): \(standardDescriptor.title) '\(enumerated.title)'")
 					switch (enumerated) {
 					#if UNIVERSAL || ETHOS
-					case .ethosCharacteristic		: mCustomCharacteristic?.didDiscoverDescriptor()
+					case .ethosMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
+					case .ethosDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
 					#endif
 
 					#if UNIVERSAL || ALTER
-					case .alterCharacteristic		: mCustomCharacteristic?.didDiscoverDescriptor()
+					case .alterMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
+					case .alterDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
 					#endif
 
 					#if UNIVERSAL || ETHOS || ALTER
-					case .ambiqOTARXCharacteristic	: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
-					case .ambiqOTATXCharacteristic	: mAmbiqOTATXCharacteristic?.didDiscoverDescriptor()
+					case .ambiqOTARXCharacteristic		: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
+					case .ambiqOTATXCharacteristic		: mAmbiqOTATXCharacteristic?.didDiscoverDescriptor()
 					#endif
 					
 					#if UNIVERSAL || LIVOTAL
-					case .livotalCharacteristic		: mCustomCharacteristic?.didDiscoverDescriptor()
-					case .nordicDFUCharacteristic	: mNordicDFUCharacteristic?.didDiscoverDescriptor()
+					case .livotalMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
+					case .livotalDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
+					case .nordicDFUCharacteristic		: mNordicDFUCharacteristic?.didDiscoverDescriptor()
 					#endif
 					}
 				}
@@ -1574,16 +1643,18 @@ public class Device: NSObject {
 		else if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
 			switch (enumerated) {
 			#if UNIVERSAL || ETHOS
-			case .ethosCharacteristic		: mCustomCharacteristic?.didUpdateValue()
+			case .ethosMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
+			case .ethosDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
 			#endif
 
 			#if UNIVERSAL || ALTER
-			case .alterCharacteristic		: mCustomCharacteristic?.didUpdateValue()
+			case .alterMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
+			case .alterDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
 			#endif
 
 			#if UNIVERSAL || ETHOS || ALTER
-			case .ambiqOTARXCharacteristic	: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
-			case .ambiqOTATXCharacteristic	:
+			case .ambiqOTARXCharacteristic		: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
+			case .ambiqOTATXCharacteristic		:
 				// Commands to RX come in on TX, causes RX to do next step
 				if let value = characteristic.value {
 					mAmbiqOTARXCharacteristic?.didUpdateTXValue(value)
@@ -1594,8 +1665,9 @@ public class Device: NSObject {
 			#endif
 			
 			#if UNIVERSAL || LIVOTAL
-			case .livotalCharacteristic		: mCustomCharacteristic?.didUpdateValue()
-			case .nordicDFUCharacteristic	: mNordicDFUCharacteristic?.didUpdateValue()
+			case .livotalMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
+			case .livotalDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
+			case .nordicDFUCharacteristic		: mNordicDFUCharacteristic?.didUpdateValue()
 			#endif
 			}
 		}
@@ -1619,21 +1691,24 @@ public class Device: NSObject {
 					
 					switch (enumerated) {
 					#if UNIVERSAL || ETHOS
-					case .ethosCharacteristic			: mCustomCharacteristic?.didUpdateNotificationState()
+					case .ethosMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
+					case .ethosDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
 					#endif
 
 					#if UNIVERSAL || ALTER
-					case .alterCharacteristic			: mCustomCharacteristic?.didUpdateNotificationState()
+					case .alterMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
+					case .alterDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
 					#endif
 
 					#if UNIVERSAL || ETHOS || ALTER
-					case .ambiqOTARXCharacteristic		: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
-					case .ambiqOTATXCharacteristic		: mAmbiqOTATXCharacteristic?.didUpdateNotificationState()
+					case .ambiqOTARXCharacteristic			: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
+					case .ambiqOTATXCharacteristic			: mAmbiqOTATXCharacteristic?.didUpdateNotificationState()
 					#endif
 
 					#if UNIVERSAL || LIVOTAL
-					case .livotalCharacteristic			: mCustomCharacteristic?.didUpdateNotificationState()
-					case .nordicDFUCharacteristic		: mNordicDFUCharacteristic?.didUpdateNotificationState()
+					case .livotalMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
+					case .livotalDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
+					case .nordicDFUCharacteristic			: mNordicDFUCharacteristic?.didUpdateNotificationState()
 					#endif
 					}
 				}

@@ -68,6 +68,7 @@ import Foundation
 		
 	case milestone						= 0xf0
 	case settings						= 0xf1
+	case caughtUp						= 0xfe
 	
 	public init(from decoder: Decoder) throws {
 		let container = try decoder.singleValueContainer()
@@ -132,7 +133,8 @@ import Foundation
 	
 		case "Milestone"							: self	= .milestone
 		case "Settings"								: self	= .settings
-		default: self	= .unknown
+		case "Caught Up"							: self	= .caughtUp
+		default										: self	= .unknown
 		}
 	}
 		
@@ -197,6 +199,8 @@ import Foundation
 
 		case .milestone								: return "Milestone"
 		case .settings								: return "Settings"
+			
+		case .caughtUp								: return "Caught Up"
 		}
 	}
 	
@@ -243,7 +247,7 @@ import Foundation
 		case .rawPPGCompressedGreen					: return 0	// Done by calculation
 		case .rawPPGCompressedRed					: return 0	// Done by calculation
 		case .rawPPGCompressedIR					: return 0	// Done by calculation
-			
+
 		#if UNIVERSAL || ETHOS
 		case .rawPPGCompressedWhiteIRRPD			: return 0	// Done by calculation
 		case .rawPPGCompressedWhiteWhitePD			: return 0	// Done by calculation
@@ -253,14 +257,16 @@ import Foundation
 		case .rawPPGRed								: return 5
 		case .rawPPGIR								: return 5
 		case .rawPPGFifoCount						: return 10
-			
+
 		#if UNIVERSAL || ETHOS
 		case .rawPPGWhiteIRRPD						: return 5
 		case .rawPPGWhiteWhitePD					: return 5
 		#endif
-						
+
 		case .milestone								: return 7
 		case .settings								: return 6
+
+		case .caughtUp								: return 7
 		}
 	}
 }

@@ -160,6 +160,7 @@ import Foundation
 		case .diagnostic					: return ("\(raw_data.hexString),\(type.title),\(diagnostic_type.title)")
 		case .milestone						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(tag)")
 		case .settings						: return ("\(raw_data.hexString),\(type.title),\(settings_type.title),\(settings_value)")
+		case .caughtUp						: return ("\(raw_data.hexString),\(type.title)")
 		}
 	}
 	
@@ -359,6 +360,9 @@ import Foundation
 				if let thisSetting = settingsType(rawValue: data[1]) { settings_type = thisSetting }
 				else { settings_type	= .unknown }
 				settings_value		= data.subdata(in: Range(2...5)).leFloat
+				
+			case .caughtUp:
+				break
 
 			case .unknown:
 				break
@@ -511,6 +515,9 @@ import Foundation
 		case .settings:
 			settings_type		= try values.decode(settingsType.self, forKey: .settings_type)
 			settings_value		= try values.decode(Float.self, forKey: .settings_value)
+			break
+			
+		case .caughtUp:
 			break
 			
 		case .unknown:
@@ -666,11 +673,12 @@ import Foundation
 		case .milestone:
 			try container.encode(epoch, forKey: .epoch)
 			try container.encode(tag, forKey: .tag)
-			break
 			
 		case .settings:
 			try container.encode(settings_type.title, forKey: .settings_type)
 			try container.encode(settings_value, forKey: .settings_value)
+			
+		case .caughtUp:
 			break
 			
 		case .unknown: break
