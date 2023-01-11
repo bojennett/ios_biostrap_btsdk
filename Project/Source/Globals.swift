@@ -15,10 +15,6 @@ var gblDFUName		= "DFU"
 var dfu				= nordicDFU()
 #endif
 
-var gblLimitLivotal	= false
-var gblLimitEthos	= false
-var gblLimitAlter	= false
-
 //--------------------------------------------------------------------------------
 //
 //

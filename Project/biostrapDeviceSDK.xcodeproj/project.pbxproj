@@ -52,12 +52,9 @@
 		3B2602C02890541E00D5CAAA /* ppgFailedType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260294288A05F600D5CAAA /* ppgFailedType.swift */; };
 		3B2602C12890541E00D5CAAA /* disStringCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */; };
 		3B2602C22890541E00D5CAAA /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9C26153EF10014CEF0 /* Device.swift */; };
-		3B2602C32890541E00D5CAAA /* ethosBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF809BA27BD787300595493 /* ethosBTSDK.swift */; };
 		3B2602C42890541E00D5CAAA /* diagnosticType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260297288A061D00D5CAAA /* diagnosticType.swift */; };
 		3B2602C52890541E00D5CAAA /* IntExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B98B4B62787B4960081DA14 /* IntExtentions.swift */; };
-		3B2602CE289054D200D5CAAA /* alterBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B2602CC289054D200D5CAAA /* alterBTSDK.swift */; };
 		3B2602D22890592700D5CAAA /* alterManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B2602D02890592700D5CAAA /* alterManufacturingTestResult.swift */; };
-		3B260312289087D500D5CAAA /* alterBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B2602CC289054D200D5CAAA /* alterBTSDK.swift */; };
 		3B260315289088D800D5CAAA /* packetType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B26028E288A04F700D5CAAA /* packetType.swift */; };
 		3B260316289088DA00D5CAAA /* diagnosticType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260297288A061D00D5CAAA /* diagnosticType.swift */; };
 		3B260317289088DD00D5CAAA /* settingsType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260291288A05CE00D5CAAA /* settingsType.swift */; };
@@ -116,9 +113,7 @@
 		3BF807EA27A201E200595493 /* ambiqOTARXCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807E627A201A500595493 /* ambiqOTARXCharacteristic.swift */; };
 		3BF807EB27A201E600595493 /* ambiqOTATXCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807E827A201AD00595493 /* ambiqOTATXCharacteristic.swift */; };
 		3BF807EE27A2057700595493 /* CrcCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807EC27A2057400595493 /* CrcCalculator.swift */; };
-		3BF8081C27A4512700595493 /* universalBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8081B27A4512700595493 /* universalBTSDK.swift */; };
 		3BF8082327A452A200595493 /* CoreBluetoothExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8082227A452A200595493 /* CoreBluetoothExtensions.swift */; };
-		3BF8082B27A4571100595493 /* livotalBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8082927A4570000595493 /* livotalBTSDK.swift */; };
 		3BF8083127A4585900595493 /* CoreBluetoothExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8082227A452A200595493 /* CoreBluetoothExtensions.swift */; };
 		3BF8087F27A8B2C900595493 /* Pods_universalBTSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D3047CFC230344A0899B985 /* Pods_universalBTSDK.framework */; };
 		3BF8088027A8B2D500595493 /* (null) in Frameworks */ = {isa = PBXBuildFile; };
@@ -142,7 +137,6 @@
 		3BF809B727BD774200595493 /* ambiqOTARXCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807E627A201A500595493 /* ambiqOTARXCharacteristic.swift */; };
 		3BF809B827BD774400595493 /* ambiqOTATXCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807E827A201AD00595493 /* ambiqOTATXCharacteristic.swift */; };
 		3BF809B927BD774700595493 /* CrcCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807EC27A2057400595493 /* CrcCalculator.swift */; };
-		3BF809BD27BD787300595493 /* ethosBTSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF809BA27BD787300595493 /* ethosBTSDK.swift */; };
 		3BFAC25B2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */; };
 		3BFAC25C2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */; };
 		3BFF754228F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */; };
@@ -162,7 +156,6 @@
 		3B260294288A05F600D5CAAA /* ppgFailedType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ppgFailedType.swift; sourceTree = "<group>"; };
 		3B260297288A061D00D5CAAA /* diagnosticType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = diagnosticType.swift; sourceTree = "<group>"; };
 		3B2602CA2890541E00D5CAAA /* alterBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = alterBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3B2602CC289054D200D5CAAA /* alterBTSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = alterBTSDK.swift; sourceTree = "<group>"; };
 		3B2602D02890592700D5CAAA /* alterManufacturingTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = alterManufacturingTestResult.swift; sourceTree = "<group>"; };
 		3B28D46828E4B72900F6953A /* ppgStatusType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ppgStatusType.swift; sourceTree = "<group>"; };
 		3B29C546264C3D59006BC11B /* nordicDFUCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nordicDFUCharacteristic.swift; sourceTree = "<group>"; };
@@ -191,11 +184,8 @@
 		3BF807E627A201A500595493 /* ambiqOTARXCharacteristic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ambiqOTARXCharacteristic.swift; sourceTree = "<group>"; };
 		3BF807E827A201AD00595493 /* ambiqOTATXCharacteristic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ambiqOTATXCharacteristic.swift; sourceTree = "<group>"; };
 		3BF807EC27A2057400595493 /* CrcCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CrcCalculator.swift; sourceTree = "<group>"; };
-		3BF8081B27A4512700595493 /* universalBTSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = universalBTSDK.swift; sourceTree = "<group>"; };
 		3BF8082227A452A200595493 /* CoreBluetoothExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBluetoothExtensions.swift; sourceTree = "<group>"; };
-		3BF8082927A4570000595493 /* livotalBTSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = livotalBTSDK.swift; sourceTree = "<group>"; };
 		3BF809B527BD766D00595493 /* ethosBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ethosBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3BF809BA27BD787300595493 /* ethosBTSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ethosBTSDK.swift; sourceTree = "<group>"; };
 		3BFAC2592811E03500CDE388 /* livotalManufacturingTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = livotalManufacturingTestResult.swift; sourceTree = "<group>"; };
 		3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = disSoftwareRevisionCharacteristic.swift; sourceTree = "<group>"; };
 		45FB47FAAB8CA00CE5244F58 /* Pods-livotalBTSDK.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-livotalBTSDK.debug.xcconfig"; path = "Target Support Files/Pods-livotalBTSDK/Pods-livotalBTSDK.debug.xcconfig"; sourceTree = "<group>"; };
@@ -384,10 +374,6 @@
 			isa = PBXGroup;
 			children = (
 				3BD01F8F261539630014CEF0 /* biostrapDeviceSDK.swift */,
-				3B2602CC289054D200D5CAAA /* alterBTSDK.swift */,
-				3BF809BA27BD787300595493 /* ethosBTSDK.swift */,
-				3BF8082927A4570000595493 /* livotalBTSDK.swift */,
-				3BF8081B27A4512700595493 /* universalBTSDK.swift */,
 				3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */,
 			);
 			path = "Top Level";
@@ -707,10 +693,8 @@
 				3B2602BF2890541E00D5CAAA /* heartRateMeasurementCharacteristic.swift in Sources */,
 				3B2602C02890541E00D5CAAA /* ppgFailedType.swift in Sources */,
 				3BD10BD828BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift in Sources */,
-				3B260312289087D500D5CAAA /* alterBTSDK.swift in Sources */,
 				3B2602C12890541E00D5CAAA /* disStringCharacteristic.swift in Sources */,
 				3B2602C22890541E00D5CAAA /* Device.swift in Sources */,
-				3B2602C32890541E00D5CAAA /* ethosBTSDK.swift in Sources */,
 				3B2602C42890541E00D5CAAA /* diagnosticType.swift in Sources */,
 				3B2602C52890541E00D5CAAA /* IntExtentions.swift in Sources */,
 			);
@@ -721,7 +705,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B260317289088DD00D5CAAA /* settingsType.swift in Sources */,
-				3BF8082B27A4571100595493 /* livotalBTSDK.swift in Sources */,
 				3BD01F9926153B280014CEF0 /* Globals.swift in Sources */,
 				3B29C557264C5B53006BC11B /* customMainCharacteristic.swift in Sources */,
 				3B29C59D264C9E72006BC11B /* nordicDFU.swift in Sources */,
@@ -768,7 +751,6 @@
 				3BEE5C8E296502B0008798FC /* customDataCharacteristic.swift in Sources */,
 				3BF807EE27A2057700595493 /* CrcCalculator.swift in Sources */,
 				3BF807C327A1AFA000595493 /* customMainCharacteristic.swift in Sources */,
-				3BF8081C27A4512700595493 /* universalBTSDK.swift in Sources */,
 				3BF807C427A1AFA000595493 /* nordicDFU.swift in Sources */,
 				3B2602D22890592700D5CAAA /* alterManufacturingTestResult.swift in Sources */,
 				3B260290288A04F700D5CAAA /* packetType.swift in Sources */,
@@ -779,7 +761,6 @@
 				3B260296288A05F600D5CAAA /* ppgFailedType.swift in Sources */,
 				3BF807C927A1AFA000595493 /* biostrapDataPacket.swift in Sources */,
 				3BF807CA27A1AFA000595493 /* BluetoothIDs.swift in Sources */,
-				3B2602CE289054D200D5CAAA /* alterBTSDK.swift in Sources */,
 				3BF807CB27A1AFA000595493 /* nordicDFUCharacteristic.swift in Sources */,
 				3BFF754328F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */,
 				3B26027D28877C3B00D5CAAA /* ethosManufacturingTestResult.swift in Sources */,
@@ -835,7 +816,6 @@
 				3B260295288A05F600D5CAAA /* ppgFailedType.swift in Sources */,
 				3BF809AC27BD766D00595493 /* disStringCharacteristic.swift in Sources */,
 				3BF809AE27BD766D00595493 /* Device.swift in Sources */,
-				3BF809BD27BD787300595493 /* ethosBTSDK.swift in Sources */,
 				3B260298288A061D00D5CAAA /* diagnosticType.swift in Sources */,
 				3BF809AF27BD766D00595493 /* IntExtentions.swift in Sources */,
 			);
@@ -854,7 +834,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -955,7 +935,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -991,7 +971,7 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1028,7 +1008,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25;
+				CURRENT_PROJECT_VERSION = 26;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;

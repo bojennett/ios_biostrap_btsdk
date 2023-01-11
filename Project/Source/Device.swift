@@ -266,18 +266,7 @@ public class Device: NSObject {
 	
 	class var scan_services: [CBUUID] {
 		#if UNIVERSAL
-		if (gblLimitLivotal) {
-			return [services.livotalService.UUID, services.nordicDFUService.UUID]
-		}
-		else if (gblLimitEthos) {
-			return [services.ethosService.UUID]
-		}
-		else if (gblLimitAlter) {
-			return [services.alterService.UUID]
-		}
-		else {
-			return [services.livotalService.UUID, services.nordicDFUService.UUID, services.ethosService.UUID, services.alterService.UUID]
-		}
+		return [services.livotalService.UUID, services.nordicDFUService.UUID, services.ethosService.UUID, services.alterService.UUID]
 		#endif
 		
 		#if LIVOTAL
