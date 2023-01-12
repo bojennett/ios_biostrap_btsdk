@@ -13,11 +13,11 @@ use File::Path qw(make_path remove_tree);
 ########################################################################################################################
 sub Usage {
 	print "Usage:\n\n";
-	print "    $0 -s [ alterBTSDK | ethosBTSDK | livotalBTSDK | universalBTSDK | pods ] -w [ biostrapDeviceSDK | Pods] [-k]\n";
+	print "    $0 -s [ alterBTSDK | ethosBTSDK | livotalBTSDK | universalBTSDK | pods ] [-v <string>] [-k]\n";
 	print "\n\n";
 	
-	print "The workspace (-w or --workspace) is the XCode workspace to use\n";
 	print "The scheme (-s or --scheme) is the scheme in that workspace\n";
+	print "An optional version (-v or --version) to apply to the build directory\n";
 	print "the optional keep (k) is whether to keep the underlying frameworks after assembling the XCFramework\n";
 	print "\n\n";
 }
@@ -41,7 +41,7 @@ sub RunCommand {
 		if (/$regex/) {
 			print RED, "        $_", RESET;
 			$failed	= 1;
-		}
+		}		
 	}
 
 	if ($failed) {
@@ -58,6 +58,7 @@ sub RunCommand {
 }
 
 GetOptions ('s|scheme=s' => \$scheme,
+			'v|version=s' => \$version,
 			'k|keep-frameworks' => \$keep);
 
 if ($scheme eq "") {
@@ -72,6 +73,7 @@ if ($scheme eq "pods") {
 }
 
 $output					= "./Builds/$scheme";
+if ($version ne "") { $output .= "-$version"; }
 
 $iOSDevicePath			="$output/Release-iphoneos";
 $iOSSimulatorPath		="$output/Release-iphonesimulator";
@@ -144,5 +146,5 @@ $totalTime = $endTime - $processStartTime;
 print "$0:  Complete.  Elapsed time '$totalTime' seconds\n";
 print "\n\n";
 
-system ("open $output");
+#system ("open $output");
 
