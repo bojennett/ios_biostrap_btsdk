@@ -20,6 +20,7 @@ import iOSDFULibrary
 		case livotal	= 1
 		case ethos		= 2
 		case alter		= 3
+		case kairos		= 4
 		case unknown	= 99
 		
 		public var title: String {
@@ -27,6 +28,7 @@ import iOSDFULibrary
 			case .livotal	: return "Livotal"
 			case .ethos		: return "Ethos"
 			case .alter		: return "Alter"
+			case .kairos	: return "Kairos"
 			case .unknown	: return "Unknown"
 			}
 		}
@@ -150,7 +152,7 @@ import iOSDFULibrary
 	@objc public var pulseOx: ((_ id: String, _ spo2: Float, _ hr: Float)->())?
 	#endif
 
-	#if UNIVERSAL || ETHOS || ALTER
+	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	@objc public var heartRate: ((_ id: String, _ hr: Int, _ rr: [Double])->())?
 	#endif
 
@@ -590,6 +592,13 @@ import iOSDFULibrary
 	}
 	#endif
 
+	#if KAIROS
+	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+		if let device = mConnectedDevices?[id] { device.kairosLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		else { self.ledComplete?(id, false) }
+	}
+	#endif
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -757,6 +766,15 @@ import iOSDFULibrary
 		log?.v ("\(id)")
 		
 		if let device = mConnectedDevices?[id] { device.alterManufacturingTest(id, test: test) }
+		else { self.manufacturingTestComplete?(id, false) }
+	}
+	#endif
+
+	#if KAIROS
+	@objc public func manufacturingTest(_ id: String, test: kairosManufacturingTestType) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.kairosManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif

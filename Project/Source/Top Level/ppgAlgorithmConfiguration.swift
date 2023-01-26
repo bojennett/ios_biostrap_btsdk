@@ -17,10 +17,10 @@ import Foundation
 	public var hrv			: Bool
 	public var rr			: Bool
 	public var spo2			: Bool
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS
 	public var fda_spo2		: Bool
 	#endif
-	#if ALTER || ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS || ALTER  || KAIROS
 	public var continuous	: Bool
 	#endif
 	
@@ -30,11 +30,11 @@ import Foundation
 		rr			= false
 		spo2		= false
 		
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		fda_spo2	= false
 		#endif
 		
-		#if ALTER || ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS || ALTER  || KAIROS
 		continuous	= false
 		#endif
 	}
@@ -47,11 +47,11 @@ import Foundation
 		if (rr)			{ result = result | 0x04 }
 		if (spo2)		{ result = result | 0x08 }
 		
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		if (fda_spo2)	{ result = result | 0x10 }
 		#endif
 		
-		#if ALTER || ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS || ALTER  || KAIROS
 		if (continuous)	{ result = result | 0x80 }
 		#endif
 
@@ -66,11 +66,11 @@ import Foundation
 		if (rr)			{ if (result != "") { result = "\(result)," }; result = "\(result)RR" }
 		if (spo2)		{ if (result != "") { result = "\(result)," }; result = "\(result)SPO2" }
 		
-		#if ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS
 		if (fda_spo2)	{ if (result != "") { result = "\(result)," }; result = "\(result)FDA_SPO2" }
 		#endif
 
-		#if ALTER || ETHOS || UNIVERSAL
+		#if UNIVERSAL || ETHOS || ALTER  || KAIROS
 		if (continuous)	{ if (result != "") { result = "\(result)," }; result = "\(result)Continous" }
 		#endif
 

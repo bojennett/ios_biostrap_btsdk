@@ -181,7 +181,7 @@ class customDataCharacteristic: Characteristic {
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
-#if ETHOS || UNIVERSAL
+#if UNIVERSAL || ETHOS
 			case .rawPPGCompressedWhiteIRRPD,
 					.rawPPGCompressedWhiteWhitePD:
 				if ((index + 1) < data.count) {
@@ -220,7 +220,7 @@ class customDataCharacteristic: Characteristic {
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
-#if ETHOS || UNIVERSAL
+#if UNIVERSAL || ETHOS
 			case .rawGyroCompressedXADC,
 					.rawGyroCompressedYADC,
 					.rawGyroCompressedZADC:
@@ -301,7 +301,7 @@ class customDataCharacteristic: Characteristic {
 					let packets = mDecompressPPGPackets(packet.raw_data)
 					dataPackets.append(contentsOf: packets)
 					
-#if ETHOS || UNIVERSAL
+#if UNIVERSAL || ETHOS
 				case .rawPPGCompressedWhiteIRRPD,
 						.rawPPGCompressedWhiteWhitePD:
 					index = index + packet.raw_data.count
@@ -318,7 +318,7 @@ class customDataCharacteristic: Characteristic {
 					let packets = mDecompressIMUPackets(packet.raw_data)
 					dataPackets.append(contentsOf: packets)
 					
-#if ETHOS || UNIVERSAL
+#if UNIVERSAL || ETHOS
 				case .rawGyroCompressedXADC,
 						.rawGyroCompressedYADC,
 						.rawGyroCompressedZADC:

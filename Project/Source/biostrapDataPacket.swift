@@ -33,7 +33,7 @@ import Foundation
 	public var diagnostic_type			: diagnosticType	= .unknown
 	public var ppg_failed_type			: ppgFailedType		= .unknown
 	public var ppg_metrics_status		: ppgStatusType		= .unknown
-	#if ALTER || ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	public var continuous_hr			: [Int]			= [Int]()
 	#endif
 	public var green_led_current		: Int			= 0
@@ -115,7 +115,7 @@ import Foundation
 		case .rawAccelCompressedYADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawAccelCompressedZADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
 
-		#if UNIVERSAL || ETHOS || ALTER
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .rawGyroXADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawGyroYADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawGyroZADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
@@ -150,7 +150,7 @@ import Foundation
 			let spo2	= "\(root),SPO2,\(spo2_valid),\(spo2_result)"
 			return ("\(hr)\n\(hrv)\n\(rr)\n\(spo2)")
 			
-		#if UNIVERSAL || ALTER || ETHOS
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr					:
 			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(mIntegerArrayToString(continuous_hr))")
 		#endif
@@ -274,7 +274,7 @@ import Foundation
 				 .rawAccelCompressedYADC,
 				 .rawAccelCompressedZADC: break // use raw_data
 
-			#if UNIVERSAL || ETHOS || ALTER
+			#if UNIVERSAL || ETHOS || ALTER || KAIROS
 			case .rawGyroXADC,
 				 .rawGyroYADC,
 				 .rawGyroZADC:
@@ -327,7 +327,7 @@ import Foundation
 				hrv_result			= data.subdata(in: Range(15...16)).leFloat16
 				hr_result			= data.subdata(in: Range(17...18)).leFloat16
 				
-			#if UNIVERSAL || ALTER || ETHOS
+			#if UNIVERSAL || ETHOS || ALTER || KAIROS
 			case .continuous_hr:
 				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
 				continuous_hr.removeAll()
@@ -412,7 +412,7 @@ import Foundation
 			 .rawAccelCompressedZADC:
 			value				= try values.decode(Int.self, forKey: .value)
 
-		#if UNIVERSAL || ETHOS || ALTER
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .rawGyroXADC,
 			 .rawGyroYADC,
 			 .rawGyroZADC:
@@ -486,7 +486,7 @@ import Foundation
 			spo2_valid			= try values.decode(Bool.self, forKey: .spo2_valid)
 			spo2_result			= try values.decode(Float.self, forKey: .spo2_result)
 			
-		#if UNIVERSAL || ALTER || ETHOS
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr:
 			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
 			let elements		= try values.decode(String.self, forKey: .continuous_hr)
@@ -575,7 +575,7 @@ import Foundation
 			 .rawAccelCompressedZADC:
 			try container.encode(value, forKey: .value)
 
-		#if UNIVERSAL || ETHOS || ALTER
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .rawGyroXADC,
 			 .rawGyroYADC,
 			 .rawGyroZADC:
@@ -650,7 +650,7 @@ import Foundation
 			try container.encode(spo2_valid, forKey: .spo2_valid)
 			try container.encode(spo2_result, forKey: .spo2_result)
 			
-		#if UNIVERSAL || ALTER || ETHOS
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr:
 			try container.encode(epoch_ms, forKey: .epoch_ms)
 			try container.encode(mIntegerArrayToString(continuous_hr), forKey: .continuous_hr)

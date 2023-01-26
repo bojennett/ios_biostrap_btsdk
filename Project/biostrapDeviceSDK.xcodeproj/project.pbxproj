@@ -74,6 +74,41 @@
 		3B5BFCDB285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */; };
 		3B8CA86B2939791E00BBC5C9 /* alterManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B2602D02890592700D5CAAA /* alterManufacturingTestResult.swift */; };
 		3B98B4B72787B4960081DA14 /* IntExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B98B4B62787B4960081DA14 /* IntExtentions.swift */; };
+		3BC00B862981BD12009F67CB /* kairosManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BC00B842981BCEF009F67CB /* kairosManufacturingTestResult.swift */; };
+		3BC00B8B2981BD36009F67CB /* CrcCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807EC27A2057400595493 /* CrcCalculator.swift */; };
+		3BC00B8C2981BD36009F67CB /* ambiqOTATXCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807E827A201AD00595493 /* ambiqOTATXCharacteristic.swift */; };
+		3BC00B8D2981BD36009F67CB /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9826153B280014CEF0 /* Globals.swift */; };
+		3BC00B8E2981BD36009F67CB /* customMainCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C556264C5B53006BC11B /* customMainCharacteristic.swift */; };
+		3BC00B8F2981BD36009F67CB /* ppgStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B28D46828E4B72900F6953A /* ppgStatusType.swift */; };
+		3BC00B902981BD36009F67CB /* nordicDFU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C59C264C9E72006BC11B /* nordicDFU.swift */; };
+		3BC00B912981BD36009F67CB /* Characteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C554264C5A5B006BC11B /* Characteristic.swift */; };
+		3BC00B922981BD36009F67CB /* CoreBluetoothExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8082227A452A200595493 /* CoreBluetoothExtensions.swift */; };
+		3BC00B932981BD36009F67CB /* manufacturingTestType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */; };
+		3BC00B942981BD36009F67CB /* customDataCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BEE5C8A296502B0008798FC /* customDataCharacteristic.swift */; };
+		3BC00B952981BD36009F67CB /* biostrapDeviceSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F8F261539630014CEF0 /* biostrapDeviceSDK.swift */; };
+		3BC00B962981BD36009F67CB /* ambiqOTARXCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807E627A201A500595493 /* ambiqOTARXCharacteristic.swift */; };
+		3BC00B972981BD36009F67CB /* disSoftwareRevisionCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */; };
+		3BC00B982981BD36009F67CB /* alterManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B2602D02890592700D5CAAA /* alterManufacturingTestResult.swift */; };
+		3BC00B992981BD36009F67CB /* liveSyncConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */; };
+		3BC00B9A2981BD36009F67CB /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9526153AF20014CEF0 /* Logging.swift */; };
+		3BC00B9B2981BD36009F67CB /* nextPacketStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */; };
+		3BC00B9C2981BD36009F67CB /* biostrapDataPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEC226C58BCF005AF135 /* biostrapDataPacket.swift */; };
+		3BC00B9D2981BD36009F67CB /* BluetoothIDs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01FAD261632830014CEF0 /* BluetoothIDs.swift */; };
+		3BC00B9E2981BD36009F67CB /* DataExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEC426C59733005AF135 /* DataExtensions.swift */; };
+		3BC00B9F2981BD36009F67CB /* peripheralDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01FB0261770BE0014CEF0 /* peripheralDelegate.swift */; };
+		3BC00BA02981BD36009F67CB /* centralManagerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9226153AC50014CEF0 /* centralManagerDelegate.swift */; };
+		3BC00BA12981BD36009F67CB /* packetType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B26028E288A04F700D5CAAA /* packetType.swift */; };
+		3BC00BA22981BD36009F67CB /* ppgAlgorithmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */; };
+		3BC00BA32981BD36009F67CB /* batteryLevelCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C560264C6C1A006BC11B /* batteryLevelCharacteristic.swift */; };
+		3BC00BA42981BD36009F67CB /* settingsType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260291288A05CE00D5CAAA /* settingsType.swift */; };
+		3BC00BA52981BD36009F67CB /* heartRateMeasurementCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C566264C7033006BC11B /* heartRateMeasurementCharacteristic.swift */; };
+		3BC00BA62981BD36009F67CB /* ppgFailedType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260294288A05F600D5CAAA /* ppgFailedType.swift */; };
+		3BC00BA72981BD36009F67CB /* disFirmwareVersionCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD10BD728BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift */; };
+		3BC00BA82981BD36009F67CB /* disStringCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */; };
+		3BC00BA92981BD36009F67CB /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9C26153EF10014CEF0 /* Device.swift */; };
+		3BC00BAA2981BD36009F67CB /* diagnosticType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260297288A061D00D5CAAA /* diagnosticType.swift */; };
+		3BC00BAB2981BD36009F67CB /* IntExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B98B4B62787B4960081DA14 /* IntExtentions.swift */; };
+		3BC00BB22981BFF2009F67CB /* kairosManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BC00B842981BCEF009F67CB /* kairosManufacturingTestResult.swift */; };
 		3BD01F90261539630014CEF0 /* biostrapDeviceSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F8F261539630014CEF0 /* biostrapDeviceSDK.swift */; };
 		3BD01F9326153AC50014CEF0 /* centralManagerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9226153AC50014CEF0 /* centralManagerDelegate.swift */; };
 		3BD01F9626153AF20014CEF0 /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BD01F9526153AF20014CEF0 /* Logging.swift */; };
@@ -167,6 +202,8 @@
 		3B29C59C264C9E72006BC11B /* nordicDFU.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nordicDFU.swift; sourceTree = "<group>"; };
 		3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = liveSyncConfiguration.swift; sourceTree = "<group>"; };
 		3B98B4B62787B4960081DA14 /* IntExtentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtentions.swift; sourceTree = "<group>"; };
+		3BC00B842981BCEF009F67CB /* kairosManufacturingTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = kairosManufacturingTestResult.swift; sourceTree = "<group>"; };
+		3BC00BB02981BD36009F67CB /* kairosBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = kairosBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BD01F832615358B0014CEF0 /* livotalBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = livotalBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BD01F8F261539630014CEF0 /* biostrapDeviceSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = biostrapDeviceSDK.swift; sourceTree = "<group>"; };
 		3BD01F9226153AC50014CEF0 /* centralManagerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = centralManagerDelegate.swift; sourceTree = "<group>"; };
@@ -199,6 +236,13 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		3B2602C62890541E00D5CAAA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BC00BAC2981BD36009F67CB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -264,7 +308,7 @@
 			path = Alter;
 			sourceTree = "<group>";
 		};
-		3B2602D32890594400D5CAAA /* Alter and Ethos */ = {
+		3B2602D32890594400D5CAAA /* Alter and Ethos and Kairos */ = {
 			isa = PBXGroup;
 			children = (
 				3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */,
@@ -272,7 +316,7 @@
 				3BF807E627A201A500595493 /* ambiqOTARXCharacteristic.swift */,
 				3BF807E827A201AD00595493 /* ambiqOTATXCharacteristic.swift */,
 			);
-			path = "Alter and Ethos";
+			path = "Alter and Ethos and Kairos";
 			sourceTree = "<group>";
 		};
 		3B29C592264C9638006BC11B /* Characteristics */ = {
@@ -300,6 +344,14 @@
 			path = Delegates;
 			sourceTree = "<group>";
 		};
+		3BC00B832981BCDE009F67CB /* Kairos */ = {
+			isa = PBXGroup;
+			children = (
+				3BC00B842981BCEF009F67CB /* kairosManufacturingTestResult.swift */,
+			);
+			path = Kairos;
+			sourceTree = "<group>";
+		};
 		3BD01F792615358B0014CEF0 = {
 			isa = PBXGroup;
 			children = (
@@ -317,6 +369,7 @@
 				3BF807DA27A1AFA000595493 /* universalBTSDK.framework */,
 				3BF809B527BD766D00595493 /* ethosBTSDK.framework */,
 				3B2602CA2890541E00D5CAAA /* alterBTSDK.framework */,
+				3BC00BB02981BD36009F67CB /* kairosBTSDK.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -335,7 +388,8 @@
 				3BF8082827A4550B00595493 /* Top Level */,
 				3B2602CF2890591200D5CAAA /* Alter */,
 				3BF807E527A2018600595493 /* Ethos */,
-				3B2602D32890594400D5CAAA /* Alter and Ethos */,
+				3BC00B832981BCDE009F67CB /* Kairos */,
+				3B2602D32890594400D5CAAA /* Alter and Ethos and Kairos */,
 				3BF807DC27A1B08900595493 /* Livotal */,
 				3B29C592264C9638006BC11B /* Characteristics */,
 				3B29C593264C9656006BC11B /* Delegates */,
@@ -402,6 +456,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3BC00B892981BD36009F67CB /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3BD01F7E2615358B0014CEF0 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -443,6 +504,25 @@
 			name = alterBTSDK;
 			productName = lvBluetoothSDK;
 			productReference = 3B2602CA2890541E00D5CAAA /* alterBTSDK.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		3BC00B872981BD36009F67CB /* kairosBTSDK */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3BC00BAE2981BD36009F67CB /* Build configuration list for PBXNativeTarget "kairosBTSDK" */;
+			buildPhases = (
+				3BC00B882981BD36009F67CB /* [CP] Check Pods Manifest.lock */,
+				3BC00B892981BD36009F67CB /* Headers */,
+				3BC00B8A2981BD36009F67CB /* Sources */,
+				3BC00BAC2981BD36009F67CB /* Frameworks */,
+				3BC00BAD2981BD36009F67CB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = kairosBTSDK;
+			productName = lvBluetoothSDK;
+			productReference = 3BC00BB02981BD36009F67CB /* kairosBTSDK.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		3BD01F822615358B0014CEF0 /* livotalBTSDK */ = {
@@ -530,6 +610,7 @@
 			projectRoot = "";
 			targets = (
 				3B2602A62890541E00D5CAAA /* alterBTSDK */,
+				3BC00B872981BD36009F67CB /* kairosBTSDK */,
 				3BF8099627BD766D00595493 /* ethosBTSDK */,
 				3BD01F822615358B0014CEF0 /* livotalBTSDK */,
 				3BF807BD27A1AFA000595493 /* universalBTSDK */,
@@ -539,6 +620,13 @@
 
 /* Begin PBXResourcesBuildPhase section */
 		3B2602C72890541E00D5CAAA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BC00BAD2981BD36009F67CB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -592,6 +680,28 @@
 			showEnvVarsInLog = 0;
 		};
 		3B2602A72890541E00D5CAAA /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ethosBTSDK-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3BC00B882981BD36009F67CB /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -700,6 +810,47 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3BC00B8A2981BD36009F67CB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3BC00B8B2981BD36009F67CB /* CrcCalculator.swift in Sources */,
+				3BC00B8C2981BD36009F67CB /* ambiqOTATXCharacteristic.swift in Sources */,
+				3BC00B8D2981BD36009F67CB /* Globals.swift in Sources */,
+				3BC00B8E2981BD36009F67CB /* customMainCharacteristic.swift in Sources */,
+				3BC00B8F2981BD36009F67CB /* ppgStatusType.swift in Sources */,
+				3BC00B902981BD36009F67CB /* nordicDFU.swift in Sources */,
+				3BC00B912981BD36009F67CB /* Characteristic.swift in Sources */,
+				3BC00B922981BD36009F67CB /* CoreBluetoothExtensions.swift in Sources */,
+				3BC00B932981BD36009F67CB /* manufacturingTestType.swift in Sources */,
+				3BC00B942981BD36009F67CB /* customDataCharacteristic.swift in Sources */,
+				3BC00B952981BD36009F67CB /* biostrapDeviceSDK.swift in Sources */,
+				3BC00B962981BD36009F67CB /* ambiqOTARXCharacteristic.swift in Sources */,
+				3BC00B972981BD36009F67CB /* disSoftwareRevisionCharacteristic.swift in Sources */,
+				3BC00B982981BD36009F67CB /* alterManufacturingTestResult.swift in Sources */,
+				3BC00B992981BD36009F67CB /* liveSyncConfiguration.swift in Sources */,
+				3BC00B9A2981BD36009F67CB /* Logging.swift in Sources */,
+				3BC00B9B2981BD36009F67CB /* nextPacketStatusType.swift in Sources */,
+				3BC00B9C2981BD36009F67CB /* biostrapDataPacket.swift in Sources */,
+				3BC00B9D2981BD36009F67CB /* BluetoothIDs.swift in Sources */,
+				3BC00B9E2981BD36009F67CB /* DataExtensions.swift in Sources */,
+				3BC00BB22981BFF2009F67CB /* kairosManufacturingTestResult.swift in Sources */,
+				3BC00B9F2981BD36009F67CB /* peripheralDelegate.swift in Sources */,
+				3BC00BA02981BD36009F67CB /* centralManagerDelegate.swift in Sources */,
+				3BC00BA12981BD36009F67CB /* packetType.swift in Sources */,
+				3BC00BA22981BD36009F67CB /* ppgAlgorithmConfiguration.swift in Sources */,
+				3BC00BA32981BD36009F67CB /* batteryLevelCharacteristic.swift in Sources */,
+				3BC00BA42981BD36009F67CB /* settingsType.swift in Sources */,
+				3BC00BA52981BD36009F67CB /* heartRateMeasurementCharacteristic.swift in Sources */,
+				3BC00BA62981BD36009F67CB /* ppgFailedType.swift in Sources */,
+				3BC00BA72981BD36009F67CB /* disFirmwareVersionCharacteristic.swift in Sources */,
+				3BC00BA82981BD36009F67CB /* disStringCharacteristic.swift in Sources */,
+				3BC00BA92981BD36009F67CB /* Device.swift in Sources */,
+				3BC00BAA2981BD36009F67CB /* diagnosticType.swift in Sources */,
+				3BC00BAB2981BD36009F67CB /* IntExtentions.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3BD01F7F2615358B0014CEF0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -774,6 +925,7 @@
 				3BF807D127A1AFA000595493 /* disStringCharacteristic.swift in Sources */,
 				3BF807EB27A201E600595493 /* ambiqOTATXCharacteristic.swift in Sources */,
 				3BF807D327A1AFA000595493 /* Device.swift in Sources */,
+				3BC00B862981BD12009F67CB /* kairosManufacturingTestResult.swift in Sources */,
 				3BF807E327A1C40A00595493 /* ppgAlgorithmConfiguration.swift in Sources */,
 				3BF807D427A1AFA000595493 /* IntExtentions.swift in Sources */,
 				3BF8082327A452A200595493 /* CoreBluetoothExtensions.swift in Sources */,
@@ -834,7 +986,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
+				CURRENT_PROJECT_VERSION = 27;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -854,6 +1006,46 @@
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "-D ALTER";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.alterBTSDK;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		3BC00BAF2981BD36009F67CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9293CBFFFE9969D4D4CD5CF1 /* Pods-ethosBTSDK.release.xcconfig */;
+			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
+				BITCODE_GENERATION_MODE = bitcode;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 27;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = kairosBTSDK.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.0;
+				OTHER_LDFLAGS = "";
+				OTHER_SWIFT_FLAGS = "-D KAIROS";
+				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.kairosBTSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
@@ -935,7 +1127,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
+				CURRENT_PROJECT_VERSION = 27;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -971,7 +1163,7 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
+				CURRENT_PROJECT_VERSION = 27;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1008,7 +1200,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26;
+				CURRENT_PROJECT_VERSION = 27;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1045,6 +1237,14 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3B2602C92890541E00D5CAAA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3BC00BAE2981BD36009F67CB /* Build configuration list for PBXNativeTarget "kairosBTSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3BC00BAF2981BD36009F67CB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

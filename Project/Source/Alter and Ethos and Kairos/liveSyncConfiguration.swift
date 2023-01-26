@@ -7,7 +7,7 @@
 
 import Foundation
 
-#if ETHOS || UNIVERSAL
+#if UNIVERSAL || ETHOS
 //--------------------------------------------------------------------------------
 //
 //

@@ -19,7 +19,7 @@ import Foundation
 	case battery						= 0x89
 	case charger						= 0x8a
 	case ppg_metrics					= 0x8b
-	#if UNIVERSAL || ETHOS || ALTER
+	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	case continuous_hr					= 0x8c
 	#endif
 	
@@ -30,7 +30,7 @@ import Foundation
 	case rawAccelCompressedYADC			= 0xc4
 	case rawAccelCompressedZADC			= 0xc5
 	
-	#if UNIVERSAL || ETHOS || ALTER
+	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	case rawGyroXADC					= 0xc8
 	case rawGyroYADC					= 0xc9
 	case rawGyroZADC					= 0xca
@@ -85,7 +85,7 @@ import Foundation
 		case "Sleep"								: self	= .sleep
 		case "Diagnostic"							: self	= .diagnostic
 		case "PPG Metrics"							: self	= .ppg_metrics
-		#if UNIVERSAL || ETHOS || ALTER
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case "Continuous Heart Rate"				: self	= .continuous_hr
 		#endif
 		case "Raw Accel FIFO Count"					: self	= .rawAccelFifoCount
@@ -98,7 +98,7 @@ import Foundation
 		case "Raw Accel Compressed Y ADC"			: self	= .rawAccelCompressedYADC
 		case "Raw Accel Compressed Z ADC"			: self	= .rawAccelCompressedZADC
 
-		#if UNIVERSAL || ETHOS || ALTER
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case "Raw Gyro X ADC"						: self	= .rawGyroXADC
 		case "Raw Gyro Y ADC"						: self	= .rawGyroYADC
 		case "Raw Gyro Z ADC"						: self	= .rawGyroZADC
@@ -151,7 +151,7 @@ import Foundation
 		case .sleep									: return "Sleep"
 		case .diagnostic							: return "Diagnostic"
 		case .ppg_metrics							: return "PPG Metrics"
-		#if UNIVERSAL || ETHOS || ALTER
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr							: return "Continuous Heart Rate"
 		#endif
 		case .rawAccelFifoCount						: return "Raw Accel FIFO Count"
@@ -164,7 +164,7 @@ import Foundation
 		case .rawAccelCompressedYADC				: return "Raw Accel Compressed Y ADC"
 		case .rawAccelCompressedZADC				: return "Raw Accel Compressed Z ADC"
 
-		#if UNIVERSAL || ETHOS || ALTER
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .rawGyroXADC							: return "Raw Gyro X ADC"
 		case .rawGyroYADC							: return "Raw Gyro Y ADC"
 		case .rawGyroZADC							: return "Raw Gyro Z ADC"
@@ -217,7 +217,7 @@ import Foundation
 		case .sleep									: return 9
 		case .diagnostic							: return 0 	// Done by calculation
 		case .ppg_metrics							: return 19
-		#if UNIVERSAL || ETHOS || ALTER
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr							: return 19
 		#endif
 		case .rawAccelFifoCount						: return 10
@@ -230,7 +230,7 @@ import Foundation
 		case .rawAccelCompressedYADC				: return 0	// Done by calculation
 		case .rawAccelCompressedZADC				: return 0	// Done by calculation
 
-		#if UNIVERSAL || ETHOS || ALTER
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .rawGyroXADC							: return 3
 		case .rawGyroYADC							: return 3
 		case .rawGyroZADC							: return 3

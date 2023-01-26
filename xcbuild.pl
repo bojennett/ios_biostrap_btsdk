@@ -13,7 +13,7 @@ use File::Path qw(make_path remove_tree);
 ########################################################################################################################
 sub Usage {
 	print "Usage:\n\n";
-	print "    $0 -s [ alterBTSDK | ethosBTSDK | livotalBTSDK | universalBTSDK | pods ] [-v <string>] [-k]\n";
+	print "    $0 -s [ alterBTSDK | kairosBTSDK | ethosBTSDK | livotalBTSDK | universalBTSDK | pods ] [-v <string>] [-k]\n";
 	print "\n\n";
 	
 	print "The scheme (-s or --scheme) is the scheme in that workspace\n";

@@ -19,8 +19,12 @@ public class Device: NSObject {
 		#if UNIVERSAL || ETHOS
 		case ethosService			= "B30E0F19-A021-45F3-8661-4255CBD49E10"
 		#endif
+		
+		#if UNIVERSAL || KAIROS
+		case kairosService			= "140BB753-9845-4C0E-B61A-E6BAE41712F0"
+		#endif
 
-		#if UNIVERSAL || ALTER || ETHOS
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case ambiqOTAService		= "00002760-08C2-11E1-9073-0E8AC72E1001"
 		#endif
 		
@@ -43,7 +47,11 @@ public class Device: NSObject {
 			case .ethosService		: return "Ethos Service"
 			#endif
 
-			#if UNIVERSAL || ETHOS || ALTER
+			#if UNIVERSAL || KAIROS
+			case .kairosService		: return "Kairos Service"
+			#endif
+				
+			#if UNIVERSAL || ETHOS || ALTER || KAIROS
 			case .ambiqOTAService	: return "Ambiq OTA Service"
 			#endif
 
@@ -65,8 +73,13 @@ public class Device: NSObject {
 		case ethosMainCharacteristic	= "B30E0F19-A021-45F3-8661-4255CBD49E11"
 		case ethosDataCharacteristic	= "B30E0F19-A021-45F3-8661-4255CBD49E12"
 		#endif
-		
-		#if UNIVERSAL || ETHOS || ALTER
+
+		#if UNIVERSAL || KAIROS
+		case kairosMainCharacteristic	= "140BB753-9845-4C0E-B61A-E6BAE41712F1"
+		case kairosDataCharacteristic	= "140BB753-9845-4C0E-B61A-E6BAE41712F2"
+		#endif
+
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case ambiqOTARXCharacteristic	= "00002760-08C2-11E1-9073-0E8AC72E0001"
 		case ambiqOTATXCharacteristic	= "00002760-08C2-11E1-9073-0E8AC72E0002"
 		#endif
@@ -93,7 +106,12 @@ public class Device: NSObject {
 			case .ethosDataCharacteristic	: return "Ethos Data Characteristic"
 			#endif
 
-			#if UNIVERSAL || ETHOS || ALTER
+			#if UNIVERSAL || KAIROS
+			case .kairosMainCharacteristic	: return "Kairos Main Characteristic"
+			case .kairosDataCharacteristic	: return "Kairos Data Characteristic"
+			#endif
+				
+			#if UNIVERSAL || ETHOS || ALTER || KAIROS
 			case .ambiqOTARXCharacteristic	: return "Ambiq OTA RX Characteristic"
 			case .ambiqOTATXCharacteristic	: return "Ambiq OTA TX Characteristic"
 			#endif
@@ -131,7 +149,7 @@ public class Device: NSObject {
 	var pulseOxUpdated: ((_ id: String, _ spo2: Float, _ hr: Float)->())?
 	#endif
 
-	#if UNIVERSAL || ETHOS || ALTER
+	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	var heartRateUpdated: ((_ id: String, _ hr: Int, _ rr: [Double])->())?
 	#endif
 
@@ -258,7 +276,7 @@ public class Device: NSObject {
 	internal var mPulseOxContinuousCharacteristic		: pulseOxContinuousCharacteristic?
 	#endif
 	
-	#if UNIVERSAL || ETHOS || ALTER
+	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	internal var mHeartRateMeasurementCharacteristic	: heartRateMeasurementCharacteristic?
 	internal var mAmbiqOTARXCharacteristic				: ambiqOTARXCharacteristic?
 	internal var mAmbiqOTATXCharacteristic				: ambiqOTATXCharacteristic?
@@ -266,7 +284,7 @@ public class Device: NSObject {
 	
 	class var scan_services: [CBUUID] {
 		#if UNIVERSAL
-		return [services.livotalService.UUID, services.nordicDFUService.UUID, services.ethosService.UUID, services.alterService.UUID]
+		return [services.livotalService.UUID, services.nordicDFUService.UUID, services.ethosService.UUID, services.alterService.UUID, services.kairosService.UUID]
 		#endif
 		
 		#if LIVOTAL
@@ -279,6 +297,10 @@ public class Device: NSObject {
 
 		#if ALTER
 		return [services.alterService.UUID]
+		#endif
+		
+		#if KAIROS
+		return [services.kairosService.UUID]
 		#endif
 	}
 	
@@ -474,6 +496,35 @@ public class Device: NSObject {
 	}
 	#endif
 
+	#if UNIVERSAL || KAIROS
+	private var mKairosConfigured: Bool {
+		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
+			
+			if let dataCharacteristic = mDataCharacteristic {
+				//log?.v ("ALTER MAIN: \(mainCharacteristic.configured), ALTER DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+				
+				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
+						batteryCharacteristic.configured &&
+						mainCharacteristic.configured &&
+						dataCharacteristic.configured &&
+						ambiqOTARXCharacteristic.configured &&
+						ambiqOTATXCharacteristic.configured
+				)
+			}
+			else {
+				//log?.v ("ALTER: \(mainCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
+				
+				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
+						batteryCharacteristic.configured &&
+						mainCharacteristic.configured &&
+						ambiqOTARXCharacteristic.configured &&
+						ambiqOTATXCharacteristic.configured
+				)
+			}
+		}
+		else { return (false) }
+	}
+	#endif
 
 	var configured: Bool {
 		if let firmwareVesion = mFirmwareVersion, let customCharacteristic = mMainCharacteristic {
@@ -485,6 +536,7 @@ public class Device: NSObject {
 		case .livotal	: return mLivotalConfigured
 		case .ethos		: return mEthosConfigured
 		case .alter		: return mAlterConfigured
+		case .kairos	: return mKairosConfigured
 		case .unknown	: return false
 		}
 		#endif
@@ -499,6 +551,10 @@ public class Device: NSObject {
 
 		#if ALTER
 		return mAlterConfigured
+		#endif
+		
+		#if KAIROS
+		return mKairosConfigured
 		#endif
 	}
 	
@@ -710,6 +766,15 @@ public class Device: NSObject {
 	}
 	#endif
 
+	#if UNIVERSAL || KAIROS
+	func kairosLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.kairosLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
+		}
+		else { self.ledComplete?(id, false) }
+	}
+	#endif
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -910,7 +975,7 @@ public class Device: NSObject {
 	}
 	#endif
 
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || ETHOS
 	func ethosManufacturingTest(_ id: String, test: ethosManufacturingTestType) {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.ethosManufacturingTest(test)
@@ -919,7 +984,7 @@ public class Device: NSObject {
 	}
 	#endif
 
-	#if ALTER || UNIVERSAL
+	#if UNIVERSAL || ALTER
 	func alterManufacturingTest(_ id: String, test: alterManufacturingTestType) {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.alterManufacturingTest(test)
@@ -928,7 +993,16 @@ public class Device: NSObject {
 	}
 	#endif
 
-	#if ETHOS || UNIVERSAL
+	#if UNIVERSAL || KAIROS
+	func kairosManufacturingTest(_ id: String, test: kairosManufacturingTestType) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.kairosManufacturingTest(test)
+		}
+		else { self.manufacturingTestComplete?(id, false) }
+	}
+	#endif
+
+	#if UNIVERSAL || ETHOS
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1070,7 +1144,7 @@ public class Device: NSObject {
 		else { updateFirmwareFailed?(self.id, 10001, "No DFU characteristic to update") }
 		#endif
 		
-		#if ETHOS || ALTER
+		#if ETHOS || ALTER || KAIROS
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
 			do {
 				let contents = try Data(contentsOf: file)
@@ -1093,17 +1167,17 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func cancelFirmwareUpdate() {
-#if LIVOTAL
+		#if LIVOTAL
 		if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.cancel() }
 		else { updateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
-#endif
+		#endif
 
-#if ETHOS || ALTER
+		#if ETHOS || ALTER || KAIROS
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic { ambiqOTARXCharacteristic.cancel() }
 		else { updateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
-#endif
+		#endif
 		
-#if UNIVERSAL
+		#if UNIVERSAL
 		switch (type) {
 		case .livotal:
 			if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.cancel() }
@@ -1115,7 +1189,7 @@ public class Device: NSObject {
 			log?.e ("Do now know device type")
 			updateFirmwareFailed?(self.id, 10001, "Do not know device type: \(type.title)")
 		}
-#endif
+		#endif
 	}
 
 	
@@ -1241,7 +1315,7 @@ public class Device: NSObject {
 					mPulseOxContinuousCharacteristic?.updated	= { id, spo2, hr in self.pulseOxUpdated?(id, spo2, hr) }
 					mPulseOxContinuousCharacteristic?.discoverDescriptors()
 				#endif
-				#if UNIVERSAL || ETHOS || ALTER
+				#if UNIVERSAL || ETHOS || ALTER || KAIROS
 				case .heart_rate_measurement:
 					log?.v ("\(self.id) '\(testCharacteristic.title)' - and enable notifications")
 					mHeartRateMeasurementCharacteristic	= heartRateMeasurementCharacteristic(peripheral, characteristic: characteristic)
@@ -1263,12 +1337,12 @@ public class Device: NSObject {
 			else if let testCharacteristic = Device.characteristics(rawValue: characteristic.prettyID) {
 				switch (testCharacteristic) {
 					
-#if UNIVERSAL || ETHOS
+				#if UNIVERSAL || ETHOS
 				case .ethosMainCharacteristic:
 					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic)
-#if UNIVERSAL
+					#if UNIVERSAL
 					mMainCharacteristic?.type	= .ethos
-#endif
+					#endif
 					mMainCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.id, successful) }
 					mMainCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.id, successful) }
 					mMainCharacteristic?.ledComplete = { successful in self.ledComplete?(self.id, successful) }
@@ -1399,7 +1473,73 @@ public class Device: NSObject {
 					mDataCharacteristic?.discoverDescriptors()
 				#endif
 
-				#if UNIVERSAL || ETHOS || ALTER
+				#if UNIVERSAL || KAIROS
+				case .kairosMainCharacteristic:
+					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic)
+					#if UNIVERSAL
+					mMainCharacteristic?.type	= .kairos
+					#endif
+					mMainCharacteristic?.startManualComplete = { successful in self.startManualComplete?(self.id, successful) }
+					mMainCharacteristic?.stopManualComplete = { successful in self.stopManualComplete?(self.id, successful) }
+					mMainCharacteristic?.ledComplete = { successful in self.ledComplete?(self.id, successful) }
+					mMainCharacteristic?.enterShipModeComplete = { successful in self.enterShipModeComplete?(self.id, successful) }
+					mMainCharacteristic?.writeSerialNumberComplete = { successful in self.writeSerialNumberComplete?(self.id, successful) }
+					mMainCharacteristic?.readSerialNumberComplete = { successful, partID in self.readSerialNumberComplete?(self.id, successful, partID) }
+					mMainCharacteristic?.deleteSerialNumberComplete = { successful in self.deleteSerialNumberComplete?(self.id, successful) }
+					mMainCharacteristic?.writeAdvIntervalComplete = { successful in self.writeAdvIntervalComplete?(self.id, successful) }
+					mMainCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.readAdvIntervalComplete?(self.id, successful, seconds) }
+					mMainCharacteristic?.deleteAdvIntervalComplete = { successful in self.deleteAdvIntervalComplete?(self.id, successful) }
+					mMainCharacteristic?.clearChargeCyclesComplete = { successful in self.clearChargeCyclesComplete?(self.id, successful) }
+					mMainCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.readChargeCyclesComplete?(self.id, successful, cycles) }
+					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.readCanLogDiagnosticsComplete?(self.id, successful, allow) }
+					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.updateCanLogDiagnosticsComplete?(self.id, successful) }
+					mMainCharacteristic?.rawLoggingComplete = { successful in self.rawLoggingComplete?(self.id, successful) }
+					mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.getRawLoggingStatusComplete?(self.id, successful, enabled) }
+					mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.getWornOverrideStatusComplete?(self.id, successful, overridden) }
+					mMainCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
+					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
+					mMainCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }
+					mMainCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
+					mMainCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
+					mMainCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.id, successful) }
+					mMainCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
+					mMainCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
+					mMainCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
+					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
+					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
+					mMainCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
+					mMainCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
+					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mMainCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
+					mMainCharacteristic?.deviceWornStatus = { isWorn in
+						if (isWorn) { self.wornStatus = "Worn" }
+						else { self.wornStatus = "Not Worn" }
+						self.deviceWornStatus?(self.id, isWorn)
+					}
+					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.id, successful, parameter) }
+					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.id, successful, parameter, value) }
+					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
+					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
+					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
+					mMainCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result) }
+					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.recalibratePPGComplete?(self.id, successful) }
+					mMainCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
+						if (charging) { self.chargingStatus	= "Charging" }
+						else if (on_charger) { self.chargingStatus = "On Charger" }
+						else if (error) { self.chargingStatus = "Charging Error" }
+						else { self.chargingStatus = "Not Charging" }
+						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
+					mMainCharacteristic?.discoverDescriptors()
+					
+				case .kairosDataCharacteristic:
+					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
+					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mDataCharacteristic?.discoverDescriptors()
+				#endif
+
+				#if UNIVERSAL || ETHOS || ALTER || KAIROS
 				case .ambiqOTARXCharacteristic:
 					if let service = characteristic.service {
 						log?.v ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)'")
@@ -1541,7 +1681,12 @@ public class Device: NSObject {
 					case .alterDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
 					#endif
 
-					#if UNIVERSAL || ETHOS || ALTER
+					#if UNIVERSAL || KAIROS
+					case .kairosMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
+					case .kairosDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
+					#endif
+
+					#if UNIVERSAL || ETHOS || ALTER || KAIROS
 					case .ambiqOTARXCharacteristic		: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
 					case .ambiqOTATXCharacteristic		: mAmbiqOTATXCharacteristic?.didDiscoverDescriptor()
 					#endif
@@ -1559,7 +1704,7 @@ public class Device: NSObject {
 					#if UNIVERSAL || ETHOS
 					case .plx_continuous_measurement	: mPulseOxContinuousCharacteristic?.didDiscoverDescriptor()
 					#endif
-					#if UNIVERSAL || ETHOS || ALTER
+					#if UNIVERSAL || ETHOS || ALTER || KAIROS
 					case .heart_rate_measurement		: mHeartRateMeasurementCharacteristic?.didDiscoverDescriptor()
 					#endif
 					default:
@@ -1617,7 +1762,7 @@ public class Device: NSObject {
 			#if UNIVERSAL || ETHOS
 			case .plx_continuous_measurement	: mPulseOxContinuousCharacteristic?.didUpdateValue()
 			#endif
-			#if UNIVERSAL || ETHOS || ALTER
+			#if UNIVERSAL || ETHOS || ALTER || KAIROS
 			case .heart_rate_measurement		: mHeartRateMeasurementCharacteristic?.didUpdateValue()
 			#endif
 			case .body_sensor_location:
@@ -1641,7 +1786,12 @@ public class Device: NSObject {
 			case .alterDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
 			#endif
 
-			#if UNIVERSAL || ETHOS || ALTER
+			#if UNIVERSAL || KAIROS
+			case .kairosMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
+			case .kairosDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
+			#endif
+				
+			#if UNIVERSAL || ETHOS || ALTER || KAIROS
 			case .ambiqOTARXCharacteristic		: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
 			case .ambiqOTATXCharacteristic		:
 				// Commands to RX come in on TX, causes RX to do next step
@@ -1689,7 +1839,12 @@ public class Device: NSObject {
 					case .alterDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
 					#endif
 
-					#if UNIVERSAL || ETHOS || ALTER
+					#if UNIVERSAL || KAIROS
+					case .kairosMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
+					case .kairosDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
+					#endif
+						
+					#if UNIVERSAL || ETHOS || ALTER || KAIROS
 					case .ambiqOTARXCharacteristic			: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
 					case .ambiqOTATXCharacteristic			: mAmbiqOTATXCharacteristic?.didUpdateNotificationState()
 					#endif
@@ -1709,7 +1864,7 @@ public class Device: NSObject {
 					#if UNIVERSAL || ETHOS
 					case .plx_continuous_measurement	: mPulseOxContinuousCharacteristic?.didUpdateNotificationState()
 					#endif
-					#if UNIVERSAL || ETHOS || ALTER
+					#if UNIVERSAL || ETHOS || ALTER || KAIROS
 					case .heart_rate_measurement		: mHeartRateMeasurementCharacteristic?.didUpdateNotificationState()
 					#endif
 					default								: log?.e ("\(self.id): '\(enumerated.title)'.  Do not know what to do - skipping")
@@ -1735,7 +1890,7 @@ public class Device: NSObject {
 	//
 	//--------------------------------------------------------------------------------
 	func isReady() {
-		#if UNIVERSAL || ETHOS || ALTER
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		mAmbiqOTARXCharacteristic?.isReady()
 		#endif
 	}
