@@ -150,7 +150,7 @@ public class Device: NSObject {
 	#endif
 
 	#if UNIVERSAL || ETHOS || ALTER || KAIROS
-	var heartRateUpdated: ((_ id: String, _ hr: Int, _ rr: [Double])->())?
+	var heartRateUpdated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
 	#endif
 
 	var writeEpochComplete: ((_ id: String, _ successful: Bool)->())?
@@ -1319,7 +1319,7 @@ public class Device: NSObject {
 				case .heart_rate_measurement:
 					log?.v ("\(self.id) '\(testCharacteristic.title)' - and enable notifications")
 					mHeartRateMeasurementCharacteristic	= heartRateMeasurementCharacteristic(peripheral, characteristic: characteristic)
-					mHeartRateMeasurementCharacteristic?.updated	= { id, hr, rr in self.heartRateUpdated?(id, hr, rr) }
+					mHeartRateMeasurementCharacteristic?.updated	= { id, epoch, hr, rr in self.heartRateUpdated?(id, epoch, hr, rr) }
 					mHeartRateMeasurementCharacteristic?.discoverDescriptors()
 				#endif
 				case .body_sensor_location:

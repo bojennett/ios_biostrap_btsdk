@@ -153,7 +153,7 @@ import iOSDFULibrary
 	#endif
 
 	#if UNIVERSAL || ETHOS || ALTER || KAIROS
-	@objc public var heartRate: ((_ id: String, _ hr: Int, _ rr: [Double])->())?
+	@objc public var heartRate: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
 	#endif
 
 	//--------------------------------------------------------------------------------
@@ -285,6 +285,21 @@ import iOSDFULibrary
 	//--------------------------------------------------------------------------------
 	@objc public func startScan() -> Bool {
 		log?.v("")
+		
+		// See if there were any connected peripherals (which could happen due to a previous instance crash), and disconnect them
+		let peripherals = mCentralManager?.retrieveConnectedPeripherals(withServices: Device.scan_services)
+		if let peripherals = peripherals {
+			if (peripherals.count > 0) {
+				log?.v ("Found '\(peripherals.count)' previously connected devices (probably due to a crash).  Disconnect them to clean up")
+				for peripheral in peripherals {
+					log?.v ("    Disconnect \(peripheral.identifier)")
+					mCentralManager?.cancelPeripheralConnection(peripheral)
+				}
+			}
+		}
+		else {
+			log?.v ("Checking for previously connected peripherals (due to crash).  Didn't find any")
+		}
 		
 		mDiscoveredDevices?.removeAll()
 		
@@ -567,6 +582,11 @@ import iOSDFULibrary
 
 	@objc public func alterLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let device = mConnectedDevices?[id] { device.alterLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		else { self.ledComplete?(id, false) }
+	}
+	
+	@objc public func kairosLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+		if let device = mConnectedDevices?[id] { device.kairosLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif

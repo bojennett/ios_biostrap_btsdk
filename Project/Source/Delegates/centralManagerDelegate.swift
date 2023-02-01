@@ -53,6 +53,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 			}
 			else if let _ = self.mConnectedDevices?[peripheral.prettyID] {
 				log?.e ("\(peripheral.prettyID): didDiscover: Discovered a device that is in my connected list.  Don't expect this...  Assume disconnected")
+				self.mCentralManager?.cancelPeripheralConnection(peripheral)
 				self.mConnectedDevices?.removeValue(forKey: peripheral.prettyID)
 				self.disconnected?(peripheral.prettyID)
 			}
@@ -79,8 +80,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.batteryLevel?(id, percentage) }
 								}
 
-								device.heartRateUpdated			= { id, hr, rr in
-									DispatchQueue.main.async { self.heartRate?(id, hr, rr) }
+								device.heartRateUpdated			= { id, epoch, hr, rr in
+									DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) }
 								}
 
 								device.writeEpochComplete		= { id, successful in
@@ -298,10 +299,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.batteryLevel?(id, percentage) }
 								}
 								
-								device.heartRateUpdated			= { id, hr, rr in
-									DispatchQueue.main.async { self.heartRate?(id, hr, rr) }
+								device.heartRateUpdated			= { id, epoch, hr, rr in
+									DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) }
 								}
-								
+
 								device.writeEpochComplete		= { id, successful in
 									DispatchQueue.main.async { self.writeEpochComplete?(id, successful) }
 								}
@@ -522,8 +523,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.pulseOx?(id, spo2, hr) }
 								}
 
-								device.heartRateUpdated			= { id, hr, rr in
-									DispatchQueue.main.async { self.heartRate?(id, hr, rr) }
+								device.heartRateUpdated			= { id, epoch, hr, rr in
+									DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) }
 								}
 
 								device.writeEpochComplete		= { id, successful in

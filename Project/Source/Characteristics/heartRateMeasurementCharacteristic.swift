@@ -11,7 +11,7 @@ import CoreBluetooth
 class heartRateMeasurementCharacteristic: Characteristic {
 	
 	// MARK: Callbacks
-	var updated: ((_ id: String, _ hr: Int, _ rr: [Double])->())?
+	var updated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
 
 	//--------------------------------------------------------------------------------
 	// Function Name: mParse
@@ -20,9 +20,11 @@ class heartRateMeasurementCharacteristic: Characteristic {
 	// Parse a bluetooth update from the Heart Rate Characteristic
 	//
 	//--------------------------------------------------------------------------------
-	internal func mParse(_ data: Data?) -> (Int, [Double]) {
+	internal func mParse(_ data: Data?) -> (Int, Int, [Double]) {
 		var hr			: Int = 0
 		var rr			: [Double] = [Double]()
+		
+		let epoch		= Int(Date().timeIntervalSince1970)
 		
 		if let data = data {
 			let hrflags		= data[0]
@@ -52,7 +54,7 @@ class heartRateMeasurementCharacteristic: Characteristic {
 			
 		}
 		
-		return (hr, rr)
+		return (epoch, hr, rr)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -87,8 +89,8 @@ class heartRateMeasurementCharacteristic: Characteristic {
 	override func didUpdateValue() {
 		if let characteristic = pCharacteristic {
 			if let data = characteristic.value {
-				let (hr, rr) = mParse(data)
-				self.updated?(pID, hr, rr)
+				let (epoch, hr, rr) = mParse(data)
+				self.updated?(pID, epoch, hr, rr)
 			}
 			else {
 				log?.e ("\(pID): Missing data")
