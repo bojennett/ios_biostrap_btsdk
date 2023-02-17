@@ -173,7 +173,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
 		if let error = error {
-			log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
+			log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription)")
 			//self.mCentralManager?.cancelPeripheralConnection(peripheral)
 			//return
 		}

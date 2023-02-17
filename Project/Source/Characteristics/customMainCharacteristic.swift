@@ -1898,36 +1898,46 @@ class customMainCharacteristic: Characteristic {
 					}
 
 				case .alter		:
-					let testResult = alterManufacturingTestResult(data.subdata(in: Range(1...4)))
-					do {
-						let jsonData = try JSONEncoder().encode(testResult)
-						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
+					if (data.count == 3) {
+						let testResult = alterManufacturingTestResult(data.subdata(in: Range(1...2)))
+						do {
+							let jsonData = try JSONEncoder().encode(testResult)
+							if let jsonString = String(data: jsonData, encoding: .utf8) {
+								self.manufacturingTestResult?(true, jsonString)
+							}
+							else {
+								log?.e ("Result jsonString Failed")
+								self.manufacturingTestResult?(false, "")
+							}
 						}
-						else {
-							log?.e ("Result jsonString Failed")
+						catch {
+							log?.e ("Result jsonData Failed")
 							self.manufacturingTestResult?(false, "")
 						}
 					}
-					catch {
-						log?.e ("Result jsonData Failed")
+					else {
 						self.manufacturingTestResult?(false, "")
 					}
 
 				case .kairos		:
-					let testResult = kairosManufacturingTestResult(data.subdata(in: Range(1...4)))
-					do {
-						let jsonData = try JSONEncoder().encode(testResult)
-						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
+					if (data.count == 3) {
+						let testResult = kairosManufacturingTestResult(data.subdata(in: Range(1...2)))
+						do {
+							let jsonData = try JSONEncoder().encode(testResult)
+							if let jsonString = String(data: jsonData, encoding: .utf8) {
+								self.manufacturingTestResult?(true, jsonString)
+							}
+							else {
+								log?.e ("Result jsonString Failed")
+								self.manufacturingTestResult?(false, "")
+							}
 						}
-						else {
-							log?.e ("Result jsonString Failed")
+						catch {
+							log?.e ("Result jsonData Failed")
 							self.manufacturingTestResult?(false, "")
 						}
 					}
-					catch {
-						log?.e ("Result jsonData Failed")
+					else {
 						self.manufacturingTestResult?(false, "")
 					}
 

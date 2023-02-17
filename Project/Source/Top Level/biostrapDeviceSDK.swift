@@ -829,6 +829,13 @@ import iOSDFULibrary
 		if let device = mConnectedDevices?[id] { device.alterManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
+	
+	@objc public func kairosManufacturingTest(_ id: String, test: kairosManufacturingTestType) {
+		log?.v ("\(id)")
+		
+		if let device = mConnectedDevices?[id] { device.kairosManufacturingTest(id, test: test) }
+		else { self.manufacturingTestComplete?(id, false) }
+	}
 	#endif
 
 	#if UNIVERSAL || ETHOS

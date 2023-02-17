@@ -221,6 +221,7 @@ public class Device: NSObject {
 	var resetSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
 	var acceptSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
 
+	@objc public var batteryValid	: Bool = false
 	@objc public var batteryLevel	: Int = 0
 	@objc public var wornStatus		: String = "Not worn"
 	@objc public var chargingStatus	: String = "Not charging"
@@ -367,7 +368,13 @@ public class Device: NSObject {
 
 	var disconnected: Bool {
 		get { return (mState == .disconnected) }
-		set { if (newValue) { mState = .disconnected } }
+		set {
+			if (newValue) {
+				batteryValid	= false
+				batteryLevel	= 0
+				mState			= .disconnected
+			}
+		}
 	}
 	
 	var connecting: Bool {
@@ -1123,7 +1130,8 @@ public class Device: NSObject {
 			if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.start(file) }
 			else { updateFirmwareFailed?(self.id, 10001, "No DFU characteristic to update") }
 		case .ethos,
-			 .alter:
+			 .alter,
+			 .kairos:
 			if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
 				do {
 					let contents = try Data(contentsOf: file)
@@ -1303,6 +1311,7 @@ public class Device: NSObject {
 					log?.v ("\(self.id) '\(testCharacteristic.title)' - read it and enable notifications")
 					mBatteryLevelCharacteristic	= batteryLevelCharacteristic(peripheral, characteristic: characteristic)
 					mBatteryLevelCharacteristic?.updated	= { id, percentage in
+						self.batteryValid = true
 						self.batteryLevel = percentage
 						self.batteryLevelUpdated?(id, percentage)
 					}
