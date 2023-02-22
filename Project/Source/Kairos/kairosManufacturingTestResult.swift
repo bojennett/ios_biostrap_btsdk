@@ -7,6 +7,7 @@
 
 import Foundation
 
+#if UNIVERSAL || KAIROS
 class kairosManufacturingTestResult: Codable {
 	
 	//--------------------------------------------------------------------------------
@@ -72,4 +73,4 @@ class kairosManufacturingTestResult: Codable {
 		try container.encode(result, forKey: .result)
 	}
 }
-
+#endif

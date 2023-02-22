@@ -7,6 +7,7 @@
 
 import Foundation
 
+#if UNIVERSAL || ALTER
 class alterManufacturingTestResult: Codable {
 	
 	//--------------------------------------------------------------------------------
@@ -72,4 +73,4 @@ class alterManufacturingTestResult: Codable {
 		try container.encode(result, forKey: .result)
 	}
 }
-
+#endif

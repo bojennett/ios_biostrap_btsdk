@@ -269,6 +269,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) }
 								}
 
+								device.deviceChargingStatus			= { id, charging, on_charger, error in
+									DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) }
+								}
+								
 								self.mDiscoveredDevices?[peripheral.prettyID] = device
 							}
 							
@@ -486,6 +490,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								
 								device.recalibratePPGComplete		= { id, successful in
 									DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) }
+								}
+								
+								device.deviceChargingStatus			= { id, charging, on_charger, error in
+									DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) }
 								}
 								
 								self.mDiscoveredDevices?[peripheral.prettyID] = device
