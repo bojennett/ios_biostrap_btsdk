@@ -79,18 +79,20 @@ import Foundation
 	@objc public var commandString: String {
 		var result: String	= ""
 		
-		if (hr)			{ if (result != "") { result = "\(result)," }; result = "\(result)HR" }
-		if (hrv)		{ if (result != "") { result = "\(result)," }; result = "\(result)HRV" }
-		if (rr)			{ if (result != "") { result = "\(result)," }; result = "\(result)RR" }
-		if (spo2)		{ if (result != "") { result = "\(result)," }; result = "\(result)SPO2" }
+		if (hr)			{ if (result != "") { result = "\(result), " }; result = "\(result)HR" }
+		if (hrv)		{ if (result != "") { result = "\(result), " }; result = "\(result)HRV" }
+		if (rr)			{ if (result != "") { result = "\(result), " }; result = "\(result)RR" }
+		if (spo2)		{ if (result != "") { result = "\(result), " }; result = "\(result)SPO2" }
 		
 		#if UNIVERSAL || ETHOS
-		if (fda_spo2)	{ if (result != "") { result = "\(result)," }; result = "\(result)FDA_SPO2" }
+		if (fda_spo2)	{ if (result != "") { result = "\(result), " }; result = "\(result)FDA_SPO2" }
 		#endif
 
 		#if UNIVERSAL || ETHOS || ALTER  || KAIROS
-		if (continuous)	{ if (result != "") { result = "\(result)," }; result = "\(result)Continous" }
+		if (continuous)	{ if (result != "") { result = "\(result), " }; result = "\(result)Continous" }
 		#endif
+		
+		if (result == "") { return ("Idle") }
 
 		return result
 
