@@ -89,7 +89,7 @@ import Foundation
 		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case "Continuous Heart Rate"				: self	= .continuous_hr
 		#endif
-		case "Steps with Active Minutes"			: self	= .steps_active
+		case "Steps with Active Seconds"			: self	= .steps_active
 			
 		case "Raw Accel FIFO Count"					: self	= .rawAccelFifoCount
 		case "Raw PPG Proximity"					: self	= .rawPPGProximity
@@ -157,7 +157,7 @@ import Foundation
 		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr							: return "Continuous Heart Rate"
 		#endif
-		case .steps_active							: return "Steps with Active Minutes"
+		case .steps_active							: return "Steps with Active Seconds"
 			
 		case .rawAccelFifoCount						: return "Raw Accel FIFO Count"
 		case .rawPPGProximity						: return "Raw PPG Proximity"

@@ -72,6 +72,9 @@
 		3B49444028388D300074F569 /* ppgAlgorithmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */; };
 		3B5BFCDA285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */; };
 		3B5BFCDB285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */; };
+		3B78695529CCD657007FE112 /* hrZoneRangeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B78695429CCD657007FE112 /* hrZoneRangeType.swift */; };
+		3B78695629CCD657007FE112 /* hrZoneRangeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B78695429CCD657007FE112 /* hrZoneRangeType.swift */; };
+		3B78695729CCD657007FE112 /* hrZoneRangeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B78695429CCD657007FE112 /* hrZoneRangeType.swift */; };
 		3B8CA86B2939791E00BBC5C9 /* alterManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B2602D02890592700D5CAAA /* alterManufacturingTestResult.swift */; };
 		3B98B4B72787B4960081DA14 /* IntExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B98B4B62787B4960081DA14 /* IntExtentions.swift */; };
 		3BC00B862981BD12009F67CB /* kairosManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BC00B842981BCEF009F67CB /* kairosManufacturingTestResult.swift */; };
@@ -201,6 +204,7 @@
 		3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = disStringCharacteristic.swift; sourceTree = "<group>"; };
 		3B29C59C264C9E72006BC11B /* nordicDFU.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nordicDFU.swift; sourceTree = "<group>"; };
 		3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = liveSyncConfiguration.swift; sourceTree = "<group>"; };
+		3B78695429CCD657007FE112 /* hrZoneRangeType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hrZoneRangeType.swift; sourceTree = "<group>"; };
 		3B98B4B62787B4960081DA14 /* IntExtentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtentions.swift; sourceTree = "<group>"; };
 		3BC00B842981BCEF009F67CB /* kairosManufacturingTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = kairosManufacturingTestResult.swift; sourceTree = "<group>"; };
 		3BC00BB02981BD36009F67CB /* kairosBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = kairosBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -292,6 +296,7 @@
 				3BD01FAD261632830014CEF0 /* BluetoothIDs.swift */,
 				3B26028E288A04F700D5CAAA /* packetType.swift */,
 				3B260297288A061D00D5CAAA /* diagnosticType.swift */,
+				3B78695429CCD657007FE112 /* hrZoneRangeType.swift */,
 				3B260291288A05CE00D5CAAA /* settingsType.swift */,
 				3B260294288A05F600D5CAAA /* ppgFailedType.swift */,
 				3B28D46828E4B72900F6953A /* ppgStatusType.swift */,
@@ -805,6 +810,7 @@
 				3BD10BD828BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift in Sources */,
 				3B2602C12890541E00D5CAAA /* disStringCharacteristic.swift in Sources */,
 				3B2602C22890541E00D5CAAA /* Device.swift in Sources */,
+				3B78695529CCD657007FE112 /* hrZoneRangeType.swift in Sources */,
 				3B2602C42890541E00D5CAAA /* diagnosticType.swift in Sources */,
 				3B2602C52890541E00D5CAAA /* IntExtentions.swift in Sources */,
 			);
@@ -828,6 +834,7 @@
 				3BC00B962981BD36009F67CB /* ambiqOTARXCharacteristic.swift in Sources */,
 				3BC00B972981BD36009F67CB /* disSoftwareRevisionCharacteristic.swift in Sources */,
 				3BC00B982981BD36009F67CB /* alterManufacturingTestResult.swift in Sources */,
+				3B78695629CCD657007FE112 /* hrZoneRangeType.swift in Sources */,
 				3BC00B992981BD36009F67CB /* liveSyncConfiguration.swift in Sources */,
 				3BC00B9A2981BD36009F67CB /* Logging.swift in Sources */,
 				3BC00B9B2981BD36009F67CB /* nextPacketStatusType.swift in Sources */,
@@ -901,6 +908,7 @@
 				3B5BFCDB285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */,
 				3BEE5C8E296502B0008798FC /* customDataCharacteristic.swift in Sources */,
 				3BF807EE27A2057700595493 /* CrcCalculator.swift in Sources */,
+				3B78695729CCD657007FE112 /* hrZoneRangeType.swift in Sources */,
 				3BF807C327A1AFA000595493 /* customMainCharacteristic.swift in Sources */,
 				3BF807C427A1AFA000595493 /* nordicDFU.swift in Sources */,
 				3B2602D22890592700D5CAAA /* alterManufacturingTestResult.swift in Sources */,
@@ -986,7 +994,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 40;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1026,7 +1034,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 40;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1127,7 +1135,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 40;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1163,7 +1171,7 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 40;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1200,7 +1208,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 40;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;

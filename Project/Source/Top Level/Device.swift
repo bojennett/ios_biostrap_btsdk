@@ -190,6 +190,14 @@ public class Device: NSObject {
 	var debugComplete: ((_ id: String, _ successful: Bool, _ device: debugDevice, _ data: Data)->())?
 	#endif
 
+	#if UNIVERSAL || ALTER || KAIROS
+	var setHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType)->())?
+	var getHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
+	var setHRZoneRangeComplete: ((_ id: String, _ successful: Bool)->())?
+	var getHRZoneRangeComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
+	var getManualModeComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
+	#endif
+
 	var dataPackets: ((_ id: String, _ packets: String)->())?
 	var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
 	var dataFailure: ((_ id: String)->())?
@@ -1032,6 +1040,78 @@ public class Device: NSObject {
 	}
 	#endif
 
+	#if UNIVERSAL || ALTER || KAIROS
+	//--------------------------------------------------------------------------------
+	// Function Name: setHRZoneColor
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setHRZoneColor(_ type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
+		}
+		else { self.setHRZoneColorComplete?(self.id, false, type) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getHRZoneColor
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getHRZoneColor(_ type: hrZoneRangeType) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getHRZoneColor(type)
+		}
+		else { self.getHRZoneColorComplete?(self.id, false, type, false, false, false, 0, 0) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setHRZoneRange
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setHRZoneRange(_ enabled: Bool, high_value: Int, low_value: Int) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
+		}
+		else { self.setHRZoneRangeComplete?(self.id, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getHRZoneRange
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getHRZoneRange() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getHRZoneRange()
+		}
+		else { self.getHRZoneRangeComplete?(self.id, false, false, 0, 0) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getManualMode
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getManualMode() {
+		log?.v("")
+		
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getManualMode() }
+		else { self.getManualModeComplete?(self.id, false, ppgAlgorithmConfiguration()) }
+	}
+	#endif
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1465,14 +1545,20 @@ public class Device: NSObject {
 					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
 					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
-					mMainCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result) }
+					mMainCharacteristic?.manufacturingTestResult	= { valid, result in self.manufacturingTestResult?(self.id, valid, result) }
 					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.recalibratePPGComplete?(self.id, successful) }
-					mMainCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
+					mMainCharacteristic?.deviceChargingStatus		= { charging, on_charger, error in
 						if (charging) { self.chargingStatus	= "Charging" }
 						else if (on_charger) { self.chargingStatus = "On Charger" }
 						else if (error) { self.chargingStatus = "Charging Error" }
 						else { self.chargingStatus = "Not Charging" }
 						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
+					mMainCharacteristic?.setHRZoneColorComplete		= { successful, type in self.setHRZoneColorComplete?(self.id, successful, type) }
+					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.getHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
+					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.setHRZoneRangeComplete?(self.id, successful) }
+					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.getHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
+					mMainCharacteristic?.getManualModeComplete		= { successful, algorithm in self.getManualModeComplete?(self.id, successful, algorithm) }
+
 					mMainCharacteristic?.discoverDescriptors()
 					
 				case .alterDataCharacteristic:
@@ -1531,16 +1617,21 @@ public class Device: NSObject {
 					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
 					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
-					mMainCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result) }
+					mMainCharacteristic?.manufacturingTestResult	= { valid, result in self.manufacturingTestResult?(self.id, valid, result) }
 					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.recalibratePPGComplete?(self.id, successful) }
-					mMainCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
+					mMainCharacteristic?.deviceChargingStatus		= { charging, on_charger, error in
 						if (charging) { self.chargingStatus	= "Charging" }
 						else if (on_charger) { self.chargingStatus = "On Charger" }
 						else if (error) { self.chargingStatus = "Charging Error" }
 						else { self.chargingStatus = "Not Charging" }
 						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
 					mMainCharacteristic?.discoverDescriptors()
-					
+					mMainCharacteristic?.setHRZoneColorComplete		= { successful, type in self.setHRZoneColorComplete?(self.id, successful, type) }
+					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.getHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
+					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.setHRZoneRangeComplete?(self.id, successful) }
+					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.getHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
+					mMainCharacteristic?.getManualModeComplete		= { successful, algorithm in self.getManualModeComplete?(self.id, successful, algorithm) }
+
 				case .kairosDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
 					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }

@@ -39,6 +39,24 @@ import Foundation
 		#endif
 	}
 	
+	convenience init(_ data: UInt8) {
+		self.init()
+		
+		hr			= ((data & 0x01) != 0x00)
+		hrv			= ((data & 0x02) != 0x00)
+		rr			= ((data & 0x04) != 0x00)
+		spo2		= ((data & 0x08) != 0x00)
+
+		#if UNIVERSAL || ETHOS
+		fda_spo2	= ((data & 0x10) != 0x00)
+		#endif
+		
+		#if UNIVERSAL || ETHOS || ALTER  || KAIROS
+		continuous	= ((data & 0x80) != 0x00)
+		#endif
+
+	}
+	
 	var commandByte: UInt8 {
 		var result: UInt8	= 0x00
 		

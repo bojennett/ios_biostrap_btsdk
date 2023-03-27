@@ -16,7 +16,7 @@ import Foundation
 	public var epoch_ms					: Int			= 0
 	public var seconds					: Int			= 0
 	public var value					: Int			= 0
-	public var active_minutes			: Int			= 0
+	public var active_seconds			: Int			= 0
 	public var voltage					: Int			= 0
 	public var temperature				: Float			= 0.0
 	public var hr_valid					: Bool			= false
@@ -68,7 +68,7 @@ import Foundation
 		case spo2_valid
 		case spo2_result
 		case value
-		case active_minutes
+		case active_seconds
 		case tag
 		case settings_type
 		case settings_value
@@ -159,7 +159,7 @@ import Foundation
 
 		case .unknown						: return ("\(raw_data.hexString),\(type.title)")
 		case .steps							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(value)")
-		case .steps_active					: return ("\(raw_data.hexString).\(type.title),\(epoch),\(value),\(active_minutes)")
+		case .steps_active					: return ("\(raw_data.hexString).\(type.title),\(epoch),\(value),\(active_seconds)")
 		case .diagnostic					: return ("\(raw_data.hexString),\(type.title),\(diagnostic_type.title)")
 		case .milestone						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(tag)")
 		case .settings						: return ("\(raw_data.hexString),\(type.title),\(settings_type.title),\(settings_value)")
@@ -320,7 +320,7 @@ import Foundation
 			case .steps_active:
 				epoch				= data.subdata(in: Range(1...4)).leInt32
 				value				= Int(data[5])
-				active_minutes		= Int(data[6])
+				active_seconds		= Int(data[6])
 
 			case .ppg_metrics:
 				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
@@ -458,7 +458,7 @@ import Foundation
 		case .steps_active:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
 			value				= try values.decode(Int.self, forKey: .value)
-			active_minutes		= try values.decode(Int.self, forKey: .active_minutes)
+			active_seconds		= try values.decode(Int.self, forKey: .active_seconds)
 			
 		case .rawPPGRed,
 			 .rawPPGIR,
@@ -574,7 +574,7 @@ import Foundation
 		case .steps_active:
 			try container.encode(epoch, forKey: .epoch)
 			try container.encode(value, forKey: .value)
-			try container.encode(active_minutes, forKey: .active_minutes)
+			try container.encode(active_seconds, forKey: .active_seconds)
 
 		case .sleep:
 			try container.encode(epoch, forKey: .epoch)

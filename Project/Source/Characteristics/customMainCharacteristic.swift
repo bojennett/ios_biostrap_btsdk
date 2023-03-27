@@ -30,6 +30,13 @@ class customMainCharacteristic: Characteristic {
 		case motor				= 0x14
 		case debug				= 0x20
 		#endif
+		#if UNIVERSAL || ALTER || KAIROS
+		case setHRZoneColor		= 0x60
+		case getHRZoneColor		= 0x61
+		case setHRZoneRange		= 0x62
+		case getHRZoneRange		= 0x63
+		case getManualMode		= 0x64
+		#endif
 		case setDeviceParam		= 0x70
 		case getDeviceParam		= 0x71
 		case delDeviceParam		= 0x72
@@ -115,6 +122,14 @@ class customMainCharacteristic: Characteristic {
 	var endSleepComplete: ((_ successful: Bool)->())?
 	#if UNIVERSAL || ETHOS
 	var debugComplete: ((_ successful: Bool, _ device: debugDevice, _ data: Data)->())?
+	#endif
+	
+	#if UNIVERSAL || ALTER || KAIROS
+	var setHRZoneColorComplete: ((_ successful: Bool, _ type: hrZoneRangeType)->())?
+	var getHRZoneColorComplete: ((_ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
+	var setHRZoneRangeComplete: ((_ successful: Bool)->())?
+	var getHRZoneRangeComplete: ((_ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
+	var getManualModeComplete: ((_ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
 	#endif
 
 	var dataPackets: ((_ packets: String)->())?
@@ -1049,6 +1064,110 @@ class customMainCharacteristic: Characteristic {
 	}
 	#endif
 
+	#if UNIVERSAL || ALTER || KAIROS
+	//--------------------------------------------------------------------------------
+	// Function Name: setHRZoneColor
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setHRZoneColor(_ type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
+		log?.v("\(type.title) -> R \(red), G \(green), B \(blue).  On: \(on_milliseconds), Off: \(off_milliseconds)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.setHRZoneColor.rawValue)
+			data.append(type.rawValue)
+			data.append(red ? 0x01 : 0x00)
+			data.append(green ? 0x01 : 0x00)
+			data.append(blue ? 0x01 : 0x00)
+			data.append(UInt8((on_milliseconds >> 0) & 0xff))
+			data.append(UInt8((on_milliseconds >> 8) & 0xff))
+			data.append(UInt8((off_milliseconds >> 0) & 0xff))
+			data.append(UInt8((off_milliseconds >> 8) & 0xff))
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.setHRZoneColorComplete?(false, type) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getHRZoneColor
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getHRZoneColor(_ type: hrZoneRangeType) {
+		log?.v("\(type.title)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getHRZoneColor.rawValue)
+			data.append(type.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getHRZoneColorComplete?(false, type, false, false, false, 0, 0) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setHRZoneRange
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setHRZoneRange(_ enabled: Bool, high_value: Int, low_value: Int) {
+		log?.v("Enabled: \(enabled) -> High Value: \(high_value), Low Value: \(low_value)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.setHRZoneRange.rawValue)
+			data.append(enabled ? 0x01 : 0x00)
+			data.append(UInt8(high_value))
+			data.append(UInt8(low_value))
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.setHRZoneRangeComplete?(false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getHRZoneRange
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getHRZoneRange() {
+		log?.v("")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getHRZoneRange.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getHRZoneRangeComplete?(false, false, 0, 0) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getManualMode
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getManualMode() {
+		log?.v("")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getManualMode.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getManualModeComplete?(false, ppgAlgorithmConfiguration()) }
+	}
+	#endif
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1311,7 +1430,7 @@ class customMainCharacteristic: Characteristic {
 					return (false, .unknown, biostrapDataPacket())
 				}
 			#endif
-
+				
 			case .unknown:
 				log?.e ("\(type.title): Index: \(index), Full Packet: \(data.hexString)")
 				return (false, type, biostrapDataPacket())
@@ -1618,6 +1737,55 @@ class customMainCharacteristic: Characteristic {
 						case .startLiveSync		: self.startLiveSyncComplete?(successful)
 						case .stopLiveSync		: self.stopLiveSyncComplete?(successful)
 						#endif
+							
+						#if UNIVERSAL || ALTER || KAIROS
+						case .setHRZoneColor:
+							if (data.count == 4) {
+								if let zone = hrZoneRangeType(rawValue: data[3]) {
+									self.setHRZoneColorComplete?(successful, zone)
+								}
+								else { self.setHRZoneColorComplete?(false, .unknown) }
+							}
+							else { self.setHRZoneColorComplete?(false, .unknown) }
+							
+						case .getHRZoneColor:
+							if (data.count == 11) {
+								if let zone = hrZoneRangeType(rawValue: data[3]) {
+									let red		= (data[4] != 0x00)
+									let green	= (data[5] != 0x00)
+									let blue	= (data[6] != 0x00)
+									let on_ms	= data.subdata(in: Range(7...8)).leInt16
+									let off_ms	= data.subdata(in: Range(9...10)).leInt16
+									self.getHRZoneColorComplete?(successful, zone, red, green, blue, on_ms, off_ms)
+								}
+								else { self.getHRZoneColorComplete?(false, .unknown, false, false, false, 0, 0) }
+							}
+							else { self.getHRZoneColorComplete?(false, .unknown, false, false, false, 0, 0) }
+							
+						case .setHRZoneRange:
+							if (data.count == 3) { self.setHRZoneRangeComplete?(successful) }
+							else { self.setHRZoneRangeComplete?(false) }
+							
+						case .getHRZoneRange:
+							if (data.count == 6) {
+								let enable		= (data[3] != 0x00)
+								let high_value	= Int(data[4])
+								let low_value	= Int(data[5])
+								self.getHRZoneRangeComplete?(successful, enable, high_value, low_value)
+							}
+							else {
+								self.getHRZoneRangeComplete?(false, false, 0, 0)
+							}
+						case .getManualMode:
+							if (data.count == 4) {
+								let algorithm	= ppgAlgorithmConfiguration(data[3])
+								self.getManualModeComplete?(successful, algorithm)
+							}
+							else {
+								self.getManualModeComplete?(false, ppgAlgorithmConfiguration())
+							}
+						#endif
+
 						case .allowPPG			: self.allowPPGComplete?(successful)
 						case .wornCheck			:
 							if (data.count == 8) {
@@ -1635,9 +1803,24 @@ class customMainCharacteristic: Characteristic {
 									self.wornCheckComplete?(false, "Unknown code: \(String(format: "0x%02X", data[3]))", 0)
 								}
 							}
+							
 						case .logRaw			: self.rawLoggingComplete?(successful)
-						case .getRawLoggingStatus	: self.getRawLoggingStatusComplete?(successful, (data[3] != 0x00))
-						case .getWornOverrideStatus	: self.getWornOverrideStatusComplete?(successful, (data[3] != 0x00))
+						case .getRawLoggingStatus	:
+							if (data.count == 4) {
+								self.getRawLoggingStatusComplete?(successful, (data[3] != 0x00))
+							}
+							else {
+								self.getRawLoggingStatusComplete?(false, false)
+							}
+							
+						case .getWornOverrideStatus	:
+							if (data.count == 4) {
+								self.getWornOverrideStatusComplete?(successful, (data[3] != 0x00))
+							}
+							else {
+								self.getWornOverrideStatusComplete?(false, false)
+							}
+							
 						case .reset				: self.resetComplete?(successful)
 						case .validateCRC		: break
 							//log?.v ("Got Validate CRC completion: \(data.hexString)")

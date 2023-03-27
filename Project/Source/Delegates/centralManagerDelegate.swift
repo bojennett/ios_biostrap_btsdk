@@ -273,6 +273,26 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) }
 								}
 								
+								device.setHRZoneColorComplete		= { id, successful, type in
+									DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) }
+								}
+								
+								device.getHRZoneColorComplete		= { id, successful, type, red, green, blue, on_ms, off_ms in
+									DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) }
+								}
+								
+								device.setHRZoneRangeComplete		= { id, successful in
+									DispatchQueue.main.async { self.setHRZoneRangeComplete?(id, successful) }
+								}
+								
+								device.getHRZoneRangeComplete		= { id, successful, enabled, high_value, low_value in
+									DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) }
+								}
+								
+								device.getManualModeComplete		= { id, successful, algorithm in
+									DispatchQueue.main.async { self.getManualModeComplete?(id, successful, algorithm) }
+								}
+								
 								self.mDiscoveredDevices?[peripheral.prettyID] = device
 							}
 							
@@ -494,6 +514,26 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								
 								device.deviceChargingStatus			= { id, charging, on_charger, error in
 									DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) }
+								}
+								
+								device.setHRZoneColorComplete		= { id, successful, type in
+									DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) }
+								}
+								
+								device.getHRZoneColorComplete		= { id, successful, type, red, green, blue, on_ms, off_ms in
+									DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) }
+								}
+								
+								device.setHRZoneRangeComplete		= { id, successful in
+									DispatchQueue.main.async { self.setHRZoneRangeComplete?(id, successful) }
+								}
+								
+								device.getHRZoneRangeComplete		= { id, successful, enabled, high_value, low_value in
+									DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) }
+								}
+								
+								device.getManualModeComplete		= { id, successful, algorithm in
+									DispatchQueue.main.async { self.getManualModeComplete?(id, successful, algorithm) }
 								}
 								
 								self.mDiscoveredDevices?[peripheral.prettyID] = device
