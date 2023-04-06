@@ -289,10 +289,18 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) }
 								}
 								
-								device.getManualModeComplete		= { id, successful, algorithm in
-									DispatchQueue.main.async { self.getManualModeComplete?(id, successful, algorithm) }
+								device.getPPGAlgorithmComplete		= { id, successful, algorithm in
+									DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm) }
 								}
-								
+
+								device.setAdvertiseAsHRMComplete	= { id, successful, asHRM in
+									DispatchQueue.main.async { self.setAdvertiseAsHRMComplete?(id, successful, asHRM) }
+								}
+
+								device.getAdvertiseAsHRMComplete	= { id, successful, asHRM in
+									DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) }
+								}
+
 								self.mDiscoveredDevices?[peripheral.prettyID] = device
 							}
 							
@@ -532,10 +540,18 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) }
 								}
 								
-								device.getManualModeComplete		= { id, successful, algorithm in
-									DispatchQueue.main.async { self.getManualModeComplete?(id, successful, algorithm) }
+								device.getPPGAlgorithmComplete		= { id, successful, algorithm in
+									DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm) }
 								}
-								
+
+								device.setAdvertiseAsHRMComplete	= { id, successful, asHRM in
+									DispatchQueue.main.async { self.setAdvertiseAsHRMComplete?(id, successful, asHRM) }
+								}
+
+								device.getAdvertiseAsHRMComplete	= { id, successful, asHRM in
+									DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) }
+								}
+
 								self.mDiscoveredDevices?[peripheral.prettyID] = device
 							}
 							
@@ -554,7 +570,6 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 							
 							if let _ = self.mDiscoveredDevices?[peripheral.prettyID] { }
 							else {
-
 								#if UNIVERSAL
 								let device = Device(name, id: peripheral.prettyID, peripheral: peripheral, type: .ethos)
 								#else

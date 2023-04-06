@@ -139,7 +139,9 @@ import iOSDFULibrary
 	@objc public var getHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	@objc public var setHRZoneRangeComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var getHRZoneRangeComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
-	@objc public var getManualModeComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
+	@objc public var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
+	@objc public var setAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
+	@objc public var getAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	#endif
 
 	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
@@ -903,15 +905,39 @@ import iOSDFULibrary
 	}
 	
 	//--------------------------------------------------------------------------------
-	// Function Name: getManualMode
+	// Function Name: getPPGAlgorithm
 	//--------------------------------------------------------------------------------
 	//
 	//
 	//
 	//--------------------------------------------------------------------------------
-	@objc public func getManualMode(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.getManualMode() }
-		else { self.getManualModeComplete?(id, false, ppgAlgorithmConfiguration()) }
+	@objc public func getPPGAlgorithm(_ id: String) {
+		if let device = mConnectedDevices?[id] { device.getPPGAlgorithm() }
+		else { self.getPPGAlgorithmComplete?(id, false, ppgAlgorithmConfiguration()) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setAdvertiseAsHRM
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func setAdvertiseAsHRM(_ id: String, asHRM: Bool) {
+		if let device = mConnectedDevices?[id] { device.setAdvertiseAsHRM(asHRM) }
+		else { self.setAdvertiseAsHRMComplete?(id, false, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getAdvertiseAsHRM
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func getAdvertiseAsHRM(_ id: String) {
+		if let device = mConnectedDevices?[id] { device.getAdvertiseAsHRM() }
+		else { self.getAdvertiseAsHRMComplete?(id, false, false) }
 	}
 	#endif
 

@@ -195,7 +195,9 @@ public class Device: NSObject {
 	var getHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	var setHRZoneRangeComplete: ((_ id: String, _ successful: Bool)->())?
 	var getHRZoneRangeComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
-	var getManualModeComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
+	var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
+	var setAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
+	var getAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	#endif
 
 	var dataPackets: ((_ id: String, _ packets: String)->())?
@@ -1098,17 +1100,39 @@ public class Device: NSObject {
 	}
 	
 	//--------------------------------------------------------------------------------
-	// Function Name: getManualMode
+	// Function Name: getPPGAlgorithm
 	//--------------------------------------------------------------------------------
 	//
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getManualMode() {
-		log?.v("")
-		
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getManualMode() }
-		else { self.getManualModeComplete?(self.id, false, ppgAlgorithmConfiguration()) }
+	func getPPGAlgorithm() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPPGAlgorithm() }
+		else { self.getPPGAlgorithmComplete?(self.id, false, ppgAlgorithmConfiguration()) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setAdvertiseAsHRM
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setAdvertiseAsHRM(_ asHRM: Bool) {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAdvertiseAsHRM(asHRM) }
+		else { self.setAdvertiseAsHRMComplete?(self.id, false, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getAdvertiseAsHRM
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getAdvertiseAsHRM() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAdvertiseAsHRM() }
+		else { self.getAdvertiseAsHRMComplete?(self.id, false, false) }
 	}
 	#endif
 
@@ -1557,7 +1581,9 @@ public class Device: NSObject {
 					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.getHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
 					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.setHRZoneRangeComplete?(self.id, successful) }
 					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.getHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
-					mMainCharacteristic?.getManualModeComplete		= { successful, algorithm in self.getManualModeComplete?(self.id, successful, algorithm) }
+					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm in self.getPPGAlgorithmComplete?(self.id, successful, algorithm) }
+					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.setAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
+					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
 
 					mMainCharacteristic?.discoverDescriptors()
 					
@@ -1630,7 +1656,9 @@ public class Device: NSObject {
 					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.getHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
 					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.setHRZoneRangeComplete?(self.id, successful) }
 					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.getHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
-					mMainCharacteristic?.getManualModeComplete		= { successful, algorithm in self.getManualModeComplete?(self.id, successful, algorithm) }
+					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm in self.getPPGAlgorithmComplete?(self.id, successful, algorithm) }
+					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.setAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
+					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
 
 				case .kairosDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
