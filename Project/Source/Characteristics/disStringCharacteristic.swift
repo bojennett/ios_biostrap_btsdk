@@ -46,7 +46,17 @@ class disStringCharacteristic: Characteristic {
 		
 		if let characteristic = pCharacteristic {
 			if let data = characteristic.value {
-				value = String(decoding: data, as: UTF8.self)
+				let result = String(decoding: data, as: UTF8.self)
+				
+				value = ""
+				for char in result {
+					if (char.isASCII) {
+						if ((char.asciiValue! >= 0x20) && (char.asciiValue! <= 0x7E)) {
+							value = "\(value)\(char)"
+						}
+						else { break }
+					}
+				}
 			}
 			else { log?.e ("\(pID): Missing data") }
 		}

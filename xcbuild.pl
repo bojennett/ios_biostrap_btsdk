@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 use Getopt::Long;
 use Term::ANSIColor qw(:constants);
