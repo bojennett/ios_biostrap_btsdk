@@ -67,16 +67,19 @@ public class Device: NSObject {
 		#if UNIVERSAL || ALTER
 		case alterMainCharacteristic	= "883BBA2C-8E31-40BB-A859-D59A2FB38EC1"
 		case alterDataCharacteristic	= "883BBA2C-8E31-40BB-A859-D59A2FB38EC2"
+		case alterStrmCharacteristic	= "883BBA2C-8E31-40BB-A859-D59A2FB38EC3"
 		#endif
 
 		#if UNIVERSAL || ETHOS
 		case ethosMainCharacteristic	= "B30E0F19-A021-45F3-8661-4255CBD49E11"
 		case ethosDataCharacteristic	= "B30E0F19-A021-45F3-8661-4255CBD49E12"
+		case ethosStrmCharacteristic	= "B30E0F19-A021-45F3-8661-4255CBD49E13"
 		#endif
 
 		#if UNIVERSAL || KAIROS
 		case kairosMainCharacteristic	= "140BB753-9845-4C0E-B61A-E6BAE41712F1"
 		case kairosDataCharacteristic	= "140BB753-9845-4C0E-B61A-E6BAE41712F2"
+		case kairosStrmCharacteristic	= "140BB753-9845-4C0E-B61A-E6BAE41712F3"
 		#endif
 
 		#if UNIVERSAL || ETHOS || ALTER || KAIROS
@@ -87,6 +90,7 @@ public class Device: NSObject {
 		#if UNIVERSAL || LIVOTAL
 		case livotalMainCharacteristic	= "58950001-A53F-11EB-BCBC-0242AC130002"
 		case livotalDataCharacteristic	= "58950002-A53F-11EB-BCBC-0242AC130002"
+		case livotalStrmCharacteristic	= "58950003-A53F-11EB-BCBC-0242AC130002"
 		case nordicDFUCharacteristic	= "8EC90003-F315-4F60-9FB8-838830DAEA50"
 		#endif
 
@@ -97,18 +101,21 @@ public class Device: NSObject {
 		var title: String {
 			switch (self) {
 			#if UNIVERSAL || ALTER
-			case .alterMainCharacteristic	: return "Alter Main Characteristic"
+			case .alterMainCharacteristic	: return "Alter Command Characteristic"
 			case .alterDataCharacteristic	: return "Alter Data Characteristic"
+			case .alterStrmCharacteristic	: return "Alter Streaming Characteristic"
 			#endif
 
 			#if UNIVERSAL || ETHOS
-			case .ethosMainCharacteristic	: return "Ethos Main Characteristic"
+			case .ethosMainCharacteristic	: return "Ethos Command Characteristic"
 			case .ethosDataCharacteristic	: return "Ethos Data Characteristic"
+			case .ethosStrmCharacteristic	: return "Ethos Streaming Characteristic"
 			#endif
 
 			#if UNIVERSAL || KAIROS
-			case .kairosMainCharacteristic	: return "Kairos Main Characteristic"
+			case .kairosMainCharacteristic	: return "Kairos Command Characteristic"
 			case .kairosDataCharacteristic	: return "Kairos Data Characteristic"
+			case .kairosStrmCharacteristic	: return "Kairos Streaming Characteristic"
 			#endif
 				
 			#if UNIVERSAL || ETHOS || ALTER || KAIROS
@@ -117,8 +124,9 @@ public class Device: NSObject {
 			#endif
 
 			#if UNIVERSAL || LIVOTAL
-			case .livotalMainCharacteristic	: return "Livotal Main Characteristic"
+			case .livotalMainCharacteristic	: return "Livotal Command Characteristic"
 			case .livotalDataCharacteristic	: return "Livotal Data Characteristic"
+			case .livotalStrmCharacteristic	: return "Livotal Streaming Characteristic"
 			case .nordicDFUCharacteristic	: return "Nordic DFU Characteristic"
 			#endif
 			}
@@ -190,12 +198,25 @@ public class Device: NSObject {
 	var debugComplete: ((_ id: String, _ successful: Bool, _ device: debugDevice, _ data: Data)->())?
 	#endif
 
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	var setAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
+	var getAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
+	#endif
+
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	var endSleepStatus: ((_ id: String, _ hasSleep: Bool)->())?
+	var buttonClicked: ((_ id: String, _ presses: Int)->())?
+	#endif
+
 	#if UNIVERSAL || ALTER || KAIROS
 	var setHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType)->())?
 	var getHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	var setHRZoneRangeComplete: ((_ id: String, _ successful: Bool)->())?
 	var getHRZoneRangeComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
 	var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
+	#endif
+	
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var setAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	var getAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	#endif
@@ -1042,6 +1063,32 @@ public class Device: NSObject {
 	}
 	#endif
 
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	//--------------------------------------------------------------------------------
+	// Function Name: setAdvertiseAsHRM
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setAskForButtonResponse(_ enable: Bool) {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAskForButtonResponse(enable) }
+		else { self.setAskForButtonResponseComplete?(self.id, false, enable) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getAdvertiseAsHRM
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getAskForButtonResponse() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAskForButtonResponse() }
+		else { self.getAskForButtonResponseComplete?(self.id, false, false) }
+	}
+	#endif
+	
 	#if UNIVERSAL || ALTER || KAIROS
 	//--------------------------------------------------------------------------------
 	// Function Name: setHRZoneColor
@@ -1110,7 +1157,9 @@ public class Device: NSObject {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPPGAlgorithm() }
 		else { self.getPPGAlgorithmComplete?(self.id, false, ppgAlgorithmConfiguration()) }
 	}
-	
+	#endif
+
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	//--------------------------------------------------------------------------------
 	// Function Name: setAdvertiseAsHRM
 	//--------------------------------------------------------------------------------
@@ -1496,6 +1545,10 @@ public class Device: NSObject {
 						else { self.wornStatus = "Not Worn" }
 						self.deviceWornStatus?(self.id, isWorn)
 					}
+					mMainCharacteristic?.setAskForButtonResponseComplete = { successful, enable in self.setAskForButtonResponseComplete?(self.id, successful, enable) }
+					mMainCharacteristic?.getAskForButtonResponseComplete = { successful, enable in self.getAskForButtonResponseComplete?(self.id, successful, enable) }
+					mMainCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
+					mMainCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
 					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.id, successful, parameter) }
 					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.id, successful, parameter, value) }
 					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
@@ -1511,6 +1564,9 @@ public class Device: NSObject {
 						else if (error) { self.chargingStatus = "Charging Error" }
 						else { self.chargingStatus = "Not Charging" }
 						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
+					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.setAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
+					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
+
 					mMainCharacteristic?.discoverDescriptors()
 					
 				case .ethosDataCharacteristic:
@@ -1518,6 +1574,10 @@ public class Device: NSObject {
 					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
 					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
 					mDataCharacteristic?.discoverDescriptors()
+					
+				case .ethosStrmCharacteristic:
+					break
+					
 				#endif
 
 				#if UNIVERSAL || ALTER
@@ -1564,6 +1624,10 @@ public class Device: NSObject {
 						else { self.wornStatus = "Not Worn" }
 						self.deviceWornStatus?(self.id, isWorn)
 					}
+					mMainCharacteristic?.setAskForButtonResponseComplete = { successful, enable in self.setAskForButtonResponseComplete?(self.id, successful, enable) }
+					mMainCharacteristic?.getAskForButtonResponseComplete = { successful, enable in self.getAskForButtonResponseComplete?(self.id, successful, enable) }
+					mMainCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
+					mMainCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
 					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.id, successful, parameter) }
 					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.id, successful, parameter, value) }
 					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
@@ -1592,6 +1656,10 @@ public class Device: NSObject {
 					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
 					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
 					mDataCharacteristic?.discoverDescriptors()
+					
+				case .alterStrmCharacteristic:
+					break
+
 				#endif
 
 				#if UNIVERSAL || KAIROS
@@ -1638,6 +1706,10 @@ public class Device: NSObject {
 						else { self.wornStatus = "Not Worn" }
 						self.deviceWornStatus?(self.id, isWorn)
 					}
+					mMainCharacteristic?.setAskForButtonResponseComplete = { successful, enable in self.setAskForButtonResponseComplete?(self.id, successful, enable) }
+					mMainCharacteristic?.getAskForButtonResponseComplete = { successful, enable in self.getAskForButtonResponseComplete?(self.id, successful, enable) }
+					mMainCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
+					mMainCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
 					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.id, successful, parameter) }
 					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.id, successful, parameter, value) }
 					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
@@ -1665,6 +1737,10 @@ public class Device: NSObject {
 					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
 					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
 					mDataCharacteristic?.discoverDescriptors()
+					
+				case .kairosStrmCharacteristic:
+					break
+					
 				#endif
 
 				#if UNIVERSAL || ETHOS || ALTER || KAIROS
@@ -1757,6 +1833,9 @@ public class Device: NSObject {
 					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
 					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
 					mDataCharacteristic?.discoverDescriptors()
+					
+				case .livotalStrmCharacteristic:
+					break
 
 				case .nordicDFUCharacteristic:
 					if let name = peripheral.name {
@@ -1802,16 +1881,19 @@ public class Device: NSObject {
 					#if UNIVERSAL || ETHOS
 					case .ethosMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
 					case .ethosDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
+					case .ethosStrmCharacteristic		: break
 					#endif
 
 					#if UNIVERSAL || ALTER
 					case .alterMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
 					case .alterDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
+					case .alterStrmCharacteristic		: break
 					#endif
 
 					#if UNIVERSAL || KAIROS
 					case .kairosMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
 					case .kairosDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
+					case .kairosStrmCharacteristic		: break
 					#endif
 
 					#if UNIVERSAL || ETHOS || ALTER || KAIROS
@@ -1822,6 +1904,7 @@ public class Device: NSObject {
 					#if UNIVERSAL || LIVOTAL
 					case .livotalMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
 					case .livotalDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
+					case .livotalStrmCharacteristic		: break
 					case .nordicDFUCharacteristic		: mNordicDFUCharacteristic?.didDiscoverDescriptor()
 					#endif
 					}
@@ -1907,16 +1990,19 @@ public class Device: NSObject {
 			#if UNIVERSAL || ETHOS
 			case .ethosMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
 			case .ethosDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
+			case .ethosStrmCharacteristic		: break
 			#endif
 
 			#if UNIVERSAL || ALTER
 			case .alterMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
 			case .alterDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
+			case .alterStrmCharacteristic		: break
 			#endif
 
 			#if UNIVERSAL || KAIROS
 			case .kairosMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
 			case .kairosDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
+			case .kairosStrmCharacteristic		: break
 			#endif
 				
 			#if UNIVERSAL || ETHOS || ALTER || KAIROS
@@ -1934,6 +2020,7 @@ public class Device: NSObject {
 			#if UNIVERSAL || LIVOTAL
 			case .livotalMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
 			case .livotalDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
+			case .livotalStrmCharacteristic		: break
 			case .nordicDFUCharacteristic		: mNordicDFUCharacteristic?.didUpdateValue()
 			#endif
 			}
@@ -1960,16 +2047,19 @@ public class Device: NSObject {
 					#if UNIVERSAL || ETHOS
 					case .ethosMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
 					case .ethosDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
+					case .ethosStrmCharacteristic			: break
 					#endif
 
 					#if UNIVERSAL || ALTER
 					case .alterMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
 					case .alterDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
+					case .alterStrmCharacteristic			: break
 					#endif
 
 					#if UNIVERSAL || KAIROS
 					case .kairosMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
 					case .kairosDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
+					case .kairosStrmCharacteristic			: break
 					#endif
 						
 					#if UNIVERSAL || ETHOS || ALTER || KAIROS
@@ -1980,6 +2070,7 @@ public class Device: NSObject {
 					#if UNIVERSAL || LIVOTAL
 					case .livotalMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
 					case .livotalDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
+					case .livotalStrmCharacteristic			: break
 					case .nordicDFUCharacteristic			: mNordicDFUCharacteristic?.didUpdateNotificationState()
 					#endif
 					}

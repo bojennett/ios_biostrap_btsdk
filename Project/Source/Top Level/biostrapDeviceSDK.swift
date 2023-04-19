@@ -134,12 +134,25 @@ import iOSDFULibrary
 	@objc public var stopLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 	
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	@objc public var setAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
+	@objc public var getAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
+	#endif
+	
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	@objc public var endSleepStatus: ((_ id: String, _ hasSleep: Bool)->())?
+	@objc public var buttonClicked: ((_ id: String, _ presses: Int)->())?
+	#endif
+	
 	#if UNIVERSAL || ALTER || KAIROS
 	@objc public var setHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType)->())?
 	@objc public var getHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	@objc public var setHRZoneRangeComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var getHRZoneRangeComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
 	@objc public var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
+	#endif
+	
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	@objc public var setAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	@objc public var getAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	#endif
@@ -851,6 +864,32 @@ import iOSDFULibrary
 	}
 	#endif
 	
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	//--------------------------------------------------------------------------------
+	// Function Name: setAskForButtonResponse
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func setAskForButtonResponse(_ id: String, enable: Bool) {
+		if let device = mConnectedDevices?[id] { device.setAskForButtonResponse(enable) }
+		else { self.setAskForButtonResponseComplete?(id, false, enable) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getAskForButtonResponse
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func getAskForButtonResponse(_ id: String) {
+		if let device = mConnectedDevices?[id] { device.getAskForButtonResponse() }
+		else { self.getAskForButtonResponseComplete?(id, false, false) }
+	}
+	#endif
+
 	#if UNIVERSAL || ALTER || KAIROS
 	//--------------------------------------------------------------------------------
 	// Function Name: setHRZoneColor

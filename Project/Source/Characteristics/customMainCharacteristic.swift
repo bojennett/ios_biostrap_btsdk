@@ -30,25 +30,37 @@ class customMainCharacteristic: Characteristic {
 		case motor				= 0x14
 		case debug				= 0x20
 		#endif
+
+		#if UNIVERSAL || ALTER || KAIROS || ETHOS
+		case setAskForButtonResponse	= 0x50
+		case getAskForButtonResponse	= 0x51
+		#endif
+
 		#if UNIVERSAL || ALTER || KAIROS
 		case setHRZoneColor		= 0x60
 		case getHRZoneColor		= 0x61
 		case setHRZoneRange		= 0x62
 		case getHRZoneRange		= 0x63
 		case getPPGAlgorithm	= 0x64
+		#endif
+		
+		#if UNIVERSAL || ALTER || KAIROS || ETHOS
 		case setAdvertiseAsHRM	= 0x65
 		case getAdvertiseAsHRM	= 0x66
 		#endif
+		
 		case setDeviceParam		= 0x70
 		case getDeviceParam		= 0x71
 		case delDeviceParam		= 0x72
 		case setSessionParam	= 0x80
 		case getSessionParam	= 0x81
 		case recalibratePPG		= 0xed
+		
 		#if UNIVERSAL || ETHOS
 		case startLiveSync		= 0xee
 		case stopLiveSync		= 0xef
 		#endif
+		
 		case getRawLoggingStatus	= 0xf5
 		case getWornOverrideStatus	= 0xf6
 		case manufacturingTest	= 0xf7
@@ -72,6 +84,10 @@ class customMainCharacteristic: Characteristic {
 		case manufacturingTest	= 0x07
 		case charging			= 0x08
 		case ppg_metrics		= 0x09
+		#if UNIVERSAL || ALTER || KAIROS || ETHOS
+		case endSleepStatus		= 0x0a
+		case buttonResponse		= 0x0b
+		#endif
 	}
 	
 	enum wornResult: UInt8 {
@@ -122,16 +138,30 @@ class customMainCharacteristic: Characteristic {
 	var disableWornDetectComplete: ((_ successful: Bool)->())?
 	var enableWornDetectComplete: ((_ successful: Bool)->())?
 	var endSleepComplete: ((_ successful: Bool)->())?
+	
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	var endSleepStatus: ((_ hasSleep: Bool)->())?
+	var buttonClicked: ((_ presses: Int)->())?
+	#endif
+	
 	#if UNIVERSAL || ETHOS
 	var debugComplete: ((_ successful: Bool, _ device: debugDevice, _ data: Data)->())?
 	#endif
-	
+
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	var setAskForButtonResponseComplete: ((_ successful: Bool, _ enable: Bool)->())?
+	var getAskForButtonResponseComplete: ((_ successful: Bool, _ enable: Bool)->())?
+	#endif
+
 	#if UNIVERSAL || ALTER || KAIROS
 	var setHRZoneColorComplete: ((_ successful: Bool, _ type: hrZoneRangeType)->())?
 	var getHRZoneColorComplete: ((_ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	var setHRZoneRangeComplete: ((_ successful: Bool)->())?
 	var getHRZoneRangeComplete: ((_ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
 	var getPPGAlgorithmComplete: ((_ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
+	#endif
+
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var setAdvertiseAsHRMComplete: ((_ successful: Bool, _ asHRM: Bool)->())?
 	var getAdvertiseAsHRMComplete: ((_ successful: Bool, _ asHRM: Bool)->())?
 	#endif
@@ -1065,6 +1095,46 @@ class customMainCharacteristic: Characteristic {
 		else { self.stopLiveSyncComplete?(false) }
 	}
 	#endif
+	
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	//--------------------------------------------------------------------------------
+	// Function Name: setAskForButtonResponse
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setAskForButtonResponse(_ enable: Bool) {
+		log?.v("\(pID): Enabled = \(enable)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.setAskForButtonResponse.rawValue)
+			data.append(enable ? 0x01 : 0x00)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.setAskForButtonResponseComplete?(false, enable) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getAskForButtonResponse
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getAskForButtonResponse() {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getAskForButtonResponse.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getAskForButtonResponseComplete?(false, false) }
+	}
+
+	#endif
 
 	#if UNIVERSAL || ALTER || KAIROS
 	//--------------------------------------------------------------------------------
@@ -1168,7 +1238,9 @@ class customMainCharacteristic: Characteristic {
 		}
 		else { self.getPPGAlgorithmComplete?(false, ppgAlgorithmConfiguration()) }
 	}
-	
+	#endif
+
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	//--------------------------------------------------------------------------------
 	// Function Name: setAdvertiseAsHRM
 	//--------------------------------------------------------------------------------
@@ -1777,6 +1849,26 @@ class customMainCharacteristic: Characteristic {
 						case .stopLiveSync		: self.stopLiveSyncComplete?(successful)
 						#endif
 							
+						#if UNIVERSAL || ALTER || KAIROS || ETHOS
+						case .setAskForButtonResponse:
+							if (data.count == 4) {
+								let enable		= data[3] == 0x01 ? true : false
+								self.setAskForButtonResponseComplete?(successful, enable)
+							}
+							else {
+								self.setAskForButtonResponseComplete?(false, false)
+							}
+							
+						case .getAskForButtonResponse:
+							if (data.count == 4) {
+								let enable		= data[3] == 0x01 ? true : false
+								self.getAskForButtonResponseComplete?(successful, enable)
+							}
+							else {
+								self.getAskForButtonResponseComplete?(false, false)
+							}
+						#endif
+							
 						#if UNIVERSAL || ALTER || KAIROS
 						case .setHRZoneColor:
 							if (data.count == 4) {
@@ -1823,7 +1915,9 @@ class customMainCharacteristic: Characteristic {
 							else {
 								self.getPPGAlgorithmComplete?(false, ppgAlgorithmConfiguration())
 							}
+						#endif
 							
+						#if UNIVERSAL || ALTER || KAIROS || ETHOS
 						case .setAdvertiseAsHRM:
 							if (data.count == 4) {
 								let asHRM		= data[3] != 0x00
@@ -1953,6 +2047,26 @@ class customMainCharacteristic: Characteristic {
 				else {
 					self.dataComplete?(-1, -1, -1, self.mFailedDecodeCount)
 				}
+				
+			#if UNIVERSAL || ALTER || KAIROS || ETHOS
+			case .endSleepStatus:
+				if (data.count == 2) {
+					let hasSleep	= data[1] == 0x01 ? true : false
+					self.endSleepStatus?(hasSleep)
+				}
+				else {
+					log?.e ("\(pID): Cannot parse 'endSleepStatus': \(data.hexString)")
+				}
+				
+			case .buttonResponse:
+				if (data.count == 2) {
+					let presses	= Int(data[1])
+					self.buttonClicked?(presses)
+				}
+				else {
+					log?.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
+				}
+			#endif
 				
 			case .validateCRC:
 				//log?.v ("\(pID): \(response) - \(data.hexString)")

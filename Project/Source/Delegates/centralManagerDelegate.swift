@@ -301,6 +301,22 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) }
 								}
 
+								device.setAskForButtonResponseComplete	= { id, successful, enable in
+									DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) }
+								}
+								
+								device.getAskForButtonResponseComplete	= { id, successful, enable in
+									DispatchQueue.main.async { self.getAskForButtonResponseComplete?(id, successful, enable) }
+								}
+								
+								device.endSleepStatus = { id, hasSleep in
+									DispatchQueue.main.async { self.endSleepStatus?(id, hasSleep) }
+								}
+								
+								device.buttonClicked = { id, presses in
+									DispatchQueue.main.async { self.buttonClicked?(id, presses) }
+								}
+								
 								self.mDiscoveredDevices?[peripheral.prettyID] = device
 							}
 							
@@ -552,6 +568,22 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) }
 								}
 
+								device.setAskForButtonResponseComplete	= { id, successful, enable in
+									DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) }
+								}
+								
+								device.getAskForButtonResponseComplete	= { id, successful, enable in
+									DispatchQueue.main.async { self.getAskForButtonResponseComplete?(id, successful, enable) }
+								}
+								
+								device.endSleepStatus = { id, hasSleep in
+									DispatchQueue.main.async { self.endSleepStatus?(id, hasSleep) }
+								}
+								
+								device.buttonClicked = { id, presses in
+									DispatchQueue.main.async { self.buttonClicked?(id, presses) }
+								}
+								
 								self.mDiscoveredDevices?[peripheral.prettyID] = device
 							}
 							
@@ -794,7 +826,31 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 								device.deviceChargingStatus			= { id, charging, on_charger, error in
 									DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) }
 								}
+								
+								device.setAdvertiseAsHRMComplete	= { id, successful, asHRM in
+									DispatchQueue.main.async { self.setAdvertiseAsHRMComplete?(id, successful, asHRM) }
+								}
+								
+								device.getAdvertiseAsHRMComplete	= { id, successful, asHRM in
+									DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) }
+								}
+								
+								device.setAskForButtonResponseComplete	= { id, successful, enable in
+									DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) }
+								}
+								
+								device.getAskForButtonResponseComplete	= { id, successful, enable in
+									DispatchQueue.main.async { self.getAskForButtonResponseComplete?(id, successful, enable) }
+								}
+								
+								device.endSleepStatus = { id, hasSleep in
+									DispatchQueue.main.async { self.endSleepStatus?(id, hasSleep) }
+								}
 
+								device.buttonClicked = { id, presses in
+									DispatchQueue.main.async { self.buttonClicked?(id, presses) }
+								}
+								
 								self.mDiscoveredDevices?[peripheral.prettyID] = device
 							}
 							
