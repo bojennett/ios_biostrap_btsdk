@@ -73,23 +73,7 @@ class customMainCharacteristic: Characteristic {
 		case stopManual			= 0xfe
 		case reset				= 0xff
 	}
-	
-	enum notifications: UInt8 {
-		case completion			= 0x00
-		case dataPacket			= 0x01
-		case worn				= 0x02
-		case ppgFailed			= 0x04
-		case validateCRC		= 0x05
-		case dataCaughtUp		= 0x06
-		case manufacturingTest	= 0x07
-		case charging			= 0x08
-		case ppg_metrics		= 0x09
-		#if UNIVERSAL || ALTER || KAIROS || ETHOS
-		case endSleepStatus		= 0x0a
-		case buttonResponse		= 0x0b
-		#endif
-	}
-	
+		
 	enum wornResult: UInt8 {
 		case broken				= 0x00
 		case busy				= 0x01
@@ -133,12 +117,17 @@ class customMainCharacteristic: Characteristic {
 	var wornCheckComplete: ((_ successful: Bool, _ type: String, _ value: Int)->())?
 	var resetComplete: ((_ successful: Bool)->())?
 	var readEpochComplete: ((_ successful: Bool, _ value: Int)->())?
-	var ppgMetrics: ((_ successful: Bool, _ packet: String)->())?
-	var ppgFailed: ((_ code: Int)->())?
 	var disableWornDetectComplete: ((_ successful: Bool)->())?
 	var enableWornDetectComplete: ((_ successful: Bool)->())?
 	var endSleepComplete: ((_ successful: Bool)->())?
-	
+	var manufacturingTestComplete: ((_ successful: Bool)->())?
+
+	var deviceWornStatus: ((_ isWorn: Bool)->())?
+	var deviceChargingStatus: ((_ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
+	var ppgMetrics: ((_ successful: Bool, _ packet: String)->())?
+	var ppgFailed: ((_ code: Int)->())?
+	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
+
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var endSleepStatus: ((_ hasSleep: Bool)->())?
 	var buttonClicked: ((_ presses: Int)->())?
@@ -169,10 +158,7 @@ class customMainCharacteristic: Characteristic {
 	var dataPackets: ((_ packets: String)->())?
 	var dataComplete: ((_ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
 	var dataFailure: (()->())?
-	
-	var manufacturingTestComplete: ((_ successful: Bool)->())?
-	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
-	
+		
 	var recalibratePPGComplete: ((_ successful: Bool)->())?
 
 	#if UNIVERSAL || ETHOS
@@ -180,8 +166,6 @@ class customMainCharacteristic: Characteristic {
 	var stopLiveSyncComplete: ((_ successful: Bool)->())?
 	#endif
 	
-	var deviceChargingStatus: ((_ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
-
 	var setSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType)->())?
 	var getSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
 	var resetSessionParamsComplete: ((_ successful: Bool)->())?
@@ -189,9 +173,7 @@ class customMainCharacteristic: Characteristic {
 	
 	var getRawLoggingStatusComplete: ((_ successful: Bool, _ enabled: Bool)->())?
 	var getWornOverrideStatusComplete: ((_ successful: Bool, _ overridden: Bool)->())?
-	
-	var deviceWornStatus: ((_ isWorn: Bool)->())?
-	
+		
 	var firmwareVersion						: String = ""
 	
 	internal var mDataPackets				: [biostrapDataPacket]!
@@ -1441,136 +1423,6 @@ class customMainCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	internal func mParseSinglePacket(_ data: Data, index: Int) -> (Bool, packetType, biostrapDataPacket) {
-		//log?.v ("\(index): \(String(format: "0x%02X", data[index]))")
-		if let type = packetType(rawValue: data[index]) {
-			switch (type) {
-			case .diagnostic:
-				if ((index + 1) < data.count) {
-					let length = Int(data[index + 1]) + 1
-					
-					if ((index + length) <= data.count) {
-						let packetData = data.subdata(in: Range(index...(index + length - 1)))
-						return (true, type, biostrapDataPacket(packetData))
-					}
-					else {
-						log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-						return (false, .unknown, biostrapDataPacket())
-					}
-				}
-				else {
-					log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-					return (false, .unknown, biostrapDataPacket())
-				}
-
-			case .rawPPGCompressedGreen,
-				 .rawPPGCompressedIR,
-				 .rawPPGCompressedRed:
-				if ((index + 1) < data.count) {
-					let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
-					if ((index + length) <= data.count) {
-						let packetData = data.subdata(in: Range(index...(index + length - 1)))
-						return (true, type, biostrapDataPacket(packetData))
-					}
-					else {
-						log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-						return (false, .unknown, biostrapDataPacket())
-					}
-				}
-				else {
-					log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-					return (false, .unknown, biostrapDataPacket())
-				}
-
-			#if UNIVERSAL || ETHOS
-			case .rawPPGCompressedWhiteIRRPD,
-				 .rawPPGCompressedWhiteWhitePD:
-				if ((index + 1) < data.count) {
-					let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
-					if ((index + length) <= data.count) {
-						let packetData = data.subdata(in: Range(index...(index + length - 1)))
-						return (true, type, biostrapDataPacket(packetData))
-					}
-					else {
-						log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-						return (false, .unknown, biostrapDataPacket())
-					}
-				}
-				else {
-					log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-					return (false, .unknown, biostrapDataPacket())
-				}
-			#endif
-				
-			case .rawAccelCompressedXADC,
-				 .rawAccelCompressedYADC,
-				 .rawAccelCompressedZADC:
-				if ((index + 1) < data.count) {
-					let length = Int(data[index + 1]) + 1 + 1 + 2 + 2
-					if ((index + length) <= data.count) {
-						let packetData = data.subdata(in: Range(index...(index + length - 1)))
-						return (true, type, biostrapDataPacket(packetData))
-					}
-					else {
-						log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-						return (false, .unknown, biostrapDataPacket())
-					}
-				}
-				else {
-					log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-					return (false, .unknown, biostrapDataPacket())
-				}
-				
-			#if UNIVERSAL || ETHOS
-			case .rawGyroCompressedXADC,
-				 .rawGyroCompressedYADC,
-				 .rawGyroCompressedZADC:
-				if ((index + 1) < data.count) {
-					let length = Int(data[index + 1]) + 1 + 1 + 2 + 2
-					if ((index + length) <= data.count) {
-						let packetData = data.subdata(in: Range(index...(index + length - 1)))
-						return (true, type, biostrapDataPacket(packetData))
-					}
-					else {
-						log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-						return (false, .unknown, biostrapDataPacket())
-					}
-				}
-				else {
-					log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-					return (false, .unknown, biostrapDataPacket())
-				}
-			#endif
-				
-			case .unknown:
-				log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-				return (false, type, biostrapDataPacket())
-				
-			default:
-				if ((index + type.length) <= data.count) {
-					let packetData = data.subdata(in: Range((index)...(index + type.length - 1)))
-					return (true, type, biostrapDataPacket(packetData))
-				}
-				else {
-					log?.e ("\(pID): \(type.title): '\(type.length)' from '\(index)' exceeds length of data '\(data.count)'")
-					return (false, type, biostrapDataPacket())
-				}
-			}
-			
-		}
-		else {
-			log?.v ("\(pID): Could not parse type: Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
-			return (false, .unknown, biostrapDataPacket())
-		}
-	}
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
 	internal func mParsePackets(_ data: Data) -> ([biostrapDataPacket]) {
 		//log?.v ("\(pID): Data: \(data.hexString)")
 		
@@ -1586,13 +1438,21 @@ class customMainCharacteristic: Characteristic {
 		dataPackets.append(incomingDataDiagnostic)
 		
 		while (index < data.count) {
-			let (found, type, packet) = mParseSinglePacket(data, index: index)
+			let (found, type, packet) = pParseSinglePacket(data, index: index)
 
 			if (found) {
 				switch (type) {
 				case .diagnostic:
 					index = index + packet.raw_data.count
 					dataPackets.append(packet)
+					
+				case .rawAccelCompressedXADC,
+						.rawAccelCompressedYADC,
+						.rawAccelCompressedZADC:
+					index = index + packet.raw_data.count
+					
+					let packets = mDecompressIMUPackets(packet.raw_data)
+					dataPackets.append(contentsOf: packets)
 					
 				case .rawPPGCompressedGreen,
 					 .rawPPGCompressedIR,
@@ -1609,17 +1469,7 @@ class customMainCharacteristic: Characteristic {
 					
 					let packets = mDecompressPPGPackets(packet.raw_data)
 					dataPackets.append(contentsOf: packets)
-				#endif
 
-				case .rawAccelCompressedXADC,
-					 .rawAccelCompressedYADC,
-					 .rawAccelCompressedZADC:
-					index = index + packet.raw_data.count
-					
-					let packets = mDecompressIMUPackets(packet.raw_data)
-					dataPackets.append(contentsOf: packets)
-
-				#if UNIVERSAL || ETHOS
 				case .rawGyroCompressedXADC,
 					 .rawGyroCompressedYADC,
 					 .rawGyroCompressedZADC:
@@ -1627,6 +1477,13 @@ class customMainCharacteristic: Characteristic {
 					
 					let packets = mDecompressIMUPackets(packet.raw_data)
 					dataPackets.append(contentsOf: packets)
+				#endif
+					
+				#if UNIVERSAL || ALTER || KAIROS || ETHOS
+				case .bbi:
+					log?.w ("BBI Packet: \(packet.csv)")
+					index = index + packet.raw_data.count
+					dataPackets.append(packet)
 				#endif
 
 				default:
@@ -1653,6 +1510,7 @@ class customMainCharacteristic: Characteristic {
 	internal func mProcessUpdateValue(_ data: Data) {
 		log?.v ("\(pID): \(data.hexString)")
 		if let response = notifications(rawValue: data[0]) {
+			log?.v ("\(pID): \(response)")
 			switch (response) {
 			case .completion:
 				if (data.count >= 3) {
@@ -2017,7 +1875,7 @@ class customMainCharacteristic: Characteristic {
 				}
 							
 			case .ppg_metrics:
-				let (_, type, packet) = mParseSinglePacket(data, index: 1)
+				let (_, type, packet) = pParseSinglePacket(data, index: 1)
 				if (type == .ppg_metrics) {
 					do {
 						let jsonData = try JSONEncoder().encode(packet)

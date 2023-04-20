@@ -18,6 +18,11 @@
 		3B14E9C228EB921C000E85F2 /* manufacturingTestType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */; };
 		3B14EA2A28EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14EA2928EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift */; };
 		3B14EA2B28EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14EA2928EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift */; };
+		3B1A3DE529F0563E00FCF0DF /* customStreamingCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1A3DE429F0563E00FCF0DF /* customStreamingCharacteristic.swift */; };
+		3B1A3DE629F0563E00FCF0DF /* customStreamingCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1A3DE429F0563E00FCF0DF /* customStreamingCharacteristic.swift */; };
+		3B1A3DE729F0563E00FCF0DF /* customStreamingCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1A3DE429F0563E00FCF0DF /* customStreamingCharacteristic.swift */; };
+		3B1A3DE829F0563E00FCF0DF /* customStreamingCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1A3DE429F0563E00FCF0DF /* customStreamingCharacteristic.swift */; };
+		3B1A3DED29F0B21300FCF0DF /* customStreamingCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1A3DE429F0563E00FCF0DF /* customStreamingCharacteristic.swift */; };
 		3B26027C28877C3B00D5CAAA /* ethosManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B26027B28877C3B00D5CAAA /* ethosManufacturingTestResult.swift */; };
 		3B26027D28877C3B00D5CAAA /* ethosManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B26027B28877C3B00D5CAAA /* ethosManufacturingTestResult.swift */; };
 		3B26028F288A04F700D5CAAA /* packetType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B26028E288A04F700D5CAAA /* packetType.swift */; };
@@ -188,6 +193,7 @@
 		3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nextPacketStatusType.swift; sourceTree = "<group>"; };
 		3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = manufacturingTestType.swift; sourceTree = "<group>"; };
 		3B14EA2928EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = pulseOxContinuousCharacteristic.swift; sourceTree = "<group>"; };
+		3B1A3DE429F0563E00FCF0DF /* customStreamingCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = customStreamingCharacteristic.swift; sourceTree = "<group>"; };
 		3B26027B28877C3B00D5CAAA /* ethosManufacturingTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ethosManufacturingTestResult.swift; sourceTree = "<group>"; };
 		3B26028E288A04F700D5CAAA /* packetType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = packetType.swift; sourceTree = "<group>"; };
 		3B260291288A05CE00D5CAAA /* settingsType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = settingsType.swift; sourceTree = "<group>"; };
@@ -334,6 +340,7 @@
 				3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */,
 				3B29C556264C5B53006BC11B /* customMainCharacteristic.swift */,
 				3BEE5C8A296502B0008798FC /* customDataCharacteristic.swift */,
+				3B1A3DE429F0563E00FCF0DF /* customStreamingCharacteristic.swift */,
 				3B29C560264C6C1A006BC11B /* batteryLevelCharacteristic.swift */,
 				3B29C566264C7033006BC11B /* heartRateMeasurementCharacteristic.swift */,
 				3B14EA2928EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift */,
@@ -786,6 +793,7 @@
 				3B28D46928E4B72900F6953A /* ppgStatusType.swift in Sources */,
 				3B2602AE2890541E00D5CAAA /* nordicDFU.swift in Sources */,
 				3B2602AF2890541E00D5CAAA /* Characteristic.swift in Sources */,
+				3B1A3DE529F0563E00FCF0DF /* customStreamingCharacteristic.swift in Sources */,
 				3B2602B02890541E00D5CAAA /* CoreBluetoothExtensions.swift in Sources */,
 				3B14E9BF28EB921C000E85F2 /* manufacturingTestType.swift in Sources */,
 				3BEE5C8B296502B0008798FC /* customDataCharacteristic.swift in Sources */,
@@ -840,6 +848,7 @@
 				3BC00B9B2981BD36009F67CB /* nextPacketStatusType.swift in Sources */,
 				3BC00B9C2981BD36009F67CB /* biostrapDataPacket.swift in Sources */,
 				3BC00B9D2981BD36009F67CB /* BluetoothIDs.swift in Sources */,
+				3B1A3DE629F0563E00FCF0DF /* customStreamingCharacteristic.swift in Sources */,
 				3BC00B9E2981BD36009F67CB /* DataExtensions.swift in Sources */,
 				3BC00BB22981BFF2009F67CB /* kairosManufacturingTestResult.swift in Sources */,
 				3BC00B9F2981BD36009F67CB /* peripheralDelegate.swift in Sources */,
@@ -864,6 +873,7 @@
 			files = (
 				3B260317289088DD00D5CAAA /* settingsType.swift in Sources */,
 				3BD01F9926153B280014CEF0 /* Globals.swift in Sources */,
+				3B1A3DED29F0B21300FCF0DF /* customStreamingCharacteristic.swift in Sources */,
 				3B29C557264C5B53006BC11B /* customMainCharacteristic.swift in Sources */,
 				3B29C59D264C9E72006BC11B /* nordicDFU.swift in Sources */,
 				3B0B204E291460C300BDB984 /* nextPacketStatusType.swift in Sources */,
@@ -910,6 +920,7 @@
 				3BF807EE27A2057700595493 /* CrcCalculator.swift in Sources */,
 				3B78695729CCD657007FE112 /* hrZoneRangeType.swift in Sources */,
 				3BF807C327A1AFA000595493 /* customMainCharacteristic.swift in Sources */,
+				3B1A3DE829F0563E00FCF0DF /* customStreamingCharacteristic.swift in Sources */,
 				3BF807C427A1AFA000595493 /* nordicDFU.swift in Sources */,
 				3B2602D22890592700D5CAAA /* alterManufacturingTestResult.swift in Sources */,
 				3B260290288A04F700D5CAAA /* packetType.swift in Sources */,
@@ -951,6 +962,7 @@
 				3BF8099D27BD766D00595493 /* customMainCharacteristic.swift in Sources */,
 				3BF8099E27BD766D00595493 /* nordicDFU.swift in Sources */,
 				3BF8099F27BD766D00595493 /* Characteristic.swift in Sources */,
+				3B1A3DE729F0563E00FCF0DF /* customStreamingCharacteristic.swift in Sources */,
 				3B14E9C028EB921C000E85F2 /* manufacturingTestType.swift in Sources */,
 				3BF809A027BD766D00595493 /* CoreBluetoothExtensions.swift in Sources */,
 				3BEE5C8C296502B0008798FC /* customDataCharacteristic.swift in Sources */,
@@ -994,7 +1006,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 43;
+				CURRENT_PROJECT_VERSION = 44;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1010,7 +1022,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1;
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "-D ALTER";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.alterBTSDK;
@@ -1034,7 +1046,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 43;
+				CURRENT_PROJECT_VERSION = 44;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1050,7 +1062,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1;
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "-D KAIROS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.kairosBTSDK;
@@ -1135,7 +1147,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 43;
+				CURRENT_PROJECT_VERSION = 44;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1149,7 +1161,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D LIVOTAL";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.livotalBTSDK;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -1171,7 +1183,7 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 43;
+				CURRENT_PROJECT_VERSION = 44;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1185,7 +1197,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D UNIVERSAL";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.universalBTSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1208,7 +1220,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 43;
+				CURRENT_PROJECT_VERSION = 44;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1224,7 +1236,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.1;
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "-D ETHOS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.ethosBTSDK;

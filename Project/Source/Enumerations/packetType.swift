@@ -19,11 +19,17 @@ import Foundation
 	case battery						= 0x89
 	case charger						= 0x8a
 	case ppg_metrics					= 0x8b
+	
 	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	case continuous_hr					= 0x8c
 	#endif
-	case steps_active					= 0x8d
 	
+	case steps_active					= 0x8d
+
+	#if UNIVERSAL || ETHOS || ALTER || KAIROS
+	case bbi							= 0x8e
+	#endif
+
 	case rawAccelXADC					= 0xc0
 	case rawAccelYADC					= 0xc1
 	case rawAccelZADC					= 0xc2
@@ -53,7 +59,6 @@ import Foundation
 	case rawPPGCompressedWhiteIRRPD     = 0xd7
 	case rawPPGCompressedWhiteWhitePD   = 0xd8
 	#endif
-
 
 	case rawAccelFifoCount				= 0xe1
 	case rawPPGProximity				= 0xe2
@@ -86,11 +91,17 @@ import Foundation
 		case "Sleep"								: self	= .sleep
 		case "Diagnostic"							: self	= .diagnostic
 		case "PPG Metrics"							: self	= .ppg_metrics
+		
 		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case "Continuous Heart Rate"				: self	= .continuous_hr
 		#endif
+			
 		case "Steps with Active Seconds"			: self	= .steps_active
 			
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
+		case "Beat-to-Beat Interval"				: self = .bbi
+		#endif
+
 		case "Raw Accel FIFO Count"					: self	= .rawAccelFifoCount
 		case "Raw PPG Proximity"					: self	= .rawPPGProximity
 			
@@ -154,11 +165,17 @@ import Foundation
 		case .sleep									: return "Sleep"
 		case .diagnostic							: return "Diagnostic"
 		case .ppg_metrics							: return "PPG Metrics"
+			
 		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr							: return "Continuous Heart Rate"
 		#endif
-		case .steps_active							: return "Steps with Active Seconds"
 			
+		case .steps_active							: return "Steps with Active Seconds"
+
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
+		case .bbi									: return "Beat-to-Beat Interval"
+		#endif
+
 		case .rawAccelFifoCount						: return "Raw Accel FIFO Count"
 		case .rawPPGProximity						: return "Raw PPG Proximity"
 			
@@ -222,11 +239,17 @@ import Foundation
 		case .sleep									: return 9
 		case .diagnostic							: return 0 	// Done by calculation
 		case .ppg_metrics							: return 19
+			
 		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr							: return 19
 		#endif
-		case .steps_active							: return 7
 			
+		case .steps_active							: return 7
+
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
+		case .bbi									: return 0 // Done by calculation
+		#endif
+
 		case .rawAccelFifoCount						: return 10
 		case .rawPPGProximity						: return 5
 

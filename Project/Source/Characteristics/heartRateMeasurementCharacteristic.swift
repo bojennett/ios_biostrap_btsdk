@@ -25,7 +25,7 @@ class heartRateMeasurementCharacteristic: Characteristic {
 		var rr			: [Double] = [Double]()
 		
 		let epoch		= Int(Date().timeIntervalSince1970)
-		
+				
 		if let data = data {
 			let hrflags		= data[0]
 			
@@ -47,7 +47,7 @@ class heartRateMeasurementCharacteristic: Characteristic {
 				if (ee_present == true) { index = index + 2 }	// Energy Extended present (no callback for this, so skip it)
 				
 				while (index < data.count) {
-					rr.append(1000.0 * Double((Int(data[index + 1]) << 8) | Int(data[index])) / 1024.0)
+					rr.append(1024.0 * Double((Int(data[index + 1]) << 8) | Int(data[index])) / 1000.0)
 					index = index + 2
 				}
 			}

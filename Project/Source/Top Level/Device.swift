@@ -299,6 +299,7 @@ public class Device: NSObject {
 	internal var mBatteryLevelCharacteristic	: batteryLevelCharacteristic?
 	internal var mMainCharacteristic			: customMainCharacteristic?
 	internal var mDataCharacteristic			: customDataCharacteristic?
+	internal var mStreamingCharacteristic		: customStreamingCharacteristic?
 
 	#if UNIVERSAL || LIVOTAL
 	internal var mNordicDFUCharacteristic		: nordicDFUCharacteristic?
@@ -427,13 +428,14 @@ public class Device: NSObject {
 	private var mLivotalConfigured: Bool {
 		if let nordicDFUCharacteristic = mNordicDFUCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 						
-			if let dataCharacteristic = mDataCharacteristic {
+			if let dataCharacteristic = mDataCharacteristic, let strmCharacteristic = mStreamingCharacteristic {
 				//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), SN: \(serialNumber.configured), LIV MAIN: \(mainCharacteristic.configured), LIV DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
 				
 				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
 						batteryCharacteristic.configured &&
 						mainCharacteristic.configured &&
 						dataCharacteristic.configured &&
+						strmCharacteristic.configured &&
 						nordicDFUCharacteristic.configured)
 			}
 			else {
@@ -471,13 +473,14 @@ public class Device: NSObject {
 			else {
 				if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic, let heartRateMeasurementCharacteristic = mHeartRateMeasurementCharacteristic, let pulseOxContinuousCharacteristic = mPulseOxContinuousCharacteristic {
 					
-					if let dataCharacteristic = mDataCharacteristic {
+					if let dataCharacteristic = mDataCharacteristic, let strmCharacteristic = mStreamingCharacteristic {
 						//log?.v ("ETH MAIN: \(mainCharacteristic.configured), ETH DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), HRM: \(heartRateMeasurementCharacteristic.configured), PULSOX: \(pulseOxContinuousCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 						
 						return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
 								batteryCharacteristic.configured &&
 								mainCharacteristic.configured &&
 								dataCharacteristic.configured &&
+								strmCharacteristic.configured &&
 								ambiqOTARXCharacteristic.configured &&
 								ambiqOTATXCharacteristic.configured &&
 								heartRateMeasurementCharacteristic.configured &&
@@ -508,13 +511,14 @@ public class Device: NSObject {
 	private var mAlterConfigured: Bool {
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 			
-			if let dataCharacteristic = mDataCharacteristic {
+			if let dataCharacteristic = mDataCharacteristic, let strmCharacteristic = mStreamingCharacteristic {
 				//log?.v ("ALTER MAIN: \(mainCharacteristic.configured), ALTER DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 				
 				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
 						batteryCharacteristic.configured &&
 						mainCharacteristic.configured &&
 						dataCharacteristic.configured &&
+						strmCharacteristic.configured &&
 						ambiqOTARXCharacteristic.configured &&
 						ambiqOTATXCharacteristic.configured
 				)
@@ -538,13 +542,14 @@ public class Device: NSObject {
 	private var mKairosConfigured: Bool {
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 			
-			if let dataCharacteristic = mDataCharacteristic {
+			if let dataCharacteristic = mDataCharacteristic, let strmCharacteristic = mStreamingCharacteristic {
 				//log?.v ("ALTER MAIN: \(mainCharacteristic.configured), ALTER DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 				
 				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
 						batteryCharacteristic.configured &&
 						mainCharacteristic.configured &&
 						dataCharacteristic.configured &&
+						strmCharacteristic.configured &&
 						ambiqOTARXCharacteristic.configured &&
 						ambiqOTATXCharacteristic.configured
 				)
@@ -1571,12 +1576,33 @@ public class Device: NSObject {
 					
 				case .ethosDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
-					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					//mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					//mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .ethosStrmCharacteristic:
-					break
+					#if UNIVERSAL
+					mStreamingCharacteristic?.type	= .ethos
+					#endif
+					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
+					mStreamingCharacteristic?.deviceWornStatus			= { isWorn in
+						if (isWorn) { self.wornStatus = "Worn" }
+						else { self.wornStatus = "Not Worn" }
+						self.deviceWornStatus?(self.id, isWorn)
+					}
+					mStreamingCharacteristic?.deviceChargingStatus		= { charging, on_charger, error in
+						if (charging) { self.chargingStatus	= "Charging" }
+						else if (on_charger) { self.chargingStatus = "On Charger" }
+						else if (error) { self.chargingStatus = "Charging Error" }
+						else { self.chargingStatus = "Not Charging" }
+						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
+					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
+					mStreamingCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
+					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
+					mStreamingCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
+					mStreamingCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
+
+					mStreamingCharacteristic?.discoverDescriptors()
 					
 				#endif
 
@@ -1653,12 +1679,33 @@ public class Device: NSObject {
 					
 				case .alterDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
-					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					//mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					//mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .alterStrmCharacteristic:
-					break
+					#if UNIVERSAL
+					mStreamingCharacteristic?.type	= .alter
+					#endif
+					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
+					mStreamingCharacteristic?.deviceWornStatus			= { isWorn in
+						if (isWorn) { self.wornStatus = "Worn" }
+						else { self.wornStatus = "Not Worn" }
+						self.deviceWornStatus?(self.id, isWorn)
+					}
+					mStreamingCharacteristic?.deviceChargingStatus		= { charging, on_charger, error in
+						if (charging) { self.chargingStatus	= "Charging" }
+						else if (on_charger) { self.chargingStatus = "On Charger" }
+						else if (error) { self.chargingStatus = "Charging Error" }
+						else { self.chargingStatus = "Not Charging" }
+						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
+					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
+					mStreamingCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
+					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
+					mStreamingCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
+					mStreamingCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
+
+					mStreamingCharacteristic?.discoverDescriptors()
 
 				#endif
 
@@ -1734,13 +1781,35 @@ public class Device: NSObject {
 
 				case .kairosDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
-					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					//mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					//mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .kairosStrmCharacteristic:
-					break
-					
+					#if UNIVERSAL
+					mStreamingCharacteristic?.type	= .kairos
+					#endif
+					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
+					mStreamingCharacteristic?.deviceWornStatus			= { isWorn in
+						if (isWorn) { self.wornStatus = "Worn" }
+						else { self.wornStatus = "Not Worn" }
+						self.deviceWornStatus?(self.id, isWorn)
+					}
+					mStreamingCharacteristic?.deviceChargingStatus		= { charging, on_charger, error in
+						if (charging) { self.chargingStatus	= "Charging" }
+						else if (on_charger) { self.chargingStatus = "On Charger" }
+						else if (error) { self.chargingStatus = "Charging Error" }
+						else { self.chargingStatus = "Not Charging" }
+						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
+					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
+					mStreamingCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
+					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
+					mStreamingCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
+					mStreamingCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
+
+					mStreamingCharacteristic?.discoverDescriptors()
+
 				#endif
 
 				#if UNIVERSAL || ETHOS || ALTER || KAIROS
@@ -1796,8 +1865,6 @@ public class Device: NSObject {
 					mMainCharacteristic?.allowPPGComplete = { successful in self.allowPPGComplete?(self.id, successful)}
 					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.wornCheckComplete?(self.id, successful, code, value )}
 					mMainCharacteristic?.resetComplete = { successful in self.resetComplete?(self.id, successful) }
-					mMainCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
-					mMainCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
 					mMainCharacteristic?.writeEpochComplete = { successful in self.writeEpochComplete?(self.id, successful) }
 					mMainCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
 					mMainCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
@@ -1806,36 +1873,60 @@ public class Device: NSObject {
 					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
 					mMainCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
 					mMainCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
-					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
-					mMainCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
-					mMainCharacteristic?.deviceWornStatus = { isWorn in
-						if (isWorn) { self.wornStatus = "Worn" }
-						else { self.wornStatus = "Not Worn" }
-						self.deviceWornStatus?(self.id, isWorn)
-					}
 					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.setSessionParamComplete?(self.id, successful, parameter) }
 					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.getSessionParamComplete?(self.id, successful, parameter, value) }
 					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.acceptSessionParamsComplete?(self.id, successful) }
 					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
-					mMainCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
+
+					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mMainCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
+					
+					mMainCharacteristic?.deviceWornStatus = { isWorn in
+						if (isWorn) { self.wornStatus = "Worn" }
+						else { self.wornStatus = "Not Worn" }
+						self.deviceWornStatus?(self.id, isWorn)
+					}
 					mMainCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
 						if (charging) { self.chargingStatus	= "Charging" }
 						else if (on_charger) { self.chargingStatus = "On Charger" }
 						else if (error) { self.chargingStatus = "Charging Error" }
 						else { self.chargingStatus = "Not Charging" }
 						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
+					mMainCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
+					mMainCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
+					mMainCharacteristic?.manufacturingTestResult		= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
+
 					mMainCharacteristic?.discoverDescriptors()
 					
 				case .livotalDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
-					mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					//mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
+					//mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .livotalStrmCharacteristic:
-					break
+					#if UNIVERSAL
+					mStreamingCharacteristic?.type	= .livotal
+					#endif
+					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
+					mStreamingCharacteristic?.deviceWornStatus			= { isWorn in
+						if (isWorn) { self.wornStatus = "Worn" }
+						else { self.wornStatus = "Not Worn" }
+						self.deviceWornStatus?(self.id, isWorn)
+					}
+					mStreamingCharacteristic?.deviceChargingStatus		= { charging, on_charger, error in
+						if (charging) { self.chargingStatus	= "Charging" }
+						else if (on_charger) { self.chargingStatus = "On Charger" }
+						else if (error) { self.chargingStatus = "Charging Error" }
+						else { self.chargingStatus = "Not Charging" }
+						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
+					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
+					mStreamingCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
+					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
+
+					mStreamingCharacteristic?.discoverDescriptors()
 
 				case .nordicDFUCharacteristic:
 					if let name = peripheral.name {
@@ -1881,19 +1972,19 @@ public class Device: NSObject {
 					#if UNIVERSAL || ETHOS
 					case .ethosMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
 					case .ethosDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
-					case .ethosStrmCharacteristic		: break
+					case .ethosStrmCharacteristic		: mStreamingCharacteristic?.didDiscoverDescriptor()
 					#endif
 
 					#if UNIVERSAL || ALTER
 					case .alterMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
 					case .alterDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
-					case .alterStrmCharacteristic		: break
+					case .alterStrmCharacteristic		: mStreamingCharacteristic?.didDiscoverDescriptor()
 					#endif
 
 					#if UNIVERSAL || KAIROS
 					case .kairosMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
 					case .kairosDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
-					case .kairosStrmCharacteristic		: break
+					case .kairosStrmCharacteristic		: mStreamingCharacteristic?.didDiscoverDescriptor()
 					#endif
 
 					#if UNIVERSAL || ETHOS || ALTER || KAIROS
@@ -1904,7 +1995,7 @@ public class Device: NSObject {
 					#if UNIVERSAL || LIVOTAL
 					case .livotalMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
 					case .livotalDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
-					case .livotalStrmCharacteristic		: break
+					case .livotalStrmCharacteristic		: mStreamingCharacteristic?.didDiscoverDescriptor()
 					case .nordicDFUCharacteristic		: mNordicDFUCharacteristic?.didDiscoverDescriptor()
 					#endif
 					}
@@ -1990,19 +2081,19 @@ public class Device: NSObject {
 			#if UNIVERSAL || ETHOS
 			case .ethosMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
 			case .ethosDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
-			case .ethosStrmCharacteristic		: break
+			case .ethosStrmCharacteristic		: mStreamingCharacteristic?.didUpdateValue()
 			#endif
 
 			#if UNIVERSAL || ALTER
 			case .alterMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
 			case .alterDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
-			case .alterStrmCharacteristic		: break
+			case .alterStrmCharacteristic		: mStreamingCharacteristic?.didUpdateValue()
 			#endif
 
 			#if UNIVERSAL || KAIROS
 			case .kairosMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
 			case .kairosDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
-			case .kairosStrmCharacteristic		: break
+			case .kairosStrmCharacteristic		: mStreamingCharacteristic?.didUpdateValue()
 			#endif
 				
 			#if UNIVERSAL || ETHOS || ALTER || KAIROS
@@ -2020,7 +2111,7 @@ public class Device: NSObject {
 			#if UNIVERSAL || LIVOTAL
 			case .livotalMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
 			case .livotalDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
-			case .livotalStrmCharacteristic		: break
+			case .livotalStrmCharacteristic		: mStreamingCharacteristic?.didUpdateValue()
 			case .nordicDFUCharacteristic		: mNordicDFUCharacteristic?.didUpdateValue()
 			#endif
 			}
@@ -2047,19 +2138,19 @@ public class Device: NSObject {
 					#if UNIVERSAL || ETHOS
 					case .ethosMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
 					case .ethosDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
-					case .ethosStrmCharacteristic			: break
+					case .ethosStrmCharacteristic			: mStreamingCharacteristic?.didUpdateNotificationState()
 					#endif
 
 					#if UNIVERSAL || ALTER
 					case .alterMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
 					case .alterDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
-					case .alterStrmCharacteristic			: break
+					case .alterStrmCharacteristic			: mStreamingCharacteristic?.didUpdateNotificationState()
 					#endif
 
 					#if UNIVERSAL || KAIROS
 					case .kairosMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
 					case .kairosDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
-					case .kairosStrmCharacteristic			: break
+					case .kairosStrmCharacteristic			: mStreamingCharacteristic?.didUpdateNotificationState()
 					#endif
 						
 					#if UNIVERSAL || ETHOS || ALTER || KAIROS
@@ -2070,7 +2161,7 @@ public class Device: NSObject {
 					#if UNIVERSAL || LIVOTAL
 					case .livotalMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
 					case .livotalDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
-					case .livotalStrmCharacteristic			: break
+					case .livotalStrmCharacteristic			: mStreamingCharacteristic?.didUpdateNotificationState()
 					case .nordicDFUCharacteristic			: mNordicDFUCharacteristic?.didUpdateNotificationState()
 					#endif
 					}

@@ -36,6 +36,7 @@ import Foundation
 	public var ppg_metrics_status		: ppgStatusType		= .unknown
 	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	public var continuous_hr			: [Int]			= [Int]()
+	public var bbi						: [Int]			= [Int]()
 	#endif
 	public var green_led_current		: Int			= 0
 	public var red_led_current			: Int			= 0
@@ -77,7 +78,10 @@ import Foundation
 		case diagnostic_type
 		case ppg_failed_type
 		case ppg_metrics_status
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case continuous_hr
+		case bbi
+		#endif
 		case green_led_current
 		case red_led_current
 		case ir_led_current
@@ -155,6 +159,8 @@ import Foundation
 		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr					:
 			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(mIntegerArrayToString(continuous_hr))")
+		case .bbi							:
+			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(mIntegerArrayToString(bbi))")
 		#endif
 
 		case .unknown						: return ("\(raw_data.hexString),\(type.title)")
@@ -342,6 +348,17 @@ import Foundation
 				for i in (9...18) {
 					if (data[i] != 0xff) { continuous_hr.append(Int(data[i])) }
 				}
+				
+			case .bbi:
+				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
+				bbi.removeAll()
+				let count			= Int(data[9])
+				var index			= 10
+				for _ in (0..<count) {
+					let thisBBI		= data.subdata(in: Range((index + 0)...(index + 1))).leUInt16
+					bbi.append(thisBBI)
+					index			= index + 2
+				}
 			#endif
 				
 			case .ppg_failed:
@@ -505,6 +522,10 @@ import Foundation
 			let elements		= try values.decode(String.self, forKey: .continuous_hr)
 			continuous_hr		= mStringArrayToIntegerArray(elements)
 			
+		case .bbi:
+			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
+			let elements		= try values.decode(String.self, forKey: .bbi)
+			bbi					= mStringArrayToIntegerArray(elements)
 		#endif
 			
 		case .ppg_failed:
@@ -672,6 +693,10 @@ import Foundation
 		case .continuous_hr:
 			try container.encode(epoch_ms, forKey: .epoch_ms)
 			try container.encode(mIntegerArrayToString(continuous_hr), forKey: .continuous_hr)
+			
+		case .bbi:
+			try container.encode(epoch_ms, forKey: .epoch_ms)
+			try container.encode(mIntegerArrayToString(bbi), forKey: .bbi)
 		#endif
 			
 		case .ppg_failed:
