@@ -1,8 +1,8 @@
 #!/bin/sh -f
 
-./xcbuild.pl -s alterBTSDK -v 2.1.44
-./xcbuild.pl -s kairosBTSDK -v 2.1.44
-./xcbuild.pl -s ethosBTSDK -v 2.1.44
-./xcbuild.pl -s livotalBTSDK -v 2.1.44
-./xcbuild.pl -s universalBTSDK -v 2.1.44
+./xcbuild.pl -s alterBTSDK
+./xcbuild.pl -s kairosBTSDK
+./xcbuild.pl -s ethosBTSDK
+./xcbuild.pl -s livotalBTSDK
+./xcbuild.pl -s universalBTSDK
 ./xcbuild.pl -s pods

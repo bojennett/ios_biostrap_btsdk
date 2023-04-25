@@ -58,7 +58,6 @@ sub RunCommand {
 }
 
 GetOptions ('s|scheme=s' => \$scheme,
-			'v|version=s' => \$version,
 			'k|keep-frameworks' => \$keep);
 
 if ($scheme eq "") {
@@ -70,6 +69,32 @@ $workspace				= "biostrapDeviceSDK";
 
 if ($scheme eq "pods") {
 	$scheme = "iOSDFULibrary";	# Will also build ZIPFoundation
+}
+else {
+	$opt_command			="xcodebuild -workspace $workspace.xcworkspace -scheme $scheme -showBuildSettings";
+
+	print "\n";
+	print "$0: Getting '$scheme' Version...\n\n";
+
+	open (CMD, "$opt_command 2>&1 |") || die "Can't get settings\n";
+	while (<CMD>) {
+		chop;
+		s/^\s+//;
+	
+		if (/MARKETING_VERSION/) {
+			($var, $equal, $value) = split (/\s+/, $_);
+			$major_minor = $value;
+		}
+	
+		if (/CURRENT_PROJECT_VERSION/) {
+			($var, $equal, $value) = split (/\s+/, $_);
+			$build = $value;
+		}
+	}
+
+	$version = "$major_minor.$build";
+
+	print BOLD, YELLOW, "$0: '$scheme' Version is '$version'\n", RESET;
 }
 
 $output					= "./Builds/$scheme";

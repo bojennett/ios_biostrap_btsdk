@@ -288,7 +288,7 @@ class customStreamingCharacteristic: Characteristic {
 	override func didUpdateValue() {
 		if let characteristic = pCharacteristic {
 			if let data = characteristic.value {
-				log?.v ("\(pID): \(data.hexString)")
+				mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
 			}
 			else {
 				log?.e ("\(pID): Missing data")
