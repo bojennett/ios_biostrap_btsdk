@@ -64,6 +64,11 @@
 		3B260316289088DA00D5CAAA /* diagnosticType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260297288A061D00D5CAAA /* diagnosticType.swift */; };
 		3B260317289088DD00D5CAAA /* settingsType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260291288A05CE00D5CAAA /* settingsType.swift */; };
 		3B260318289088E000D5CAAA /* ppgFailedType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B260294288A05F600D5CAAA /* ppgFailedType.swift */; };
+		3B276E5029FC5F1B003B4B65 /* AES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B276E4F29FC5F1B003B4B65 /* AES.swift */; };
+		3B276E5129FC5F1B003B4B65 /* AES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B276E4F29FC5F1B003B4B65 /* AES.swift */; };
+		3B276E5229FC5F1B003B4B65 /* AES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B276E4F29FC5F1B003B4B65 /* AES.swift */; };
+		3B276E5329FC5F1B003B4B65 /* AES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B276E4F29FC5F1B003B4B65 /* AES.swift */; };
+		3B276E5429FC5F1B003B4B65 /* AES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B276E4F29FC5F1B003B4B65 /* AES.swift */; };
 		3B28D46928E4B72900F6953A /* ppgStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B28D46828E4B72900F6953A /* ppgStatusType.swift */; };
 		3B28D46A28E4B72900F6953A /* ppgStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B28D46828E4B72900F6953A /* ppgStatusType.swift */; };
 		3B28D46B28E4B72900F6953A /* ppgStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B28D46828E4B72900F6953A /* ppgStatusType.swift */; };
@@ -201,6 +206,7 @@
 		3B260297288A061D00D5CAAA /* diagnosticType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = diagnosticType.swift; sourceTree = "<group>"; };
 		3B2602CA2890541E00D5CAAA /* alterBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = alterBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B2602D02890592700D5CAAA /* alterManufacturingTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = alterManufacturingTestResult.swift; sourceTree = "<group>"; };
+		3B276E4F29FC5F1B003B4B65 /* AES.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AES.swift; sourceTree = "<group>"; };
 		3B28D46828E4B72900F6953A /* ppgStatusType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ppgStatusType.swift; sourceTree = "<group>"; };
 		3B29C546264C3D59006BC11B /* nordicDFUCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nordicDFUCharacteristic.swift; sourceTree = "<group>"; };
 		3B29C554264C5A5B006BC11B /* Characteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Characteristic.swift; sourceTree = "<group>"; };
@@ -435,6 +441,7 @@
 		3BF8082827A4550B00595493 /* Top Level */ = {
 			isa = PBXGroup;
 			children = (
+				3B276E4F29FC5F1B003B4B65 /* AES.swift */,
 				3BD01F9826153B280014CEF0 /* Globals.swift */,
 				3BD01F9526153AF20014CEF0 /* Logging.swift */,
 				3BD01F8F261539630014CEF0 /* biostrapDeviceSDK.swift */,
@@ -787,6 +794,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B2602AA2890541E00D5CAAA /* CrcCalculator.swift in Sources */,
+				3B276E5029FC5F1B003B4B65 /* AES.swift in Sources */,
 				3B2602AB2890541E00D5CAAA /* ambiqOTATXCharacteristic.swift in Sources */,
 				3B2602AC2890541E00D5CAAA /* Globals.swift in Sources */,
 				3B2602AD2890541E00D5CAAA /* customMainCharacteristic.swift in Sources */,
@@ -852,6 +860,7 @@
 				3BC00B9E2981BD36009F67CB /* DataExtensions.swift in Sources */,
 				3BC00BB22981BFF2009F67CB /* kairosManufacturingTestResult.swift in Sources */,
 				3BC00B9F2981BD36009F67CB /* peripheralDelegate.swift in Sources */,
+				3B276E5129FC5F1B003B4B65 /* AES.swift in Sources */,
 				3BC00BA02981BD36009F67CB /* centralManagerDelegate.swift in Sources */,
 				3BC00BA12981BD36009F67CB /* packetType.swift in Sources */,
 				3BC00BA22981BD36009F67CB /* ppgAlgorithmConfiguration.swift in Sources */,
@@ -883,6 +892,7 @@
 				3B14E9C128EB921C000E85F2 /* manufacturingTestType.swift in Sources */,
 				3BFF755B28FA18EE0039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */,
 				3BD01F90261539630014CEF0 /* biostrapDeviceSDK.swift in Sources */,
+				3B276E5329FC5F1B003B4B65 /* AES.swift in Sources */,
 				3BD01F9626153AF20014CEF0 /* Logging.swift in Sources */,
 				3BF3FEC326C58BCF005AF135 /* biostrapDataPacket.swift in Sources */,
 				3B28D46B28E4B72900F6953A /* ppgStatusType.swift in Sources */,
@@ -919,6 +929,7 @@
 				3BEE5C8E296502B0008798FC /* customDataCharacteristic.swift in Sources */,
 				3BF807EE27A2057700595493 /* CrcCalculator.swift in Sources */,
 				3B78695729CCD657007FE112 /* hrZoneRangeType.swift in Sources */,
+				3B276E5429FC5F1B003B4B65 /* AES.swift in Sources */,
 				3BF807C327A1AFA000595493 /* customMainCharacteristic.swift in Sources */,
 				3B1A3DE829F0563E00FCF0DF /* customStreamingCharacteristic.swift in Sources */,
 				3BF807C427A1AFA000595493 /* nordicDFU.swift in Sources */,
@@ -956,6 +967,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3BF809B927BD774700595493 /* CrcCalculator.swift in Sources */,
+				3B276E5229FC5F1B003B4B65 /* AES.swift in Sources */,
 				3BF809B827BD774400595493 /* ambiqOTATXCharacteristic.swift in Sources */,
 				3BF8099C27BD766D00595493 /* Globals.swift in Sources */,
 				3B28D46A28E4B72900F6953A /* ppgStatusType.swift in Sources */,
@@ -1006,7 +1018,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 45;
+				CURRENT_PROJECT_VERSION = 46;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1046,7 +1058,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 45;
+				CURRENT_PROJECT_VERSION = 46;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1147,7 +1159,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 45;
+				CURRENT_PROJECT_VERSION = 46;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1183,7 +1195,7 @@
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 45;
+				CURRENT_PROJECT_VERSION = 46;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1220,7 +1232,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 45;
+				CURRENT_PROJECT_VERSION = 46;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;

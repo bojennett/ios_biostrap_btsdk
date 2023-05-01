@@ -11,6 +11,41 @@ extension Data {
 	
 	//--------------------------------------------------------------------------------
 	//
+	// Initialize from a string
+	//
+	//--------------------------------------------------------------------------------
+	init (hex: String) {
+		let len = hex.count / 2
+		var data = Data(capacity: len)
+		var i = hex.startIndex
+		
+		for _ in 0..<len {
+			let j = hex.index(i, offsetBy: 2)
+			let bytes = hex[i..<j]
+			if var num = UInt8(bytes, radix: 16) { data.append(&num, count: 1) }
+			i = j
+		}
+		self = data
+	}
+	
+	init(base64: String) {
+		var base64 = base64
+			.replacingOccurrences(of: "-", with: "+")
+			.replacingOccurrences(of: "_", with: "/")
+		if base64.count % 4 != 0 {
+			base64.append(String(repeating: "=", count: 4 - base64.count % 4))
+		}
+		
+		if let decoded = Data(base64Encoded: base64) {
+			self = decoded
+		}
+		else {
+			self = Data()
+		}
+	}
+
+	//--------------------------------------------------------------------------------
+	//
 	// String of the data
 	//
 	//--------------------------------------------------------------------------------

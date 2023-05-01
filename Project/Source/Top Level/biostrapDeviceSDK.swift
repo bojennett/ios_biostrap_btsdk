@@ -249,7 +249,8 @@ import iOSDFULibrary
 	internal var mDiscoveredDevices	: [ String : Device ]?
 	internal var mConnectedDevices	: [ String : Device ]?
 	internal lazy var mPairedDeviceNames	= [ String: String ]()
-	
+	internal var mLicensed			: Bool = false
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -306,7 +307,96 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	#if KAIROS || ETHOS || LIVOTAL || UNIVERSAL
+	public func acquireLicense(_ licenseKey: String) -> (Bool, Int, String) {
+		mLicensed		= false
+		
+		var message		= ""
+		var days		= 0
+		let key			= Data(hex: "9A144A39DFF1E9B818EECFB9D59D7E3A")
+		let seed		= Data(hex: "672014793B911351260FE2136D2EA553")
+
+		let licenseKeyData	= Data.init(base64: licenseKey)
+		if let decrypt = AES.decrypt(licenseKeyData, key: key, seed: seed) {
+			let str = String(decoding: decrypt, as: UTF8.self)
+							
+			do {
+				let license = try JSONDecoder().decode([String : String].self, from: decrypt)
+				log?.v ("\(license)")
+				
+				if let strDate = license["date"] {
+					if let date = Int(strDate) {
+						let expiration_ts	= TimeInterval(date) / 1000		// Data is stored in ms
+						let current_ts		= Date().timeIntervalSince1970
+
+						if (current_ts < expiration_ts) {
+							days = Int(expiration_ts - current_ts) / 60 / 60 / 24
+							message = "License is valid for '\(days)' more days"
+							
+							if let bundle = license["bundle"] {
+								if (bundle == "*") {
+									message = "Universal bundle: \(message)"
+									mLicensed	= true
+								}
+								else {
+									if let bundleID = Bundle.main.bundleIdentifier {
+										if (bundleID == bundle) {
+											message = "Bundle ID matches: \(message)"
+											mLicensed = true
+										}
+										else {
+											message = "Application's Bundle ID does not match licensed bundle ID"
+										}
+									}
+									else {
+										message = "Could not retrieve application's bundle ID"
+									}
+								}
+							}
+							else {
+								message = "No bundle ID given in the license"
+							}
+						}
+						else {
+							message = "License is invalid - it has expired"
+						}
+
+					}
+					else {
+						message = "No date in the license"
+					}
+				}
+				else {
+					message = "Cannot parse date of license"
+				}
+			}
+			catch {
+				message = "Could not decode the license"
+			}
+		}
+		else {
+			message = "Could not decrypt the license"
+		}
+		
+		return (mLicensed, days, message)
+	}
+	#endif
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	@objc public func startScan() -> Bool {
+		#if KAIROS || ETHOS || LIVOTAL || UNIVERSAL
+		if (!mLicensed) {
+			log?.e ("Not licensed - cannot start scanning")
+			return (false)
+		}
+		#endif
+		
 		log?.v("")
 		
 		// See if there were any connected peripherals (which could happen due to a previous instance crash), and disconnect them
