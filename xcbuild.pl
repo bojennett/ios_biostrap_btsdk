@@ -13,11 +13,10 @@ use File::Path qw(make_path remove_tree);
 ########################################################################################################################
 sub Usage {
 	print "Usage:\n\n";
-	print "    $0 -s [ alterBTSDK | kairosBTSDK | ethosBTSDK | livotalBTSDK | universalBTSDK | pods ] [-v <string>] [-k]\n";
+	print "    $0 -s [ alterBTSDK | kairosBTSDK | ethosBTSDK | livotalBTSDK | universalBTSDK | pods ] [-k]\n";
 	print "\n\n";
 	
 	print "The scheme (-s or --scheme) is the scheme in that workspace\n";
-	print "An optional version (-v or --version) to apply to the build directory\n";
 	print "the optional keep (k) is whether to keep the underlying frameworks after assembling the XCFramework\n";
 	print "\n\n";
 }

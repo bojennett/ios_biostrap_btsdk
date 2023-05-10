@@ -1492,7 +1492,7 @@ class customMainCharacteristic: Characteristic {
 				}
 			}
 			else {
-				index = index + type.length
+				index = index + packetType.unknown.length
 				mFailedDecodeCount	= mFailedDecodeCount + 1
 			}			
 		}

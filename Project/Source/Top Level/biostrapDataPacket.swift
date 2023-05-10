@@ -165,7 +165,7 @@ import Foundation
 
 		case .unknown						: return ("\(raw_data.hexString),\(type.title)")
 		case .steps							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(value)")
-		case .steps_active					: return ("\(raw_data.hexString).\(type.title),\(epoch),\(value),\(active_seconds)")
+		case .steps_active					: return ("\(raw_data.hexString),\(type.title),\(epoch),\(value),\(active_seconds)")
 		case .diagnostic					: return ("\(raw_data.hexString),\(type.title),\(diagnostic_type.title)")
 		case .milestone						: return ("\(raw_data.hexString),\(type.title),\(epoch),\(tag)")
 		case .settings						: return ("\(raw_data.hexString),\(type.title),\(settings_type.title),\(settings_value)")

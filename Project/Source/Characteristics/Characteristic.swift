@@ -174,7 +174,7 @@ class Characteristic {
 				
 			case .unknown:
 				log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-				return (false, type, biostrapDataPacket())
+				return (false, .unknown, biostrapDataPacket())
 				
 			default:
 				if ((index + type.length) <= data.count) {
@@ -183,7 +183,7 @@ class Characteristic {
 				}
 				else {
 					log?.e ("\(pID): \(type.title): '\(type.length)' from '\(index)' exceeds length of data '\(data.count)'")
-					return (false, type, biostrapDataPacket())
+					return (false, .unknown, biostrapDataPacket())
 				}
 			}
 			
