@@ -89,7 +89,7 @@ class customStreamingCharacteristic: Characteristic {
 			#endif
 								
 			case .manufacturingTest:
-			#if LIVOTAL
+				#if LIVOTAL
 				let testResult = livotalManufacturingTestResult(data.subdata(in: Range(1...4)))
 				do {
 					let jsonData = try JSONEncoder().encode(testResult)

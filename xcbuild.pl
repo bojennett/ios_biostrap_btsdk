@@ -38,21 +38,21 @@ sub RunCommand {
 	open (CMD, "$command 2>&1 |");
 	while (<CMD>) {
 		if (/$regex/) {
-			print RED, "        $_", RESET;
+			print BRIGHT_RED, "        $_", RESET;
 			$failed	= 1;
 		}		
 	}
 
 	if ($failed) {
 		print "\n";
-		print "$0:    "; print RED, "Error Building $title\n", RESET;
+		print "$0:    "; print BRIGHT_RED, "Error Building $title\n", RESET;
 		print "\n";
 		exit (1);
 	}
 
 	$endTime	= time();
 	$elapsed	= $endTime - $startTime;
-	print "$0:    ";  print GREEN, "Completed Building iPhone Simulator Framework in '$elapsed' seconds\n", RESET;
+	print "$0:    ";  print BRIGHT_GREEN, "Completed Building iPhone Simulator Framework in '$elapsed' seconds\n", RESET;
 	print "\n";	
 }
 
@@ -93,7 +93,7 @@ else {
 
 	$version = "$major_minor.$build";
 
-	print BOLD, YELLOW, "$0: '$scheme' Version is '$version'\n", RESET;
+	print BOLD, BRIGHT_YELLOW, "$0: '$scheme' Version is '$version'\n", RESET;
 }
 
 $output					= "./Builds/$scheme";
@@ -116,17 +116,17 @@ else {
 
 print "\n";
 print "$0: Commands that will be run:\n";
-print "$0:     Simulator Build: "; print GREEN, "$sim_command\n", RESET;
-print "$0:     OS Build:        "; print GREEN, "$ios_command\n", RESET;
-print "$0:     XC Assembler:    "; print GREEN, "$xc1_command\n", RESET;
+print "$0:     Simulator Build: "; print BRIGHT_GREEN, "$sim_command\n", RESET;
+print "$0:     OS Build:        "; print BRIGHT_GREEN, "$ios_command\n", RESET;
+print "$0:     XC Assembler:    "; print BRIGHT_GREEN, "$xc1_command\n", RESET;
 
 if ($xc2_command ne "") {
-	print "$0:     XC Assembler:    "; print GREEN, "$xc2_command\n", RESET;	
+	print "$0:     XC Assembler:    "; print BRIGHT_GREEN, "$xc2_command\n", RESET;	
 }
 
 if ($keep == 1) {
 	print "\n";
-	print "$0: "; print BOLD, YELLOW, "Keeping the frameworks after assembling\n", RESET;
+	print "$0: "; print BOLD, BRIGHT_YELLOW, "Keeping the frameworks after assembling\n", RESET;
 	print "\n";
 }
 

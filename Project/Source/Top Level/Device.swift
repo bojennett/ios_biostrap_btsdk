@@ -1581,10 +1581,10 @@ public class Device: NSObject {
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .ethosStrmCharacteristic:
+					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .ethos
 					#endif
-					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
 					mStreamingCharacteristic?.deviceWornStatus			= { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
 						else { self.wornStatus = "Not Worn" }
@@ -1684,10 +1684,10 @@ public class Device: NSObject {
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .alterStrmCharacteristic:
+					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .alter
 					#endif
-					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
 					mStreamingCharacteristic?.deviceWornStatus			= { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
 						else { self.wornStatus = "Not Worn" }
@@ -1787,10 +1787,10 @@ public class Device: NSObject {
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .kairosStrmCharacteristic:
+					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .kairos
 					#endif
-					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
 					mStreamingCharacteristic?.deviceWornStatus			= { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
 						else { self.wornStatus = "Not Worn" }
@@ -1907,10 +1907,10 @@ public class Device: NSObject {
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .livotalStrmCharacteristic:
+					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .livotal
 					#endif
-					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
 					mStreamingCharacteristic?.deviceWornStatus			= { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
 						else { self.wornStatus = "Not Worn" }
