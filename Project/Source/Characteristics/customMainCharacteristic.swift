@@ -2150,13 +2150,14 @@ class customMainCharacteristic: Characteristic {
 				}
 				#endif
 				
-				
 			case .charging:
 				let on_charger	= (data[1] == 0x01)
 				let charging	= (data[2] == 0x01)
 				let error		= (data[3] == 0x01)
 				
 				self.deviceChargingStatus?(charging, on_charger, error)
+				
+			case .streamPacket: log?.e ("\(pID): Should not get '\(response)' on this characteristic!")
 			}
 		}
 		else {

@@ -224,6 +224,7 @@ public class Device: NSObject {
 	var dataPackets: ((_ id: String, _ packets: String)->())?
 	var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
 	var dataFailure: ((_ id: String)->())?
+	var streamingPacket: ((_ id: String, _ packet: String)->())?
 	
 	var deviceWornStatus: ((_ id: String, _ isWorn: Bool)->())?
 
@@ -1601,6 +1602,7 @@ public class Device: NSObject {
 					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
 					mStreamingCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
 					mStreamingCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
+					mStreamingCharacteristic?.streamingPacket = { packet in self.streamingPacket?(self.id, packet) }
 
 					mStreamingCharacteristic?.discoverDescriptors()
 					
@@ -1704,6 +1706,7 @@ public class Device: NSObject {
 					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
 					mStreamingCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
 					mStreamingCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
+					mStreamingCharacteristic?.streamingPacket = { packet in self.streamingPacket?(self.id, packet) }
 
 					mStreamingCharacteristic?.discoverDescriptors()
 
@@ -1807,6 +1810,7 @@ public class Device: NSObject {
 					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
 					mStreamingCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
 					mStreamingCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
+					mStreamingCharacteristic?.streamingPacket = { packet in self.streamingPacket?(self.id, packet) }
 
 					mStreamingCharacteristic?.discoverDescriptors()
 
@@ -1925,6 +1929,7 @@ public class Device: NSObject {
 					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.ppgMetrics?(self.id, successful, packet) }
 					mStreamingCharacteristic?.ppgFailed = { code in self.ppgFailed?(self.id, code) }
 					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.manufacturingTestResult?(self.id, valid, result)}
+					mStreamingCharacteristic?.streamingPacket = { packet in self.streamingPacket?(self.id, packet) }
 
 					mStreamingCharacteristic?.discoverDescriptors()
 

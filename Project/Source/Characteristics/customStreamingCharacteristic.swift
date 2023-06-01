@@ -18,6 +18,7 @@ class customStreamingCharacteristic: Characteristic {
 	var ppgMetrics: ((_ successful: Bool, _ packet: String)->())?
 	var ppgFailed: ((_ code: Int)->())?
 	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
+	var streamingPacket: ((_ packet: String)->())?
 
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var endSleepStatus: ((_ hasSleep: Bool)->())?
@@ -32,7 +33,6 @@ class customStreamingCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mProcessUpdateValue(_ data: Data) {
-		log?.v ("\(pID): \(data.hexString)")
 		if let response = notifications(rawValue: data[0]) {
 			switch (response) {
 			case .completion: log?.e ("\(pID): Should not get '\(response)' on this characteristic!")
@@ -271,6 +271,29 @@ class customStreamingCharacteristic: Characteristic {
 				let error		= (data[3] == 0x01)
 				
 				self.deviceChargingStatus?(charging, on_charger, error)
+				
+			case .streamPacket:
+				let length = Int(data[2])
+				var packet = biostrapStreamingPacket()
+				
+				if ((length + 1) <= data.count) {
+					packet = biostrapStreamingPacket(data.subdata(in: Range(1...length)))
+				}
+				else {
+					packet.type				= .unknown
+					packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
+
+					log?.e ("\(pID): Bad streaming packet: \(data.hexString)")
+				}
+				
+				do {
+					let jsonData = try JSONEncoder().encode(packet)
+					if let jsonString = String(data: jsonData, encoding: .utf8) {
+						self.streamingPacket?(jsonString)
+					}
+					else { log?.e ("\(pID): Cannot make string from json data") }
+				}
+				catch { log?.e ("\(pID): Cannot make JSON data") }
 			}
 		}
 		else {

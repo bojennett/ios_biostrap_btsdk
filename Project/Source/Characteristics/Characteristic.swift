@@ -24,6 +24,7 @@ class Characteristic {
 		case endSleepStatus		= 0x0a
 		case buttonResponse		= 0x0b
 		#endif
+		case streamPacket		= 0x0c
 	}
 	
 	// MARK: Internal Variables

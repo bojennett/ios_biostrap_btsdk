@@ -212,6 +212,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 										DispatchQueue.main.async { self.dataPackets?(id, packets) }
 									}
 								}
+								
+								device.streamingPacket			= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
 
 								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
 									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count) }
@@ -480,6 +482,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									}
 								}
 								
+								device.streamingPacket			= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
+
 								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
 									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count) }
 								}
@@ -758,6 +762,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 										DispatchQueue.main.async { self.dataPackets?(id, packets) }
 									}
 								}
+								
+								device.streamingPacket			= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
 
 								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
 									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count) }
@@ -1010,6 +1016,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 										DispatchQueue.main.async { self.dataPackets?(id, packets) }
 									}
 								}
+								
+								device.streamingPacket			= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
 
 								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
 									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count) }

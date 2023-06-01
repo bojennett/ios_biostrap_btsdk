@@ -118,7 +118,8 @@ import iOSDFULibrary
 	@objc public var dataPackets: ((_ id: String, _ packets: String)->())?
 	@objc public var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
 	@objc public var dataFailure: ((_ id: String)->())?
-	
+	@objc public var streamingPacket: ((_ id: String, _ packet: String)->())?
+
 	@objc public var deviceWornStatus: ((_ id: String, _ isWorn: Bool)->())?
 
 	@objc public var updateFirmwareStarted: ((_ id: String)->())?
