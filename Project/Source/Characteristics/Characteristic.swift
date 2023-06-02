@@ -159,7 +159,6 @@ class Characteristic {
 					let final_index = index + 9 + (packets * 2)
 					if (final_index < data.count) {
 						let packetData = data.subdata(in: Range(index...final_index))
-						log?.v ("\(pID): \(type.title): (Good Packet) Index: \(index), sub_packet: \(packetData.hexString)")
 						return (true, type, biostrapDataPacket(packetData))
 					}
 					else {
@@ -171,6 +170,25 @@ class Characteristic {
 					log?.e ("\(pID): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
+				
+			case .cadence:
+				if ((index + 9) < data.count) {
+					let packets = Int(data[index + 9])
+					let final_index = index + 9 + packets
+					if (final_index < data.count) {
+						let packetData = data.subdata(in: Range(index...final_index))
+						return (true, type, biostrapDataPacket(packetData))
+					}
+					else {
+						log?.e ("\(pID): \(type.title): (Out of range) Index: \(index), packets: \(packets), final index: \(final_index), full packet: \(data.hexString)")
+						return (false, .unknown, biostrapDataPacket())
+					}
+				}
+				else {
+					log?.e ("\(pID): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
+					return (false, .unknown, biostrapDataPacket())
+				}
+
 			#endif
 				
 			case .unknown:

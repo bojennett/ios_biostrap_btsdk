@@ -75,7 +75,7 @@ import Foundation
 	case imuIF				= 0x05
 	case imuFIFO			= 0x06
 	case led				= 0x07
-	case button				= 0x09
+	case ppgUserTriggerButton				= 0x09
 	case spectralLEDS		= 0x0A
 	case imuSelfTest		= 0x0B
 	case spectralLEDLeakage	= 0x0C
@@ -91,7 +91,7 @@ import Foundation
 		case .imuIF					: return ("IMU Interface")
 		case .imuFIFO				: return ("IMU FIFO")
 		case .led					: return ("LED")
-		case .button				: return ("Button")
+		case .ppgUserTriggerButton				: return ("Button")
 		case .spectralLEDS			: return ("Spectral LEDs")
 		case .imuSelfTest			: return ("IMU Self Test")
 		case .spectralLEDLeakage	: return ("Spectral LED Leakage")
@@ -111,7 +111,7 @@ import Foundation
 		case "IMU Interface"		: self = .imuIF
 		case "IMU FIFO"				: self = .imuFIFO
 		case "LED"					: self = .led
-		case "Button"				: self = .button
+		case "Button"				: self = .ppgUserTriggerButton
 		case "Spectral LEDs"		: self = .spectralLEDS
 		case "IMU Self Test"		: self = .imuSelfTest
 		case "Spectral LED Leakage"	: self = .spectralLEDLeakage
@@ -131,7 +131,7 @@ import Foundation
 	case imuIF				= 0x05
 	case imuFIFO			= 0x06
 	case led				= 0x07
-	case button				= 0x09
+	case ppgUserTriggerButton				= 0x09
 	case spectralLEDS		= 0x0A
 	case imuSelfTest		= 0x0B
 	case spectralLEDLeakage	= 0x0C
@@ -147,7 +147,7 @@ import Foundation
 		case .imuIF					: return ("IMU Interface")
 		case .imuFIFO				: return ("IMU FIFO")
 		case .led					: return ("LED")
-		case .button				: return ("Button")
+		case .ppgUserTriggerButton				: return ("Button")
 		case .spectralLEDS			: return ("Spectral LEDs")
 		case .imuSelfTest			: return ("IMU Self Test")
 		case .spectralLEDLeakage	: return ("Spectral LED Leakage")
@@ -167,7 +167,7 @@ import Foundation
 		case "IMU Interface"		: self = .imuIF
 		case "IMU FIFO"				: self = .imuFIFO
 		case "LED"					: self = .led
-		case "Button"				: self = .button
+		case "Button"				: self = .ppgUserTriggerButton
 		case "Spectral LEDs"		: self = .spectralLEDS
 		case "IMU Self Test"		: self = .imuSelfTest
 		case "Spectral LED Leakage"	: self = .spectralLEDLeakage
@@ -189,7 +189,7 @@ import Foundation
 	case imuFIFO		= 0x06
 	case led			= 0x07
 	case motor		 	= 0x08
-	case button			= 0x09
+	case ppgUserTriggerButton			= 0x09
 	case unknown		= 0xff
 		
 	public var title: String {
@@ -203,7 +203,7 @@ import Foundation
 		case .imuFIFO				: return ("IMU FIFO")
 		case .led					: return ("LED")
 		case .motor					: return ("Motor")
-		case .button				: return ("Button")
+		case .ppgUserTriggerButton				: return ("Button")
 		case .unknown				: return ("Unknown")
 		}
 	}
@@ -221,7 +221,7 @@ import Foundation
 		case "IMU FIFO"				: self = .imuFIFO
 		case "LED"					: self = .led
 		case "Motor"				: self = .motor
-		case "Button"				: self = .button
+		case "Button"				: self = .ppgUserTriggerButton
 		default						: self = .unknown
 		}
 	}

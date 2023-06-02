@@ -37,6 +37,11 @@ import Foundation
 	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	public var continuous_hr			: [Int]			= [Int]()
 	public var bbi						: [Int]			= [Int]()
+	public var cadence_spm				: [Int]			= [Int]()
+	public var event_type				: eventType		= .unknown
+	public var bookend_type				: bookendType	= .unknown
+	public var bookend_payload			: Int			= 0
+	public var duration_ms				: Int			= 0
 	#endif
 	public var green_led_current		: Int			= 0
 	public var red_led_current			: Int			= 0
@@ -81,6 +86,11 @@ import Foundation
 		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case continuous_hr
 		case bbi
+		case cadence_spm
+		case event_type
+		case bookend_type
+		case bookend_payload
+		case duration_ms
 		#endif
 		case green_led_current
 		case red_led_current
@@ -161,6 +171,12 @@ import Foundation
 			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(mIntegerArrayToString(continuous_hr))")
 		case .bbi							:
 			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(mIntegerArrayToString(bbi))")
+		case .cadence						:
+			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(mIntegerArrayToString(cadence_spm))")
+		case .event							:
+			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(event_type.title)")
+		case .bookend						:
+			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(duration_ms),\(bookend_type.title),\(bookend_payload)")
 		#endif
 
 		case .unknown						: return ("\(raw_data.hexString),\(type.title)")
@@ -359,6 +375,36 @@ import Foundation
 					bbi.append(thisBBI)
 					index			= index + 2
 				}
+				
+			case .cadence:
+				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
+				cadence_spm.removeAll()
+				let count			= Int(data[9])
+				var index			= 10
+				for _ in (0..<count) {
+					cadence_spm.append(Int(data[index]))
+					index			= index + 1
+				}
+				
+			case .event:
+				if let thisEvent = eventType(rawValue: data[1]) {
+					event_type		= thisEvent
+				}
+				else {
+					event_type		= .unknown
+				}
+				epoch_ms			= data.subdata(in: Range(2...9)).leInt64
+				
+			case .bookend:
+				if let thisBookend = bookendType(rawValue: data[1]) {
+					bookend_type	= thisBookend
+				}
+				else {
+					bookend_type	= .unknown
+				}
+				bookend_payload		= Int(data[2])
+				epoch_ms			= data.subdata(in: Range(3...10)).leInt64
+				duration_ms			= data.subdata(in: Range(11...14)).leInt64
 			#endif
 				
 			case .ppg_failed:
@@ -526,6 +572,21 @@ import Foundation
 			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
 			let elements		= try values.decode(String.self, forKey: .bbi)
 			bbi					= mStringArrayToIntegerArray(elements)
+			
+		case .cadence:
+			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
+			let elements		= try values.decode(String.self, forKey: .cadence_spm)
+			cadence_spm			= mStringArrayToIntegerArray(elements)
+			
+		case .event:
+			event_type			= try values.decode(eventType.self, forKey: .event_type)
+			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
+			
+		case .bookend:
+			bookend_type		= try values.decode(bookendType.self, forKey: .bookend_type)
+			bookend_payload		= try values.decode(Int.self, forKey: .bookend_payload)
+			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
+			duration_ms			= try values.decode(Int.self, forKey: .duration_ms)
 		#endif
 			
 		case .ppg_failed:
@@ -697,6 +758,20 @@ import Foundation
 		case .bbi:
 			try container.encode(epoch_ms, forKey: .epoch_ms)
 			try container.encode(mIntegerArrayToString(bbi), forKey: .bbi)
+			
+		case .cadence:
+			try container.encode(epoch_ms, forKey: .epoch_ms)
+			try container.encode(mIntegerArrayToString(cadence_spm), forKey: .cadence_spm)
+			
+		case .event:
+			try container.encode(event_type.title, forKey: .event_type)
+			try container.encode(epoch_ms, forKey: .epoch_ms)
+			
+		case .bookend:
+			try container.encode(bookend_type.title, forKey: .bookend_type)
+			try container.encode(bookend_payload, forKey: .bookend_payload)
+			try container.encode(epoch_ms, forKey: .epoch_ms)
+			try container.encode(duration_ms, forKey: .duration_ms)
 		#endif
 			
 		case .ppg_failed:

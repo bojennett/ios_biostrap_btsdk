@@ -28,6 +28,9 @@ import Foundation
 
 	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	case bbi							= 0x8e
+	case cadence						= 0x8f
+	case event							= 0x90
+	case bookend						= 0x91
 	#endif
 
 	case rawAccelXADC					= 0xc0
@@ -71,7 +74,7 @@ import Foundation
 	case rawPPGWhiteIRRPD				= 0xe8
 	case rawPPGWhiteWhitePD				= 0xe9
 	#endif
-		
+	
 	case milestone						= 0xf0
 	case settings						= 0xf1
 	case caughtUp						= 0xfe
@@ -100,6 +103,9 @@ import Foundation
 			
 		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case "Beat-to-Beat Interval"				: self = .bbi
+		case "Cadence"								: self = .cadence
+		case "Event"								: self = .event
+		case "Bookend"								: self = .bookend
 		#endif
 
 		case "Raw Accel FIFO Count"					: self	= .rawAccelFifoCount
@@ -174,6 +180,9 @@ import Foundation
 
 		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .bbi									: return "Beat-to-Beat Interval"
+		case .cadence								: return "Cadence"
+		case .event									: return "Event"
+		case .bookend								: return "Bookend"
 		#endif
 
 		case .rawAccelFifoCount						: return "Raw Accel FIFO Count"
@@ -248,6 +257,9 @@ import Foundation
 
 		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .bbi									: return 0 // Done by calculation
+		case .event									: return 10
+		case .cadence								: return 0 // Done by calculation
+		case .bookend								: return 15
 		#endif
 
 		case .rawAccelFifoCount						: return 10

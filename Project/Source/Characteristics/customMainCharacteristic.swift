@@ -1481,7 +1481,10 @@ class customMainCharacteristic: Characteristic {
 					
 				#if UNIVERSAL || ALTER || KAIROS || ETHOS
 				case .bbi:
-					log?.w ("BBI Packet: \(packet.csv)")
+					index = index + packet.raw_data.count
+					dataPackets.append(packet)
+					
+				case .cadence:
 					index = index + packet.raw_data.count
 					dataPackets.append(packet)
 				#endif
