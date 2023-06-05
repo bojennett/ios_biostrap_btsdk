@@ -17,18 +17,18 @@ class customMainCharacteristic: Characteristic {
 	
 	// MARK: Enumerations
 	enum commands: UInt8 {
-		case writeEpoch			= 0x00
-		case getAllPackets		= 0x01
-		case getNextPacket		= 0x02
-		case getPacketCount		= 0x03
-		case validateCRC		= 0x04
-		case led				= 0x10
-		case enterShipMode		= 0x11
-		case readEpoch			= 0x12
-		case endSleep			= 0x13
+		case writeEpoch					= 0x00
+		case getAllPackets				= 0x01
+		case getNextPacket				= 0x02
+		case getPacketCount				= 0x03
+		case validateCRC				= 0x04
+		case led						= 0x10
+		case enterShipMode				= 0x11
+		case readEpoch					= 0x12
+		case endSleep					= 0x13
 		#if UNIVERSAL || ETHOS
-		case motor				= 0x14
-		case debug				= 0x20
+		case motor						= 0x14
+		case debug						= 0x20
 		#endif
 
 		#if UNIVERSAL || ALTER || KAIROS || ETHOS
@@ -37,47 +37,47 @@ class customMainCharacteristic: Characteristic {
 		#endif
 
 		#if UNIVERSAL || ALTER || KAIROS
-		case setHRZoneColor		= 0x60
-		case getHRZoneColor		= 0x61
-		case setHRZoneRange		= 0x62
-		case getHRZoneRange		= 0x63
-		case getPPGAlgorithm	= 0x64
+		case setHRZoneColor				= 0x60
+		case getHRZoneColor				= 0x61
+		case setHRZoneRange				= 0x62
+		case getHRZoneRange				= 0x63
+		case getPPGAlgorithm			= 0x64
 		#endif
 		
 		#if UNIVERSAL || ALTER || KAIROS || ETHOS
-		case setAdvertiseAsHRM	= 0x65
-		case getAdvertiseAsHRM	= 0x66
+		case setAdvertiseAsHRM			= 0x65
+		case getAdvertiseAsHRM			= 0x66
 		#endif
 		
-		case setDeviceParam		= 0x70
-		case getDeviceParam		= 0x71
-		case delDeviceParam		= 0x72
-		case setSessionParam	= 0x80
-		case getSessionParam	= 0x81
-		case recalibratePPG		= 0xed
+		case setDeviceParam				= 0x70
+		case getDeviceParam				= 0x71
+		case delDeviceParam				= 0x72
+		case setSessionParam			= 0x80
+		case getSessionParam			= 0x81
+		case recalibratePPG				= 0xed
 		
 		#if UNIVERSAL || ETHOS
-		case startLiveSync		= 0xee
-		case stopLiveSync		= 0xef
+		case startLiveSync				= 0xee
+		case stopLiveSync				= 0xef
 		#endif
 		
-		case getRawLoggingStatus	= 0xf5
-		case getWornOverrideStatus	= 0xf6
-		case manufacturingTest	= 0xf7
-		case allowPPG			= 0xf8
-		case wornCheck			= 0xf9
-		case logRaw				= 0xfa
-		case disableWornDetect	= 0xfb
-		case enableWornDetect	= 0xfc
-		case startManual		= 0xfd
-		case stopManual			= 0xfe
-		case reset				= 0xff
+		case getRawLoggingStatus		= 0xf5
+		case getWornOverrideStatus		= 0xf6
+		case manufacturingTest			= 0xf7
+		case allowPPG					= 0xf8
+		case wornCheck					= 0xf9
+		case logRaw						= 0xfa
+		case disableWornDetect			= 0xfb
+		case enableWornDetect			= 0xfc
+		case startManual				= 0xfd
+		case stopManual					= 0xfe
+		case reset						= 0xff
 	}
 		
 	enum wornResult: UInt8 {
-		case broken				= 0x00
-		case busy				= 0x01
-		case ran				= 0x02
+		case broken						= 0x00
+		case busy						= 0x01
+		case ran						= 0x02
 		
 		var message: String {
 			switch (self) {
