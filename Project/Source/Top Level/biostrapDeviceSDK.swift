@@ -150,7 +150,7 @@ import iOSDFULibrary
 	@objc public var getHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	@objc public var setHRZoneRangeComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var getHRZoneRangeComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
-	@objc public var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
+	@objc public var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
 	#endif
 	
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
@@ -178,6 +178,10 @@ import iOSDFULibrary
 
 	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	@objc public var heartRate: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
+	#endif
+
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	@objc public var airplaneModeComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 
 	//--------------------------------------------------------------------------------
@@ -1043,7 +1047,7 @@ import iOSDFULibrary
 	//--------------------------------------------------------------------------------
 	@objc public func getPPGAlgorithm(_ id: String) {
 		if let device = mConnectedDevices?[id] { device.getPPGAlgorithm() }
-		else { self.getPPGAlgorithmComplete?(id, false, ppgAlgorithmConfiguration()) }
+		else { self.getPPGAlgorithmComplete?(id, false, ppgAlgorithmConfiguration(), eventType.unknown) }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1142,6 +1146,20 @@ import iOSDFULibrary
 		if let device = mConnectedDevices?[id] { device.getWornOverrideStatus(id) }
 		else { self.getWornOverrideStatusComplete?(id, false, false) }
 	}
+
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func airplaneMode(_ id: String) {
+		if let device = mConnectedDevices?[id] { device.airplaneMode(id) }
+		else { self.airplaneModeComplete?(id, false) }
+	}
+	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:

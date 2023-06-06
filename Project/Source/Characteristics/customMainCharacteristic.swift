@@ -61,6 +61,10 @@ class customMainCharacteristic: Characteristic {
 		case stopLiveSync				= 0xef
 		#endif
 		
+		#if UNIVERSAL || ALTER || KAIROS || ETHOS
+		case airplaneMode				= 0xf4
+		#endif
+		
 		case getRawLoggingStatus		= 0xf5
 		case getWornOverrideStatus		= 0xf6
 		case manufacturingTest			= 0xf7
@@ -147,7 +151,7 @@ class customMainCharacteristic: Characteristic {
 	var getHRZoneColorComplete: ((_ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	var setHRZoneRangeComplete: ((_ successful: Bool)->())?
 	var getHRZoneRangeComplete: ((_ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
-	var getPPGAlgorithmComplete: ((_ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
+	var getPPGAlgorithmComplete: ((_ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
 	#endif
 
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
@@ -173,6 +177,10 @@ class customMainCharacteristic: Characteristic {
 	
 	var getRawLoggingStatusComplete: ((_ successful: Bool, _ enabled: Bool)->())?
 	var getWornOverrideStatusComplete: ((_ successful: Bool, _ overridden: Bool)->())?
+	
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	var airplaneModeComplete: ((_ successful: Bool)->())?
+	#endif
 		
 	var firmwareVersion						: String = ""
 	
@@ -901,6 +909,21 @@ class customMainCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	func airplaneMode() {
+		log?.v("\(pID)")
+		
+		if (!mSimpleCommand(.airplaneMode)) { self.airplaneModeComplete?(false) }
+	}
+	#endif
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
 	func reset() {
 		log?.v("\(pID)")
 
@@ -1218,7 +1241,7 @@ class customMainCharacteristic: Characteristic {
 			data.append(commands.getPPGAlgorithm.rawValue)
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
-		else { self.getPPGAlgorithmComplete?(false, ppgAlgorithmConfiguration()) }
+		else { self.getPPGAlgorithmComplete?(false, ppgAlgorithmConfiguration(), eventType.unknown) }
 	}
 	#endif
 
@@ -1513,7 +1536,6 @@ class customMainCharacteristic: Characteristic {
 	internal func mProcessUpdateValue(_ data: Data) {
 		log?.v ("\(pID): \(data.hexString)")
 		if let response = notifications(rawValue: data[0]) {
-			log?.v ("\(pID): \(response)")
 			switch (response) {
 			case .completion:
 				if (data.count >= 3) {
@@ -1769,12 +1791,22 @@ class customMainCharacteristic: Characteristic {
 								self.getHRZoneRangeComplete?(false, false, 0, 0)
 							}
 						case .getPPGAlgorithm:
-							if (data.count == 4) {
+							if (data.count == 5) {
 								let algorithm	= ppgAlgorithmConfiguration(data[3])
-								self.getPPGAlgorithmComplete?(successful, algorithm)
+								
+								if let type = eventType(rawValue: data[4]) {
+									self.getPPGAlgorithmComplete?(successful, algorithm, type)
+								}
+								else {
+									self.getPPGAlgorithmComplete?(successful, algorithm, eventType.unknown)
+								}
+							}
+							else if (data.count == 4) {
+								let algorithm	= ppgAlgorithmConfiguration(data[3])
+								self.getPPGAlgorithmComplete?(successful, algorithm, eventType.unknown)
 							}
 							else {
-								self.getPPGAlgorithmComplete?(false, ppgAlgorithmConfiguration())
+								self.getPPGAlgorithmComplete?(false, ppgAlgorithmConfiguration(), eventType.unknown)
 							}
 						#endif
 							
@@ -1832,6 +1864,10 @@ class customMainCharacteristic: Characteristic {
 							else {
 								self.getWornOverrideStatusComplete?(false, false)
 							}
+							
+						#if UNIVERSAL || ALTER || KAIROS || ETHOS
+						case .airplaneMode		: self.airplaneModeComplete?(successful)
+						#endif
 							
 						case .reset				: self.resetComplete?(successful)
 						case .validateCRC		: break

@@ -213,7 +213,7 @@ public class Device: NSObject {
 	var getHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	var setHRZoneRangeComplete: ((_ id: String, _ successful: Bool)->())?
 	var getHRZoneRangeComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
-	var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration)->())?
+	var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
 	#endif
 	
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
@@ -252,6 +252,10 @@ public class Device: NSObject {
 	var getSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
 	var resetSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
 	var acceptSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
+
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	var airplaneModeComplete: ((_ id: String, _ successful: Bool)->())?
+	#endif
 
 	@objc public var batteryValid	: Bool = false
 	@objc public var batteryLevel	: Int = 0
@@ -1161,7 +1165,7 @@ public class Device: NSObject {
 	//--------------------------------------------------------------------------------
 	func getPPGAlgorithm() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPPGAlgorithm() }
-		else { self.getPPGAlgorithmComplete?(self.id, false, ppgAlgorithmConfiguration()) }
+		else { self.getPPGAlgorithmComplete?(self.id, false, ppgAlgorithmConfiguration(), eventType.unknown) }
 	}
 	#endif
 
@@ -1261,6 +1265,22 @@ public class Device: NSObject {
 		else { self.getWornOverrideStatusComplete?(id, false, false) }
 	}
 	
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func airplaneMode(_ id: String) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.airplaneMode()
+		}
+		else { self.airplaneModeComplete?(id, false) }
+	}
+	#endif
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1572,6 +1592,7 @@ public class Device: NSObject {
 						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
 					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.setAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
 					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
+					mMainCharacteristic?.airplaneModeComplete		= { successful in self.airplaneModeComplete?(self.id, successful) }
 
 					mMainCharacteristic?.discoverDescriptors()
 					
@@ -1673,9 +1694,10 @@ public class Device: NSObject {
 					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.getHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
 					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.setHRZoneRangeComplete?(self.id, successful) }
 					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.getHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
-					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm in self.getPPGAlgorithmComplete?(self.id, successful, algorithm) }
+					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm, state in self.getPPGAlgorithmComplete?(self.id, successful, algorithm, state) }
 					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.setAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
 					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
+					mMainCharacteristic?.airplaneModeComplete		= { successful in self.airplaneModeComplete?(self.id, successful) }
 
 					mMainCharacteristic?.discoverDescriptors()
 					
@@ -1778,9 +1800,10 @@ public class Device: NSObject {
 					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.getHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
 					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.setHRZoneRangeComplete?(self.id, successful) }
 					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.getHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
-					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm in self.getPPGAlgorithmComplete?(self.id, successful, algorithm) }
+					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm, state in self.getPPGAlgorithmComplete?(self.id, successful, algorithm, state) }
 					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.setAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
 					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
+					mMainCharacteristic?.airplaneModeComplete		= { successful in self.airplaneModeComplete?(self.id, successful) }
 
 				case .kairosDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)

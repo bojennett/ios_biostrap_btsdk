@@ -184,6 +184,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) }
 								}
 
+								device.airplaneModeComplete		= { id, successful in
+									DispatchQueue.main.async { self.airplaneModeComplete?(id, successful) }
+								}
+								
 								device.resetComplete			= { id, successful in
 									DispatchQueue.main.async { self.resetComplete?(id, successful) }
 								}
@@ -291,8 +295,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) }
 								}
 								
-								device.getPPGAlgorithmComplete		= { id, successful, algorithm in
-									DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm) }
+								device.getPPGAlgorithmComplete		= { id, successful, algorithm, state in
+									DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm, state) }
 								}
 
 								device.setAdvertiseAsHRMComplete	= { id, successful, asHRM in
@@ -453,6 +457,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) }
 								}
 								
+								device.airplaneModeComplete		= { id, successful in
+									DispatchQueue.main.async { self.airplaneModeComplete?(id, successful) }
+								}
+								
 								device.resetComplete			= { id, successful in
 									DispatchQueue.main.async { self.resetComplete?(id, successful) }
 								}
@@ -560,8 +568,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) }
 								}
 								
-								device.getPPGAlgorithmComplete		= { id, successful, algorithm in
-									DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm) }
+								device.getPPGAlgorithmComplete		= { id, successful, algorithm, state in
+									DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm, state) }
 								}
 
 								device.setAdvertiseAsHRMComplete	= { id, successful, asHRM in
@@ -734,6 +742,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) }
 								}
 
+								device.airplaneModeComplete		= { id, successful in
+									DispatchQueue.main.async { self.airplaneModeComplete?(id, successful) }
+								}
+								
 								device.resetComplete			= { id, successful in
 									DispatchQueue.main.async { self.resetComplete?(id, successful) }
 								}
