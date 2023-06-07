@@ -68,19 +68,19 @@ import Foundation
 
 #if UNIVERSAL || ALTER
 @objc public enum alterManufacturingTestType: UInt8, Codable, CaseIterable {
-	case flashIF			= 0x01
-	case flashArray			= 0x02
-	case spectralIF			= 0x03
-	case spectralFIFO		= 0x04
-	case imuIF				= 0x05
-	case imuFIFO			= 0x06
-	case led				= 0x07
-	case ppgUserTriggerButton				= 0x09
-	case spectralLEDS		= 0x0A
-	case imuSelfTest		= 0x0B
-	case spectralLEDLeakage	= 0x0C
-	case imuNoiseFloor		= 0x0D
-	case unknown			= 0xff
+	case flashIF				= 0x01
+	case flashArray				= 0x02
+	case spectralIF				= 0x03
+	case spectralFIFO			= 0x04
+	case imuIF					= 0x05
+	case imuFIFO				= 0x06
+	case led					= 0x07
+	case ppgUserTriggerButton	= 0x09
+	case spectralLEDS			= 0x0A
+	case imuSelfTest			= 0x0B
+	case spectralLEDLeakage		= 0x0C
+	case imuNoiseFloor			= 0x0D
+	case unknown				= 0xff
 		
 	public var title: String {
 		switch (self) {
@@ -91,7 +91,7 @@ import Foundation
 		case .imuIF					: return ("IMU Interface")
 		case .imuFIFO				: return ("IMU FIFO")
 		case .led					: return ("LED")
-		case .ppgUserTriggerButton				: return ("Button")
+		case .ppgUserTriggerButton	: return ("Button")
 		case .spectralLEDS			: return ("Spectral LEDs")
 		case .imuSelfTest			: return ("IMU Self Test")
 		case .spectralLEDLeakage	: return ("Spectral LED Leakage")
@@ -124,19 +124,19 @@ import Foundation
 
 #if UNIVERSAL || KAIROS
 @objc public enum kairosManufacturingTestType: UInt8, Codable, CaseIterable {
-	case flashIF			= 0x01
-	case flashArray			= 0x02
-	case spectralIF			= 0x03
-	case spectralFIFO		= 0x04
-	case imuIF				= 0x05
-	case imuFIFO			= 0x06
-	case led				= 0x07
-	case ppgUserTriggerButton				= 0x09
-	case spectralLEDS		= 0x0A
-	case imuSelfTest		= 0x0B
-	case spectralLEDLeakage	= 0x0C
-	case imuNoiseFloor		= 0x0D
-	case unknown			= 0xff
+	case flashIF				= 0x01
+	case flashArray				= 0x02
+	case spectralIF				= 0x03
+	case spectralFIFO			= 0x04
+	case imuIF					= 0x05
+	case imuFIFO				= 0x06
+	case led					= 0x07
+	case ppgUserTriggerButton	= 0x09
+	case spectralLEDS			= 0x0A
+	case imuSelfTest			= 0x0B
+	case spectralLEDLeakage		= 0x0C
+	case imuNoiseFloor			= 0x0D
+	case unknown				= 0xff
 	
 	public var title: String {
 		switch (self) {
@@ -147,7 +147,7 @@ import Foundation
 		case .imuIF					: return ("IMU Interface")
 		case .imuFIFO				: return ("IMU FIFO")
 		case .led					: return ("LED")
-		case .ppgUserTriggerButton				: return ("Button")
+		case .ppgUserTriggerButton	: return ("Button")
 		case .spectralLEDS			: return ("Spectral LEDs")
 		case .imuSelfTest			: return ("IMU Self Test")
 		case .spectralLEDLeakage	: return ("Spectral LED Leakage")
@@ -180,17 +180,17 @@ import Foundation
 
 #if UNIVERSAL || ETHOS
 @objc public enum ethosManufacturingTestType: UInt8, Codable, CaseIterable {
-	case temp			= 0x00
-	case flashIF		= 0x01
-	case flashArray		= 0x02
-	case spectralIF		= 0x03
-	case spectralFIFO	= 0x04
-	case imuIF			= 0x05
-	case imuFIFO		= 0x06
-	case led			= 0x07
-	case motor		 	= 0x08
-	case ppgUserTriggerButton			= 0x09
-	case unknown		= 0xff
+	case temp					= 0x00
+	case flashIF				= 0x01
+	case flashArray				= 0x02
+	case spectralIF				= 0x03
+	case spectralFIFO			= 0x04
+	case imuIF					= 0x05
+	case imuFIFO				= 0x06
+	case led					= 0x07
+	case motor		 			= 0x08
+	case ppgUserTriggerButton	= 0x09
+	case unknown				= 0xff
 		
 	public var title: String {
 		switch (self) {
@@ -203,7 +203,7 @@ import Foundation
 		case .imuFIFO				: return ("IMU FIFO")
 		case .led					: return ("LED")
 		case .motor					: return ("Motor")
-		case .ppgUserTriggerButton				: return ("Button")
+		case .ppgUserTriggerButton	: return ("Button")
 		case .unknown				: return ("Unknown")
 		}
 	}

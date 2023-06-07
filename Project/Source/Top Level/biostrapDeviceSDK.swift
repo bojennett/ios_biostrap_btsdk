@@ -136,26 +136,19 @@ import iOSDFULibrary
 	#endif
 	
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
-	@objc public var setAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
-	@objc public var getAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
-	#endif
-	
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	@objc public var endSleepStatus: ((_ id: String, _ hasSleep: Bool)->())?
 	@objc public var buttonClicked: ((_ id: String, _ presses: Int)->())?
-	#endif
-	
-	#if UNIVERSAL || ALTER || KAIROS
+	@objc public var setAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
+	@objc public var getAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
 	@objc public var setHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType)->())?
 	@objc public var getHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	@objc public var setHRZoneRangeComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var getHRZoneRangeComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
 	@objc public var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
-	#endif
-	
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	@objc public var setAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	@objc public var getAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
+	@objc public var setButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
+	@objc public var getButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
 	#endif
 
 	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
@@ -176,11 +169,8 @@ import iOSDFULibrary
 	@objc public var pulseOx: ((_ id: String, _ spo2: Float, _ hr: Float)->())?
 	#endif
 
-	#if UNIVERSAL || ETHOS || ALTER || KAIROS
-	@objc public var heartRate: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
-	#endif
-
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	@objc public var heartRate: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
 	@objc public var airplaneModeComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 
@@ -983,9 +973,7 @@ import iOSDFULibrary
 		if let device = mConnectedDevices?[id] { device.getAskForButtonResponse() }
 		else { self.getAskForButtonResponseComplete?(id, false, false) }
 	}
-	#endif
 
-	#if UNIVERSAL || ALTER || KAIROS
 	//--------------------------------------------------------------------------------
 	// Function Name: setHRZoneColor
 	//--------------------------------------------------------------------------------
@@ -1072,6 +1060,30 @@ import iOSDFULibrary
 	@objc public func getAdvertiseAsHRM(_ id: String) {
 		if let device = mConnectedDevices?[id] { device.getAdvertiseAsHRM() }
 		else { self.getAdvertiseAsHRMComplete?(id, false, false) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name: setButtonCommand
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func setButtonCommand(_ id: String, tap: buttonTapType, command: buttonCommandConfiguration) {
+		if let device = mConnectedDevices?[id] { device.setButtonCommand(tap, command: command) }
+		else { self.setButtonCommandComplete?(id, false, .unknown, buttonCommandConfiguration()) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getButtonCommand
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func getButtonCommand(_ id: String, tap: buttonTapType) {
+		if let device = mConnectedDevices?[id] { device.getButtonCommand(tap) }
+		else { self.getButtonCommandComplete?(id, false, tap, buttonCommandConfiguration()) }
 	}
 	#endif
 

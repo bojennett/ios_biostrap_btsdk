@@ -34,19 +34,15 @@ class customMainCharacteristic: Characteristic {
 		#if UNIVERSAL || ALTER || KAIROS || ETHOS
 		case setAskForButtonResponse	= 0x50
 		case getAskForButtonResponse	= 0x51
-		#endif
-
-		#if UNIVERSAL || ALTER || KAIROS
 		case setHRZoneColor				= 0x60
 		case getHRZoneColor				= 0x61
 		case setHRZoneRange				= 0x62
 		case getHRZoneRange				= 0x63
 		case getPPGAlgorithm			= 0x64
-		#endif
-		
-		#if UNIVERSAL || ALTER || KAIROS || ETHOS
 		case setAdvertiseAsHRM			= 0x65
 		case getAdvertiseAsHRM			= 0x66
+		case setButtonCommand			= 0x67
+		case getButtonCommand			= 0x68
 		#endif
 		
 		case setDeviceParam				= 0x70
@@ -144,19 +140,15 @@ class customMainCharacteristic: Characteristic {
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var setAskForButtonResponseComplete: ((_ successful: Bool, _ enable: Bool)->())?
 	var getAskForButtonResponseComplete: ((_ successful: Bool, _ enable: Bool)->())?
-	#endif
-
-	#if UNIVERSAL || ALTER || KAIROS
 	var setHRZoneColorComplete: ((_ successful: Bool, _ type: hrZoneRangeType)->())?
 	var getHRZoneColorComplete: ((_ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	var setHRZoneRangeComplete: ((_ successful: Bool)->())?
 	var getHRZoneRangeComplete: ((_ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
 	var getPPGAlgorithmComplete: ((_ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
-	#endif
-
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var setAdvertiseAsHRMComplete: ((_ successful: Bool, _ asHRM: Bool)->())?
 	var getAdvertiseAsHRMComplete: ((_ successful: Bool, _ asHRM: Bool)->())?
+	var setButtonCommandComplete: ((_ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
+	var getButtonCommandComplete: ((_ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
 	#endif
 
 	var dataPackets: ((_ packets: String)->())?
@@ -1139,9 +1131,6 @@ class customMainCharacteristic: Characteristic {
 		else { self.getAskForButtonResponseComplete?(false, false) }
 	}
 
-	#endif
-
-	#if UNIVERSAL || ALTER || KAIROS
 	//--------------------------------------------------------------------------------
 	// Function Name: setHRZoneColor
 	//--------------------------------------------------------------------------------
@@ -1243,9 +1232,7 @@ class customMainCharacteristic: Characteristic {
 		}
 		else { self.getPPGAlgorithmComplete?(false, ppgAlgorithmConfiguration(), eventType.unknown) }
 	}
-	#endif
 
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	//--------------------------------------------------------------------------------
 	// Function Name: setAdvertiseAsHRM
 	//--------------------------------------------------------------------------------
@@ -1281,6 +1268,45 @@ class customMainCharacteristic: Characteristic {
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
 		else { self.getAdvertiseAsHRMComplete?(false, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setButtonCommand
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setButtonCommand(_ tap: buttonTapType, command: buttonCommandConfiguration) {
+		log?.v("\(pID): \(tap.title) -> \(command.settings)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.setButtonCommand.rawValue)
+			data.append(tap.rawValue)
+			data.append(command.data)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.setButtonCommandComplete?(false, tap, buttonCommandConfiguration()) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getButtonCommand
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getButtonCommand(_ tap: buttonTapType) {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getButtonCommand.rawValue)
+			data.append(tap.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getButtonCommandComplete?(false, tap, buttonCommandConfiguration()) }
 	}
 	#endif
 
@@ -1750,9 +1776,7 @@ class customMainCharacteristic: Characteristic {
 							else {
 								self.getAskForButtonResponseComplete?(false, false)
 							}
-						#endif
 							
-						#if UNIVERSAL || ALTER || KAIROS
 						case .setHRZoneColor:
 							if (data.count == 4) {
 								if let zone = hrZoneRangeType(rawValue: data[3]) {
@@ -1808,9 +1832,7 @@ class customMainCharacteristic: Characteristic {
 							else {
 								self.getPPGAlgorithmComplete?(false, ppgAlgorithmConfiguration(), eventType.unknown)
 							}
-						#endif
 							
-						#if UNIVERSAL || ALTER || KAIROS || ETHOS
 						case .setAdvertiseAsHRM:
 							if (data.count == 4) {
 								let asHRM		= data[3] != 0x00
@@ -1827,6 +1849,32 @@ class customMainCharacteristic: Characteristic {
 							}
 							else {
 								self.getAdvertiseAsHRMComplete?(false, false)
+							}
+							
+						case .setButtonCommand:
+							if (data.count == 8) {
+								if let tap = buttonTapType(rawValue: data[3]) {
+									self.setButtonCommandComplete?(true, tap, buttonCommandConfiguration(data.subdata(in: Range(4...7))))
+								}
+								else {
+									self.setButtonCommandComplete?(false, .unknown, buttonCommandConfiguration())
+								}
+							}
+							else {
+								self.setButtonCommandComplete?(false, .unknown, buttonCommandConfiguration())
+							}
+
+						case .getButtonCommand:
+							if (data.count == 8) {
+								if let tap = buttonTapType(rawValue: data[3]) {
+									self.setButtonCommandComplete?(true, tap, buttonCommandConfiguration(data.subdata(in: Range(4...7))))
+								}
+								else {
+									self.getButtonCommandComplete?(false, .unknown, buttonCommandConfiguration())
+								}
+							}
+							else {
+								self.getButtonCommandComplete?(false, .unknown, buttonCommandConfiguration())
 							}
 						#endif
 

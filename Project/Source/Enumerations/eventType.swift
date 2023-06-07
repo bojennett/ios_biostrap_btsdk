@@ -21,6 +21,11 @@ import Foundation
 	case doublePress								= 0x0a
 	case triplePress								= 0x0b
 	case longPress									= 0x0c
+	case none										= 0x0d
+	case ppgWornStop								= 0x0e
+	case ppgTimerStop								= 0x0f
+	case ppgFWStop									= 0x10
+	case ppgFWStart									= 0x11
 	case unknown									= 0xff
 	
 	public init(from decoder: Decoder) throws {
@@ -40,6 +45,11 @@ import Foundation
 		case "Double Press"							: self	= .doublePress
 		case "Triple Press"							: self	= .triplePress
 		case "Long Press"							: self	= .longPress
+		case "None"									: self	= .none
+		case "PPG Worn Stop"						: self	= .ppgWornStop
+		case "PPG Timer Stop"						: self	= .ppgTimerStop
+		case "PPG Firmware Stop"					: self	= .ppgFWStop
+		case "PPG Firmware Start"					: self	= .ppgFWStart
 		default										: self	= .unknown
 		}
 	}
@@ -59,6 +69,11 @@ import Foundation
 		case .doublePress							: return "Double Press"
 		case .triplePress							: return "Triple Press"
 		case .longPress								: return "Long Press"
+		case .none									: return "None"
+		case .ppgWornStop							: return "PPG Worn Stop"
+		case .ppgTimerStop							: return "PPG Timer Stop"
+		case .ppgFWStop								: return "PPG Firmware Stop"
+		case .ppgFWStart							: return "PPG Firmware Start"
 		case .unknown								: return "Unknown"
 		}
 	}

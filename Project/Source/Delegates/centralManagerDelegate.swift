@@ -307,6 +307,14 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) }
 								}
 
+								device.setButtonCommandComplete	= { id, successful, tap, command in
+									DispatchQueue.main.async { self.setButtonCommandComplete?(id, successful, tap, command) }
+								}
+								
+								device.getButtonCommandComplete	= { id, successful, tap, command in
+									DispatchQueue.main.async { self.getButtonCommandComplete?(id, successful, tap, command) }
+								}
+								
 								device.setAskForButtonResponseComplete	= { id, successful, enable in
 									DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) }
 								}
@@ -580,6 +588,14 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) }
 								}
 
+								device.setButtonCommandComplete	= { id, successful, tap, command in
+									DispatchQueue.main.async { self.setButtonCommandComplete?(id, successful, tap, command) }
+								}
+								
+								device.getButtonCommandComplete	= { id, successful, tap, command in
+									DispatchQueue.main.async { self.getButtonCommandComplete?(id, successful, tap, command) }
+								}
+								
 								device.setAskForButtonResponseComplete	= { id, successful, enable in
 									DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) }
 								}
@@ -845,12 +861,40 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) }
 								}
 								
+								device.setHRZoneColorComplete		= { id, successful, type in
+									DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) }
+								}
+								
+								device.getHRZoneColorComplete		= { id, successful, type, red, green, blue, on_ms, off_ms in
+									DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) }
+								}
+								
+								device.setHRZoneRangeComplete		= { id, successful in
+									DispatchQueue.main.async { self.setHRZoneRangeComplete?(id, successful) }
+								}
+								
+								device.getHRZoneRangeComplete		= { id, successful, enabled, high_value, low_value in
+									DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) }
+								}
+								
+								device.getPPGAlgorithmComplete		= { id, successful, algorithm, state in
+									DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm, state) }
+								}
+								
 								device.setAdvertiseAsHRMComplete	= { id, successful, asHRM in
 									DispatchQueue.main.async { self.setAdvertiseAsHRMComplete?(id, successful, asHRM) }
 								}
 								
 								device.getAdvertiseAsHRMComplete	= { id, successful, asHRM in
 									DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) }
+								}
+								
+								device.setButtonCommandComplete	= { id, successful, tap, command in
+									DispatchQueue.main.async { self.setButtonCommandComplete?(id, successful, tap, command) }
+								}
+								
+								device.getButtonCommandComplete	= { id, successful, tap, command in
+									DispatchQueue.main.async { self.getButtonCommandComplete?(id, successful, tap, command) }
 								}
 								
 								device.setAskForButtonResponseComplete	= { id, successful, enable in

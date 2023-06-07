@@ -199,26 +199,19 @@ public class Device: NSObject {
 	#endif
 
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
-	var setAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
-	var getAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
-	#endif
-
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var endSleepStatus: ((_ id: String, _ hasSleep: Bool)->())?
 	var buttonClicked: ((_ id: String, _ presses: Int)->())?
-	#endif
-
-	#if UNIVERSAL || ALTER || KAIROS
+	var setAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
+	var getAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
 	var setHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType)->())?
 	var getHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	var setHRZoneRangeComplete: ((_ id: String, _ successful: Bool)->())?
 	var getHRZoneRangeComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
 	var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
-	#endif
-	
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var setAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	var getAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
+	var setButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
+	var getButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
 	#endif
 
 	var dataPackets: ((_ id: String, _ packets: String)->())?
@@ -1075,7 +1068,7 @@ public class Device: NSObject {
 
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	//--------------------------------------------------------------------------------
-	// Function Name: setAdvertiseAsHRM
+	// Function Name: setAskForButtonResponse
 	//--------------------------------------------------------------------------------
 	//
 	//
@@ -1087,7 +1080,7 @@ public class Device: NSObject {
 	}
 	
 	//--------------------------------------------------------------------------------
-	// Function Name: getAdvertiseAsHRM
+	// Function Name: getAskForButtonResponse
 	//--------------------------------------------------------------------------------
 	//
 	//
@@ -1097,9 +1090,7 @@ public class Device: NSObject {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAskForButtonResponse() }
 		else { self.getAskForButtonResponseComplete?(self.id, false, false) }
 	}
-	#endif
 	
-	#if UNIVERSAL || ALTER || KAIROS
 	//--------------------------------------------------------------------------------
 	// Function Name: setHRZoneColor
 	//--------------------------------------------------------------------------------
@@ -1192,6 +1183,30 @@ public class Device: NSObject {
 	func getAdvertiseAsHRM() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAdvertiseAsHRM() }
 		else { self.getAdvertiseAsHRMComplete?(self.id, false, false) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name: getAdvertiseAsHRM
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setButtonCommand(_ tap: buttonTapType, command: buttonCommandConfiguration) {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setButtonCommand(tap, command: command) }
+		else { self.setButtonCommandComplete?(self.id, false, .unknown, buttonCommandConfiguration()) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name: getAdvertiseAsHRM
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getButtonCommand(_ tap: buttonTapType) {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getButtonCommand(tap) }
+		else { self.getButtonCommandComplete?(self.id, false, tap, buttonCommandConfiguration()) }
 	}
 	#endif
 
@@ -1590,8 +1605,14 @@ public class Device: NSObject {
 						else if (error) { self.chargingStatus = "Charging Error" }
 						else { self.chargingStatus = "Not Charging" }
 						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
+					mMainCharacteristic?.setHRZoneColorComplete		= { successful, type in self.setHRZoneColorComplete?(self.id, successful, type) }
+					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.getHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
+					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.setHRZoneRangeComplete?(self.id, successful) }
+					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.getHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
 					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.setAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
 					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
+					mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in self.setButtonCommandComplete?(self.id, successful, tap, command) }
+					mMainCharacteristic?.getButtonCommandComplete	= { successful, tap, command in self.getButtonCommandComplete?(self.id, successful, tap, command) }
 					mMainCharacteristic?.airplaneModeComplete		= { successful in self.airplaneModeComplete?(self.id, successful) }
 
 					mMainCharacteristic?.discoverDescriptors()
@@ -1697,6 +1718,8 @@ public class Device: NSObject {
 					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm, state in self.getPPGAlgorithmComplete?(self.id, successful, algorithm, state) }
 					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.setAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
 					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
+					mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in self.setButtonCommandComplete?(self.id, successful, tap, command) }
+					mMainCharacteristic?.getButtonCommandComplete	= { successful, tap, command in self.getButtonCommandComplete?(self.id, successful, tap, command) }
 					mMainCharacteristic?.airplaneModeComplete		= { successful in self.airplaneModeComplete?(self.id, successful) }
 
 					mMainCharacteristic?.discoverDescriptors()
@@ -1795,7 +1818,6 @@ public class Device: NSObject {
 						else if (error) { self.chargingStatus = "Charging Error" }
 						else { self.chargingStatus = "Not Charging" }
 						self.deviceChargingStatus?(self.id, charging, on_charger, error) }
-					mMainCharacteristic?.discoverDescriptors()
 					mMainCharacteristic?.setHRZoneColorComplete		= { successful, type in self.setHRZoneColorComplete?(self.id, successful, type) }
 					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.getHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
 					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.setHRZoneRangeComplete?(self.id, successful) }
@@ -1803,7 +1825,11 @@ public class Device: NSObject {
 					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm, state in self.getPPGAlgorithmComplete?(self.id, successful, algorithm, state) }
 					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.setAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
 					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
+					mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in self.setButtonCommandComplete?(self.id, successful, tap, command) }
+					mMainCharacteristic?.getButtonCommandComplete	= { successful, tap, command in self.getButtonCommandComplete?(self.id, successful, tap, command) }
 					mMainCharacteristic?.airplaneModeComplete		= { successful in self.airplaneModeComplete?(self.id, successful) }
+
+					mMainCharacteristic?.discoverDescriptors()
 
 				case .kairosDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)

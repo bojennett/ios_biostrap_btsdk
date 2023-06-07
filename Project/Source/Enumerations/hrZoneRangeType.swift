@@ -7,7 +7,6 @@
 
 import Foundation
 
-#if UNIVERSAL || ALTER || KAIROS
 @objc public enum hrZoneRangeType: UInt8, Codable {
 	case below				= 0x00		// Below the minimum range
 	case within				= 0x01		// Wthin the range
@@ -35,4 +34,3 @@ import Foundation
 		}
 	}
 }
-#endif
