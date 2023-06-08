@@ -7,10 +7,11 @@
 
 import Foundation
 
-@objc public enum buttonTapType: UInt8, Codable {
+@objc public enum buttonTapType: UInt8, Codable, CaseIterable {
 	case single				= 0x00
 	case double				= 0x01
 	case triple				= 0x02
+	case long				= 0x03
 	case unknown			= 0xff
 	
 	public var title: String {
@@ -18,6 +19,7 @@ import Foundation
 		case .single		: return ("Single Tap")
 		case .double		: return ("Double Tap")
 		case .triple		: return ("Triple Tap")
+		case .long			: return ("Long Press")
 		case .unknown		: return ("Unknown")
 		}
 	}
@@ -30,6 +32,7 @@ import Foundation
 		case "Single Tap"	: self = .single
 		case "Double Tap"	: self = .double
 		case "Triple Tap"	: self = .triple
+		case "Long Press"	: self = .long
 		default				: self = .unknown
 		}
 	}

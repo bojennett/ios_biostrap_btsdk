@@ -147,8 +147,8 @@ import iOSDFULibrary
 	@objc public var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
 	@objc public var setAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	@objc public var getAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
-	@objc public var setButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
-	@objc public var getButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
+	@objc public var setButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
+	@objc public var getButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
 	#endif
 
 	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
@@ -1069,9 +1069,9 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
-	@objc public func setButtonCommand(_ id: String, tap: buttonTapType, command: buttonCommandConfiguration) {
+	@objc public func setButtonCommand(_ id: String, tap: buttonTapType, command: buttonCommandType) {
 		if let device = mConnectedDevices?[id] { device.setButtonCommand(tap, command: command) }
-		else { self.setButtonCommandComplete?(id, false, .unknown, buttonCommandConfiguration()) }
+		else { self.setButtonCommandComplete?(id, false, tap, command) }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1083,7 +1083,7 @@ import iOSDFULibrary
 	//--------------------------------------------------------------------------------
 	@objc public func getButtonCommand(_ id: String, tap: buttonTapType) {
 		if let device = mConnectedDevices?[id] { device.getButtonCommand(tap) }
-		else { self.getButtonCommandComplete?(id, false, tap, buttonCommandConfiguration()) }
+		else { self.getButtonCommandComplete?(id, false, tap, .unknown) }
 	}
 	#endif
 

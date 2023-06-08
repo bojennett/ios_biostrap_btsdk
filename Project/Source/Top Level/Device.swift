@@ -210,8 +210,8 @@ public class Device: NSObject {
 	var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
 	var setAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	var getAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
-	var setButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
-	var getButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
+	var setButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
+	var getButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
 	#endif
 
 	var dataPackets: ((_ id: String, _ packets: String)->())?
@@ -1192,9 +1192,9 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setButtonCommand(_ tap: buttonTapType, command: buttonCommandConfiguration) {
+	func setButtonCommand(_ tap: buttonTapType, command: buttonCommandType) {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setButtonCommand(tap, command: command) }
-		else { self.setButtonCommandComplete?(self.id, false, .unknown, buttonCommandConfiguration()) }
+		else { self.setButtonCommandComplete?(self.id, false, tap, command) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1206,7 +1206,7 @@ public class Device: NSObject {
 	//--------------------------------------------------------------------------------
 	func getButtonCommand(_ tap: buttonTapType) {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getButtonCommand(tap) }
-		else { self.getButtonCommandComplete?(self.id, false, tap, buttonCommandConfiguration()) }
+		else { self.getButtonCommandComplete?(self.id, false, tap, .unknown) }
 	}
 	#endif
 

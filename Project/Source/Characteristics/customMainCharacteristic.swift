@@ -147,8 +147,8 @@ class customMainCharacteristic: Characteristic {
 	var getPPGAlgorithmComplete: ((_ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
 	var setAdvertiseAsHRMComplete: ((_ successful: Bool, _ asHRM: Bool)->())?
 	var getAdvertiseAsHRMComplete: ((_ successful: Bool, _ asHRM: Bool)->())?
-	var setButtonCommandComplete: ((_ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
-	var getButtonCommandComplete: ((_ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandConfiguration)->())?
+	var setButtonCommandComplete: ((_ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
+	var getButtonCommandComplete: ((_ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
 	#endif
 
 	var dataPackets: ((_ packets: String)->())?
@@ -1277,17 +1277,17 @@ class customMainCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setButtonCommand(_ tap: buttonTapType, command: buttonCommandConfiguration) {
-		log?.v("\(pID): \(tap.title) -> \(command.settings)")
+	func setButtonCommand(_ tap: buttonTapType, command: buttonCommandType) {
+		log?.v("\(pID): \(tap.title) -> \(command.title)")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
 			data.append(commands.setButtonCommand.rawValue)
 			data.append(tap.rawValue)
-			data.append(command.data)
+			data.append(command.rawValue)
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
-		else { self.setButtonCommandComplete?(false, tap, buttonCommandConfiguration()) }
+		else { self.setButtonCommandComplete?(false, tap, command) }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1298,7 +1298,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getButtonCommand(_ tap: buttonTapType) {
-		log?.v("\(pID)")
+		log?.v("\(pID): \(tap.title)")
 		
 		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
 			var data = Data()
@@ -1306,7 +1306,7 @@ class customMainCharacteristic: Characteristic {
 			data.append(tap.rawValue)
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
-		else { self.getButtonCommandComplete?(false, tap, buttonCommandConfiguration()) }
+		else { self.getButtonCommandComplete?(false, tap, .unknown) }
 	}
 	#endif
 
@@ -1852,29 +1852,29 @@ class customMainCharacteristic: Characteristic {
 							}
 							
 						case .setButtonCommand:
-							if (data.count == 8) {
-								if let tap = buttonTapType(rawValue: data[3]) {
-									self.setButtonCommandComplete?(true, tap, buttonCommandConfiguration(data.subdata(in: Range(4...7))))
+							if (data.count == 5) {
+								if let tap = buttonTapType(rawValue: data[3]), let command = buttonCommandType(rawValue: data[4]) {
+									self.setButtonCommandComplete?(true, tap, command)
 								}
 								else {
-									self.setButtonCommandComplete?(false, .unknown, buttonCommandConfiguration())
+									self.setButtonCommandComplete?(false, .unknown, .unknown)
 								}
 							}
 							else {
-								self.setButtonCommandComplete?(false, .unknown, buttonCommandConfiguration())
+								self.setButtonCommandComplete?(false, .unknown, .unknown)
 							}
 
 						case .getButtonCommand:
-							if (data.count == 8) {
-								if let tap = buttonTapType(rawValue: data[3]) {
-									self.setButtonCommandComplete?(true, tap, buttonCommandConfiguration(data.subdata(in: Range(4...7))))
+							if (data.count == 5) {
+								if let tap = buttonTapType(rawValue: data[3]), let command = buttonCommandType(rawValue: data[4]) {
+									self.getButtonCommandComplete?(true, tap, command)
 								}
 								else {
-									self.getButtonCommandComplete?(false, .unknown, buttonCommandConfiguration())
+									self.getButtonCommandComplete?(false, .unknown, .unknown)
 								}
 							}
 							else {
-								self.getButtonCommandComplete?(false, .unknown, buttonCommandConfiguration())
+								self.getButtonCommandComplete?(false, .unknown, .unknown)
 							}
 						#endif
 

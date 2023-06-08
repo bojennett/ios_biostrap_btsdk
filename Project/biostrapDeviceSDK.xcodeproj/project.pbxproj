@@ -85,10 +85,6 @@
 		3B5AFD572A2FEE6800F99663 /* buttonTapType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5AFD552A2FEE6800F99663 /* buttonTapType.swift */; };
 		3B5AFD582A2FEE6800F99663 /* buttonTapType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5AFD552A2FEE6800F99663 /* buttonTapType.swift */; };
 		3B5AFD592A2FEE6800F99663 /* buttonTapType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5AFD552A2FEE6800F99663 /* buttonTapType.swift */; };
-		3B5AFD622A30E02100F99663 /* buttonCommandConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5AFD612A30E02100F99663 /* buttonCommandConfiguration.swift */; };
-		3B5AFD632A30E02100F99663 /* buttonCommandConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5AFD612A30E02100F99663 /* buttonCommandConfiguration.swift */; };
-		3B5AFD642A30E02100F99663 /* buttonCommandConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5AFD612A30E02100F99663 /* buttonCommandConfiguration.swift */; };
-		3B5AFD652A30E02100F99663 /* buttonCommandConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5AFD612A30E02100F99663 /* buttonCommandConfiguration.swift */; };
 		3B5BFCDA285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */; };
 		3B5BFCDB285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */; };
 		3B78695529CCD657007FE112 /* hrZoneRangeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B78695429CCD657007FE112 /* hrZoneRangeType.swift */; };
@@ -119,6 +115,11 @@
 		3B930EFB2A31525000DB151C /* biostrapStreamingPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EE62A26BDBF000C2FDF /* biostrapStreamingPacket.swift */; };
 		3B930EFC2A31525E00DB151C /* streamingType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EEC2A26BDED000C2FDF /* streamingType.swift */; };
 		3B930EFD2A31527700DB151C /* wavelengthType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EF22A26C050000C2FDF /* wavelengthType.swift */; };
+		3B930F162A323C7D00DB151C /* buttonCommandType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B930F152A323C7D00DB151C /* buttonCommandType.swift */; };
+		3B930F172A323C7D00DB151C /* buttonCommandType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B930F152A323C7D00DB151C /* buttonCommandType.swift */; };
+		3B930F182A323C7D00DB151C /* buttonCommandType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B930F152A323C7D00DB151C /* buttonCommandType.swift */; };
+		3B930F192A323C7D00DB151C /* buttonCommandType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B930F152A323C7D00DB151C /* buttonCommandType.swift */; };
+		3B930F1A2A323C7D00DB151C /* buttonCommandType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B930F152A323C7D00DB151C /* buttonCommandType.swift */; };
 		3B98B4B72787B4960081DA14 /* IntExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B98B4B62787B4960081DA14 /* IntExtentions.swift */; };
 		3BC00B862981BD12009F67CB /* kairosManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BC00B842981BCEF009F67CB /* kairosManufacturingTestResult.swift */; };
 		3BC00B8B2981BD36009F67CB /* CrcCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807EC27A2057400595493 /* CrcCalculator.swift */; };
@@ -249,7 +250,6 @@
 		3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = disStringCharacteristic.swift; sourceTree = "<group>"; };
 		3B29C59C264C9E72006BC11B /* nordicDFU.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nordicDFU.swift; sourceTree = "<group>"; };
 		3B5AFD552A2FEE6800F99663 /* buttonTapType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = buttonTapType.swift; sourceTree = "<group>"; };
-		3B5AFD612A30E02100F99663 /* buttonCommandConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = buttonCommandConfiguration.swift; sourceTree = "<group>"; };
 		3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = liveSyncConfiguration.swift; sourceTree = "<group>"; };
 		3B78695429CCD657007FE112 /* hrZoneRangeType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hrZoneRangeType.swift; sourceTree = "<group>"; };
 		3B8E1EE62A26BDBF000C2FDF /* biostrapStreamingPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = biostrapStreamingPacket.swift; sourceTree = "<group>"; };
@@ -257,6 +257,7 @@
 		3B8E1EF22A26C050000C2FDF /* wavelengthType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = wavelengthType.swift; sourceTree = "<group>"; };
 		3B8E1F1A2A292035000C2FDF /* eventType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = eventType.swift; sourceTree = "<group>"; };
 		3B8E1F2C2A2A5283000C2FDF /* bookendType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = bookendType.swift; sourceTree = "<group>"; };
+		3B930F152A323C7D00DB151C /* buttonCommandType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = buttonCommandType.swift; sourceTree = "<group>"; };
 		3B98B4B62787B4960081DA14 /* IntExtentions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtentions.swift; sourceTree = "<group>"; };
 		3BC00B842981BCEF009F67CB /* kairosManufacturingTestResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = kairosManufacturingTestResult.swift; sourceTree = "<group>"; };
 		3BC00BB02981BD36009F67CB /* kairosBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = kairosBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -348,6 +349,7 @@
 				3BD01FAD261632830014CEF0 /* BluetoothIDs.swift */,
 				3B8E1F2C2A2A5283000C2FDF /* bookendType.swift */,
 				3B5AFD552A2FEE6800F99663 /* buttonTapType.swift */,
+				3B930F152A323C7D00DB151C /* buttonCommandType.swift */,
 				3B260297288A061D00D5CAAA /* diagnosticType.swift */,
 				3B8E1F1A2A292035000C2FDF /* eventType.swift */,
 				3B78695429CCD657007FE112 /* hrZoneRangeType.swift */,
@@ -412,7 +414,6 @@
 			children = (
 				3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */,
 				3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */,
-				3B5AFD612A30E02100F99663 /* buttonCommandConfiguration.swift */,
 			);
 			path = Structures;
 			sourceTree = "<group>";
@@ -884,13 +885,13 @@
 				3B2602B52890541E00D5CAAA /* biostrapDataPacket.swift in Sources */,
 				3B2602B62890541E00D5CAAA /* BluetoothIDs.swift in Sources */,
 				3B2602B72890541E00D5CAAA /* DataExtensions.swift in Sources */,
-				3B5AFD622A30E02100F99663 /* buttonCommandConfiguration.swift in Sources */,
 				3B2602B82890541E00D5CAAA /* peripheralDelegate.swift in Sources */,
 				3B2602BA2890541E00D5CAAA /* centralManagerDelegate.swift in Sources */,
 				3B2602BB2890541E00D5CAAA /* packetType.swift in Sources */,
 				3B2602BC2890541E00D5CAAA /* ppgAlgorithmConfiguration.swift in Sources */,
 				3B2602BD2890541E00D5CAAA /* batteryLevelCharacteristic.swift in Sources */,
 				3B2602BE2890541E00D5CAAA /* settingsType.swift in Sources */,
+				3B930F162A323C7D00DB151C /* buttonCommandType.swift in Sources */,
 				3B2602BF2890541E00D5CAAA /* heartRateMeasurementCharacteristic.swift in Sources */,
 				3B2602C02890541E00D5CAAA /* ppgFailedType.swift in Sources */,
 				3BD10BD828BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift in Sources */,
@@ -927,6 +928,7 @@
 				3BC00B992981BD36009F67CB /* liveSyncConfiguration.swift in Sources */,
 				3BC00B9A2981BD36009F67CB /* Logging.swift in Sources */,
 				3BC00B9B2981BD36009F67CB /* nextPacketStatusType.swift in Sources */,
+				3B930F172A323C7D00DB151C /* buttonCommandType.swift in Sources */,
 				3B8E1EE82A26BDBF000C2FDF /* biostrapStreamingPacket.swift in Sources */,
 				3BC00B9C2981BD36009F67CB /* biostrapDataPacket.swift in Sources */,
 				3BC00B9D2981BD36009F67CB /* BluetoothIDs.swift in Sources */,
@@ -947,7 +949,6 @@
 				3BC00BA82981BD36009F67CB /* disStringCharacteristic.swift in Sources */,
 				3BC00BA92981BD36009F67CB /* Device.swift in Sources */,
 				3BC00BAA2981BD36009F67CB /* diagnosticType.swift in Sources */,
-				3B5AFD632A30E02100F99663 /* buttonCommandConfiguration.swift in Sources */,
 				3B8E1F2E2A2A5283000C2FDF /* bookendType.swift in Sources */,
 				3BC00BAB2981BD36009F67CB /* IntExtentions.swift in Sources */,
 			);
@@ -960,6 +961,7 @@
 				3B260317289088DD00D5CAAA /* settingsType.swift in Sources */,
 				3BD01F9926153B280014CEF0 /* Globals.swift in Sources */,
 				3B1A3DED29F0B21300FCF0DF /* customStreamingCharacteristic.swift in Sources */,
+				3B930F192A323C7D00DB151C /* buttonCommandType.swift in Sources */,
 				3B29C557264C5B53006BC11B /* customMainCharacteristic.swift in Sources */,
 				3B8E1F302A2A5283000C2FDF /* bookendType.swift in Sources */,
 				3B29C59D264C9E72006BC11B /* nordicDFU.swift in Sources */,
@@ -1024,7 +1026,6 @@
 				3BF807EA27A201E200595493 /* ambiqOTARXCharacteristic.swift in Sources */,
 				3B260296288A05F600D5CAAA /* ppgFailedType.swift in Sources */,
 				3BF807C927A1AFA000595493 /* biostrapDataPacket.swift in Sources */,
-				3B5AFD652A30E02100F99663 /* buttonCommandConfiguration.swift in Sources */,
 				3B8E1F312A2A5283000C2FDF /* bookendType.swift in Sources */,
 				3BF807CA27A1AFA000595493 /* BluetoothIDs.swift in Sources */,
 				3B8E1EF12A26BDED000C2FDF /* streamingType.swift in Sources */,
@@ -1035,6 +1036,7 @@
 				3B14EA2B28EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift in Sources */,
 				3BF807CD27A1AFA000595493 /* peripheralDelegate.swift in Sources */,
 				3BF807CE27A1AFA000595493 /* centralManagerDelegate.swift in Sources */,
+				3B930F1A2A323C7D00DB151C /* buttonCommandType.swift in Sources */,
 				3BF807CF27A1AFA000595493 /* batteryLevelCharacteristic.swift in Sources */,
 				3B8E1F1F2A292035000C2FDF /* eventType.swift in Sources */,
 				3BFAC25C2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */,
@@ -1075,6 +1077,7 @@
 				3B5BFCDA285D25C5009B22C4 /* liveSyncConfiguration.swift in Sources */,
 				3BF809A327BD766D00595493 /* Logging.swift in Sources */,
 				3B8E1F2F2A2A5283000C2FDF /* bookendType.swift in Sources */,
+				3B930F182A323C7D00DB151C /* buttonCommandType.swift in Sources */,
 				3BF809A427BD766D00595493 /* biostrapDataPacket.swift in Sources */,
 				3B8E1EF52A26C050000C2FDF /* wavelengthType.swift in Sources */,
 				3BF809A527BD766D00595493 /* BluetoothIDs.swift in Sources */,
@@ -1095,7 +1098,6 @@
 				3B260295288A05F600D5CAAA /* ppgFailedType.swift in Sources */,
 				3BF809AC27BD766D00595493 /* disStringCharacteristic.swift in Sources */,
 				3BF809AE27BD766D00595493 /* Device.swift in Sources */,
-				3B5AFD642A30E02100F99663 /* buttonCommandConfiguration.swift in Sources */,
 				3B260298288A061D00D5CAAA /* diagnosticType.swift in Sources */,
 				3BF809AF27BD766D00595493 /* IntExtentions.swift in Sources */,
 			);
