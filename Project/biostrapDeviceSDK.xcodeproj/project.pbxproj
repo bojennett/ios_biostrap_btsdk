@@ -98,7 +98,6 @@
 		3B8E1EE72A26BDBF000C2FDF /* biostrapStreamingPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EE62A26BDBF000C2FDF /* biostrapStreamingPacket.swift */; };
 		3B8E1EE82A26BDBF000C2FDF /* biostrapStreamingPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EE62A26BDBF000C2FDF /* biostrapStreamingPacket.swift */; };
 		3B8E1EE92A26BDBF000C2FDF /* biostrapStreamingPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EE62A26BDBF000C2FDF /* biostrapStreamingPacket.swift */; };
-		3B8E1EEA2A26BDBF000C2FDF /* biostrapStreamingPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EE62A26BDBF000C2FDF /* biostrapStreamingPacket.swift */; };
 		3B8E1EEB2A26BDBF000C2FDF /* biostrapStreamingPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EE62A26BDBF000C2FDF /* biostrapStreamingPacket.swift */; };
 		3B8E1EED2A26BDED000C2FDF /* streamingType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EEC2A26BDED000C2FDF /* streamingType.swift */; };
 		3B8E1EEE2A26BDED000C2FDF /* streamingType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EEC2A26BDED000C2FDF /* streamingType.swift */; };
@@ -117,6 +116,9 @@
 		3B8E1F2F2A2A5283000C2FDF /* bookendType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1F2C2A2A5283000C2FDF /* bookendType.swift */; };
 		3B8E1F302A2A5283000C2FDF /* bookendType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1F2C2A2A5283000C2FDF /* bookendType.swift */; };
 		3B8E1F312A2A5283000C2FDF /* bookendType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1F2C2A2A5283000C2FDF /* bookendType.swift */; };
+		3B930EFB2A31525000DB151C /* biostrapStreamingPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EE62A26BDBF000C2FDF /* biostrapStreamingPacket.swift */; };
+		3B930EFC2A31525E00DB151C /* streamingType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EEC2A26BDED000C2FDF /* streamingType.swift */; };
+		3B930EFD2A31527700DB151C /* wavelengthType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8E1EF22A26C050000C2FDF /* wavelengthType.swift */; };
 		3B98B4B72787B4960081DA14 /* IntExtentions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B98B4B62787B4960081DA14 /* IntExtentions.swift */; };
 		3BC00B862981BD12009F67CB /* kairosManufacturingTestResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BC00B842981BCEF009F67CB /* kairosManufacturingTestResult.swift */; };
 		3BC00B8B2981BD36009F67CB /* CrcCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807EC27A2057400595493 /* CrcCalculator.swift */; };
@@ -344,19 +346,19 @@
 			isa = PBXGroup;
 			children = (
 				3BD01FAD261632830014CEF0 /* BluetoothIDs.swift */,
-				3B26028E288A04F700D5CAAA /* packetType.swift */,
-				3B8E1EEC2A26BDED000C2FDF /* streamingType.swift */,
-				3B8E1EF22A26C050000C2FDF /* wavelengthType.swift */,
-				3B8E1F1A2A292035000C2FDF /* eventType.swift */,
 				3B8E1F2C2A2A5283000C2FDF /* bookendType.swift */,
-				3B260297288A061D00D5CAAA /* diagnosticType.swift */,
-				3B78695429CCD657007FE112 /* hrZoneRangeType.swift */,
 				3B5AFD552A2FEE6800F99663 /* buttonTapType.swift */,
-				3B260291288A05CE00D5CAAA /* settingsType.swift */,
-				3B260294288A05F600D5CAAA /* ppgFailedType.swift */,
-				3B28D46828E4B72900F6953A /* ppgStatusType.swift */,
+				3B260297288A061D00D5CAAA /* diagnosticType.swift */,
+				3B8E1F1A2A292035000C2FDF /* eventType.swift */,
+				3B78695429CCD657007FE112 /* hrZoneRangeType.swift */,
 				3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */,
 				3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */,
+				3B26028E288A04F700D5CAAA /* packetType.swift */,
+				3B260294288A05F600D5CAAA /* ppgFailedType.swift */,
+				3B28D46828E4B72900F6953A /* ppgStatusType.swift */,
+				3B8E1EEC2A26BDED000C2FDF /* streamingType.swift */,
+				3B260291288A05CE00D5CAAA /* settingsType.swift */,
+				3B8E1EF22A26C050000C2FDF /* wavelengthType.swift */,
 			);
 			path = Enumerations;
 			sourceTree = "<group>";
@@ -961,6 +963,7 @@
 				3B29C557264C5B53006BC11B /* customMainCharacteristic.swift in Sources */,
 				3B8E1F302A2A5283000C2FDF /* bookendType.swift in Sources */,
 				3B29C59D264C9E72006BC11B /* nordicDFU.swift in Sources */,
+				3B930EFC2A31525E00DB151C /* streamingType.swift in Sources */,
 				3B0B204E291460C300BDB984 /* nextPacketStatusType.swift in Sources */,
 				3B29C555264C5A5B006BC11B /* Characteristic.swift in Sources */,
 				3B260318289088E000D5CAAA /* ppgFailedType.swift in Sources */,
@@ -973,12 +976,14 @@
 				3BF3FEC326C58BCF005AF135 /* biostrapDataPacket.swift in Sources */,
 				3B28D46B28E4B72900F6953A /* ppgStatusType.swift in Sources */,
 				3BD01FAE261632830014CEF0 /* BluetoothIDs.swift in Sources */,
+				3B930EFD2A31527700DB151C /* wavelengthType.swift in Sources */,
 				3B29C547264C3D59006BC11B /* nordicDFUCharacteristic.swift in Sources */,
 				3BD10BDA28BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift in Sources */,
 				3BF3FEC526C59733005AF135 /* DataExtensions.swift in Sources */,
 				3BD01FB1261770BE0014CEF0 /* peripheralDelegate.swift in Sources */,
 				3BD01F9326153AC50014CEF0 /* centralManagerDelegate.swift in Sources */,
 				3B29C561264C6C1A006BC11B /* batteryLevelCharacteristic.swift in Sources */,
+				3B930EFB2A31525000DB151C /* biostrapStreamingPacket.swift in Sources */,
 				3B260316289088DA00D5CAAA /* diagnosticType.swift in Sources */,
 				3BFAC25B2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */,
 				3B29C56D264C7263006BC11B /* disStringCharacteristic.swift in Sources */,
@@ -986,7 +991,6 @@
 				3B260315289088D800D5CAAA /* packetType.swift in Sources */,
 				3BD01F9D26153EF10014CEF0 /* Device.swift in Sources */,
 				3B98B4B72787B4960081DA14 /* IntExtentions.swift in Sources */,
-				3B8E1EEA2A26BDBF000C2FDF /* biostrapStreamingPacket.swift in Sources */,
 				3BEE5C8D296502B0008798FC /* customDataCharacteristic.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
