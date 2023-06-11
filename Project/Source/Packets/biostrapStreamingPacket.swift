@@ -126,7 +126,7 @@ import Foundation
 				if let test = wavelengthType(rawValue: data[14]) { ppgWavelengths = test }
 
 			case .motionState:
-				motionState			= (data[3] != 0x00)
+				motionState			= (data[2] != 0x00)
 				
 			case .unknown:
 				break
