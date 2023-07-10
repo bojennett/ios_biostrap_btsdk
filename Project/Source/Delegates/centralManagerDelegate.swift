@@ -100,6 +100,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) }
 								}
 
+								device.getAllPacketsAcknowledgeComplete	= { id, successful, ack in
+									DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) }
+								}
+								
 								device.getNextPacketComplete	= { id, successful, error_code, caughtUp, packet in
 									DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) }
 								}
@@ -208,19 +212,19 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.ppgFailed?(id, code) }
 								}
 
-								device.dataPackets				= { id, packets in
+								device.dataPackets				= { id, sequence_number, packets in
 									if (self.dataPacketsOnBackgroundThread) {
-										self.dataPackets?(id, packets)
+										self.dataPackets?(id, sequence_number, packets)
 									}
 									else {
-										DispatchQueue.main.async { self.dataPackets?(id, packets) }
+										DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) }
 									}
 								}
 								
 								device.streamingPacket			= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
 
-								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
-									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count) }
+								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in
+									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) }
 								}
 
 								device.dataFailure				= { id in
@@ -381,6 +385,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) }
 								}
 								
+								device.getAllPacketsAcknowledgeComplete	= { id, successful, ack in
+									DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) }
+								}
+								
 								device.getNextPacketComplete	= { id, successful, error_code, caughtUp, packet in
 									DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) }
 								}
@@ -489,21 +497,21 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.ppgFailed?(id, code) }
 								}
 								
-								device.dataPackets				= { id, packets in
+								device.dataPackets				= { id, sequence_number, packets in
 									if (self.dataPacketsOnBackgroundThread) {
-										self.dataPackets?(id, packets)
+										self.dataPackets?(id, sequence_number, packets)
 									}
 									else {
-										DispatchQueue.main.async { self.dataPackets?(id, packets) }
+										DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) }
 									}
 								}
-								
+
 								device.streamingPacket			= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
 
-								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
-									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count) }
+								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in
+									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) }
 								}
-								
+
 								device.dataFailure				= { id in
 									DispatchQueue.main.async { self.dataFailure?(id) }
 								}
@@ -670,6 +678,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) }
 								}
 
+								device.getAllPacketsAcknowledgeComplete	= { id, successful, ack in
+									DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) }
+								}
+								
 								device.getNextPacketComplete	= { id, successful, error_code, caughtUp, packet in
 									DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) }
 								}
@@ -782,19 +794,19 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.ppgFailed?(id, code) }
 								}
 
-								device.dataPackets				= { id, packets in
+								device.dataPackets				= { id, sequence_number, packets in
 									if (self.dataPacketsOnBackgroundThread) {
-										self.dataPackets?(id, packets)
+										self.dataPackets?(id, sequence_number, packets)
 									}
 									else {
-										DispatchQueue.main.async { self.dataPackets?(id, packets) }
+										DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) }
 									}
 								}
-								
+
 								device.streamingPacket			= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
 
-								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
-									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count) }
+								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in
+									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) }
 								}
 
 								device.dataFailure				= { id in
@@ -960,6 +972,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) }
 								}
 
+								device.getAllPacketsAcknowledgeComplete	= { id, successful, ack in
+									DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) }
+								}
+								
 								device.getNextPacketComplete	= { id, successful, error_code, caughtUp, packet in
 									DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) }
 								}
@@ -1064,19 +1080,19 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 									DispatchQueue.main.async { self.ppgFailed?(id, code) }
 								}
 
-								device.dataPackets				= { id, packets in
+								device.dataPackets				= { id, sequence_number, packets in
 									if (self.dataPacketsOnBackgroundThread) {
-										self.dataPackets?(id, packets)
+										self.dataPackets?(id, sequence_number, packets)
 									}
 									else {
-										DispatchQueue.main.async { self.dataPackets?(id, packets) }
+										DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) }
 									}
 								}
-								
+
 								device.streamingPacket			= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
 
-								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count in
-									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count) }
+								device.dataComplete				= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in
+									DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) }
 								}
 
 								device.dataFailure				= { id in

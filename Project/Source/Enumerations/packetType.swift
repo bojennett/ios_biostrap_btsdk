@@ -32,6 +32,10 @@ import Foundation
 	case event							= 0x90
 	case bookend						= 0x91
 	#endif
+	
+	#if UNIVERSAL || ALTER || KAIROS
+	case algorithmData					= 0x92
+	#endif
 
 	case rawAccelXADC					= 0xc0
 	case rawAccelYADC					= 0xc1
@@ -106,6 +110,10 @@ import Foundation
 		case "Cadence"								: self = .cadence
 		case "Event"								: self = .event
 		case "Bookend"								: self = .bookend
+		#endif
+			
+		#if UNIVERSAL || ALTER || KAIROS
+		case "Algorithm Data"						: self = .algorithmData
 		#endif
 
 		case "Raw Accel FIFO Count"					: self	= .rawAccelFifoCount
@@ -184,6 +192,10 @@ import Foundation
 		case .event									: return "Event"
 		case .bookend								: return "Bookend"
 		#endif
+			
+		#if UNIVERSAL || ALTER || KAIROS
+		case .algorithmData							: return "Algorithm Data"
+		#endif
 
 		case .rawAccelFifoCount						: return "Raw Accel FIFO Count"
 		case .rawPPGProximity						: return "Raw PPG Proximity"
@@ -260,6 +272,10 @@ import Foundation
 		case .event									: return 10
 		case .cadence								: return 0 // Done by calculation
 		case .bookend								: return 15
+		#endif
+			
+		#if UNIVERSAL || ALTER || KAIROS
+		case .algorithmData							: return 0
 		#endif
 
 		case .rawAccelFifoCount						: return 10

@@ -85,6 +85,7 @@ import iOSDFULibrary
 	@objc public var debugComplete: ((_ id: String, _ successful: Bool, _ device: debugDevice, _ data: Data)->())?
 	#endif
 	@objc public var getAllPacketsComplete: ((_ id: String, _ successful: Bool)->())?
+	@objc public var getAllPacketsAcknowledgeComplete: ((_ id: String, _ successful: Bool, _ ack: Bool)->())?
 	@objc public var getNextPacketComplete: ((_ id: String, _ successful: Bool, _ error_code: nextPacketStatusType, _ caughtUp: Bool, _ packet: String)->())?
 	@objc public var getPacketCountComplete: ((_ id: String, _ successful: Bool, _ count: Int)->())?
 	@objc public var startManualComplete: ((_ id: String, _ successful: Bool)->())?
@@ -115,8 +116,8 @@ import iOSDFULibrary
 	@objc public var disableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 	@objc public var enableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 
-	@objc public var dataPackets: ((_ id: String, _ packets: String)->())?
-	@objc public var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
+	@objc public var dataPackets: ((_ id: String, _ sequence_number: Int, _ packets: String)->())?
+	@objc public var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int, _ intermediate: Bool)->())?
 	@objc public var dataFailure: ((_ id: String)->())?
 	@objc public var streamingPacket: ((_ id: String, _ packet: String)->())?
 
@@ -579,13 +580,23 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
-	@objc public func getAllPackets(_ id: String) {
-		log?.v ("\(id)")
-		
-		if let device = mConnectedDevices?[id] { device.getAllPackets(id) }
+	@objc public func getAllPackets(_ id: String, pages: Int, delay: Int) {
+		if let device = mConnectedDevices?[id] { device.getAllPackets(id, pages: pages, delay: delay) }
 		else { self.getAllPacketsComplete?(id, false) }
 	}
 
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func getAllPacketsAcknowledge(_ id: String, ack: Bool) {
+		if let device = mConnectedDevices?[id] { device.getAllPacketsAcknowledge(id, ack: ack) }
+		else { self.getAllPacketsAcknowledgeComplete?(id, false, ack) }
+	}
+	
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------

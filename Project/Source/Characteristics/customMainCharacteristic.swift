@@ -22,6 +22,7 @@ class customMainCharacteristic: Characteristic {
 		case getNextPacket				= 0x02
 		case getPacketCount				= 0x03
 		case validateCRC				= 0x04
+		case getAllPacketsAcknowledge	= 0x05
 		case led						= 0x10
 		case enterShipMode				= 0x11
 		case readEpoch					= 0x12
@@ -91,6 +92,7 @@ class customMainCharacteristic: Characteristic {
 	// MARK: Callbacks
 	var writeEpochComplete: ((_ successful: Bool)->())?
 	var getAllPacketsComplete: ((_ successful: Bool)->())?
+	var getAllPacketsAcknowledgeComplete: ((_ successful: Bool, _ ack: Bool)->())?
 	var getNextPacketComplete: ((_ successful: Bool, _ error: nextPacketStatusType, _ caughtUp: Bool, _ packet: String)->())?
 	var getPacketCountComplete: ((_ successful: Bool, _ count: Int)->())?
 	var startManualComplete: ((_ successful: Bool)->())?
@@ -180,7 +182,6 @@ class customMainCharacteristic: Characteristic {
 	internal var mCRCOK						: Bool = true
 	internal var mExpectedSequenceNumber	: Int = 0
 	internal var mCRCFailCount				: Int = 0
-	internal var mFailedDecodeCount			: Int = 0
 	
 	//--------------------------------------------------------------------------------
 	//
@@ -374,14 +375,45 @@ class customMainCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getAllPackets() {
-		log?.v("\(pID)")
+	func getAllPackets(pages: Int, delay: Int, newStyle: Bool) {
+		log?.v("\(pID): Pages: \(pages), delay: \(delay) ms")
 
-		mFailedDecodeCount	= 0
+		self.pFailedDecodeCount	= 0
 		
-		if (!mSimpleCommand(.getAllPackets)) { self.getAllPacketsComplete?(false) }
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getAllPackets.rawValue)
+			
+			if (newStyle) {
+				data.append(contentsOf: pages.leData16)
+				data.append(contentsOf: delay.leData16)
+			}
+
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getAllPacketsComplete?(false) }
 	}
 
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getAllPacketsAcknowledge(_ ack: Bool) {
+		log?.v("\(pID): Ack: \(ack)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getAllPacketsAcknowledge.rawValue)
+			data.append(ack ? 0x01 : 0x00)
+			
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getAllPacketsAcknowledgeComplete?(false, ack) }
+	}
+	
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1362,113 +1394,6 @@ class customMainCharacteristic: Characteristic {
 	// Function Name:
 	//--------------------------------------------------------------------------------
 	//
-	//def reconstruct(dataComp8Bit):
-	//	reconstructedData = []
-	//	reconstructedData.append(dataComp8Bit.dataOffset)
-	//
-	//	for counter in range(0,dataComp8Bit.compressionCount):
-	//		sign = dataComp8Bit.bitwiseSign & (1 << counter)
-	//		if sign != 0:
-	//			sign = -1
-	//		else:
-	//			sign = 1
-	//
-	//		reconstructedData.append(reconstructedData[0] + sign*dataComp8Bit.dataPointer[counter])
-	//
-	//	return reconstructedData
-	//
-	//--------------------------------------------------------------------------------
-	internal func mDecompressPPGPackets(_ data: Data) -> [biostrapDataPacket] {
-		var packets				= [biostrapDataPacket]()
-		if let packetType = packetType(rawValue: data[0]) {
-			let compressionCount	= Int(data[1])
-			let bitwiseSign			= data[2]
-			
-			let firstSample			= (Int(data[3]) << 0) | (Int(data[4]) << 8) | (Int(data[5]) << 16)
-			let packet				= biostrapDataPacket()
-			packet.value			= firstSample
-			packet.type				= packetType
-			packet.raw_data			= data
-			packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
-
-			packets.append(packet)
-			
-			var index		= 0
-			while (index < compressionCount) {
-				let negative			= ((bitwiseSign & (0x01 << index)) != 0)
-				let sample				= Int(data[index + 6])
-				let packet				= biostrapDataPacket()
-				packet.type				= packetType
-				packet.raw_data			= data
-				packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
-
-				if (negative) {
-					packet.value	= firstSample - sample
-				}
-				else {
-					packet.value	= firstSample + sample
-				}
-				
-				packets.append(packet)
-				index = index + 1
-			}
-		}
-		
-		return (packets)
-	}
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	// Similar to PPG.  Differences:
-	//    * firstSample is 2 bytes and signed
-	//    * bitwiseSign is 2 bytes (total of 15 possible samples)
-	//
-	//--------------------------------------------------------------------------------
-	internal func mDecompressIMUPackets(_ data: Data) -> [biostrapDataPacket] {
-		var packets				= [biostrapDataPacket]()
-		if let packetType = packetType(rawValue: data[0]) {
-			let compressionCount	= Int(data[1])
-			let bitwiseSign			= data.subdata(in: Range(2...3)).leUInt16
-			
-			let firstSample			= data.subdata(in: Range(4...5)).leInt16
-			let packet				= biostrapDataPacket()
-			packet.value			= firstSample
-			packet.raw_data			= data
-			packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
-			packet.type				= packetType
-			
-			packets.append(packet)
-			
-			var index		= 0
-			while (index < compressionCount) {
-				let negative			= ((bitwiseSign & (0x01 << index)) != 0)
-				let sample				= Int(data[index + 6])
-				let packet				= biostrapDataPacket()
-				packet.type				= packetType
-				packet.raw_data			= data
-				packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
-
-				if (negative) {
-					packet.value	= firstSample - sample
-				}
-				else {
-					packet.value	= firstSample + sample
-				}
-				
-				packets.append(packet)
-				index = index + 1
-			}
-		}
-		
-		return (packets)
-	}
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
 	//
 	//
 	//--------------------------------------------------------------------------------
@@ -1545,7 +1470,7 @@ class customMainCharacteristic: Characteristic {
 			}
 			else {
 				index = index + packetType.unknown.length
-				mFailedDecodeCount	= mFailedDecodeCount + 1
+				pFailedDecodeCount	= pFailedDecodeCount + 1
 			}			
 		}
 		
@@ -1583,6 +1508,13 @@ class customMainCharacteristic: Characteristic {
 							mCRCOK					= true
 							mExpectedSequenceNumber	= 0
 							self.getAllPacketsComplete?(successful)
+						case .getAllPacketsAcknowledge	:
+							if (data.count == 4) {
+								self.getAllPacketsAcknowledgeComplete?(successful, (data[3] == 0x01))
+							}
+							else {
+								self.getAllPacketsAcknowledgeComplete?(false, false)
+							}
 						case .getNextPacket :
 							if (data.count >= 5) {
 								let error_code	= nextPacketStatusType(rawValue: data[3])
@@ -1987,10 +1919,10 @@ class customMainCharacteristic: Characteristic {
 					let bad_read_count	= Int(data.subdata(in: Range(1...2)).leUInt16)
 					let bad_parse_count	= Int(data.subdata(in: Range(3...4)).leUInt16)
 					let overflow_count	= Int(data.subdata(in: Range(5...6)).leUInt16)
-					self.dataComplete?(bad_read_count, bad_parse_count, overflow_count, self.mFailedDecodeCount)
+					self.dataComplete?(bad_read_count, bad_parse_count, overflow_count, self.pFailedDecodeCount)
 				}
 				else {
-					self.dataComplete?(-1, -1, -1, self.mFailedDecodeCount)
+					self.dataComplete?(-1, -1, -1, self.pFailedDecodeCount)
 				}
 				
 			#if UNIVERSAL || ALTER || KAIROS || ETHOS

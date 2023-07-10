@@ -44,6 +44,8 @@ class Characteristic {
 		return (pDiscovered)
 	}
 
+	internal var pFailedDecodeCount			: Int = 0
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -188,7 +190,26 @@ class Characteristic {
 					log?.e ("\(pID): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
-
+			#endif
+				
+			#if UNIVERSAL || ALTER || KAIROS
+			case .algorithmData:
+				if ((index + 1) < data.count) {
+					let length = Int(data[index + 1]) + 1
+					
+					if ((index + length) <= data.count) {
+						let packetData = data.subdata(in: Range(index...(index + length - 1)))
+						return (true, type, biostrapDataPacket(packetData))
+					}
+					else {
+						log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						return (false, .unknown, biostrapDataPacket())
+					}
+				}
+				else {
+					log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+					return (false, .unknown, biostrapDataPacket())
+				}
 			#endif
 				
 			case .unknown:
@@ -211,6 +232,206 @@ class Characteristic {
 			log?.v ("\(pID): Could not parse type: Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
 			return (false, .unknown, biostrapDataPacket())
 		}
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//def reconstruct(dataComp8Bit):
+	//	reconstructedData = []
+	//	reconstructedData.append(dataComp8Bit.dataOffset)
+	//
+	//	for counter in range(0,dataComp8Bit.compressionCount):
+	//		sign = dataComp8Bit.bitwiseSign & (1 << counter)
+	//		if sign != 0:
+	//			sign = -1
+	//		else:
+	//			sign = 1
+	//
+	//		reconstructedData.append(reconstructedData[0] + sign*dataComp8Bit.dataPointer[counter])
+	//
+	//	return reconstructedData
+	//
+	//--------------------------------------------------------------------------------
+	internal func mDecompressPPGPackets(_ data: Data) -> [biostrapDataPacket] {
+		var packets				= [biostrapDataPacket]()
+		if let packetType = packetType(rawValue: data[0]) {
+			let compressionCount	= Int(data[1])
+			let bitwiseSign			= data[2]
+			
+			let firstSample			= (Int(data[3]) << 0) | (Int(data[4]) << 8) | (Int(data[5]) << 16)
+			let packet				= biostrapDataPacket()
+			packet.value			= firstSample
+			packet.type				= packetType
+			packet.raw_data			= data
+			packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
+			
+			packets.append(packet)
+			
+			var index		= 0
+			while (index < compressionCount) {
+				let negative			= ((bitwiseSign & (0x01 << index)) != 0)
+				let sample				= Int(data[index + 6])
+				let packet				= biostrapDataPacket()
+				packet.type				= packetType
+				packet.raw_data			= data
+				packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
+				
+				if (negative) {
+					packet.value	= firstSample - sample
+				}
+				else {
+					packet.value	= firstSample + sample
+				}
+				
+				packets.append(packet)
+				index = index + 1
+			}
+		}
+		
+		return (packets)
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	// Similar to PPG.  Differences:
+	//    * firstSample is 2 bytes and signed
+	//    * bitwiseSign is 2 bytes (total of 15 possible samples)
+	//
+	//--------------------------------------------------------------------------------
+	internal func mDecompressIMUPackets(_ data: Data) -> [biostrapDataPacket] {
+		var packets				= [biostrapDataPacket]()
+		if let packetType = packetType(rawValue: data[0]) {
+			let compressionCount	= Int(data[1])
+			let bitwiseSign			= data.subdata(in: Range(2...3)).leUInt16
+			
+			let firstSample			= data.subdata(in: Range(4...5)).leInt16
+			let packet				= biostrapDataPacket()
+			packet.value			= firstSample
+			packet.raw_data			= data
+			packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
+			packet.type				= packetType
+			
+			packets.append(packet)
+			
+			var index		= 0
+			while (index < compressionCount) {
+				let negative			= ((bitwiseSign & (0x01 << index)) != 0)
+				let sample				= Int(data[index + 6])
+				let packet				= biostrapDataPacket()
+				packet.type				= packetType
+				packet.raw_data			= data
+				packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
+				
+				if (negative) {
+					packet.value	= firstSample - sample
+				}
+				else {
+					packet.value	= firstSample + sample
+				}
+				
+				packets.append(packet)
+				index = index + 1
+			}
+		}
+		
+		return (packets)
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	internal func pParseDataPackets(_ data: Data) -> ([biostrapDataPacket]) {
+		//log?.v ("\(pID): Data: \(data.hexString)")
+		
+		var index = 0
+		var dataPackets = [biostrapDataPacket]()
+		
+		let incomingDataDiagnostic				= biostrapDataPacket()
+		incomingDataDiagnostic.raw_data			= data
+		incomingDataDiagnostic.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
+		incomingDataDiagnostic.type				= packetType.diagnostic
+		incomingDataDiagnostic.diagnostic_type	= diagnosticType.bluetoothPacket
+		
+		dataPackets.append(incomingDataDiagnostic)
+		
+		while (index < data.count) {
+			let (found, type, packet) = pParseSinglePacket(data, index: index)
+			
+			if (found) {
+				switch (type) {
+				case .diagnostic:
+					index = index + packet.raw_data.count
+					dataPackets.append(packet)
+					
+				case .rawAccelCompressedXADC,
+						.rawAccelCompressedYADC,
+						.rawAccelCompressedZADC:
+					index = index + packet.raw_data.count
+					
+					let packets = mDecompressIMUPackets(packet.raw_data)
+					dataPackets.append(contentsOf: packets)
+					
+				case .rawPPGCompressedGreen,
+						.rawPPGCompressedIR,
+						.rawPPGCompressedRed:
+					index = index + packet.raw_data.count
+					
+					let packets = mDecompressPPGPackets(packet.raw_data)
+					dataPackets.append(contentsOf: packets)
+					
+				#if UNIVERSAL || ETHOS
+				case .rawPPGCompressedWhiteIRRPD,
+						.rawPPGCompressedWhiteWhitePD:
+					index = index + packet.raw_data.count
+					
+					let packets = mDecompressPPGPackets(packet.raw_data)
+					dataPackets.append(contentsOf: packets)
+					
+				case .rawGyroCompressedXADC,
+						.rawGyroCompressedYADC,
+						.rawGyroCompressedZADC:
+					index = index + packet.raw_data.count
+					
+					let packets = mDecompressIMUPackets(packet.raw_data)
+					dataPackets.append(contentsOf: packets)
+				#endif
+					
+				#if UNIVERSAL || ALTER || KAIROS || ETHOS
+				case .bbi:
+					index = index + packet.raw_data.count
+					dataPackets.append(packet)
+					
+				case .cadence:
+					index = index + packet.raw_data.count
+					dataPackets.append(packet)
+				#endif
+					
+				#if UNIVERSAL || ALTER || KAIROS
+				case .algorithmData:
+					index = index + packet.raw_data.count
+					dataPackets.append(packet)
+				#endif
+					
+				default:
+					index = index + type.length
+					if (type != .unknown) { dataPackets.append(packet) }
+				}
+			}
+			else {
+				index = index + packetType.unknown.length
+				pFailedDecodeCount	= pFailedDecodeCount + 1
+			}
+		}
+		
+		return (dataPackets)
 	}
 
 	//--------------------------------------------------------------------------------

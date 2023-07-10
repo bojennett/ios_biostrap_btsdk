@@ -163,6 +163,7 @@ public class Device: NSObject {
 
 	var writeEpochComplete: ((_ id: String, _ successful: Bool)->())?
 	var getAllPacketsComplete: ((_ id: String, _ successful: Bool)->())?
+	var getAllPacketsAcknowledgeComplete: ((_ id: String, _ successful: Bool, _ ack: Bool)->())?
 	var getNextPacketComplete: ((_ id: String, _ successful: Bool, _ error_code: nextPacketStatusType, _ caughtUp: Bool, _ packet: String)->())?
 	var getPacketCountComplete: ((_ id: String, _ successful: Bool, _ count: Int)->())?
 	var startManualComplete: ((_ id: String, _ successful: Bool)->())?
@@ -214,8 +215,8 @@ public class Device: NSObject {
 	var getButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
 	#endif
 
-	var dataPackets: ((_ id: String, _ packets: String)->())?
-	var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
+	var dataPackets: ((_ id: String, _ sequence_number: Int, _ packets: String)->())?
+	var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int, _ intermediate: Bool)->())?
 	var dataFailure: ((_ id: String)->())?
 	var streamingPacket: ((_ id: String, _ packet: String)->())?
 	
@@ -265,11 +266,6 @@ public class Device: NSObject {
 		else { return ("???") }
 	}
 
-	@objc public var softwareRevision : [String] {
-		if let softwareRevision = mSoftwareRevision { return softwareRevision.value }
-		else { return ([String]()) }
-	}
-
 	@objc public var hardwareRevision : String {
 		if let hardwareRevision = mHardwareRevision { return hardwareRevision.value }
 		else { return ("???") }
@@ -284,7 +280,24 @@ public class Device: NSObject {
 		if let serialNumber = mSerialNumber { return serialNumber.value }
 		else { return ("???") }
 	}
+	
+	@objc public var bluetoothSoftwareRevision	: String {
+		if let softwareRevision = mSoftwareRevision { return softwareRevision.bluetooth }
+		else { return ("???") }
+	}
 
+	@objc public var algorithmsSoftwareRevision	: String {
+		if let softwareRevision = mSoftwareRevision { return softwareRevision.algorithms }
+		else { return ("???") }
+	}
+
+	#if UNIVERSAL || ETHOS
+	@objc public var medtorSoftwareRevision		: String {
+		if let softwareRevision = mSoftwareRevision { return softwareRevision.medtor }
+		else { return ("???") }
+	}
+	#endif
+	
 	internal var mModelNumber					: disStringCharacteristic?
 	internal var mFirmwareVersion				: disFirmwareVersionCharacteristic?
 	internal var mSoftwareRevision				: disSoftwareRevisionCharacteristic?
@@ -682,13 +695,42 @@ public class Device: NSObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getAllPackets(_ id: String) {
+	func getAllPackets(_ id: String, pages: Int, delay: Int) {
+		var newStyle	= false
+		
 		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getAllPackets()
+			if let softwareVersion = mSoftwareRevision {
+				if (softwareVersion.bluetoothGreaterThan("2.0.4")) {
+					log?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use new style")
+					newStyle	= true
+				}
+				else {
+					log?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use old style")
+				}
+			}
+			else {
+				log?.e ("Can't find the software version, i guess i will use the old style")
+			}
+
+			mainCharacteristic.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
 		}
 		else { self.getAllPacketsComplete?(id, false) }
 	}
 
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getAllPacketsAcknowledge(_ id: String, ack: Bool) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getAllPacketsAcknowledge(ack)
+		}
+		else { self.getAllPacketsAcknowledgeComplete?(id, false, ack) }
+	}
+	
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1574,12 +1616,13 @@ public class Device: NSObject {
 					mMainCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
 					mMainCharacteristic?.debugComplete = { successful, device, data in self.debugComplete?(self.id, successful, device, data) }
 					mMainCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
+					mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in self.getAllPacketsAcknowledgeComplete?(self.id, successful, ack) }
 					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
 					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
 					mMainCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
 					mMainCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
-					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, -1, packets) }
+					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
 					mMainCharacteristic?.deviceWornStatus = { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
@@ -1619,8 +1662,8 @@ public class Device: NSObject {
 					
 				case .ethosDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
-					//mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					//mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mDataCharacteristic?.dataPackets = { sequence_number, packets in self.dataPackets?(self.id, sequence_number, packets) }
+					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate) }
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .ethosStrmCharacteristic:
@@ -1682,12 +1725,13 @@ public class Device: NSObject {
 					mMainCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
 					mMainCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
 					mMainCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
+					mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in self.getAllPacketsAcknowledgeComplete?(self.id, successful, ack) }
 					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
 					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
 					mMainCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
 					mMainCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
-					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, -1, packets) }
+					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
 					mMainCharacteristic?.deviceWornStatus = { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
@@ -1726,8 +1770,8 @@ public class Device: NSObject {
 					
 				case .alterDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
-					//mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					//mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mDataCharacteristic?.dataPackets = { sequence_number, packets in self.dataPackets?(self.id, sequence_number, packets) }
+					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate) }
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .alterStrmCharacteristic:
@@ -1789,12 +1833,13 @@ public class Device: NSObject {
 					mMainCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
 					mMainCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
 					mMainCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
+					mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in self.getAllPacketsAcknowledgeComplete?(self.id, successful, ack) }
 					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
 					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
 					mMainCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
 					mMainCharacteristic?.enableWornDetectComplete = { successful in self.enableWornDetectComplete?(self.id, successful) }
-					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, -1, packets) }
+					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
 					mMainCharacteristic?.deviceWornStatus = { isWorn in
 						if (isWorn) { self.wornStatus = "Worn" }
@@ -1833,9 +1878,8 @@ public class Device: NSObject {
 
 				case .kairosDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
-					//mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					//mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
-					
+					mDataCharacteristic?.dataPackets = { sequence_number, packets in self.dataPackets?(self.id, sequence_number, packets) }
+					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate) }
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .kairosStrmCharacteristic:
@@ -1922,6 +1966,7 @@ public class Device: NSObject {
 					mMainCharacteristic?.readEpochComplete = { successful, value in self.readEpochComplete?(self.id, successful,  value) }
 					mMainCharacteristic?.endSleepComplete = { successful in self.endSleepComplete?(self.id, successful) }
 					mMainCharacteristic?.getAllPacketsComplete = { successful in self.getAllPacketsComplete?(self.id, successful) }
+					mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in self.getAllPacketsAcknowledgeComplete?(self.id, successful, ack) }
 					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.getNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
 					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.getPacketCountComplete?(self.id, successful, count) }
 					mMainCharacteristic?.disableWornDetectComplete = { successful in self.disableWornDetectComplete?(self.id, successful) }
@@ -1932,8 +1977,8 @@ public class Device: NSObject {
 					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.resetSessionParamsComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.manufacturingTestComplete?(self.id, successful) }
 
-					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mMainCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, -1, packets) }
+					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.dataFailure?(self.id) }
 					
 					mMainCharacteristic?.deviceWornStatus = { isWorn in
@@ -1955,8 +2000,8 @@ public class Device: NSObject {
 					
 				case .livotalDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
-					//mDataCharacteristic?.dataPackets = { packets in self.dataPackets?(self.id, packets) }
-					//mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count) }
+					mDataCharacteristic?.dataPackets = { sequence_number, packets in self.dataPackets?(self.id, sequence_number, packets) }
+					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in self.dataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate) }
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .livotalStrmCharacteristic:

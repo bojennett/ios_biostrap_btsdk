@@ -10,7 +10,9 @@ import CoreBluetooth
 
 class disSoftwareRevisionCharacteristic: Characteristic {
 	
-	var value				: [String]
+	var bluetooth			: String	= ""
+	var algorithms			: String	= ""
+	var medtor				: String	= ""
 		
 	//--------------------------------------------------------------------------------
 	//
@@ -18,7 +20,6 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic) {
-		value	= [String]()
 		super.init(peripheral, characteristic: characteristic)
 	}
 	
@@ -34,7 +35,7 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 			peripheral.readValue(for: characteristic)
 		}
 	}
-	
+		
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -47,14 +48,45 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 		
 		if let characteristic = pCharacteristic {
 			if let data = characteristic.value {
+				bluetooth	= ""
+				algorithms	= ""
+				medtor		= ""
+
 				let dataString = String(decoding: data, as: UTF8.self).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"])))
 				let components = dataString.split(separator: "_")
 				
-				for component in components { value.append(String(component)) }
+				var index = 0
+				for component in components {
+					if (index == 0) { bluetooth		= String(component) }
+					if (index == 1) { algorithms	= String(component) }
+					if (index == 2) { medtor		= String(component) }
+					
+					index = index + 1
+				}
 			}
 			else { log?.e ("\(pID): Missing data") }
 		}
 		else { log?.e ("\(pID): Missing characteristic") }
 	}
 
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func bluetoothGreaterThan(_ compare: String) -> Bool { return bluetooth.versionGreaterThan(compare, separator: ".") }
+	func bluetoothLessThan(_ compare: String) -> Bool { return bluetooth.versionLessThan(compare, separator: ".") }
+	func bluetoothEqualTo(_ compare: String) -> Bool { return bluetooth.versionEqualTo(compare, separator: ".") }
+
+	func algorithmsGreaterThan(_ compare: String) -> Bool { return algorithms.versionGreaterThan(compare, separator: ".") }
+	func algorithmsLessThan(_ compare: String) -> Bool { return algorithms.versionLessThan(compare, separator: ".") }
+	func algorithmsEqualTo(_ compare: String) -> Bool { return algorithms.versionEqualTo(compare, separator: ".") }
+
+	#if UNIVERSAL || ETHOS
+	func medtorGreaterThan(_ compare: String) -> Bool { return medtor.versionGreaterThan(compare, separator: ".") }
+	func medtorLessThan(_ compare: String) -> Bool { return medtor.versionLessThan(compare, separator: ".") }
+	func medtorEqualTo(_ compare: String) -> Bool { return medtor.versionEqualTo(compare, separator: ".") }
+	#endif
 }
