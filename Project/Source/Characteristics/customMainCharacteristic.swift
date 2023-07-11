@@ -1397,93 +1397,6 @@ class customMainCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	internal func mParsePackets(_ data: Data) -> ([biostrapDataPacket]) {
-		//log?.v ("\(pID): Data: \(data.hexString)")
-		
-		var index = 0
-		var dataPackets = [biostrapDataPacket]()
-		
-		let incomingDataDiagnostic				= biostrapDataPacket()
-		incomingDataDiagnostic.raw_data			= data
-		incomingDataDiagnostic.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
-		incomingDataDiagnostic.type				= packetType.diagnostic
-		incomingDataDiagnostic.diagnostic_type	= diagnosticType.bluetoothPacket
-
-		dataPackets.append(incomingDataDiagnostic)
-		
-		while (index < data.count) {
-			let (found, type, packet) = pParseSinglePacket(data, index: index)
-
-			if (found) {
-				switch (type) {
-				case .diagnostic:
-					index = index + packet.raw_data.count
-					dataPackets.append(packet)
-					
-				case .rawAccelCompressedXADC,
-						.rawAccelCompressedYADC,
-						.rawAccelCompressedZADC:
-					index = index + packet.raw_data.count
-					
-					let packets = mDecompressIMUPackets(packet.raw_data)
-					dataPackets.append(contentsOf: packets)
-					
-				case .rawPPGCompressedGreen,
-					 .rawPPGCompressedIR,
-					 .rawPPGCompressedRed:
-					index = index + packet.raw_data.count
-					
-					let packets = mDecompressPPGPackets(packet.raw_data)
-					dataPackets.append(contentsOf: packets)
-					
-				#if UNIVERSAL || ETHOS
-				case .rawPPGCompressedWhiteIRRPD,
-					 .rawPPGCompressedWhiteWhitePD:
-					index = index + packet.raw_data.count
-					
-					let packets = mDecompressPPGPackets(packet.raw_data)
-					dataPackets.append(contentsOf: packets)
-
-				case .rawGyroCompressedXADC,
-					 .rawGyroCompressedYADC,
-					 .rawGyroCompressedZADC:
-					index = index + packet.raw_data.count
-					
-					let packets = mDecompressIMUPackets(packet.raw_data)
-					dataPackets.append(contentsOf: packets)
-				#endif
-					
-				#if UNIVERSAL || ALTER || KAIROS || ETHOS
-				case .bbi:
-					index = index + packet.raw_data.count
-					dataPackets.append(packet)
-					
-				case .cadence:
-					index = index + packet.raw_data.count
-					dataPackets.append(packet)
-				#endif
-
-				default:
-					index = index + type.length
-					if (type != .unknown) { dataPackets.append(packet) }
-				}
-			}
-			else {
-				index = index + packetType.unknown.length
-				pFailedDecodeCount	= pFailedDecodeCount + 1
-			}			
-		}
-		
-		return (dataPackets)
-	}
-	
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
 	internal func mProcessUpdateValue(_ data: Data) {
 		log?.v ("\(pID): \(data.hexString)")
 		if let response = notifications(rawValue: data[0]) {
@@ -1521,7 +1434,7 @@ class customMainCharacteristic: Characteristic {
 								let caughtUp	= (data[4] == 0x01)
 
 								if (successful) {
-									let dataPackets = self.mParsePackets(data.subdata(in: Range(5...(data.count - 1))))
+									let dataPackets = self.pParseDataPackets(data.subdata(in: Range(5...(data.count - 1))))
 									do {
 										let jsonData = try JSONEncoder().encode(dataPackets)
 										if let jsonString = String(data: jsonData, encoding: .utf8) {
@@ -1877,7 +1790,7 @@ class customMainCharacteristic: Characteristic {
 					mExpectedSequenceNumber = mExpectedSequenceNumber + 1
 					
 					if (mCRCOK) {
-						let dataPackets = self.mParsePackets(data.subdata(in: Range(3...(data.count - 1))))
+						let dataPackets = self.pParseDataPackets(data.subdata(in: Range(3...(data.count - 1))))
 						mDataPackets.append(contentsOf: dataPackets)
 					}
 				}

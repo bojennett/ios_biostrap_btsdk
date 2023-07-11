@@ -253,7 +253,12 @@ import Foundation
 		var data = Data()
 		let strArray = value.components(separatedBy: " ")
 		for str in strArray {
-			if let test = UInt8(str) { data.append(test) }
+			if let test = UInt32(str, radix: 16) {
+				data.append(UInt8(test))
+			}
+			else {
+				log?.e ("Cannot parse '\(str)' into a hex value")
+			}
 		}
 		
 		return data
