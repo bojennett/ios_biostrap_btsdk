@@ -474,17 +474,24 @@ import iOSDFULibrary
 	@objc public func disconnect(_ id: String) {
 		log?.v("\(id)")
 		
+		if let device = mDiscoveredDevices?[id] {
+			if let peripheral = device.peripheral {
+				log?.v("Found \(id) in discovered list -> trying to disconnect")
+				mDiscoveredDevices?.removeValue(forKey: id)
+				mCentralManager?.cancelPeripheralConnection(peripheral)
+				return
+			}
+		}
+		
 		if let device = mConnectedDevices?[id] {
 			if let peripheral = device.peripheral {
+				log?.v("Found \(id) in connected list -> trying to disconnect")
 				mCentralManager?.cancelPeripheralConnection(peripheral)
-			}
-			else {
-				log?.e("Peripheral for \(id) does not exist")
+				return
 			}
 		}
-		else {
-			log?.e("Device for \(id) does not exist")
-		}
+		
+		log?.e("Cannot find '\(id)' in connected or discovered list.  Nothing to disconnect")
 	}
 
 	//--------------------------------------------------------------------------------

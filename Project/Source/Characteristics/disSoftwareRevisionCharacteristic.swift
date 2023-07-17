@@ -12,16 +12,34 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 	
 	var bluetooth			: String	= ""
 	var algorithms			: String	= ""
+	#if UNIVERSAL || ETHOS
 	var medtor				: String	= ""
+	#endif
+	
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	var sleep				: String	= ""
+	#endif
+	
+	#if UNIVERSAL
+	var type				: biostrapDeviceSDK.biostrapDeviceType	= .unknown
+	#endif
 		
 	//--------------------------------------------------------------------------------
 	//
 	// Constructor
 	//
 	//--------------------------------------------------------------------------------
+	#if UNIVERSAL
+	init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, type: biostrapDeviceSDK.biostrapDeviceType) {
+		super.init(peripheral, characteristic: characteristic)
+		
+		self.type	= type
+	}
+	#else
 	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic) {
 		super.init(peripheral, characteristic: characteristic)
 	}
+	#endif
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -50,7 +68,13 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 			if let data = characteristic.value {
 				bluetooth	= ""
 				algorithms	= ""
+				#if UNIVERSAL || ETHOS
 				medtor		= ""
+				#endif
+				
+				#if UNIVERSAL || ALTER || KAIROS || ETHOS
+				sleep		= ""
+				#endif
 
 				let dataString = String(decoding: data, as: UTF8.self).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"])))
 				let components = dataString.split(separator: "_")
@@ -59,8 +83,27 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 				for component in components {
 					if (index == 0) { bluetooth		= String(component) }
 					if (index == 1) { algorithms	= String(component) }
-					if (index == 2) { medtor		= String(component) }
+					#if UNIVERSAL
 					
+					if ((type == .alter) || (type == .kairos)) {
+						if (index == 2) { sleep		= String(component) }
+					}
+					
+					if (type == .ethos) {
+						if (index == 2) { medtor	= String(component) }
+						if (index == 3) { sleep		= String(component) }
+					}
+					#endif
+										
+					#if ETHOS
+					if (index == 2) { medtor		= String(component) }
+					if (index == 3) { sleep			= String(component) }
+					#endif
+					
+					#if ALTER || KAIROS
+					if (index == 2) { sleep			= String(component) }
+					#endif
+
 					index = index + 1
 				}
 			}

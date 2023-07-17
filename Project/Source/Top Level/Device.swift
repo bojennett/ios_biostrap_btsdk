@@ -297,7 +297,14 @@ public class Device: NSObject {
 		else { return ("???") }
 	}
 	#endif
-	
+
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	@objc public var sleepSoftwareRevision		: String {
+		if let softwareRevision = mSoftwareRevision { return softwareRevision.sleep }
+		else { return ("???") }
+	}
+	#endif
+
 	internal var mModelNumber					: disStringCharacteristic?
 	internal var mFirmwareVersion				: disFirmwareVersionCharacteristic?
 	internal var mSoftwareRevision				: disSoftwareRevisionCharacteristic?
@@ -1531,7 +1538,11 @@ public class Device: NSObject {
 				case .software_revision_string:
 					mDISCharacteristicsDiscovered	= true
 					mDISCharacteristicCount = mDISCharacteristicCount + 1
+					#if UNIVERSAL
+					mSoftwareRevision = disSoftwareRevisionCharacteristic(peripheral, characteristic: characteristic, type: type)
+					#else
 					mSoftwareRevision = disSoftwareRevisionCharacteristic(peripheral, characteristic: characteristic)
+					#endif
 					mSoftwareRevision?.read()
 				case .manufacturer_name_string:
 					mDISCharacteristicsDiscovered	= true
