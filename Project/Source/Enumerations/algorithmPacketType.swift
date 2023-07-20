@@ -8,7 +8,7 @@
 import Foundation
 
 @objc public enum algorithmPacketType: UInt8, Codable {
-	case philipsSleep			= 0x00
+	case philipsSleep			= 0x2f
 	case unknown				= 0xff
 	
 	public var title: String {

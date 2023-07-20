@@ -86,6 +86,8 @@ extension Data {
 	var leInt64: Int {
 		if (self.count != 8) { return 0 }
 		
+		if (self[7] > 0x7f) { return 0 }	// Won't be able to create an integer here
+		
 		let byte0	= UInt64(self[0]) <<  0
 		let byte1	= UInt64(self[1]) <<  8
 		let byte2	= UInt64(self[2]) << 16

@@ -83,8 +83,8 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 				for component in components {
 					if (index == 0) { bluetooth		= String(component) }
 					if (index == 1) { algorithms	= String(component) }
-					#if UNIVERSAL
 					
+					#if UNIVERSAL
 					if ((type == .alter) || (type == .kairos)) {
 						if (index == 2) { sleep		= String(component) }
 					}
