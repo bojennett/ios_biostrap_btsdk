@@ -839,7 +839,7 @@ import Foundation
 			
 		#if UNIVERSAL || ALTER || KAIROS
 		case .algorithmData:
-			try container.encode(algorithmPacketSubType, forKey: .algorithmPacketSubType)
+			try container.encode(algorithmPacketSubType.title, forKey: .algorithmPacketSubType)
 			try container.encode(algorithmPacketCount, forKey: .algorithmPacketCount)
 			try container.encode(algorithmPacketIndex, forKey: .algorithmPacketIndex)
 			let outputString = algorithmPacketData.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
