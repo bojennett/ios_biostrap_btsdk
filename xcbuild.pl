@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+use POSIX 'strftime';
 use Getopt::Long;
 use Term::ANSIColor qw(:constants);
 use File::Path qw(make_path remove_tree);
@@ -20,6 +21,19 @@ sub Usage {
 	print "if 'all' chosen, all are made, including pods\n";
 	print "the optional keep (k) is whether to keep the underlying frameworks after assembling the XCFramework\n";
 	print "\n\n";
+}
+
+########################################################################################################################
+#
+########################################################################################################################
+#
+#
+#
+########################################################################################################################
+sub SecondsToTime {
+    my ($seconds) = @_;
+
+    return(strftime('%T', gmtime $seconds));
 }
 
 ########################################################################################################################
@@ -53,8 +67,6 @@ sub RunCommand {
 
 	$endTime	= time();
 	$elapsed	= $endTime - $startTime;
-	print "$0:    ";  print BRIGHT_GREEN, "Completed Building iPhone Simulator Framework in '$elapsed' seconds\n", RESET;
-	print "\n";	
 }
 
 GetOptions ('s|scheme=s' => \$scheme,
@@ -88,8 +100,8 @@ for $scheme (@schemes) {
 	else {
 		$opt_command			="xcodebuild -workspace $workspace.xcworkspace -scheme $scheme -showBuildSettings";
 
-		print "\n";
-		print "$0: Getting '$scheme' Version...\n\n";
+		print "-------------------------------------------------------\n";
+		print "$0: Building '", BOLD, BRIGHT_CYAN, "$scheme", RESET, "'\n";
 
 		open (CMD, "$opt_command 2>&1 |") || die "Can't get settings\n";
 		while (<CMD>) {
@@ -109,10 +121,10 @@ for $scheme (@schemes) {
 
 		$version = "$major_minor.$build";
 
-		print BOLD, BRIGHT_YELLOW, "$0: '$scheme' Version is '$version'\n", RESET;
+		print "$0: Version is '", BOLD, BRIGHT_YELLOW, "$version", RESET, "'\n";
 	}
 
-	$output					= "./Builds/$scheme";
+	$output					= "./releases/$scheme";
 	if ($version ne "") { $output .= "-$version"; }
 
 	$iOSDevicePath			="$output/Release-iphoneos";
@@ -130,11 +142,10 @@ for $scheme (@schemes) {
 		$xc2_command			= "";
 	}
 
-	print "\n";
-	print "$0: Commands that will be run:\n";
-	print "$0:     Simulator Build: "; print BRIGHT_GREEN, "$sim_command\n", RESET;
-	print "$0:     OS Build:        "; print BRIGHT_GREEN, "$ios_command\n", RESET;
-	print "$0:     XC Assembler:    "; print BRIGHT_GREEN, "$xc1_command\n", RESET;
+	print "$0: Commands:\n";
+	print "$0:     Simulator Build: ", BOLD, BRIGHT_GREEN, "$sim_command\n", RESET;
+	print "$0:     OS Build:        ", BOLD, BRIGHT_GREEN, "$ios_command\n", RESET;
+	print "$0:     XC Assembler:    ", BOLD, BRIGHT_GREEN, "$xc1_command\n", RESET;
 
 	if ($xc2_command ne "") {
 		print "$0:     XC Assembler:    "; print BRIGHT_GREEN, "$xc2_command\n", RESET;	
@@ -147,18 +158,14 @@ for $scheme (@schemes) {
 	}
 
 
-	print "\n";
-	print "$0: Building to: "; print BOLD, "$output\n", RESET;
-
 	$processStartTime	= time();
 
 	if (!(-d "$output")) {
-		print "$0: No Output Directory.  Creating...\n\n";
+		print "$0: No Output Directory.  Creating...\n";
 		make_path ($output);
 	}
 
 	system("rm -rf $output/*");
-	print "\n";
 
 	# Run build commands.  If any command fails, the application exits
 
@@ -176,14 +183,13 @@ for $scheme (@schemes) {
 		system ("rm -rf $iOSDevicePath");
 	}
 
-	print "\n";
-	print "$0: XCFramework located: "; print BOLD, "$output", RESET;
-	print "\n";
+	print "$0: XCFramework location: '"; print BOLD, BRIGHT_YELLOW, "$output", RESET, "'\n";
+
 	print "\n";
 
 	$totalTime = $endTime - $processStartTime;
 
-	print "$0:  Complete.  Elapsed time '$totalTime' seconds\n";
+	print "$0: Complete.  Elapsed time '", BOLD, BRIGHT_YELLOW, &SecondsToTime($totalTime), RESET, "'\n";
 	print "\n\n";
 
 	#system ("open $output");
