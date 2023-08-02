@@ -75,6 +75,8 @@ import iOSDFULibrary
 	@objc public var discovered: ((_ id: String)->())?
 	#endif
 	
+	@objc public var discoveredUnnamed: ((_ id: String)->())?
+	
 	@objc public var connected: ((_ id: String)->())?
 	@objc public var disconnected: ((_ id: String)->())?
 	

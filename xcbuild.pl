@@ -93,6 +93,8 @@ else {
 
 $workspace				= "biostrapDeviceSDK";
 
+$allStartTime	= time();
+
 for $scheme (@schemes) {
 	if ($scheme eq "pods") {
 		$scheme = "iOSDFULibrary";	# Will also build ZIPFoundation
@@ -191,7 +193,13 @@ for $scheme (@schemes) {
 
 	print "$0: Complete.  Elapsed time '", BOLD, BRIGHT_YELLOW, &SecondsToTime($totalTime), RESET, "'\n";
 	print "\n\n";
-
-	#system ("open $output");
 }
+
+$allTotalTime = time() - $allStartTime;
+
+print "\n";
+print "$0: ", "Total time: '", BOLD, BRIGHT_YELLOW, &SecondsToTime($allTotalTime), RESET "'\n";
+
+print "\n\n";
+
 

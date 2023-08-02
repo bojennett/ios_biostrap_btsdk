@@ -229,7 +229,7 @@ class Characteristic {
 			
 		}
 		else {
-			log?.v ("\(pID): Could not parse type: Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+			log?.e ("\(pID): Could not parse type: Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
 			return (false, .unknown, biostrapDataPacket())
 		}
 	}
