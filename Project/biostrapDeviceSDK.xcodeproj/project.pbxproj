@@ -79,6 +79,11 @@
 		3B29C561264C6C1A006BC11B /* batteryLevelCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C560264C6C1A006BC11B /* batteryLevelCharacteristic.swift */; };
 		3B29C56D264C7263006BC11B /* disStringCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */; };
 		3B29C59D264C9E72006BC11B /* nordicDFU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B29C59C264C9E72006BC11B /* nordicDFU.swift */; };
+		3B3E1BA52A7C22CA00D11023 /* UInt8Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3E1BA42A7C22CA00D11023 /* UInt8Extensions.swift */; };
+		3B3E1BA62A7C22CA00D11023 /* UInt8Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3E1BA42A7C22CA00D11023 /* UInt8Extensions.swift */; };
+		3B3E1BA72A7C22CA00D11023 /* UInt8Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3E1BA42A7C22CA00D11023 /* UInt8Extensions.swift */; };
+		3B3E1BA82A7C22CA00D11023 /* UInt8Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3E1BA42A7C22CA00D11023 /* UInt8Extensions.swift */; };
+		3B3E1BA92A7C22CA00D11023 /* UInt8Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3E1BA42A7C22CA00D11023 /* UInt8Extensions.swift */; };
 		3B49444028388D300074F569 /* ppgAlgorithmConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3FEE226D81A40005AF135 /* ppgAlgorithmConfiguration.swift */; };
 		3B5AFD542A2FAD9300F99663 /* hrZoneRangeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B78695429CCD657007FE112 /* hrZoneRangeType.swift */; };
 		3B5AFD562A2FEE6800F99663 /* buttonTapType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B5AFD552A2FEE6800F99663 /* buttonTapType.swift */; };
@@ -259,6 +264,7 @@
 		3B29C566264C7033006BC11B /* heartRateMeasurementCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = heartRateMeasurementCharacteristic.swift; sourceTree = "<group>"; };
 		3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = disStringCharacteristic.swift; sourceTree = "<group>"; };
 		3B29C59C264C9E72006BC11B /* nordicDFU.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nordicDFU.swift; sourceTree = "<group>"; };
+		3B3E1BA42A7C22CA00D11023 /* UInt8Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UInt8Extensions.swift; sourceTree = "<group>"; };
 		3B5AFD552A2FEE6800F99663 /* buttonTapType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = buttonTapType.swift; sourceTree = "<group>"; };
 		3B5BFCD9285D25C5009B22C4 /* liveSyncConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = liveSyncConfiguration.swift; sourceTree = "<group>"; };
 		3B78695429CCD657007FE112 /* hrZoneRangeType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hrZoneRangeType.swift; sourceTree = "<group>"; };
@@ -512,6 +518,7 @@
 			children = (
 				3BF3FEC426C59733005AF135 /* DataExtensions.swift */,
 				3B98B4B62787B4960081DA14 /* IntExtentions.swift */,
+				3B3E1BA42A7C22CA00D11023 /* UInt8Extensions.swift */,
 				3BF8082227A452A200595493 /* CoreBluetoothExtensions.swift */,
 				3B9C5C712A40AAE500570699 /* StringExtentions.swift */,
 			);
@@ -913,6 +920,7 @@
 				3B2602C12890541E00D5CAAA /* disStringCharacteristic.swift in Sources */,
 				3B2602C22890541E00D5CAAA /* Device.swift in Sources */,
 				3B78695529CCD657007FE112 /* hrZoneRangeType.swift in Sources */,
+				3B3E1BA52A7C22CA00D11023 /* UInt8Extensions.swift in Sources */,
 				3B2602C42890541E00D5CAAA /* diagnosticType.swift in Sources */,
 				3B2602C52890541E00D5CAAA /* IntExtentions.swift in Sources */,
 				3BC7AFFA2A57825400A3C1B8 /* algorithmPacketType.swift in Sources */,
@@ -962,6 +970,7 @@
 				3BC00BA32981BD36009F67CB /* batteryLevelCharacteristic.swift in Sources */,
 				3BC00BA42981BD36009F67CB /* settingsType.swift in Sources */,
 				3BC00BA52981BD36009F67CB /* heartRateMeasurementCharacteristic.swift in Sources */,
+				3B3E1BA62A7C22CA00D11023 /* UInt8Extensions.swift in Sources */,
 				3BC00BA62981BD36009F67CB /* ppgFailedType.swift in Sources */,
 				3BC00BA72981BD36009F67CB /* disFirmwareVersionCharacteristic.swift in Sources */,
 				3BC00BA82981BD36009F67CB /* disStringCharacteristic.swift in Sources */,
@@ -1005,6 +1014,7 @@
 				3BD01FB1261770BE0014CEF0 /* peripheralDelegate.swift in Sources */,
 				3BD01F9326153AC50014CEF0 /* centralManagerDelegate.swift in Sources */,
 				3B29C561264C6C1A006BC11B /* batteryLevelCharacteristic.swift in Sources */,
+				3B3E1BA82A7C22CA00D11023 /* UInt8Extensions.swift in Sources */,
 				3B930EFB2A31525000DB151C /* biostrapStreamingPacket.swift in Sources */,
 				3B260316289088DA00D5CAAA /* diagnosticType.swift in Sources */,
 				3BFAC25B2811E03500CDE388 /* livotalManufacturingTestResult.swift in Sources */,
@@ -1071,6 +1081,7 @@
 				3BF807E327A1C40A00595493 /* ppgAlgorithmConfiguration.swift in Sources */,
 				3BF807D427A1AFA000595493 /* IntExtentions.swift in Sources */,
 				3BF8082327A452A200595493 /* CoreBluetoothExtensions.swift in Sources */,
+				3B3E1BA92A7C22CA00D11023 /* UInt8Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1117,6 +1128,7 @@
 				3BF809AA27BD766D00595493 /* batteryLevelCharacteristic.swift in Sources */,
 				3B260292288A05CE00D5CAAA /* settingsType.swift in Sources */,
 				3BF809AB27BD766D00595493 /* heartRateMeasurementCharacteristic.swift in Sources */,
+				3B3E1BA72A7C22CA00D11023 /* UInt8Extensions.swift in Sources */,
 				3B0B204D291460C300BDB984 /* nextPacketStatusType.swift in Sources */,
 				3BD10BD928BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift in Sources */,
 				3B260295288A05F600D5CAAA /* ppgFailedType.swift in Sources */,
@@ -1245,7 +1257,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 70;
+				CURRENT_PROJECT_VERSION = 71;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
