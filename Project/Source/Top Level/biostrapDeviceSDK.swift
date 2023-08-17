@@ -316,8 +316,6 @@ import iOSDFULibrary
 
 		let licenseKeyData	= Data.init(base64: licenseKey)
 		if let decrypt = AES.decrypt(licenseKeyData, key: key, seed: seed) {
-			let str = String(decoding: decrypt, as: UTF8.self)
-							
 			do {
 				let license = try JSONDecoder().decode([String : String].self, from: decrypt)
 				log?.v ("\(license)")

@@ -445,7 +445,7 @@ import Foundation
 				}
 				bookend_payload		= data[2].Int8
 				epoch_ms			= data.subdata(in: Range(3...10)).leInt64
-				duration_ms			= data.subdata(in: Range(11...14)).leInt64
+				duration_ms			= data.subdata(in: Range(11...14)).leInt32
 			#endif
 				
 			#if UNIVERSAL || ALTER || KAIROS
