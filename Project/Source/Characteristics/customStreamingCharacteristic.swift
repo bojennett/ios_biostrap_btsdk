@@ -19,6 +19,7 @@ class customStreamingCharacteristic: Characteristic {
 	var ppgFailed: ((_ code: Int)->())?
 	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
 	var streamingPacket: ((_ packet: String)->())?
+	var dataAvailable: (()->())?
 
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var endSleepStatus: ((_ hasSleep: Bool)->())?
@@ -294,6 +295,8 @@ class customStreamingCharacteristic: Characteristic {
 					else { log?.e ("\(pID): Cannot make string from json data") }
 				}
 				catch { log?.e ("\(pID): Cannot make JSON data") }
+				
+			case .dataAvailable: dataAvailable?()
 			}
 		}
 		else {

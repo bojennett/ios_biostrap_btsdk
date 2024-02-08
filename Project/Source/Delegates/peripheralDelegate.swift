@@ -30,7 +30,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//--------------------------------------------------------------------------------
 	public func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) {
 		DispatchQueue.main.async {
-			if let device = self.mConnectedDevices?[peripheral.prettyID], (device.peripheral == peripheral) {
+			if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
 				device.isReady()
 			}
 		}
@@ -138,7 +138,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 			
 			if let characteristics = service.characteristics {
 				for characteristic in characteristics {
-					if let device = self.mConnectedDevices?[peripheral.prettyID], (device.peripheral == peripheral) {
+					if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
 						device.didDiscoverCharacteristic(characteristic)
 						
 						if (device.configured) {
@@ -178,7 +178,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 			//return
 		}
 		
-		if let device = self.mConnectedDevices?[peripheral.prettyID], (device.peripheral == peripheral) {
+		if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
 			device.didUpdateValue(characteristic)
 			
 			if (device.configured) {
@@ -212,7 +212,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 			
 			if let descriptors = characteristic.descriptors {
 				for descriptor in descriptors {
-					if let device = self.mConnectedDevices?[peripheral.prettyID] {
+					if let device = self.mConnectedDevices[peripheral.prettyID] {
 						device.didDiscoverDescriptor(descriptor, forCharacteristic: characteristic)
 					}
 				}
@@ -250,7 +250,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 				return
 			}
 
-			if let device = self.mConnectedDevices?[peripheral.prettyID], (device.peripheral == peripheral) {
+			if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
 				device.didUpdateNotificationState(characteristic)
 				
 				if (device.configured) {

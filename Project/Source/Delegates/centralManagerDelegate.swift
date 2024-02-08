@@ -21,11 +21,9 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		
 		DispatchQueue.main.async {
 			if (central.state != .poweredOn) {
-				self.mDiscoveredDevices?.removeAll()
+				self.mDiscoveredDevices.removeAll()
 				
-				if let connectedDevices = self.mConnectedDevices {
-					for (id, _) in connectedDevices { self.mProcessDisconnection(id) }
-				}
+				for (id, _) in self.mConnectedDevices { self.mProcessDisconnection(id) }
 				
 				//self.mConnectedDevices?.removeAll()
 				self.bluetoothReady?(false)
@@ -43,414 +41,701 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-		
-		if (advertisementData[CBAdvertisementDataServiceUUIDsKey] == nil) { return }
+	internal func mGetNameFromManufacturerData(_ advertisementData: [String : Any]) -> (Bool, biostrapDiscoveryType, Bool, String, service: CBUUID) {
+		var valid = false
+		var paired = biostrapDiscoveryType.unknown
+		var has_serial = false
+		var name = ""
+		var service = org_bluetooth_service.user_data.UUID
 
-		DispatchQueue.main.async { [self] in
-			if let _ = self.mConnectedDevices?[peripheral.prettyID] {
-				log?.e ("\(peripheral.prettyID): didDiscover: Discovered a device that is in my connected list.  Don't expect this...  Ignore")
-			}
-			
-			// Local Name
-			if let deviceName = mPairedDeviceNames[peripheral.prettyID] ?? advertisementData[CBAdvertisementDataLocalNameKey] as? String {
-				let serviceUUIDs	= advertisementData[CBAdvertisementDataServiceUUIDsKey] as! Array<CBUUID>
+		if let manufacturer_data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data {
+			if (manufacturer_data[0] == 0x42) && (manufacturer_data[1] == 0x53) {	// "BS" for "biostrap"
+				//log?.v ("Manufacturer Data: \(manufacturer_data.hexString)")
+				if (manufacturer_data.count == 3) {
+					if ((manufacturer_data[2] & 0x80) == 0x00) { // if bit 7 is set, this has a name, so length should not be 3!
+						log?.v (" --- No name: Flags = \(manufacturer_data.hexString)")
+						valid = true
+						if ((manufacturer_data[2] & 0x01) != 0x00) {
+							paired = .paired_w_uuid
+						}
+						else {
+							paired = .unpaired_w_uuid
+						}
+						
+						has_serial = ((manufacturer_data[2] & 0x02) != 0x00)
+					}
+					else {
+						log?.w (" --- has name, but length is weird: ${data.hexString()}")
+					}
+				}
 				
-				for thisUUID in serviceUUIDs {
+				else if (manufacturer_data.count == 14) {
+					//log?.v ("\(manufacturer_data.hexString)")
+					let prefix = String(decoding: manufacturer_data.subdata(in: Range(3...5)), as: UTF8.self)
+					if let deviceType = Device.prefixes(rawValue: prefix) {
+						
 #if UNIVERSAL || ALTER
-					if (thisUUID == Device.services.alterService.UUID) {
-						
-						if let _ = self.mDiscoveredDevices?[peripheral.prettyID] { }
-						else {
-#if UNIVERSAL
-							let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, type: .alter)
-#else
-							let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral)
-#endif
-							
-							device.epoch					= Date().timeIntervalSince1970
-							
-							device.batteryLevelUpdated					= { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
-							device.heartRateUpdated						= { id, epoch, hr, rr in DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) } }
-							device.writeEpochComplete					= { id, successful in DispatchQueue.main.async { self.writeEpochComplete?(id, successful) } }
-							device.readEpochComplete					= { id, successful, value in DispatchQueue.main.async { self.readEpochComplete?(id, successful, value) } }
-							device.endSleepComplete						= { id, successful in DispatchQueue.main.async { self.endSleepComplete?(id, successful) } }
-							device.getAllPacketsComplete				= { id, successful in DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) } }
-							device.getAllPacketsAcknowledgeComplete		= { id, successful, ack in DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) } }
-							device.getNextPacketComplete				= { id, successful, error_code, caughtUp, packet in DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) } }
-							device.getPacketCountComplete				= { id, successful, count in DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) } }
-							device.startManualComplete 					= { id, successful in DispatchQueue.main.async { self.startManualComplete?(id, successful) } }
-							device.stopManualComplete 					= { id, successful in DispatchQueue.main.async { self.stopManualComplete?(id, successful) } }
-							device.ledComplete							= { id, successful in DispatchQueue.main.async { self.ledComplete?(id, successful) } }
-							device.enterShipModeComplete				= { id, successful in DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) } }
-							device.writeSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) } }
-							device.readSerialNumberComplete				= { id, successful, partID in DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) } }
-							device.deleteSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) } }
-							device.writeAdvIntervalComplete				= { id, successful in DispatchQueue.main.async { self.writeAdvIntervalComplete?(id, successful) } }
-							device.readAdvIntervalComplete				= { id, successful, seconds in DispatchQueue.main.async { self.readAdvIntervalComplete?(id, successful, seconds) } }
-							device.deleteAdvIntervalComplete 			= { id, successful in DispatchQueue.main.async { self.deleteAdvIntervalComplete?(id, successful) } }
-							device.clearChargeCyclesComplete			= { id, successful in DispatchQueue.main.async { self.clearChargeCyclesComplete?(id, successful) } }
-							device.readChargeCyclesComplete				= { id, successful, cycles in DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) } }
-							device.readCanLogDiagnosticsComplete 		= { id, successful, allow in DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) } }
-							device.updateCanLogDiagnosticsComplete 		= { id, successful in DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) } }
-							device.allowPPGComplete						= { id, successful in DispatchQueue.main.async { self.allowPPGComplete?(id, successful) } }
-							device.wornCheckComplete					= { id, successful, code, value in DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) } }
-							device.rawLoggingComplete					= { id, successful in DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) } }
-							device.getRawLoggingStatusComplete 			= { id, successful, enabled in DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) } }
-							device.getWornOverrideStatusComplete 		= { id, successful, overridden in DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) } }
-							device.airplaneModeComplete					= { id, successful in DispatchQueue.main.async { self.airplaneModeComplete?(id, successful) } }
-							device.resetComplete						= { id, successful in DispatchQueue.main.async { self.resetComplete?(id, successful) } }
-							device.disableWornDetectComplete			= { id, successful in DispatchQueue.main.async { self.disableWornDetectComplete?(id, successful) } }
-							device.enableWornDetectComplete				= { id, successful in DispatchQueue.main.async { self.enableWornDetectComplete?(id, successful) } }
-							device.ppgMetrics     						= { id, successful, packet in DispatchQueue.main.async { self.ppgMetrics?(id, successful, packet) } }
-							device.ppgFailed							= { id, code in DispatchQueue.main.async { self.ppgFailed?(id, code) } }
-							
-							device.dataPackets							= { id, sequence_number, packets in
-								if (self.dataPacketsOnBackgroundThread) { self.dataPackets?(id, sequence_number, packets) }
-								else { DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) } }
-							}
-							
-							device.streamingPacket						= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
-							device.dataComplete							= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) } }
-							device.dataFailure							= { id in DispatchQueue.main.async { self.dataFailure?(id) } }
-							device.deviceWornStatus						= { id, isWorn in DispatchQueue.main.async { self.deviceWornStatus?(id, isWorn) } }
-							device.updateFirmwareFailed					= { id, code, message in DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) } }
-							device.updateFirmwareFinished				= { id in DispatchQueue.main.async { self.updateFirmwareFinished?(id) } }
-							device.updateFirmwareStarted				= { id in DispatchQueue.main.async { self.updateFirmwareStarted?(id) } }
-							device.updateFirmwareProgress				= { id, percentage in DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) } }
-							device.setSessionParamComplete				= { id, successful, parameter in DispatchQueue.main.async { self.setSessionParamComplete?(id, successful, parameter) } }
-							device.getSessionParamComplete				= { id, successful, parameter, value in DispatchQueue.main.async { self.getSessionParamComplete?(id, successful, parameter, value) } }
-							device.resetSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.resetSessionParamsComplete?(id, successful) } }
-							device.acceptSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) } }
-							device.manufacturingTestComplete			= { id, successful in DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) } }
-							device.manufacturingTestResult				= { id, valid, result in DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) } }
-							device.recalibratePPGComplete				= { id, successful in DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) } }
-							device.deviceChargingStatus					= { id, charging, on_charger, error in DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) } }
-							device.setHRZoneColorComplete				= { id, successful, type in DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) } }
-							device.getHRZoneColorComplete				= { id, successful, type, red, green, blue, on_ms, off_ms in DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) } }
-							device.setHRZoneRangeComplete				= { id, successful in DispatchQueue.main.async { self.setHRZoneRangeComplete?(id, successful) } }
-							device.getHRZoneRangeComplete				= { id, successful, enabled, high_value, low_value in DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) } }
-							device.getPPGAlgorithmComplete				= { id, successful, algorithm, state in DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm, state) } }
-							device.setAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.setAdvertiseAsHRMComplete?(id, successful, asHRM) } }
-							device.getAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) } }
-							device.setButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.setButtonCommandComplete?(id, successful, tap, command) } }
-							device.getButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.getButtonCommandComplete?(id, successful, tap, command) } }
-							device.setAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) } }
-							device.getAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.getAskForButtonResponseComplete?(id, successful, enable) } }
-							device.endSleepStatus 						= { id, hasSleep in DispatchQueue.main.async { self.endSleepStatus?(id, hasSleep) } }
-							device.buttonClicked 						= { id, presses in DispatchQueue.main.async { self.buttonClicked?(id, presses) } }
-
-							self.mDiscoveredDevices?[peripheral.prettyID] = device
+						if (deviceType == .alter) {
+							valid = true
+							service = Device.services.alter.UUID
 						}
+#endif
 						
-						log?.v("\(peripheral.prettyID): didDiscover: \(deviceName)")
-#if UNIVERSAL
-						discovered?(peripheral.prettyID, .alter)
-#else
-						discovered?(peripheral.prettyID)
-#endif
-					}
-#endif
-					
-#if UNIVERSAL || KAIROS
-					if (thisUUID == Device.services.kairosService.UUID) {
-						
-						if let _ = mDiscoveredDevices?[peripheral.prettyID] { }
-						else {
-#if UNIVERSAL
-							let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, type: .kairos)
-#else
-							let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral)
-#endif
-							
-							device.epoch					= Date().timeIntervalSince1970
-							
-							device.batteryLevelUpdated					= { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
-							device.heartRateUpdated						= { id, epoch, hr, rr in DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) } }
-							device.writeEpochComplete					= { id, successful in DispatchQueue.main.async { self.writeEpochComplete?(id, successful) } }
-							device.readEpochComplete					= { id, successful, value in DispatchQueue.main.async { self.readEpochComplete?(id, successful, value) } }
-							device.endSleepComplete						= { id, successful in DispatchQueue.main.async { self.endSleepComplete?(id, successful) } }
-							device.getAllPacketsComplete				= { id, successful in DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) } }
-							device.getAllPacketsAcknowledgeComplete		= { id, successful, ack in DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) } }
-							device.getNextPacketComplete				= { id, successful, error_code, caughtUp, packet in DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) } }
-							device.getPacketCountComplete				= { id, successful, count in DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) } }
-							device.startManualComplete 					= { id, successful in DispatchQueue.main.async { self.startManualComplete?(id, successful) } }
-							device.stopManualComplete 					= { id, successful in DispatchQueue.main.async { self.stopManualComplete?(id, successful) } }
-							device.ledComplete							= { id, successful in DispatchQueue.main.async { self.ledComplete?(id, successful) } }
-							device.enterShipModeComplete				= { id, successful in DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) } }
-							device.writeSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) } }
-							device.readSerialNumberComplete				= { id, successful, partID in DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) } }
-							device.deleteSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) } }
-							device.writeAdvIntervalComplete				= { id, successful in DispatchQueue.main.async { self.writeAdvIntervalComplete?(id, successful) } }
-							device.readAdvIntervalComplete				= { id, successful, seconds in DispatchQueue.main.async { self.readAdvIntervalComplete?(id, successful, seconds) } }
-							device.deleteAdvIntervalComplete 			= { id, successful in DispatchQueue.main.async { self.deleteAdvIntervalComplete?(id, successful) } }
-							device.clearChargeCyclesComplete			= { id, successful in DispatchQueue.main.async { self.clearChargeCyclesComplete?(id, successful) } }
-							device.readChargeCyclesComplete				= { id, successful, cycles in DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) } }
-							device.readCanLogDiagnosticsComplete 		= { id, successful, allow in DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) } }
-							device.updateCanLogDiagnosticsComplete 		= { id, successful in DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) } }
-							device.allowPPGComplete						= { id, successful in DispatchQueue.main.async { self.allowPPGComplete?(id, successful) } }
-							device.wornCheckComplete					= { id, successful, code, value in DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) } }
-							device.rawLoggingComplete					= { id, successful in DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) } }
-							device.getRawLoggingStatusComplete 			= { id, successful, enabled in DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) } }
-							device.getWornOverrideStatusComplete 		= { id, successful, overridden in DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) } }
-							device.airplaneModeComplete					= { id, successful in DispatchQueue.main.async { self.airplaneModeComplete?(id, successful) } }
-							device.resetComplete						= { id, successful in DispatchQueue.main.async { self.resetComplete?(id, successful) } }
-							device.disableWornDetectComplete			= { id, successful in DispatchQueue.main.async { self.disableWornDetectComplete?(id, successful) } }
-							device.enableWornDetectComplete				= { id, successful in DispatchQueue.main.async { self.enableWornDetectComplete?(id, successful) } }
-							device.ppgMetrics     						= { id, successful, packet in DispatchQueue.main.async { self.ppgMetrics?(id, successful, packet) } }
-							device.ppgFailed							= { id, code in DispatchQueue.main.async { self.ppgFailed?(id, code) } }
-							
-							device.dataPackets							= { id, sequence_number, packets in
-								if (self.dataPacketsOnBackgroundThread) { self.dataPackets?(id, sequence_number, packets) }
-								else { DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) } }
-							}
-							
-							device.streamingPacket						= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
-							device.dataComplete							= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) } }
-							device.dataFailure							= { id in DispatchQueue.main.async { self.dataFailure?(id) } }
-							device.deviceWornStatus						= { id, isWorn in DispatchQueue.main.async { self.deviceWornStatus?(id, isWorn) } }
-							device.updateFirmwareFailed					= { id, code, message in DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) } }
-							device.updateFirmwareFinished				= { id in DispatchQueue.main.async { self.updateFirmwareFinished?(id) } }
-							device.updateFirmwareStarted				= { id in DispatchQueue.main.async { self.updateFirmwareStarted?(id) } }
-							device.updateFirmwareProgress				= { id, percentage in DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) } }
-							device.setSessionParamComplete				= { id, successful, parameter in DispatchQueue.main.async { self.setSessionParamComplete?(id, successful, parameter) } }
-							device.getSessionParamComplete				= { id, successful, parameter, value in DispatchQueue.main.async { self.getSessionParamComplete?(id, successful, parameter, value) } }
-							device.resetSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.resetSessionParamsComplete?(id, successful) } }
-							device.acceptSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) } }
-							device.manufacturingTestComplete			= { id, successful in DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) } }
-							device.manufacturingTestResult				= { id, valid, result in DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) } }
-							device.recalibratePPGComplete				= { id, successful in DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) } }
-							device.deviceChargingStatus					= { id, charging, on_charger, error in DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) } }
-							device.setHRZoneColorComplete				= { id, successful, type in DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) } }
-							device.getHRZoneColorComplete				= { id, successful, type, red, green, blue, on_ms, off_ms in DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) } }
-							device.setHRZoneRangeComplete				= { id, successful in DispatchQueue.main.async { self.setHRZoneRangeComplete?(id, successful) } }
-							device.getHRZoneRangeComplete				= { id, successful, enabled, high_value, low_value in DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) } }
-							device.getPPGAlgorithmComplete				= { id, successful, algorithm, state in DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm, state) } }
-							device.setAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.setAdvertiseAsHRMComplete?(id, successful, asHRM) } }
-							device.getAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) } }
-							device.setButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.setButtonCommandComplete?(id, successful, tap, command) } }
-							device.getButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.getButtonCommandComplete?(id, successful, tap, command) } }
-							device.setAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) } }
-							device.getAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.getAskForButtonResponseComplete?(id, successful, enable) } }
-							device.endSleepStatus 						= { id, hasSleep in DispatchQueue.main.async { self.endSleepStatus?(id, hasSleep) } }
-							device.buttonClicked 						= { id, presses in DispatchQueue.main.async { self.buttonClicked?(id, presses) } }
-
-							self.mDiscoveredDevices?[peripheral.prettyID] = device
-						}
-						
-						log?.v("\(peripheral.prettyID): didDiscover: \(deviceName)")
-#if UNIVERSAL
-						discovered?(peripheral.prettyID, .kairos)
-#else
-						discovered?(peripheral.prettyID)
-#endif
-					}
-#endif
-					
 #if UNIVERSAL || ETHOS
-					if (thisUUID == Device.services.ethosService.UUID) {
-						
-						if let _ = self.mDiscoveredDevices?[peripheral.prettyID] { }
-						else {
-#if UNIVERSAL
-							let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, type: .ethos)
-#else
-							let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral)
-#endif
-							
-							device.epoch					= Date().timeIntervalSince1970
-							
-							device.batteryLevelUpdated					= { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
-							device.pulseOxUpdated						= { id, spo2, hr in DispatchQueue.main.async { self.pulseOx?(id, spo2, hr) } }
-							device.heartRateUpdated						= { id, epoch, hr, rr in DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) } }
-							device.writeEpochComplete					= { id, successful in DispatchQueue.main.async { self.writeEpochComplete?(id, successful) } }
-							device.readEpochComplete					= { id, successful, value in DispatchQueue.main.async { self.readEpochComplete?(id, successful, value) } }
-							device.endSleepComplete						= { id, successful in DispatchQueue.main.async { self.endSleepComplete?(id, successful) } }
-							device.debugComplete						= { id, successful, device, data in DispatchQueue.main.async { self.debugComplete?(id, successful, device, data) } }
-							device.getAllPacketsComplete				= { id, successful in DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) } }
-							device.getAllPacketsAcknowledgeComplete		= { id, successful, ack in DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) } }
-							device.getNextPacketComplete				= { id, successful, error_code, caughtUp, packet in DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) } }
-							device.getPacketCountComplete				= { id, successful, count in DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) } }
-							device.startManualComplete 					= { id, successful in DispatchQueue.main.async { self.startManualComplete?(id, successful) } }
-							device.stopManualComplete 					= { id, successful in DispatchQueue.main.async { self.stopManualComplete?(id, successful) } }
-							device.ledComplete							= { id, successful in DispatchQueue.main.async { self.ledComplete?(id, successful) } }
-							device.motorComplete						= { id, successful in DispatchQueue.main.async { self.motorComplete?(id, successful) } }
-							device.enterShipModeComplete				= { id, successful in DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) } }
-							device.writeSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) } }
-							device.readSerialNumberComplete				= { id, successful, partID in DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) } }
-							device.deleteSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) } }
-							device.writeAdvIntervalComplete				= { id, successful in DispatchQueue.main.async { self.writeAdvIntervalComplete?(id, successful) } }
-							device.readAdvIntervalComplete				= { id, successful, seconds in DispatchQueue.main.async { self.readAdvIntervalComplete?(id, successful, seconds) } }
-							device.deleteAdvIntervalComplete 			= { id, successful in DispatchQueue.main.async { self.deleteAdvIntervalComplete?(id, successful) } }
-							device.clearChargeCyclesComplete			= { id, successful in DispatchQueue.main.async { self.clearChargeCyclesComplete?(id, successful) } }
-							device.readChargeCyclesComplete				= { id, successful, cycles in DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) } }
-							device.readCanLogDiagnosticsComplete 		= { id, successful, allow in DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) } }
-							device.updateCanLogDiagnosticsComplete 		= { id, successful in DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) } }
-							device.allowPPGComplete						= { id, successful in DispatchQueue.main.async { self.allowPPGComplete?(id, successful) } }
-							device.wornCheckComplete					= { id, successful, code, value in DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) } }
-							device.rawLoggingComplete					= { id, successful in DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) } }
-							device.getRawLoggingStatusComplete 			= { id, successful, enabled in DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) } }
-							device.getWornOverrideStatusComplete 		= { id, successful, overridden in DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) } }
-							device.airplaneModeComplete					= { id, successful in DispatchQueue.main.async { self.airplaneModeComplete?(id, successful) } }
-							device.resetComplete						= { id, successful in DispatchQueue.main.async { self.resetComplete?(id, successful) } }
-							device.disableWornDetectComplete			= { id, successful in DispatchQueue.main.async { self.disableWornDetectComplete?(id, successful) } }
-							device.enableWornDetectComplete				= { id, successful in DispatchQueue.main.async { self.enableWornDetectComplete?(id, successful) } }
-							device.ppgMetrics     						= { id, successful, packet in DispatchQueue.main.async { self.ppgMetrics?(id, successful, packet) } }
-							device.ppgFailed							= { id, code in DispatchQueue.main.async { self.ppgFailed?(id, code) } }
-							
-							device.dataPackets							= { [self] id, sequence_number, packets in
-								if (dataPacketsOnBackgroundThread) { dataPackets?(id, sequence_number, packets) }
-								else { DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) }
-								}
-							}
-							
-							device.streamingPacket						= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
-							device.dataComplete							= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) } }
-							device.dataFailure							= { id in DispatchQueue.main.async { self.dataFailure?(id) } }
-							device.deviceWornStatus						= { id, isWorn in DispatchQueue.main.async { self.deviceWornStatus?(id, isWorn) } }
-							device.updateFirmwareFailed					= { id, code, message in DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) } }
-							device.updateFirmwareFinished				= { id in DispatchQueue.main.async { self.updateFirmwareFinished?(id) } }
-							device.updateFirmwareStarted				= { id in DispatchQueue.main.async { self.updateFirmwareStarted?(id) } }
-							device.updateFirmwareProgress				= { id, percentage in DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) } }
-							device.setSessionParamComplete				= { id, successful, parameter in DispatchQueue.main.async { self.setSessionParamComplete?(id, successful, parameter) } }
-							device.getSessionParamComplete				= { id, successful, parameter, value in DispatchQueue.main.async { self.getSessionParamComplete?(id, successful, parameter, value) } }
-							device.resetSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.resetSessionParamsComplete?(id, successful) } }
-							device.acceptSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) } }
-							device.manufacturingTestComplete			= { id, successful in DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) } }
-							device.manufacturingTestResult				= { id, valid, result in DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) } }
-							device.startLiveSyncComplete				= { id, successful in DispatchQueue.main.async { self.startLiveSyncComplete?(id, successful) } }
-							device.stopLiveSyncComplete					= { id, successful in DispatchQueue.main.async { self.stopLiveSyncComplete?(id, successful) } }
-							device.recalibratePPGComplete				= { id, successful in DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) } }
-							device.deviceChargingStatus					= { id, charging, on_charger, error in DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) } }
-							device.setHRZoneColorComplete				= { id, successful, type in DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) } }
-							device.getHRZoneColorComplete				= { id, successful, type, red, green, blue, on_ms, off_ms in DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) } }
-							device.setHRZoneRangeComplete				= { id, successful in DispatchQueue.main.async { self.setHRZoneRangeComplete?(id, successful) } }
-							device.getHRZoneRangeComplete				= { id, successful, enabled, high_value, low_value in DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) } }
-							device.getPPGAlgorithmComplete				= { id, successful, algorithm, state in DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm, state) } }
-							device.setAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.setAdvertiseAsHRMComplete?(id, successful, asHRM) } }
-							device.getAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) } }
-							device.setButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.setButtonCommandComplete?(id, successful, tap, command) } }
-							device.getButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.getButtonCommandComplete?(id, successful, tap, command) } }
-							device.setAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) } }
-							device.getAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.getAskForButtonResponseComplete?(id, successful, enable) } }
-							device.endSleepStatus 						= { id, hasSleep in DispatchQueue.main.async { self.endSleepStatus?(id, hasSleep) } }
-							device.buttonClicked 						= { id, presses in DispatchQueue.main.async { self.buttonClicked?(id, presses) } }
-
-							mDiscoveredDevices?[peripheral.prettyID] = device
+						if (deviceType == .ethos) {
+							valid = true
+							service = Device.services.ethos.UUID
 						}
-						
-						log?.v("\(peripheral.prettyID): didDiscover: \(deviceName)")
-						
-#if UNIVERSAL
-						discovered?(peripheral.prettyID, .ethos)
-#else
-						discovered?(peripheral.prettyID)
 #endif
-					}
+						
+#if UNIVERSAL || KAIROS
+						if (deviceType == .kairos) {
+							valid = true
+							service = Device.services.kairos.UUID
+						}
 #endif
-					
+						
 #if UNIVERSAL || LIVOTAL
-					if (thisUUID == Device.services.livotalService.UUID) {
-						
-						if let _ = self.mDiscoveredDevices?[peripheral.prettyID] { }
-						else {
-							
-#if UNIVERSAL
-							let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, type: .livotal)
-#else
-							let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral)
-#endif
-							
-							device.epoch					= Date().timeIntervalSince1970
-							
-							device.batteryLevelUpdated					= { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
-							device.writeEpochComplete					= { id, successful in DispatchQueue.main.async { self.writeEpochComplete?(id, successful) } }
-							device.readEpochComplete					= { id, successful, value in DispatchQueue.main.async { self.readEpochComplete?(id, successful, value) } }
-							device.endSleepComplete						= { id, successful in DispatchQueue.main.async { self.endSleepComplete?(id, successful) } }
-							device.getAllPacketsComplete				= { id, successful in DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) } }
-							device.getAllPacketsAcknowledgeComplete		= { id, successful, ack in DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) } }
-							device.getNextPacketComplete				= { id, successful, error_code, caughtUp, packet in DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) } }
-							device.getPacketCountComplete				= { id, successful, count in DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) } }
-							device.startManualComplete					= { id, successful in DispatchQueue.main.async { self.startManualComplete?(id, successful) } }
-							device.stopManualComplete					= { id, successful in DispatchQueue.main.async { self.stopManualComplete?(id, successful) } }
-							device.ledComplete							= { id, successful in DispatchQueue.main.async { self.ledComplete?(id, successful) } }
-							device.enterShipModeComplete				= { id, successful in DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) } }
-							device.writeSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) } }
-							device.readSerialNumberComplete				= { id, successful, partID in DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) } }
-							device.deleteSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) } }
-							device.writeAdvIntervalComplete				= { id, successful in DispatchQueue.main.async { self.writeAdvIntervalComplete?(id, successful) } }
-							device.readAdvIntervalComplete				= { id, successful, seconds in DispatchQueue.main.async { self.readAdvIntervalComplete?(id, successful, seconds) } }
-							device.deleteAdvIntervalComplete 			= { id, successful in DispatchQueue.main.async { self.deleteAdvIntervalComplete?(id, successful) } }
-							device.clearChargeCyclesComplete			= { id, successful in DispatchQueue.main.async { self.clearChargeCyclesComplete?(id, successful) } }
-							device.readChargeCyclesComplete				= { id, successful, cycles in DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) } }
-							device.readCanLogDiagnosticsComplete 		= { id, successful, allow in DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) } }
-							device.updateCanLogDiagnosticsComplete 		= { id, successful in DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) } }
-							device.allowPPGComplete						= { id, successful in DispatchQueue.main.async { self.allowPPGComplete?(id, successful) } }
-							device.wornCheckComplete					= { id, successful, code, value in DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) } }
-							device.rawLoggingComplete					= { id, successful in DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) } }
-							device.getRawLoggingStatusComplete 			= { id, successful, enabled in DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) } }
-							device.getWornOverrideStatusComplete 		= { id, successful, overridden in DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) } }
-							device.resetComplete						= { id, successful in DispatchQueue.main.async { self.resetComplete?(id, successful) } }
-							device.disableWornDetectComplete			= { id, successful in DispatchQueue.main.async { self.disableWornDetectComplete?(id, successful) } }
-							device.enableWornDetectComplete				= { id, successful in DispatchQueue.main.async { self.enableWornDetectComplete?(id, successful) } }
-							device.ppgMetrics     						= { id, successful, packet in DispatchQueue.main.async { self.ppgMetrics?(id, successful, packet) } }
-							device.ppgFailed							= { id, code in DispatchQueue.main.async { self.ppgFailed?(id, code) } }
-							
-							device.dataPackets							= { id, sequence_number, packets in
-								if (self.dataPacketsOnBackgroundThread) { self.dataPackets?(id, sequence_number, packets) }
-								else { DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) }
-								}
-							}
-							device.streamingPacket						= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
-							device.dataComplete							= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) } }
-							device.dataFailure							= { id in DispatchQueue.main.async { self.dataFailure?(id) } }
-							device.deviceWornStatus						= { id, isWorn in DispatchQueue.main.async { self.deviceWornStatus?(id, isWorn) } }
-							device.updateFirmwareFailed					= { id, code, message in DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) } }
-							device.updateFirmwareFinished				= { id in DispatchQueue.main.async { self.updateFirmwareFinished?(id) } }
-							device.updateFirmwareStarted				= { id in DispatchQueue.main.async { self.updateFirmwareStarted?(id) } }
-							device.updateFirmwareProgress				= { id, percentage in DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) } }
-							device.setSessionParamComplete				= { id, successful, parameter in DispatchQueue.main.async { self.setSessionParamComplete?(id, successful, parameter) } }
-							device.getSessionParamComplete				= { id, successful, parameter, value in DispatchQueue.main.async { self.getSessionParamComplete?(id, successful, parameter, value) } }
-							device.resetSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.resetSessionParamsComplete?(id, successful) } }
-							device.acceptSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) } }
-							device.manufacturingTestComplete			= { id, successful in DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) } }
-							device.manufacturingTestResult				= { id, valid, result in DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) } }
-							device.recalibratePPGComplete				= { id, successful in DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) } }
-							device.deviceChargingStatus					= { id, charging, on_charger, error in DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) } }
-
-							self.mDiscoveredDevices?[peripheral.prettyID] = device
+						if (deviceType == .livotal) {
+							valid = true
+							service = Device.services.livotal.UUID
 						}
-						
-						log?.v("\(peripheral.prettyID): didDiscover: \(deviceName)")
-						
-#if UNIVERSAL
-						self.discovered?(peripheral.prettyID, .livotal)
-#else
-						self.discovered?(peripheral.prettyID)
 #endif
-					}
-					
-					if (thisUUID == Device.services.nordicDFUService.UUID) {
-						log?.v("\(peripheral.prettyID): didDiscover: \(deviceName) -> DFU mode!")
 						
-						if (deviceName == gblDFUName) {
-							if (!dfu.active) {
-								log?.v("\(peripheral.prettyID): didDiscover: And it happens to be who I am looking for!")
-								dfu.update(peripheral)
+						if (valid) {
+							if ((manufacturer_data[2] & 0x01) != 0x00) {
+								paired = .paired
 							}
 							else {
-								log?.e("\(peripheral.prettyID): didDiscover: I should have started by now...")
+								paired = .unpaired
+							}
+							has_serial = (manufacturer_data[2] & 0x02) != 0x00
+							
+							if (has_serial) {
+								name = String(decoding: manufacturer_data.subdata(in: Range(6...13)), as: UTF8.self)	// Serial number
+							}
+							else {
+								let mac_address = String(decoding: manufacturer_data.subdata(in: Range(6...13)), as: UTF8.self)	// MAC Address
+								name = "\(prefix)-\(mac_address)"
 							}
 						}
-						else {
-							log?.e("\(peripheral.prettyID): didDiscover: This is not who I am looking for, though...")
+					}
+					
+					else {
+						log?.w ("Found a device with BS as the first two characters, but other advertising data I do not understand: \(manufacturer_data.hexString)")
+					}
+				}
+
+			}
+		}
+		
+		return (valid, paired, has_serial, name, service)
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+		var valid = false
+		var valid_type_but_no_name = false
+		var discovery_type = biostrapDiscoveryType.unknown
+		var has_serial = false
+		var deviceName = ""
+		var device_service = org_bluetooth_service.user_data.UUID
+		var services = [CBUUID]()
+
+		// Filter out all devices that i can't even connect to
+		if let connectable = advertisementData[CBAdvertisementDataIsConnectable] as? Bool {
+			if (!connectable) { return }
+		}
+		else {
+			//log?.e ("\(peripheral.prettyID): Can't find connectable flag...")
+			return
+		}
+		
+		// Paired with UUID or legacy
+		if let serviceUUIDs = advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID] {
+
+			// One of ours
+			if (Device.scan_services.contains(serviceUUIDs[0])) {
+				services = serviceUUIDs
+				
+				// New devices will also have manufacturer's data with the 128-bit UUID
+				if let manufacturer_data = advertisementData[CBAdvertisementDataManufacturerDataKey] as? Data {
+					if ((manufacturer_data[0] & 0x01) != 0x00) {
+						discovery_type = .paired_w_uuid
+					}
+					else {
+						discovery_type = .unpaired_w_uuid	// This really shouldn't happen.  If we have a UUID and are not legacy, firmware should have set the paired bit
+					}
+					has_serial = (manufacturer_data[0] & 0x02) != 0x00
+					
+					// Since we have a UUID in the advertisement, no room for a name.  Either this is a device we care about (in our paired list), or it's a device
+					// we have found that must belong to somebody else (because it was advertising with a UUID and has manufacturer's data.  In the latter case,
+					// we don't know the name.
+					if let test = mPairedDeviceNames[peripheral.prettyID] {
+						deviceName = test
+						valid = true
+					}
+					else {
+						deviceName = peripheral.prettyID 	// A paired device we don't own
+						valid = false
+						valid_type_but_no_name = true
+					}
+					
+					// If we want both paired
+					if (scanForPaired && scanForUnpaired) { }
+					else {
+						if (scanForPaired && discovery_type.isNotPaired) { // Not a paired device, and I want paired devices only
+							valid = false
+							if (scanInBackground) { valid_type_but_no_name = true }
+						}
+						
+						if (scanForUnpaired && discovery_type.isPaired) {	// Paired device, and I want unpaired devices only
+							valid = false
+							if (scanInBackground) { valid_type_but_no_name = true }
 						}
 					}
-#endif
+				}
+				
+				// If no manufacturer's data, it's a legacy device
+				else {
+					discovery_type = .legacy	// Legacy device doesn't have manufacturer's data
+					
+					if !scanForLegacy && scanInBackground {	// We still need legacy devices to go through even if we don't want them, because in the background the OS will suspend us if we don't take action
+						valid = false
+						valid_type_but_no_name = true
+						deviceName = peripheral.prettyID
+					}
+					else {
+						
+						// If this is a device I own, i definitely want it.
+						if let test = mPairedDeviceNames[peripheral.prettyID] {
+							deviceName = test
+							valid = true
+						}
+						else {
+							// Legacy Device has its name from scan response packet, but it doesn't always come through
+							if let test = advertisementData[CBAdvertisementDataLocalNameKey] as? String {
+								// Name came through
+								deviceName = test
+								if (scanForLegacy) { valid = true }
+								else {
+									valid = false
+									valid_type_but_no_name = true
+								}
+							}
+							else {
+								// Name did not come through
+								deviceName = peripheral.prettyID
+								valid = false
+								valid_type_but_no_name = true
+							}
+						}
+					}
 				}
 			}
-			else {
-				self.discoveredUnnamed?(peripheral.prettyID)
+			
+			// Heart rate monitor - still might be ours if it's new firmware.  This would be a paired device below the threshold, but with HRM advertising enabled
+			else if (serviceUUIDs[0] == org_bluetooth_service.heart_rate.UUID) {
+				(valid, discovery_type, has_serial, deviceName, device_service) = mGetNameFromManufacturerData(advertisementData)
+				services.append(device_service)
+				
+				if (valid) {
+					if let _ = mPairedDeviceNames[peripheral.prettyID] { }
+					else {
+						if (scanForPaired && scanForUnpaired) { }	// I want anything that is valid and is advertising with an HRM
+						else {
+							if (scanForPaired && discovery_type.isNotPaired) { 	// Not a paired device, and I want paired devices only
+								valid = false
+							}
+							
+							if (scanForUnpaired && discovery_type.isPaired) {	// Paired device, and I want unpaired devices only
+								valid = false
+							}
+						}
+					}
+
+					services.append(contentsOf: serviceUUIDs)
+					
+					//log?.v ("\(peripheral.prettyID) - New FW: (HRM only) \(deviceName), paired = \(paired), has_serial = \(has_serial), \(services)")
+				}
+				else {
+					if let test = mPairedDeviceNames[peripheral.prettyID] ?? advertisementData[CBAdvertisementDataLocalNameKey] as? String {
+						deviceName = test
+						//log?.v ("\(peripheral.prettyID) - Leg FW: \(deviceName) - \(serviceUUIDs)")
+					}
+				}
+				services = serviceUUIDs
+			}
+		}
+		
+		// Paired without UUID or not paired
+		else {
+			(valid, discovery_type, has_serial, deviceName, device_service) = mGetNameFromManufacturerData(advertisementData)
+			
+			if (valid) {
+				if let _ = mPairedDeviceNames[peripheral.prettyID] { }
+				else {
+					if (!scanForPaired && !scanForUnpaired) {	// I don't want anything
+						valid = false
+						valid_type_but_no_name = true
+					}
+					else if (scanForPaired && scanForUnpaired) { }	// I want anything that is valid
+					else {
+						if (scanForPaired && discovery_type.isNotPaired) { 	// Not a paired device, and I want paired devices only
+							valid = false
+							valid_type_but_no_name = true
+						}
+						
+						if (scanForUnpaired && discovery_type.isPaired) {	// Paired device, and I want unpaired devices only
+							valid = false
+							valid_type_but_no_name = true
+						}
+					}
+				}
+
+				services.append(device_service)
+				//log?.v ("\(peripheral.prettyID) - New FW: \(deviceName), paired = \(paired), has_serial = \(has_serial), \(device_service) [\(valid) - \(scanForPaired), \(scanForUnpaired)]")
+			}
+		}
+		
+		DispatchQueue.main.async { [self] in
+			if let _ = self.mConnectedDevices[peripheral.prettyID] {
+				log?.e ("\(peripheral.prettyID): didDiscover: Discovered a device that is in my connected list.  Don't expect this...  Ignore")
+			}
+							
+			for thisUUID in services {
+#if UNIVERSAL || ALTER
+				if (thisUUID == Device.services.alter.UUID) {
+					
+					if let device = self.mDiscoveredDevices[peripheral.prettyID] {
+						if valid { discovered?(peripheral.prettyID, device) }
+						else {
+							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+						}
+					}
+					else {
+#if UNIVERSAL
+						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, type: .alter, discoveryType: discovery_type)
+#else
+						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, discoveryType: discovery_type)
+#endif
+						
+						device.epoch					= Date().timeIntervalSince1970
+						
+						device.batteryLevelUpdated					= { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
+						device.heartRateUpdated						= { id, epoch, hr, rr in DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) } }
+						device.writeEpochComplete					= { id, successful in DispatchQueue.main.async { self.writeEpochComplete?(id, successful) } }
+						device.readEpochComplete					= { id, successful, value in DispatchQueue.main.async { self.readEpochComplete?(id, successful, value) } }
+						device.endSleepComplete						= { id, successful in DispatchQueue.main.async { self.endSleepComplete?(id, successful) } }
+						device.getAllPacketsComplete				= { id, successful in DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) } }
+						device.getAllPacketsAcknowledgeComplete		= { id, successful, ack in DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) } }
+						device.getNextPacketComplete				= { id, successful, error_code, caughtUp, packet in DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) } }
+						device.getPacketCountComplete				= { id, successful, count in DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) } }
+						device.startManualComplete 					= { id, successful in DispatchQueue.main.async { self.startManualComplete?(id, successful) } }
+						device.stopManualComplete 					= { id, successful in DispatchQueue.main.async { self.stopManualComplete?(id, successful) } }
+						device.ledComplete							= { id, successful in DispatchQueue.main.async { self.ledComplete?(id, successful) } }
+						device.enterShipModeComplete				= { id, successful in DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) } }
+						device.writeSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) } }
+						device.readSerialNumberComplete				= { id, successful, partID in DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) } }
+						device.deleteSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) } }
+						device.writeAdvIntervalComplete				= { id, successful in DispatchQueue.main.async { self.writeAdvIntervalComplete?(id, successful) } }
+						device.readAdvIntervalComplete				= { id, successful, seconds in DispatchQueue.main.async { self.readAdvIntervalComplete?(id, successful, seconds) } }
+						device.deleteAdvIntervalComplete 			= { id, successful in DispatchQueue.main.async { self.deleteAdvIntervalComplete?(id, successful) } }
+						device.clearChargeCyclesComplete			= { id, successful in DispatchQueue.main.async { self.clearChargeCyclesComplete?(id, successful) } }
+						device.readChargeCyclesComplete				= { id, successful, cycles in DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) } }
+						device.readCanLogDiagnosticsComplete 		= { id, successful, allow in DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) } }
+						device.updateCanLogDiagnosticsComplete 		= { id, successful in DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) } }
+						device.allowPPGComplete						= { id, successful in DispatchQueue.main.async { self.allowPPGComplete?(id, successful) } }
+						device.wornCheckComplete					= { id, successful, code, value in DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) } }
+						device.rawLoggingComplete					= { id, successful in DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) } }
+						device.getRawLoggingStatusComplete 			= { id, successful, enabled in DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) } }
+						device.getWornOverrideStatusComplete 		= { id, successful, overridden in DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) } }
+						device.airplaneModeComplete					= { id, successful in DispatchQueue.main.async { self.airplaneModeComplete?(id, successful) } }
+						device.resetComplete						= { id, successful in DispatchQueue.main.async { self.resetComplete?(id, successful) } }
+						device.disableWornDetectComplete			= { id, successful in DispatchQueue.main.async { self.disableWornDetectComplete?(id, successful) } }
+						device.enableWornDetectComplete				= { id, successful in DispatchQueue.main.async { self.enableWornDetectComplete?(id, successful) } }
+						device.ppgMetrics     						= { id, successful, packet in DispatchQueue.main.async { self.ppgMetrics?(id, successful, packet) } }
+						device.ppgFailed							= { id, code in DispatchQueue.main.async { self.ppgFailed?(id, code) } }
+						
+						device.dataPackets							= { id, sequence_number, packets in
+							if (self.dataPacketsOnBackgroundThread) { self.dataPackets?(id, sequence_number, packets) }
+							else { DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) } }
+						}
+						
+						device.streamingPacket						= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
+						device.dataAvailable						= { id in DispatchQueue.main.async { self.dataAvailable?(id) }}
+						device.dataComplete							= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) } }
+						device.dataFailure							= { id in DispatchQueue.main.async { self.dataFailure?(id) } }
+						device.deviceWornStatus						= { id, isWorn in DispatchQueue.main.async { self.deviceWornStatus?(id, isWorn) } }
+						device.updateFirmwareFailed					= { id, code, message in DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) } }
+						device.updateFirmwareFinished				= { id in DispatchQueue.main.async { self.updateFirmwareFinished?(id) } }
+						device.updateFirmwareStarted				= { id in DispatchQueue.main.async { self.updateFirmwareStarted?(id) } }
+						device.updateFirmwareProgress				= { id, percentage in DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) } }
+						device.setSessionParamComplete				= { id, successful, parameter in DispatchQueue.main.async { self.setSessionParamComplete?(id, successful, parameter) } }
+						device.getSessionParamComplete				= { id, successful, parameter, value in DispatchQueue.main.async { self.getSessionParamComplete?(id, successful, parameter, value) } }
+						device.resetSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.resetSessionParamsComplete?(id, successful) } }
+						device.acceptSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) } }
+						device.manufacturingTestComplete			= { id, successful in DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) } }
+						device.manufacturingTestResult				= { id, valid, result in DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) } }
+						device.recalibratePPGComplete				= { id, successful in DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) } }
+						device.deviceChargingStatus					= { id, charging, on_charger, error in DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) } }
+						device.setHRZoneColorComplete				= { id, successful, type in DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) } }
+						device.getHRZoneColorComplete				= { id, successful, type, red, green, blue, on_ms, off_ms in DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) } }
+						device.setHRZoneRangeComplete				= { id, successful in DispatchQueue.main.async { self.setHRZoneRangeComplete?(id, successful) } }
+						device.getHRZoneRangeComplete				= { id, successful, enabled, high_value, low_value in DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) } }
+						device.getPPGAlgorithmComplete				= { id, successful, algorithm, state in DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm, state) } }
+						device.setAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.setAdvertiseAsHRMComplete?(id, successful, asHRM) } }
+						device.getAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) } }
+						device.setButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.setButtonCommandComplete?(id, successful, tap, command) } }
+						device.getButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.getButtonCommandComplete?(id, successful, tap, command) } }
+						device.setPairedComplete					= { id, successful in DispatchQueue.main.async { self.setPairedComplete?(id, successful) } }
+						device.setUnpairedComplete					= { id, successful in DispatchQueue.main.async { self.setUnpairedComplete?(id, successful) } }
+						device.getPairedComplete					= { id, successful, paired in DispatchQueue.main.async { self.getPairedComplete?(id, successful, paired) } }
+						device.setPageThresholdComplete				= { id, successful in DispatchQueue.main.async { self.setPageThresholdComplete?(id, successful) } }
+						device.getPageThresholdComplete				= { id, successful, threshold in DispatchQueue.main.async { self.getPageThresholdComplete?(id, successful, threshold) } }
+						device.deletePageThresholdComplete			= { id, successful in DispatchQueue.main.async { self.deletePageThresholdComplete?(id, successful) } }
+						device.setAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) } }
+						device.getAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.getAskForButtonResponseComplete?(id, successful, enable) } }
+						device.endSleepStatus 						= { id, hasSleep in DispatchQueue.main.async { self.endSleepStatus?(id, hasSleep) } }
+						device.buttonClicked 						= { id, presses in DispatchQueue.main.async { self.buttonClicked?(id, presses) } }
+						
+						if valid {
+							self.mDiscoveredDevices[peripheral.prettyID] = device
+							discovered?(peripheral.prettyID, device)
+						}
+						else {
+							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+						}
+					}
+					
+				}
+#endif
+				
+#if UNIVERSAL || KAIROS
+				if (thisUUID == Device.services.kairos.UUID) {
+					
+					if let device = mDiscoveredDevices[peripheral.prettyID] {
+						if valid { discovered?(peripheral.prettyID, device) }
+						else {
+							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+						}
+					}
+					else {
+#if UNIVERSAL
+						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, type: .kairos, discoveryType: discovery_type)
+#else
+						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, discoveryType: discovery_type)
+#endif
+						
+						device.epoch					= Date().timeIntervalSince1970
+						
+						device.batteryLevelUpdated					= { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
+						device.heartRateUpdated						= { id, epoch, hr, rr in DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) } }
+						device.writeEpochComplete					= { id, successful in DispatchQueue.main.async { self.writeEpochComplete?(id, successful) } }
+						device.readEpochComplete					= { id, successful, value in DispatchQueue.main.async { self.readEpochComplete?(id, successful, value) } }
+						device.endSleepComplete						= { id, successful in DispatchQueue.main.async { self.endSleepComplete?(id, successful) } }
+						device.getAllPacketsComplete				= { id, successful in DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) } }
+						device.getAllPacketsAcknowledgeComplete		= { id, successful, ack in DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) } }
+						device.getNextPacketComplete				= { id, successful, error_code, caughtUp, packet in DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) } }
+						device.getPacketCountComplete				= { id, successful, count in DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) } }
+						device.startManualComplete 					= { id, successful in DispatchQueue.main.async { self.startManualComplete?(id, successful) } }
+						device.stopManualComplete 					= { id, successful in DispatchQueue.main.async { self.stopManualComplete?(id, successful) } }
+						device.ledComplete							= { id, successful in DispatchQueue.main.async { self.ledComplete?(id, successful) } }
+						device.enterShipModeComplete				= { id, successful in DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) } }
+						device.writeSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) } }
+						device.readSerialNumberComplete				= { id, successful, partID in DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) } }
+						device.deleteSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) } }
+						device.writeAdvIntervalComplete				= { id, successful in DispatchQueue.main.async { self.writeAdvIntervalComplete?(id, successful) } }
+						device.readAdvIntervalComplete				= { id, successful, seconds in DispatchQueue.main.async { self.readAdvIntervalComplete?(id, successful, seconds) } }
+						device.deleteAdvIntervalComplete 			= { id, successful in DispatchQueue.main.async { self.deleteAdvIntervalComplete?(id, successful) } }
+						device.clearChargeCyclesComplete			= { id, successful in DispatchQueue.main.async { self.clearChargeCyclesComplete?(id, successful) } }
+						device.readChargeCyclesComplete				= { id, successful, cycles in DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) } }
+						device.readCanLogDiagnosticsComplete 		= { id, successful, allow in DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) } }
+						device.updateCanLogDiagnosticsComplete 		= { id, successful in DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) } }
+						device.allowPPGComplete						= { id, successful in DispatchQueue.main.async { self.allowPPGComplete?(id, successful) } }
+						device.wornCheckComplete					= { id, successful, code, value in DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) } }
+						device.rawLoggingComplete					= { id, successful in DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) } }
+						device.getRawLoggingStatusComplete 			= { id, successful, enabled in DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) } }
+						device.getWornOverrideStatusComplete 		= { id, successful, overridden in DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) } }
+						device.airplaneModeComplete					= { id, successful in DispatchQueue.main.async { self.airplaneModeComplete?(id, successful) } }
+						device.resetComplete						= { id, successful in DispatchQueue.main.async { self.resetComplete?(id, successful) } }
+						device.disableWornDetectComplete			= { id, successful in DispatchQueue.main.async { self.disableWornDetectComplete?(id, successful) } }
+						device.enableWornDetectComplete				= { id, successful in DispatchQueue.main.async { self.enableWornDetectComplete?(id, successful) } }
+						device.ppgMetrics     						= { id, successful, packet in DispatchQueue.main.async { self.ppgMetrics?(id, successful, packet) } }
+						device.ppgFailed							= { id, code in DispatchQueue.main.async { self.ppgFailed?(id, code) } }
+						
+						device.dataPackets							= { id, sequence_number, packets in
+							if (self.dataPacketsOnBackgroundThread) { self.dataPackets?(id, sequence_number, packets) }
+							else { DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) } }
+						}
+						
+						device.streamingPacket						= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
+						device.dataAvailable						= { id in DispatchQueue.main.async { self.dataAvailable?(id) }}
+						device.dataComplete							= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) } }
+						device.dataFailure							= { id in DispatchQueue.main.async { self.dataFailure?(id) } }
+						device.deviceWornStatus						= { id, isWorn in DispatchQueue.main.async { self.deviceWornStatus?(id, isWorn) } }
+						device.updateFirmwareFailed					= { id, code, message in DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) } }
+						device.updateFirmwareFinished				= { id in DispatchQueue.main.async { self.updateFirmwareFinished?(id) } }
+						device.updateFirmwareStarted				= { id in DispatchQueue.main.async { self.updateFirmwareStarted?(id) } }
+						device.updateFirmwareProgress				= { id, percentage in DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) } }
+						device.setSessionParamComplete				= { id, successful, parameter in DispatchQueue.main.async { self.setSessionParamComplete?(id, successful, parameter) } }
+						device.getSessionParamComplete				= { id, successful, parameter, value in DispatchQueue.main.async { self.getSessionParamComplete?(id, successful, parameter, value) } }
+						device.resetSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.resetSessionParamsComplete?(id, successful) } }
+						device.acceptSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) } }
+						device.manufacturingTestComplete			= { id, successful in DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) } }
+						device.manufacturingTestResult				= { id, valid, result in DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) } }
+						device.recalibratePPGComplete				= { id, successful in DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) } }
+						device.deviceChargingStatus					= { id, charging, on_charger, error in DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) } }
+						device.setHRZoneColorComplete				= { id, successful, type in DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) } }
+						device.getHRZoneColorComplete				= { id, successful, type, red, green, blue, on_ms, off_ms in DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) } }
+						device.setHRZoneRangeComplete				= { id, successful in DispatchQueue.main.async { self.setHRZoneRangeComplete?(id, successful) } }
+						device.getHRZoneRangeComplete				= { id, successful, enabled, high_value, low_value in DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) } }
+						device.getPPGAlgorithmComplete				= { id, successful, algorithm, state in DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm, state) } }
+						device.setAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.setAdvertiseAsHRMComplete?(id, successful, asHRM) } }
+						device.getAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) } }
+						device.setButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.setButtonCommandComplete?(id, successful, tap, command) } }
+						device.getButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.getButtonCommandComplete?(id, successful, tap, command) } }
+						device.setPairedComplete					= { id, successful in DispatchQueue.main.async { self.setPairedComplete?(id, successful) } }
+						device.setUnpairedComplete					= { id, successful in DispatchQueue.main.async { self.setUnpairedComplete?(id, successful) } }
+						device.getPairedComplete					= { id, successful, paired in DispatchQueue.main.async { self.getPairedComplete?(id, successful, paired) } }
+						device.setPageThresholdComplete				= { id, successful in DispatchQueue.main.async { self.setPageThresholdComplete?(id, successful) } }
+						device.getPageThresholdComplete				= { id, successful, threshold in DispatchQueue.main.async { self.getPageThresholdComplete?(id, successful, threshold) } }
+						device.deletePageThresholdComplete			= { id, successful in DispatchQueue.main.async { self.deletePageThresholdComplete?(id, successful) } }
+						device.setAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) } }
+						device.getAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.getAskForButtonResponseComplete?(id, successful, enable) } }
+						device.endSleepStatus 						= { id, hasSleep in DispatchQueue.main.async { self.endSleepStatus?(id, hasSleep) } }
+						device.buttonClicked 						= { id, presses in DispatchQueue.main.async { self.buttonClicked?(id, presses) } }
+						
+						if valid {
+							self.mDiscoveredDevices[peripheral.prettyID] = device
+							discovered?(peripheral.prettyID, device)
+						}
+						else {
+							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+						}
+					}
+				}
+#endif
+				
+#if UNIVERSAL || ETHOS
+				if (thisUUID == Device.services.ethos.UUID) {
+					
+					if let device = self.mDiscoveredDevices[peripheral.prettyID] {
+						if valid { discovered?(peripheral.prettyID, device) }
+						else {
+							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+						}
+					}
+					else {
+#if UNIVERSAL
+						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, type: .ethos, discoveryType: discovery_type)
+#else
+						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, discoveryType: discovery_type)
+#endif
+						
+						device.epoch					= Date().timeIntervalSince1970
+						
+						device.batteryLevelUpdated					= { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
+						device.pulseOxUpdated						= { id, spo2, hr in DispatchQueue.main.async { self.pulseOx?(id, spo2, hr) } }
+						device.heartRateUpdated						= { id, epoch, hr, rr in DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) } }
+						device.writeEpochComplete					= { id, successful in DispatchQueue.main.async { self.writeEpochComplete?(id, successful) } }
+						device.readEpochComplete					= { id, successful, value in DispatchQueue.main.async { self.readEpochComplete?(id, successful, value) } }
+						device.endSleepComplete						= { id, successful in DispatchQueue.main.async { self.endSleepComplete?(id, successful) } }
+						device.debugComplete						= { id, successful, device, data in DispatchQueue.main.async { self.debugComplete?(id, successful, device, data) } }
+						device.getAllPacketsComplete				= { id, successful in DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) } }
+						device.getAllPacketsAcknowledgeComplete		= { id, successful, ack in DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) } }
+						device.getNextPacketComplete				= { id, successful, error_code, caughtUp, packet in DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) } }
+						device.getPacketCountComplete				= { id, successful, count in DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) } }
+						device.startManualComplete 					= { id, successful in DispatchQueue.main.async { self.startManualComplete?(id, successful) } }
+						device.stopManualComplete 					= { id, successful in DispatchQueue.main.async { self.stopManualComplete?(id, successful) } }
+						device.ledComplete							= { id, successful in DispatchQueue.main.async { self.ledComplete?(id, successful) } }
+						device.motorComplete						= { id, successful in DispatchQueue.main.async { self.motorComplete?(id, successful) } }
+						device.enterShipModeComplete				= { id, successful in DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) } }
+						device.writeSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) } }
+						device.readSerialNumberComplete				= { id, successful, partID in DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) } }
+						device.deleteSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) } }
+						device.writeAdvIntervalComplete				= { id, successful in DispatchQueue.main.async { self.writeAdvIntervalComplete?(id, successful) } }
+						device.readAdvIntervalComplete				= { id, successful, seconds in DispatchQueue.main.async { self.readAdvIntervalComplete?(id, successful, seconds) } }
+						device.deleteAdvIntervalComplete 			= { id, successful in DispatchQueue.main.async { self.deleteAdvIntervalComplete?(id, successful) } }
+						device.clearChargeCyclesComplete			= { id, successful in DispatchQueue.main.async { self.clearChargeCyclesComplete?(id, successful) } }
+						device.readChargeCyclesComplete				= { id, successful, cycles in DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) } }
+						device.readCanLogDiagnosticsComplete 		= { id, successful, allow in DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) } }
+						device.updateCanLogDiagnosticsComplete 		= { id, successful in DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) } }
+						device.allowPPGComplete						= { id, successful in DispatchQueue.main.async { self.allowPPGComplete?(id, successful) } }
+						device.wornCheckComplete					= { id, successful, code, value in DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) } }
+						device.rawLoggingComplete					= { id, successful in DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) } }
+						device.getRawLoggingStatusComplete 			= { id, successful, enabled in DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) } }
+						device.getWornOverrideStatusComplete 		= { id, successful, overridden in DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) } }
+						device.airplaneModeComplete					= { id, successful in DispatchQueue.main.async { self.airplaneModeComplete?(id, successful) } }
+						device.resetComplete						= { id, successful in DispatchQueue.main.async { self.resetComplete?(id, successful) } }
+						device.disableWornDetectComplete			= { id, successful in DispatchQueue.main.async { self.disableWornDetectComplete?(id, successful) } }
+						device.enableWornDetectComplete				= { id, successful in DispatchQueue.main.async { self.enableWornDetectComplete?(id, successful) } }
+						device.ppgMetrics     						= { id, successful, packet in DispatchQueue.main.async { self.ppgMetrics?(id, successful, packet) } }
+						device.ppgFailed							= { id, code in DispatchQueue.main.async { self.ppgFailed?(id, code) } }
+						
+						device.dataPackets							= { [self] id, sequence_number, packets in
+							if (dataPacketsOnBackgroundThread) { dataPackets?(id, sequence_number, packets) }
+							else { DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) }
+							}
+						}
+						
+						device.streamingPacket						= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
+						device.dataAvailable						= { id in DispatchQueue.main.async { self.dataAvailable?(id) }}
+						device.dataComplete							= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) } }
+						device.dataFailure							= { id in DispatchQueue.main.async { self.dataFailure?(id) } }
+						device.deviceWornStatus						= { id, isWorn in DispatchQueue.main.async { self.deviceWornStatus?(id, isWorn) } }
+						device.updateFirmwareFailed					= { id, code, message in DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) } }
+						device.updateFirmwareFinished				= { id in DispatchQueue.main.async { self.updateFirmwareFinished?(id) } }
+						device.updateFirmwareStarted				= { id in DispatchQueue.main.async { self.updateFirmwareStarted?(id) } }
+						device.updateFirmwareProgress				= { id, percentage in DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) } }
+						device.setSessionParamComplete				= { id, successful, parameter in DispatchQueue.main.async { self.setSessionParamComplete?(id, successful, parameter) } }
+						device.getSessionParamComplete				= { id, successful, parameter, value in DispatchQueue.main.async { self.getSessionParamComplete?(id, successful, parameter, value) } }
+						device.resetSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.resetSessionParamsComplete?(id, successful) } }
+						device.acceptSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) } }
+						device.manufacturingTestComplete			= { id, successful in DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) } }
+						device.manufacturingTestResult				= { id, valid, result in DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) } }
+						device.startLiveSyncComplete				= { id, successful in DispatchQueue.main.async { self.startLiveSyncComplete?(id, successful) } }
+						device.stopLiveSyncComplete					= { id, successful in DispatchQueue.main.async { self.stopLiveSyncComplete?(id, successful) } }
+						device.recalibratePPGComplete				= { id, successful in DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) } }
+						device.deviceChargingStatus					= { id, charging, on_charger, error in DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) } }
+						device.setHRZoneColorComplete				= { id, successful, type in DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) } }
+						device.getHRZoneColorComplete				= { id, successful, type, red, green, blue, on_ms, off_ms in DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) } }
+						device.setHRZoneRangeComplete				= { id, successful in DispatchQueue.main.async { self.setHRZoneRangeComplete?(id, successful) } }
+						device.getHRZoneRangeComplete				= { id, successful, enabled, high_value, low_value in DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) } }
+						device.getPPGAlgorithmComplete				= { id, successful, algorithm, state in DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm, state) } }
+						device.setAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.setAdvertiseAsHRMComplete?(id, successful, asHRM) } }
+						device.getAdvertiseAsHRMComplete			= { id, successful, asHRM in DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) } }
+						device.setButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.setButtonCommandComplete?(id, successful, tap, command) } }
+						device.getButtonCommandComplete				= { id, successful, tap, command in DispatchQueue.main.async { self.getButtonCommandComplete?(id, successful, tap, command) } }
+						device.setPairedComplete					= { id, successful in DispatchQueue.main.async { self.setPairedComplete?(id, successful) } }
+						device.setUnpairedComplete					= { id, successful in DispatchQueue.main.async { self.setUnpairedComplete?(id, successful) } }
+						device.getPairedComplete					= { id, successful, paired in DispatchQueue.main.async { self.getPairedComplete?(id, successful, paired) } }
+						device.setPageThresholdComplete				= { id, successful in DispatchQueue.main.async { self.setPageThresholdComplete?(id, successful) } }
+						device.getPageThresholdComplete				= { id, successful, threshold in DispatchQueue.main.async { self.getPageThresholdComplete?(id, successful, threshold) } }
+						device.deletePageThresholdComplete			= { id, successful in DispatchQueue.main.async { self.deletePageThresholdComplete?(id, successful) } }
+						device.setAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) } }
+						device.getAskForButtonResponseComplete		= { id, successful, enable in DispatchQueue.main.async { self.getAskForButtonResponseComplete?(id, successful, enable) } }
+						device.endSleepStatus 						= { id, hasSleep in DispatchQueue.main.async { self.endSleepStatus?(id, hasSleep) } }
+						device.buttonClicked 						= { id, presses in DispatchQueue.main.async { self.buttonClicked?(id, presses) } }
+						
+						if valid {
+							self.mDiscoveredDevices[peripheral.prettyID] = device
+							discovered?(peripheral.prettyID, device)
+						}
+						else {
+							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+						}
+					}
+				}
+#endif
+				
+#if UNIVERSAL || LIVOTAL
+				if (thisUUID == Device.services.livotal.UUID) {
+					
+					if let device = self.mDiscoveredDevices[peripheral.prettyID] {
+						if valid { discovered?(peripheral.prettyID, device) }
+						else {
+							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+						}
+					}
+					else {
+						
+#if UNIVERSAL
+						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, type: .livotal, discoveryType: discovery_type)
+#else
+						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, discoveryType: discovery_type)
+#endif
+						
+						device.epoch					= Date().timeIntervalSince1970
+						
+						device.batteryLevelUpdated					= { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
+						device.writeEpochComplete					= { id, successful in DispatchQueue.main.async { self.writeEpochComplete?(id, successful) } }
+						device.readEpochComplete					= { id, successful, value in DispatchQueue.main.async { self.readEpochComplete?(id, successful, value) } }
+						device.endSleepComplete						= { id, successful in DispatchQueue.main.async { self.endSleepComplete?(id, successful) } }
+						device.getAllPacketsComplete				= { id, successful in DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) } }
+						device.getAllPacketsAcknowledgeComplete		= { id, successful, ack in DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) } }
+						device.getNextPacketComplete				= { id, successful, error_code, caughtUp, packet in DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) } }
+						device.getPacketCountComplete				= { id, successful, count in DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) } }
+						device.startManualComplete					= { id, successful in DispatchQueue.main.async { self.startManualComplete?(id, successful) } }
+						device.stopManualComplete					= { id, successful in DispatchQueue.main.async { self.stopManualComplete?(id, successful) } }
+						device.ledComplete							= { id, successful in DispatchQueue.main.async { self.ledComplete?(id, successful) } }
+						device.enterShipModeComplete				= { id, successful in DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) } }
+						device.writeSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) } }
+						device.readSerialNumberComplete				= { id, successful, partID in DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) } }
+						device.deleteSerialNumberComplete			= { id, successful in DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) } }
+						device.writeAdvIntervalComplete				= { id, successful in DispatchQueue.main.async { self.writeAdvIntervalComplete?(id, successful) } }
+						device.readAdvIntervalComplete				= { id, successful, seconds in DispatchQueue.main.async { self.readAdvIntervalComplete?(id, successful, seconds) } }
+						device.deleteAdvIntervalComplete 			= { id, successful in DispatchQueue.main.async { self.deleteAdvIntervalComplete?(id, successful) } }
+						device.clearChargeCyclesComplete			= { id, successful in DispatchQueue.main.async { self.clearChargeCyclesComplete?(id, successful) } }
+						device.readChargeCyclesComplete				= { id, successful, cycles in DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) } }
+						device.readCanLogDiagnosticsComplete 		= { id, successful, allow in DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) } }
+						device.updateCanLogDiagnosticsComplete 		= { id, successful in DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) } }
+						device.allowPPGComplete						= { id, successful in DispatchQueue.main.async { self.allowPPGComplete?(id, successful) } }
+						device.wornCheckComplete					= { id, successful, code, value in DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) } }
+						device.rawLoggingComplete					= { id, successful in DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) } }
+						device.getRawLoggingStatusComplete 			= { id, successful, enabled in DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) } }
+						device.getWornOverrideStatusComplete 		= { id, successful, overridden in DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) } }
+						device.resetComplete						= { id, successful in DispatchQueue.main.async { self.resetComplete?(id, successful) } }
+						device.disableWornDetectComplete			= { id, successful in DispatchQueue.main.async { self.disableWornDetectComplete?(id, successful) } }
+						device.enableWornDetectComplete				= { id, successful in DispatchQueue.main.async { self.enableWornDetectComplete?(id, successful) } }
+						device.ppgMetrics     						= { id, successful, packet in DispatchQueue.main.async { self.ppgMetrics?(id, successful, packet) } }
+						device.ppgFailed							= { id, code in DispatchQueue.main.async { self.ppgFailed?(id, code) } }
+						
+						device.dataPackets							= { id, sequence_number, packets in
+							if (self.dataPacketsOnBackgroundThread) { self.dataPackets?(id, sequence_number, packets) }
+							else { DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) }
+							}
+						}
+						device.streamingPacket						= { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
+						device.dataComplete							= { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) } }
+						device.dataFailure							= { id in DispatchQueue.main.async { self.dataFailure?(id) } }
+						device.deviceWornStatus						= { id, isWorn in DispatchQueue.main.async { self.deviceWornStatus?(id, isWorn) } }
+						device.updateFirmwareFailed					= { id, code, message in DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) } }
+						device.updateFirmwareFinished				= { id in DispatchQueue.main.async { self.updateFirmwareFinished?(id) } }
+						device.updateFirmwareStarted				= { id in DispatchQueue.main.async { self.updateFirmwareStarted?(id) } }
+						device.updateFirmwareProgress				= { id, percentage in DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) } }
+						device.setSessionParamComplete				= { id, successful, parameter in DispatchQueue.main.async { self.setSessionParamComplete?(id, successful, parameter) } }
+						device.getSessionParamComplete				= { id, successful, parameter, value in DispatchQueue.main.async { self.getSessionParamComplete?(id, successful, parameter, value) } }
+						device.resetSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.resetSessionParamsComplete?(id, successful) } }
+						device.acceptSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) } }
+						device.manufacturingTestComplete			= { id, successful in DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) } }
+						device.manufacturingTestResult				= { id, valid, result in DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) } }
+						device.recalibratePPGComplete				= { id, successful in DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) } }
+						device.deviceChargingStatus					= { id, charging, on_charger, error in DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) } }
+												
+						if valid {
+							self.mDiscoveredDevices[peripheral.prettyID] = device
+							discovered?(peripheral.prettyID, device)
+						}
+						else {
+							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+						}
+					}
+				}
+				
+				if (thisUUID == Device.services.nordicDFU.UUID) {
+					//log?.v("\(peripheral.prettyID): didDiscover: \(deviceName) -> DFU mode!")
+					
+					if (deviceName == gblDFUName) {
+						if (!dfu.active) {
+							log?.v("\(peripheral.prettyID): didDiscover: And it happens to be who I am looking for!")
+							dfu.update(peripheral)
+						}
+						else {
+							log?.e("\(peripheral.prettyID): didDiscover: I should have started by now...")
+						}
+					}
+					else {
+						log?.e("\(peripheral.prettyID): didDiscover: This is not who I am looking for, though...")
+					}
+				}
+#endif
 			}
 		}
 	}
@@ -465,8 +750,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
 		log?.v("\(peripheral.prettyID): didConnect")
 		
-		DispatchQueue.main.async {
-			if let device = self.mDiscoveredDevices?[peripheral.prettyID] {
+		DispatchQueue.main.async { [self] in
+			if let device = mDiscoveredDevices[peripheral.prettyID] {
 				if (device.connecting) {
 					if let devicePeripheral = device.peripheral {
 						if (peripheral == devicePeripheral) {
@@ -474,19 +759,32 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 							device.peripheral	= devicePeripheral
 							device.epoch		= Date().timeIntervalSince1970
 							device.configuring	= true
-							self.mDiscoveredDevices?.removeValue(forKey: peripheral.prettyID)
-							self.mConnectedDevices?[peripheral.prettyID] = device
+							mDiscoveredDevices.removeValue(forKey: peripheral.prettyID)
+							mConnectedDevices[peripheral.prettyID] = device
 							devicePeripheral.discoverServices(nil)
 						}
+						else {
+							log?.e ("\(peripheral.prettyID): didConnect - Connected to a devcie that is in my list, exists, but isn't the same?  Weird!  Disconnect")
+							mCentralManager?.cancelPeripheralConnection(peripheral)
+						}
+					}
+					else {
+						log?.e ("\(peripheral.prettyID): didConnect - Connected to a device that is in my list, but is not valid.  Weird!  Disconnect")
+						mCentralManager?.cancelPeripheralConnection(peripheral)
 					}
 				}
 				else {
-					log?.e ("\(peripheral.prettyID): didConnect: Connected to a device that isn't requesting connection.  Weird!")
+					log?.e ("\(peripheral.prettyID): didConnect - Connected to a device that isn't requesting connection.  Weird!  Disconnect")
+					mCentralManager?.cancelPeripheralConnection(peripheral)
 				}
+			}
+			else {
+				log?.e ("\(peripheral.prettyID): didConnect - Connected to a device not in my discovered list.  Disconnect")
+				mCentralManager?.cancelPeripheralConnection(peripheral)
 			}
 		}
 	}
-	
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -496,9 +794,9 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//--------------------------------------------------------------------------------
 	internal func mProcessDisconnection(_ id: String) {
 		DispatchQueue.main.async {
-			if let device = self.mDiscoveredDevices?[id] {
+			if let device = self.mDiscoveredDevices[id] {
 				if (device.connecting) {
-					self.mDiscoveredDevices?.removeValue(forKey: id)
+					self.mDiscoveredDevices.removeValue(forKey: id)
 				}
 				else {
 					log?.e ("\(id): Disconnected from a discovered device that isn't requesting connection.  Weird!")
@@ -508,9 +806,9 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 				return
 			}
 
-			if let device = self.mConnectedDevices?[id] {
+			if let device = self.mConnectedDevices[id] {
 				if (device.configuring || device.connected) {
-					self.mConnectedDevices?.removeValue(forKey: id)
+					self.mConnectedDevices.removeValue(forKey: id)
 				}
 				else {
 					log?.e ("\(id): Disconnected from a connected device that isn't discovering services or fully connected.  Weird!")

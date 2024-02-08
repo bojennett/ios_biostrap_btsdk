@@ -151,8 +151,14 @@ class customMainCharacteristic: Characteristic {
 	var getAdvertiseAsHRMComplete: ((_ successful: Bool, _ asHRM: Bool)->())?
 	var setButtonCommandComplete: ((_ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
 	var getButtonCommandComplete: ((_ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
+	var getPairedComplete: ((_ successful: Bool, _ paired: Bool)->())?
+	var setPairedComplete: ((_ successful: Bool)->())?
+	var setUnpairedComplete: ((_ successful: Bool)->())?
+	var getPageThresholdComplete: ((_ successful: Bool, _ threshold: Int)->())?
+	var setPageThresholdComplete: ((_ successful: Bool)->())?
+	var deletePageThresholdComplete: ((_ successful: Bool)->())?
 	#endif
-
+	
 	var dataPackets: ((_ packets: String)->())?
 	var dataComplete: ((_ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
 	var dataFailure: (()->())?
@@ -1340,6 +1346,124 @@ class customMainCharacteristic: Characteristic {
 		}
 		else { self.getButtonCommandComplete?(false, tap, .unknown) }
 	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setPaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setPaired() {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.setDeviceParam.rawValue)
+			data.append(deviceParameterType.paired.rawValue)
+			data.append(0x01)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.setPairedComplete?(false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setUnpaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setUnpaired() {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.delDeviceParam.rawValue)
+			data.append(deviceParameterType.paired.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.setUnpairedComplete?(false) }
+	}
+	
+
+	//--------------------------------------------------------------------------------
+	// Function Name: getPaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getPaired() {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getDeviceParam.rawValue)
+			data.append(deviceParameterType.paired.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getPairedComplete?(false, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setPageThreshold
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setPageThreshold(_ threshold: Int) {
+		log?.v("\(pID): \(threshold)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.setDeviceParam.rawValue)
+			data.append(deviceParameterType.pageThreshold.rawValue)
+			data.append(UInt8(threshold))
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.setPageThresholdComplete?(false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getPageThreshold
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getPageThreshold() {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.getDeviceParam.rawValue)
+			data.append(deviceParameterType.pageThreshold.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.getPageThresholdComplete?(false, 1) }
+	}
+	
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: deletePageThreshold
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func deletePageThreshold() {
+		log?.v("\(pID)")
+		
+		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
+			var data = Data()
+			data.append(commands.delDeviceParam.rawValue)
+			data.append(deviceParameterType.pageThreshold.rawValue)
+			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		}
+		else { self.deletePageThresholdComplete?(false) }
+	}
 	#endif
 
 	//--------------------------------------------------------------------------------
@@ -1507,6 +1631,8 @@ class customMainCharacteristic: Characteristic {
 								case .serialNumber			: self.writeSerialNumberComplete?(successful)
 								case .chargeCycle			: self.clearChargeCyclesComplete?(successful)
 								case .canLogDiagnostics		: self.updateCanLogDiagnosticsComplete?(successful)
+								case .paired				: self.setPairedComplete?(successful)
+								case .pageThreshold			: self.setPageThresholdComplete?(successful)
 								}
 							}
 							else {
@@ -1525,13 +1651,17 @@ class customMainCharacteristic: Characteristic {
 										let snString	= snData.trimmingCharacters(in: nulls)
 										self.readSerialNumberComplete?(successful, snString)
 									case .chargeCycle			:
-										log?.v ("\(pID): \(response): Data: \(data.hexString)")
 										let cycles = data.subdata(in: Range(4...7)).leFloat
 										self.readChargeCyclesComplete?(successful, cycles)
 									case .canLogDiagnostics		:
-										log?.v ("\(pID): \(response): Data: \(data.hexString)")
 										let canLog = (data[4] != 0x00)
-										self.readCanLogDiagnosticsComplete?(true, canLog)
+										self.readCanLogDiagnosticsComplete?(successful, canLog)
+									case .paired:
+										let paired = (data[4] != 0x00)
+										self.getPairedComplete?(successful, paired)
+									case .pageThreshold:
+										log?.v ("\(pID): \(response): Data: \(data.hexString)")
+										self.getPageThresholdComplete?(successful, Int(data[4]))
 									}
 								}
 								else {
@@ -1540,6 +1670,8 @@ class customMainCharacteristic: Characteristic {
 									case .serialNumber			: self.readSerialNumberComplete?(false, "")
 									case .chargeCycle			: self.readChargeCyclesComplete?(false, 0.0)
 									case .canLogDiagnostics		: self.readCanLogDiagnosticsComplete?(false, false)
+									case .paired				: self.getPairedComplete?(false, false)
+									case .pageThreshold			: self.getPageThresholdComplete?(false, 1)
 									}
 								}
 							}
@@ -1553,6 +1685,8 @@ class customMainCharacteristic: Characteristic {
 								case .serialNumber			: self.deleteSerialNumberComplete?(successful)
 								case .chargeCycle			: log?.e ("\(pID): Should not have been able to delete \(parameter.title)")
 								case .canLogDiagnostics		: log?.e ("\(pID): Should not have been able to delete \(parameter.title)")
+								case .paired				: self.setUnpairedComplete?(successful)
+								case .pageThreshold			: self.deletePageThresholdComplete?(successful)
 								}
 							}
 							else {
@@ -2090,6 +2224,7 @@ class customMainCharacteristic: Characteristic {
 				self.deviceChargingStatus?(charging, on_charger, error)
 				
 			case .streamPacket: log?.e ("\(pID): Should not get '\(response)' on this characteristic!")
+			case .dataAvailable: log?.e ("\(pID): Should not get '\(response)' on this characteristic!")
 			}
 		}
 		else {

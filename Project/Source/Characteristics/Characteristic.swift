@@ -25,6 +25,9 @@ class Characteristic {
 		case buttonResponse		= 0x0b
 		#endif
 		case streamPacket		= 0x0c
+		#if UNIVERSAL || ALTER || KAIROS || ETHOS
+		case dataAvailable		= 0x0d
+		#endif
 	}
 	
 	// MARK: Internal Variables

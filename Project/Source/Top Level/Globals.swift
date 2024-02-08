@@ -105,6 +105,8 @@ var dfu				= nordicDFU()
 	case chargeCycle			= 0x02
 	case advertisingInterval	= 0x03
 	case canLogDiagnostics		= 0x04
+	case paired					= 0x07
+	case pageThreshold			= 0x08
 	
 	public var title: String {
 		switch (self) {
@@ -112,6 +114,8 @@ var dfu				= nordicDFU()
 		case .chargeCycle			: return "chargeCycle"
 		case .advertisingInterval	: return "advertisingInterval"
 		case .canLogDiagnostics		: return "canLogDiagnostics"
+		case .paired				: return "paired"
+		case .pageThreshold			: return "pageThreshold"
 		}
 	}
 }

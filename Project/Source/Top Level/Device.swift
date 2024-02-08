@@ -10,27 +10,46 @@ import CoreBluetooth
 
 public class Device: NSObject {
 	
-	
-	enum services: String {
+	enum prefixes: String {
 		#if UNIVERSAL || ALTER
-		case alterService			= "883BBA2C-8E31-40BB-A859-D59A2FB38EC0"
+		case alter = "ALT"
 		#endif
 		
 		#if UNIVERSAL || ETHOS
-		case ethosService			= "B30E0F19-A021-45F3-8661-4255CBD49E10"
+		case ethos = "ETH"
 		#endif
 		
 		#if UNIVERSAL || KAIROS
-		case kairosService			= "140BB753-9845-4C0E-B61A-E6BAE41712F0"
-		#endif
-
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
-		case ambiqOTAService		= "00002760-08C2-11E1-9073-0E8AC72E1001"
+		case kairos = "KAI"
 		#endif
 		
 		#if UNIVERSAL || LIVOTAL
-		case livotalService			= "58950000-A53F-11EB-BCBC-0242AC130002"
-		case nordicDFUService		= "FE59"
+		case livotal = "LIV"
+		#endif
+		
+		case unknown = "UNK"
+	}
+		
+	enum services: String {
+		#if UNIVERSAL || ALTER
+		case alter			= "883BBA2C-8E31-40BB-A859-D59A2FB38EC0"
+		#endif
+		
+		#if UNIVERSAL || ETHOS
+		case ethos			= "B30E0F19-A021-45F3-8661-4255CBD49E10"
+		#endif
+		
+		#if UNIVERSAL || KAIROS
+		case kairos			= "140BB753-9845-4C0E-B61A-E6BAE41712F0"
+		#endif
+
+		#if UNIVERSAL || ETHOS || ALTER || KAIROS
+		case ambiqOTA		= "00002760-08C2-11E1-9073-0E8AC72E1001"
+		#endif
+		
+		#if UNIVERSAL || LIVOTAL
+		case livotal		= "58950000-A53F-11EB-BCBC-0242AC130002"
+		case nordicDFU		= "FE59"
 		#endif
 
 		var UUID: CBUUID {
@@ -40,24 +59,24 @@ public class Device: NSObject {
 		var title: String {
 			switch (self) {
 			#if UNIVERSAL || ALTER
-			case .alterService		: return "Alter Service"
+			case .alter		: return "Alter Service"
 			#endif
 
 			#if UNIVERSAL || ETHOS
-			case .ethosService		: return "Ethos Service"
+			case .ethos		: return "Ethos Service"
 			#endif
 
 			#if UNIVERSAL || KAIROS
-			case .kairosService		: return "Kairos Service"
+			case .kairos	: return "Kairos Service"
 			#endif
 				
 			#if UNIVERSAL || ETHOS || ALTER || KAIROS
-			case .ambiqOTAService	: return "Ambiq OTA Service"
+			case .ambiqOTA	: return "Ambiq OTA Service"
 			#endif
 
 			#if UNIVERSAL || LIVOTAL
-			case .livotalService	: return "Livotal Service"
-			case .nordicDFUService	: return "Nordic DFU Service"
+			case .livotal	: return "Livotal Service"
+			case .nordicDFU	: return "Nordic DFU Service"
 			#endif
 			}
 		}
@@ -148,6 +167,7 @@ public class Device: NSObject {
 	var peripheral			: CBPeripheral?
 	@objc public var name	: String
 	@objc public var id		: String
+	@objc public var discovery_type : biostrapDeviceSDK.biostrapDiscoveryType
 	var epoch				: TimeInterval
 	
 	// MARK: Callbacks
@@ -213,12 +233,21 @@ public class Device: NSObject {
 	var getAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	var setButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
 	var getButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
+	var getPairedComplete: ((_ id: String, _ successful: Bool, _ paired: Bool)->())?
+	var setPairedComplete: ((_ id: String, _ successful: Bool)->())?
+	var setUnpairedComplete: ((_ id: String, _ successful: Bool)->())?
+	var getPageThresholdComplete: ((_ id: String, _ successful: Bool, _ threshold: Int)->())?
+	var setPageThresholdComplete: ((_ id: String, _ successful: Bool)->())?
+	var deletePageThresholdComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 
 	var dataPackets: ((_ id: String, _ sequence_number: Int, _ packets: String)->())?
 	var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int, _ intermediate: Bool)->())?
 	var dataFailure: ((_ id: String)->())?
 	var streamingPacket: ((_ id: String, _ packet: String)->())?
+	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	var dataAvailable: ((_ id: String)->())?
+	#endif
 	
 	var deviceWornStatus: ((_ id: String, _ isWorn: Bool)->())?
 
@@ -333,25 +362,47 @@ public class Device: NSObject {
 	internal var mAmbiqOTATXCharacteristic				: ambiqOTATXCharacteristic?
 	#endif
 	
-	class var scan_services: [CBUUID] {
+	class var manufacturer_prefixes: [String] {
 		#if UNIVERSAL
-		return [services.livotalService.UUID, services.nordicDFUService.UUID, services.ethosService.UUID, services.alterService.UUID, services.kairosService.UUID]
+		return [prefixes.livotal.rawValue, prefixes.ethos.rawValue, prefixes.alter.rawValue, prefixes.kairos.rawValue]
 		#endif
 		
 		#if LIVOTAL
-		return [services.livotalService.UUID, services.nordicDFUService.UUID]
+		return [prefixes.livotal.rawValue]
 		#endif
 		
 		#if ETHOS
-		return [services.ethosService.UUID]
+		return [prefixes.ethos.rawValue]
 		#endif
-
+		
 		#if ALTER
-		return [services.alterService.UUID]
+		return [prefixes.alter.rawValue]
 		#endif
 		
 		#if KAIROS
-		return [services.kairosService.UUID]
+		return [prefixes.kairos.rawValue]
+		#endif
+	}
+	
+	class var scan_services: [CBUUID] {
+		#if UNIVERSAL
+		return [services.livotal.UUID, services.nordicDFU.UUID, services.ethos.UUID, services.alter.UUID, services.kairos.UUID]
+		#endif
+		
+		#if LIVOTAL
+		return [services.livotal.UUID, services.nordicDFU.UUID]
+		#endif
+		
+		#if ETHOS
+		return [services.ethos.UUID]
+		#endif
+
+		#if ALTER
+		return [services.alter.UUID]
+		#endif
+		
+		#if KAIROS
+		return [services.kairos.UUID]
 		#endif
 	}
 	
@@ -391,6 +442,7 @@ public class Device: NSObject {
 		self.epoch							= TimeInterval(0)
 		self.mDISCharacteristicCount		= 0
 		self.mDISCharacteristicsDiscovered	= false
+		self.discovery_type					= .unknown
 		
 		#if UNIVERSAL
 		self.type							= .unknown
@@ -398,22 +450,24 @@ public class Device: NSObject {
 	}
 
 	#if UNIVERSAL
-	convenience init(_ name: String, id: String, peripheral: CBPeripheral?, type: biostrapDeviceSDK.biostrapDeviceType) {
+	convenience init(_ name: String, id: String, peripheral: CBPeripheral?, type: biostrapDeviceSDK.biostrapDeviceType, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
 		self.name		= name
 		self.id			= id
 		self.peripheral	= peripheral
 		self.type		= type
+		self.discovery_type = discoveryType
 	}
 	#endif
 
-	convenience init(_ name: String, id: String, peripheral: CBPeripheral?) {
+	convenience init(_ name: String, id: String, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
 		self.name		= name
 		self.id			= id
 		self.peripheral	= peripheral
+		self.discovery_type = discoveryType
 	}
 
 	var disconnected: Bool {
@@ -1235,7 +1289,7 @@ public class Device: NSObject {
 	}
 
 	//--------------------------------------------------------------------------------
-	// Function Name: getAdvertiseAsHRM
+	// Function Name: setButtonCommand
 	//--------------------------------------------------------------------------------
 	//
 	//
@@ -1247,7 +1301,7 @@ public class Device: NSObject {
 	}
 
 	//--------------------------------------------------------------------------------
-	// Function Name: getAdvertiseAsHRM
+	// Function Name: getButtonCommand
 	//--------------------------------------------------------------------------------
 	//
 	//
@@ -1256,6 +1310,78 @@ public class Device: NSObject {
 	func getButtonCommand(_ tap: buttonTapType) {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getButtonCommand(tap) }
 		else { self.getButtonCommandComplete?(self.id, false, tap, .unknown) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setPaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setPaired() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPaired() }
+		else { self.setPairedComplete?(self.id, false) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name: setUnpaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setUnpaired() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setUnpaired() }
+		else { self.setUnpairedComplete?(self.id, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getPaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getPaired() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPaired() }
+		else { self.getPairedComplete?(self.id, false, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setPaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func setPageThreshold(_ threshold: Int) {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPageThreshold(threshold) }
+		else { self.setPageThresholdComplete?(self.id, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setUnpaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getPageThreshold() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPageThreshold() }
+		else { self.getPageThresholdComplete?(self.id, false, 1) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getPaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func deletePageThreshold() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.deletePageThreshold() }
+		else { self.deletePageThresholdComplete?(self.id, false) }
 	}
 	#endif
 
@@ -1667,6 +1793,12 @@ public class Device: NSObject {
 					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
 					mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in self.setButtonCommandComplete?(self.id, successful, tap, command) }
 					mMainCharacteristic?.getButtonCommandComplete	= { successful, tap, command in self.getButtonCommandComplete?(self.id, successful, tap, command) }
+					mMainCharacteristic?.setPairedComplete			= { successful in self.setPairedComplete?(self.id, successful) }
+					mMainCharacteristic?.setUnpairedComplete		= { successful in self.setUnpairedComplete?(self.id, successful) }
+					mMainCharacteristic?.getPairedComplete			= { successful, paired in self.getPairedComplete?(self.id, successful, paired) }
+					mMainCharacteristic?.setPageThresholdComplete	= { successful in self.setPageThresholdComplete?(self.id, successful) }
+					mMainCharacteristic?.getPageThresholdComplete	= { successful, threshold in self.getPageThresholdComplete?(self.id, successful, threshold) }
+					mMainCharacteristic?.deletePageThresholdComplete	= { successful in self.deletePageThresholdComplete?(self.id, successful) }
 					mMainCharacteristic?.airplaneModeComplete		= { successful in self.airplaneModeComplete?(self.id, successful) }
 
 					mMainCharacteristic?.discoverDescriptors()
@@ -1699,6 +1831,7 @@ public class Device: NSObject {
 					mStreamingCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
 					mStreamingCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
 					mStreamingCharacteristic?.streamingPacket = { packet in self.streamingPacket?(self.id, packet) }
+					mStreamingCharacteristic?.dataAvailable = { self.dataAvailable?(self.id) }
 
 					mStreamingCharacteristic?.discoverDescriptors()
 					
@@ -1775,6 +1908,12 @@ public class Device: NSObject {
 					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
 					mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in self.setButtonCommandComplete?(self.id, successful, tap, command) }
 					mMainCharacteristic?.getButtonCommandComplete	= { successful, tap, command in self.getButtonCommandComplete?(self.id, successful, tap, command) }
+					mMainCharacteristic?.setPairedComplete			= { successful in self.setPairedComplete?(self.id, successful) }
+					mMainCharacteristic?.setUnpairedComplete		= { successful in self.setUnpairedComplete?(self.id, successful) }
+					mMainCharacteristic?.getPairedComplete			= { successful, paired in self.getPairedComplete?(self.id, successful, paired) }
+					mMainCharacteristic?.setPageThresholdComplete	= { successful in self.setPageThresholdComplete?(self.id, successful) }
+					mMainCharacteristic?.getPageThresholdComplete	= { successful, threshold in self.getPageThresholdComplete?(self.id, successful, threshold) }
+					mMainCharacteristic?.deletePageThresholdComplete	= { successful in self.deletePageThresholdComplete?(self.id, successful) }
 					mMainCharacteristic?.airplaneModeComplete		= { successful in self.airplaneModeComplete?(self.id, successful) }
 
 					mMainCharacteristic?.discoverDescriptors()
@@ -1807,6 +1946,7 @@ public class Device: NSObject {
 					mStreamingCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
 					mStreamingCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
 					mStreamingCharacteristic?.streamingPacket = { packet in self.streamingPacket?(self.id, packet) }
+					mStreamingCharacteristic?.dataAvailable = { self.dataAvailable?(self.id) }
 
 					mStreamingCharacteristic?.discoverDescriptors()
 
@@ -1883,6 +2023,12 @@ public class Device: NSObject {
 					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.getAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
 					mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in self.setButtonCommandComplete?(self.id, successful, tap, command) }
 					mMainCharacteristic?.getButtonCommandComplete	= { successful, tap, command in self.getButtonCommandComplete?(self.id, successful, tap, command) }
+					mMainCharacteristic?.setPairedComplete			= { successful in self.setPairedComplete?(self.id, successful) }
+					mMainCharacteristic?.setUnpairedComplete		= { successful in self.setUnpairedComplete?(self.id, successful) }
+					mMainCharacteristic?.getPairedComplete			= { successful, paired in self.getPairedComplete?(self.id, successful, paired) }
+					mMainCharacteristic?.setPageThresholdComplete	= { successful in self.setPageThresholdComplete?(self.id, successful) }
+					mMainCharacteristic?.getPageThresholdComplete	= { successful, threshold in self.getPageThresholdComplete?(self.id, successful, threshold) }
+					mMainCharacteristic?.deletePageThresholdComplete	= { successful in self.deletePageThresholdComplete?(self.id, successful) }
 					mMainCharacteristic?.airplaneModeComplete		= { successful in self.airplaneModeComplete?(self.id, successful) }
 
 					mMainCharacteristic?.discoverDescriptors()
@@ -1915,6 +2061,7 @@ public class Device: NSObject {
 					mStreamingCharacteristic?.endSleepStatus = { enable in self.endSleepStatus?(self.id, enable) }
 					mStreamingCharacteristic?.buttonClicked = { presses in self.buttonClicked?(self.id, presses) }
 					mStreamingCharacteristic?.streamingPacket = { packet in self.streamingPacket?(self.id, packet) }
+					mStreamingCharacteristic?.dataAvailable = { self.dataAvailable?(self.id) }
 
 					mStreamingCharacteristic?.discoverDescriptors()
 

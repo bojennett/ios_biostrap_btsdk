@@ -15,6 +15,39 @@ import iOSDFULibrary
 	
 	var dataPacketsOnBackgroundThread	= false
 	
+	internal var scanInBackground		= false
+	internal var scanForPaired			= false
+	internal var scanForUnpaired		= false
+	internal var scanForLegacy			= false
+	
+	@objc public enum biostrapDiscoveryType: Int {
+		case legacy				= 1
+		case unpaired			= 2
+		case unpaired_w_uuid	= 3		// This should never occur.. it means a firmware bug
+		case paired				= 4
+		case paired_w_uuid		= 5
+		case unknown			= 99
+		
+		public var title: String {
+			switch (self) {
+			case .legacy			: return "Legacy"
+			case .unpaired			: return "Unpaired"
+			case .unpaired_w_uuid	: return "Unpaired with UUID"
+			case .paired			: return "Paired"
+			case .paired_w_uuid		: return "Paired with UUID"
+			case .unknown			: return "Unknown"
+			}
+		}
+		
+		public var isPaired: Bool {
+			return (self == .paired) || (self == .paired_w_uuid)
+		}
+		
+		public var isNotPaired: Bool {
+			return (self == .unpaired) || (self == .unpaired_w_uuid)
+		}
+	}
+	
 	#if UNIVERSAL
 	@objc public enum biostrapDeviceType: Int {
 		case livotal	= 1
@@ -69,13 +102,8 @@ import iOSDFULibrary
 	@objc public var logE: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
 	
 	@objc public var bluetoothReady: ((_ isOn: Bool)->())?
-	#if UNIVERSAL
-	@objc public var discovered: ((_ id: String, _ type: biostrapDeviceType)->())?
-	#else
-	@objc public var discovered: ((_ id: String)->())?
-	#endif
-	
-	@objc public var discoveredUnnamed: ((_ id: String)->())?
+	@objc public var discovered: ((_ id: String, _ device: Device)->())?
+	@objc public var discoveredUnnamed: ((_ id: String, _ device: Device)->())?
 	
 	@objc public var connected: ((_ id: String)->())?
 	@objc public var disconnected: ((_ id: String)->())?
@@ -122,6 +150,7 @@ import iOSDFULibrary
 	@objc public var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int, _ intermediate: Bool)->())?
 	@objc public var dataFailure: ((_ id: String)->())?
 	@objc public var streamingPacket: ((_ id: String, _ packet: String)->())?
+	@objc public var dataAvailable: ((_ id: String)->())?
 
 	@objc public var deviceWornStatus: ((_ id: String, _ isWorn: Bool)->())?
 
@@ -152,6 +181,12 @@ import iOSDFULibrary
 	@objc public var getAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	@objc public var setButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
 	@objc public var getButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
+	@objc public var getPairedComplete: ((_ id: String, _ successful: Bool, _ paired: Bool)->())?
+	@objc public var setPairedComplete: ((_ id: String, _ successful: Bool)->())?
+	@objc public var setUnpairedComplete: ((_ id: String, _ successful: Bool)->())?
+	@objc public var getPageThresholdComplete: ((_ id: String, _ successful: Bool, _ threshold: Int)->())?
+	@objc public var setPageThresholdComplete: ((_ id: String, _ successful: Bool)->())?
+	@objc public var deletePageThresholdComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 
 	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
@@ -210,11 +245,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public var connectedDevices: [ Device ] {
-		if let devices = mConnectedDevices {
-			return (mGetDevicesSortedByTime(devices))
-		}
-		
-		return ([])
+		return (mGetDevicesSortedByTime(mConnectedDevices))
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -223,11 +254,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public var discoveredDevices: [ Device ] {
-		if let devices = mDiscoveredDevices {
-			return (mGetDevicesSortedByTime(devices))
-		}
-		
-		return ([])
+		return (mGetDevicesSortedByTime(mDiscoveredDevices))
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -244,8 +271,8 @@ import iOSDFULibrary
 		
 	// Internal vars
 	internal var mCentralManager	: CBCentralManager?
-	internal var mDiscoveredDevices	: [ String : Device ]?
-	internal var mConnectedDevices	: [ String : Device ]?
+	internal var mDiscoveredDevices	= [ String : Device ]()
+	internal var mConnectedDevices	= [ String : Device ]()
 	internal lazy var mPairedDeviceNames	= [ String: String ]()
 	internal var mLicensed			: Bool = false
 
@@ -385,7 +412,12 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
-	@objc public func startScan() -> Bool {
+	@objc public func startScan(inBackground: Bool = false, forPaired: Bool = true, forUnpaired: Bool = true, forLegacy: Bool = true) -> Bool {
+		scanInBackground = inBackground
+		scanForPaired = forPaired
+		scanForUnpaired = forUnpaired
+		scanForLegacy = forLegacy
+		
 		#if KAIROS || ETHOS || LIVOTAL || UNIVERSAL
 		if (!mLicensed) {
 			log?.e ("Not licensed - cannot start scanning")
@@ -410,16 +442,20 @@ import iOSDFULibrary
 			log?.v ("Checking for previously connected peripherals (due to crash).  Didn't find any")
 		}
 		
-		mDiscoveredDevices?.removeAll()
+		mDiscoveredDevices.removeAll()
 		
 		if (mCentralManager?.state == .poweredOn) {
 			let services	= Device.scan_services
 			var options		= [String : Any]()
 
-			//services.append(Device.scan_services)
 			options[CBCentralManagerScanOptionAllowDuplicatesKey]		= true
 
-			mCentralManager?.scanForPeripherals(withServices: services, options: options)
+			if (inBackground) {
+				mCentralManager?.scanForPeripherals(withServices: services, options: options)
+			}
+			else {
+				mCentralManager?.scanForPeripherals(withServices: nil, options: options)
+			}
 			return (true)
 		}
 		
@@ -437,7 +473,7 @@ import iOSDFULibrary
 		log?.v("")
 		
 		mCentralManager?.stopScan()
-		mDiscoveredDevices?.removeAll()
+		mDiscoveredDevices.removeAll()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -450,7 +486,7 @@ import iOSDFULibrary
 	@objc public func connect(_ id: String) {
 		log?.v("\(id)")
 		
-		if let device = mDiscoveredDevices?[id] {
+		if let device = mDiscoveredDevices[id] {
 			if let peripheral = device.peripheral {
 				device.connecting = true
 				mCentralManager?.connect(peripheral, options: nil)
@@ -474,16 +510,16 @@ import iOSDFULibrary
 	@objc public func disconnect(_ id: String) {
 		log?.v("\(id)")
 		
-		if let device = mDiscoveredDevices?[id] {
+		if let device = mDiscoveredDevices[id] {
 			if let peripheral = device.peripheral {
 				log?.v("Found \(id) in discovered list -> trying to disconnect")
-				mDiscoveredDevices?.removeValue(forKey: id)
+				mDiscoveredDevices.removeValue(forKey: id)
 				mCentralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 		}
 		
-		if let device = mConnectedDevices?[id] {
+		if let device = mConnectedDevices[id] {
 			if let peripheral = device.peripheral {
 				log?.v("Found \(id) in connected list -> trying to disconnect")
 				mCentralManager?.cancelPeripheralConnection(peripheral)
@@ -532,7 +568,7 @@ import iOSDFULibrary
 	@objc public func writeEpoch(_ id: String, newEpoch: Int) {
 		log?.v("\(id): \(newEpoch)")
 		
-		if let device = mConnectedDevices?[id] { device.writeEpoch(id, newEpoch: newEpoch) }
+		if let device = mConnectedDevices[id] { device.writeEpoch(id, newEpoch: newEpoch) }
 		else { self.writeEpochComplete?(id, false) }
 	}
 
@@ -546,7 +582,7 @@ import iOSDFULibrary
 	@objc public func readEpoch(_ id: String) {
 		log?.v("\(id)")
 		
-		if let device = mConnectedDevices?[id] { device.readEpoch(id) }
+		if let device = mConnectedDevices[id] { device.readEpoch(id) }
 		else { self.readEpochComplete?(id, false, 0) }
 	}
 
@@ -560,7 +596,7 @@ import iOSDFULibrary
 	@objc public func endSleep(_ id: String) {
 		log?.v("\(id)")
 		
-		if let device = mConnectedDevices?[id] { device.endSleep(id) }
+		if let device = mConnectedDevices[id] { device.endSleep(id) }
 		else { self.endSleepComplete?(id, false) }
 	}
 	
@@ -575,7 +611,7 @@ import iOSDFULibrary
 	@objc public func debug(_ id: String, device: debugDevice, data: Data) {
 		log?.v("\(id): \(device.name) -> \(data.hexString)")
 		
-		if let connectedDevice = mConnectedDevices?[id] { connectedDevice.debug(id, device: device, data: data) }
+		if let connectedDevice = mConnectedDevices[id] { connectedDevice.debug(id, device: device, data: data) }
 		else { self.debugComplete?(id, false, device, data) }
 	}
 	#endif
@@ -588,7 +624,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getAllPackets(_ id: String, pages: Int, delay: Int) {
-		if let device = mConnectedDevices?[id] { device.getAllPackets(id, pages: pages, delay: delay) }
+		if let device = mConnectedDevices[id] { device.getAllPackets(id, pages: pages, delay: delay) }
 		else { self.getAllPacketsComplete?(id, false) }
 	}
 
@@ -600,7 +636,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getAllPacketsAcknowledge(_ id: String, ack: Bool) {
-		if let device = mConnectedDevices?[id] { device.getAllPacketsAcknowledge(id, ack: ack) }
+		if let device = mConnectedDevices[id] { device.getAllPacketsAcknowledge(id, ack: ack) }
 		else { self.getAllPacketsAcknowledgeComplete?(id, false, ack) }
 	}
 	
@@ -614,7 +650,7 @@ import iOSDFULibrary
 	@objc public func getNextPacket(_ id: String, single: Bool) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices?[id] { device.getNextPacket(id, single: single) }
+		if let device = mConnectedDevices[id] { device.getNextPacket(id, single: single) }
 		else { self.getNextPacketComplete?(id, false, .missingDevice, true, "") }
 	}
 
@@ -628,7 +664,7 @@ import iOSDFULibrary
 	@objc public func getPacketCount(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices?[id] { device.getPacketCount(id) }
+		if let device = mConnectedDevices[id] { device.getPacketCount(id) }
 		else { self.getPacketCountComplete?(id, false, 0) }
 	}
 
@@ -642,7 +678,7 @@ import iOSDFULibrary
 	@objc public func disableWornDetect(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices?[id] { device.disableWornDetect(id) }
+		if let device = mConnectedDevices[id] { device.disableWornDetect(id) }
 		else { self.disableWornDetectComplete?(id, false) }
 	}
 
@@ -656,7 +692,7 @@ import iOSDFULibrary
 	@objc public func enableWornDetect(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices?[id] { device.enableWornDetect(id) }
+		if let device = mConnectedDevices[id] { device.enableWornDetect(id) }
 		else { self.enableWornDetectComplete?(id, false) }
 	}
 
@@ -670,7 +706,7 @@ import iOSDFULibrary
 	@objc public func startManual(_ id: String, algorithms: ppgAlgorithmConfiguration) {
 		log?.v ("\(id): Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
 		
-		if let device = mConnectedDevices?[id] { device.startManual(id, algorithms: algorithms) }
+		if let device = mConnectedDevices[id] { device.startManual(id, algorithms: algorithms) }
 		else { self.startManualComplete?(id, false) }
 	}
 
@@ -684,7 +720,7 @@ import iOSDFULibrary
 	@objc public func stopManual(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices?[id] { device.stopManual(id) }
+		if let device = mConnectedDevices[id] { device.stopManual(id) }
 		else { self.stopManualComplete?(id, false) }
 	}
 
@@ -697,50 +733,50 @@ import iOSDFULibrary
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL
 	@objc public func livotalLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices?[id] { device.livotalLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.livotalLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	
 	@objc public func ethosLED(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
-		if let device = mConnectedDevices?[id] { device.ethosLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
+		if let device = mConnectedDevices[id] { device.ethosLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
 		else { self.ledComplete?(id, false) }
 	}
 
 	@objc public func alterLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices?[id] { device.alterLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.alterLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	
 	@objc public func kairosLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices?[id] { device.kairosLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.kairosLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
 
 	#if LIVOTAL
 	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices?[id] { device.livotalLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.livotalLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
 
 	#if ETHOS
 	@objc public func led(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
-		if let device = mConnectedDevices?[id] { device.ethosLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
+		if let device = mConnectedDevices[id] { device.ethosLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
 
 	#if ALTER
 	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices?[id] { device.alterLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.alterLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
 
 	#if KAIROS
 	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices?[id] { device.kairosLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.kairosLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
@@ -754,7 +790,7 @@ import iOSDFULibrary
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || ETHOS
 	@objc public func motor(_ id: String, milliseconds: Int, pulses: Int) {
-		if let device = mConnectedDevices?[id] { device.motor(id, milliseconds: milliseconds, pulses: pulses) }
+		if let device = mConnectedDevices[id] { device.motor(id, milliseconds: milliseconds, pulses: pulses) }
 		else { self.motorComplete?(id, false) }
 	}
 	#endif
@@ -767,7 +803,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func enterShipMode(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.enterShipMode(id) }
+		if let device = mConnectedDevices[id] { device.enterShipMode(id) }
 		else { self.enterShipModeComplete?(id, false) }
 	}
 
@@ -779,7 +815,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func writeSerialNumber(_ id: String, partID: String) {
-		if let device = mConnectedDevices?[id] { device.writeSerialNumber(id, partID: partID) }
+		if let device = mConnectedDevices[id] { device.writeSerialNumber(id, partID: partID) }
 		else { self.writeSerialNumberComplete?(id, false) }
 	}
 
@@ -791,7 +827,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func readSerialNumber(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.readSerialNumber(id) }
+		if let device = mConnectedDevices[id] { device.readSerialNumber(id) }
 		else { self.readSerialNumberComplete?(id, false, "") }
 	}
 
@@ -803,7 +839,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func deleteSerialNumber(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.deleteSerialNumber(id) }
+		if let device = mConnectedDevices[id] { device.deleteSerialNumber(id) }
 		else { self.deleteSerialNumberComplete?(id, false) }
 	}
 
@@ -815,7 +851,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func writeAdvInterval(_ id: String, seconds: Int) {
-		if let device = mConnectedDevices?[id] { device.writeAdvInterval(id, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.writeAdvInterval(id, seconds: seconds) }
 		else { self.writeAdvIntervalComplete?(id, false) }
 	}
 
@@ -827,7 +863,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func readAdvInterval(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.readAdvInterval(id) }
+		if let device = mConnectedDevices[id] { device.readAdvInterval(id) }
 		else { self.readAdvIntervalComplete?(id, false, 0) }
 	}
 
@@ -839,7 +875,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func deleteAdvInterval(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.deleteAdvInterval(id) }
+		if let device = mConnectedDevices[id] { device.deleteAdvInterval(id) }
 		else { self.deleteAdvIntervalComplete?(id, false) }
 	}
 
@@ -851,7 +887,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func clearChargeCycles(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.clearChargeCycles(id) }
+		if let device = mConnectedDevices[id] { device.clearChargeCycles(id) }
 		else { self.clearChargeCyclesComplete?(id, false) }
 	}
 
@@ -863,7 +899,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func readChargeCycles(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.readChargeCycles(id) }
+		if let device = mConnectedDevices[id] { device.readChargeCycles(id) }
 		else { self.readChargeCyclesComplete?(id, false, 0) }
 	}
 
@@ -875,7 +911,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func readCanLogDiagnostics(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.readCanLogDiagnostics(id) }
+		if let device = mConnectedDevices[id] { device.readCanLogDiagnostics(id) }
 		else { self.readCanLogDiagnosticsComplete?(id, false, false) }
 	}
 	
@@ -887,7 +923,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func updateCanLogDiagnostics(_ id: String, allow: Bool) {
-		if let device = mConnectedDevices?[id] { device.updateCanLogDiagnostics(id, allow: allow) }
+		if let device = mConnectedDevices[id] { device.updateCanLogDiagnostics(id, allow: allow) }
 		else { self.updateCanLogDiagnosticsComplete?(id, false) }
 	}
 		
@@ -900,50 +936,50 @@ import iOSDFULibrary
 	//--------------------------------------------------------------------------------
 	#if LIVOTAL
 	@objc public func manufacturingTest(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.livotalManufacturingTest(id) }
+		if let device = mConnectedDevices[id] { device.livotalManufacturingTest(id) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
 	
 	#if ALTER
 	@objc public func manufacturingTest(_ id: String, test: alterManufacturingTestType) {
-		if let device = mConnectedDevices?[id] { device.alterManufacturingTest(id, test: test) }
+		if let device = mConnectedDevices[id] { device.alterManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
 
 	#if KAIROS
 	@objc public func manufacturingTest(_ id: String, test: kairosManufacturingTestType) {
-		if let device = mConnectedDevices?[id] { device.kairosManufacturingTest(id, test: test) }
+		if let device = mConnectedDevices[id] { device.kairosManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
 
 	#if ETHOS
 	@objc public func manufacturingTest(_ id: String, test: ethosManufacturingTestType) {
-		if let device = mConnectedDevices?[id] { device.ethosManufacturingTest(id, test: test) }
+		if let device = mConnectedDevices[id] { device.ethosManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
 
 	#if UNIVERSAL
 	@objc public func livotalManufacturingTest(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.livotalManufacturingTest(id) }
+		if let device = mConnectedDevices[id] { device.livotalManufacturingTest(id) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 
 	@objc public func ethosManufacturingTest(_ id: String, test: ethosManufacturingTestType) {
-		if let device = mConnectedDevices?[id] { device.ethosManufacturingTest(id, test: test) }
+		if let device = mConnectedDevices[id] { device.ethosManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	
 	@objc public func alterManufacturingTest(_ id: String, test: alterManufacturingTestType) {
-		if let device = mConnectedDevices?[id] { device.alterManufacturingTest(id, test: test) }
+		if let device = mConnectedDevices[id] { device.alterManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	
 	@objc public func kairosManufacturingTest(_ id: String, test: kairosManufacturingTestType) {
-		if let device = mConnectedDevices?[id] { device.kairosManufacturingTest(id, test: test) }
+		if let device = mConnectedDevices[id] { device.kairosManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
@@ -957,12 +993,12 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func startLiveSync(_ id: String, configuration: liveSyncConfiguration) {
-		if let device = mConnectedDevices?[id] { device.startLiveSync(id, configuration: configuration) }
+		if let device = mConnectedDevices[id] { device.startLiveSync(id, configuration: configuration) }
 		else { self.startLiveSyncComplete?(id, false) }
 	}
 	
 	@objc public func stopLiveSync(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.stopLiveSync(id) }
+		if let device = mConnectedDevices[id] { device.stopLiveSync(id) }
 		else { self.stopLiveSyncComplete?(id, false) }
 	}
 	#endif
@@ -976,7 +1012,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func setAskForButtonResponse(_ id: String, enable: Bool) {
-		if let device = mConnectedDevices?[id] { device.setAskForButtonResponse(enable) }
+		if let device = mConnectedDevices[id] { device.setAskForButtonResponse(enable) }
 		else { self.setAskForButtonResponseComplete?(id, false, enable) }
 	}
 	
@@ -988,7 +1024,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getAskForButtonResponse(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.getAskForButtonResponse() }
+		if let device = mConnectedDevices[id] { device.getAskForButtonResponse() }
 		else { self.getAskForButtonResponseComplete?(id, false, false) }
 	}
 
@@ -1000,7 +1036,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func setHRZoneColor(_ id: String, type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
-		if let device = mConnectedDevices?[id] {
+		if let device = mConnectedDevices[id] {
 			device.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
 		}
 		else { self.setHRZoneColorComplete?(id, false, type) }
@@ -1014,7 +1050,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getHRZoneColor(_ id: String, type: hrZoneRangeType) {
-		if let device = mConnectedDevices?[id] { device.getHRZoneColor(type) }
+		if let device = mConnectedDevices[id] { device.getHRZoneColor(type) }
 		else { self.getHRZoneColorComplete?(id, false, type, false, false, false, 0, 0) }
 	}
 	
@@ -1026,7 +1062,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func setHRZoneRange(_ id: String, enabled: Bool, high_value: Int, low_value: Int) {
-		if let device = mConnectedDevices?[id] {
+		if let device = mConnectedDevices[id] {
 			device.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
 		}
 		else { self.setHRZoneRangeComplete?(id, false) }
@@ -1040,7 +1076,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getHRZoneRange(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.getHRZoneRange() }
+		if let device = mConnectedDevices[id] { device.getHRZoneRange() }
 		else { self.getHRZoneRangeComplete?(id, false, false, 0, 0) }
 	}
 	
@@ -1052,7 +1088,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getPPGAlgorithm(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.getPPGAlgorithm() }
+		if let device = mConnectedDevices[id] { device.getPPGAlgorithm() }
 		else { self.getPPGAlgorithmComplete?(id, false, ppgAlgorithmConfiguration(), eventType.unknown) }
 	}
 	
@@ -1064,7 +1100,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func setAdvertiseAsHRM(_ id: String, asHRM: Bool) {
-		if let device = mConnectedDevices?[id] { device.setAdvertiseAsHRM(asHRM) }
+		if let device = mConnectedDevices[id] { device.setAdvertiseAsHRM(asHRM) }
 		else { self.setAdvertiseAsHRMComplete?(id, false, false) }
 	}
 	
@@ -1076,7 +1112,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getAdvertiseAsHRM(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.getAdvertiseAsHRM() }
+		if let device = mConnectedDevices[id] { device.getAdvertiseAsHRM() }
 		else { self.getAdvertiseAsHRMComplete?(id, false, false) }
 	}
 
@@ -1088,7 +1124,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func setButtonCommand(_ id: String, tap: buttonTapType, command: buttonCommandType) {
-		if let device = mConnectedDevices?[id] { device.setButtonCommand(tap, command: command) }
+		if let device = mConnectedDevices[id] { device.setButtonCommand(tap, command: command) }
 		else { self.setButtonCommandComplete?(id, false, tap, command) }
 	}
 	
@@ -1100,8 +1136,80 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getButtonCommand(_ id: String, tap: buttonTapType) {
-		if let device = mConnectedDevices?[id] { device.getButtonCommand(tap) }
+		if let device = mConnectedDevices[id] { device.getButtonCommand(tap) }
 		else { self.getButtonCommandComplete?(id, false, tap, .unknown) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setPaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func setPaired(_ id: String) {
+		if let device = mConnectedDevices[id] { device.setPaired() }
+		else { self.setPairedComplete?(id, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setUnpaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func setUnpaired(_ id: String) {
+		if let device = mConnectedDevices[id] { device.setUnpaired() }
+		else { self.setUnpairedComplete?(id, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getPaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func getPaired(_ id: String) {
+		if let device = mConnectedDevices[id] { device.getPaired() }
+		else { self.getPairedComplete?(id, false, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setPaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func setPageThreshold(_ id: String, threshold: Int) {
+		if let device = mConnectedDevices[id] { device.setPageThreshold(threshold) }
+		else { self.setPageThresholdComplete?(id, false) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: setUnpaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func getPageThreshold(_ id: String) {
+		if let device = mConnectedDevices[id] { device.getPageThreshold() }
+		else { self.getPageThresholdComplete?(id, false, 1) }
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: getPaired
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	@objc public func deletePageThreshold(_ id: String) {
+		if let device = mConnectedDevices[id] { device.deletePageThreshold() }
+		else { self.deletePageThresholdComplete?(id, false) }
 	}
 	#endif
 
@@ -1113,7 +1221,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func recalibratePPG(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.recalibratePPG(id) }
+		if let device = mConnectedDevices[id] { device.recalibratePPG(id) }
 		else { self.recalibratePPGComplete?(id, false) }
 	}
 
@@ -1125,7 +1233,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func allowPPG(_ id: String, allow: Bool) {
-		if let device = mConnectedDevices?[id] { device.allowPPG(id, allow: allow) }
+		if let device = mConnectedDevices[id] { device.allowPPG(id, allow: allow) }
 		else { self.allowPPGComplete?(id, false) }
 	}
 
@@ -1137,7 +1245,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func wornCheck(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.wornCheck(id) }
+		if let device = mConnectedDevices[id] { device.wornCheck(id) }
 		else { self.wornCheckComplete?(id, false, "No device", 0) }
 	}
 
@@ -1149,7 +1257,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func rawLogging(_ id: String, enable: Bool) {
-		if let device = mConnectedDevices?[id] { device.rawLogging(id, enable: enable) }
+		if let device = mConnectedDevices[id] { device.rawLogging(id, enable: enable) }
 		else { self.rawLoggingComplete?(id, false) }
 	}
 
@@ -1161,7 +1269,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getRawLoggingStatus(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.getRawLoggingStatus(id) }
+		if let device = mConnectedDevices[id] { device.getRawLoggingStatus(id) }
 		else { self.getRawLoggingStatusComplete?(id, false, false) }
 	}
 
@@ -1173,7 +1281,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getWornOverrideStatus(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.getWornOverrideStatus(id) }
+		if let device = mConnectedDevices[id] { device.getWornOverrideStatus(id) }
 		else { self.getWornOverrideStatusComplete?(id, false, false) }
 	}
 
@@ -1186,7 +1294,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func airplaneMode(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.airplaneMode(id) }
+		if let device = mConnectedDevices[id] { device.airplaneMode(id) }
 		else { self.airplaneModeComplete?(id, false) }
 	}
 	#endif
@@ -1199,7 +1307,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func reset(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.reset(id) }
+		if let device = mConnectedDevices[id] { device.reset(id) }
 		else { self.resetComplete?(id, false) }
 	}
 
@@ -1211,7 +1319,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func updateFirmware(_ id: String, file: URL) {
-		if let device = mConnectedDevices?[id] { device.updateFirmware(file) }
+		if let device = mConnectedDevices[id] { device.updateFirmware(file) }
 		else { self.updateFirmwareFailed?(id, 10000, "No connected device to update") }
 
 	}
@@ -1224,7 +1332,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func cancelFirmwareUpdate(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.cancelFirmwareUpdate() }
+		if let device = mConnectedDevices[id] { device.cancelFirmwareUpdate() }
 		else { self.updateFirmwareFailed?(id, 10000, "No connected device to update") }
 	}
 	
@@ -1236,7 +1344,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func setSessionParam(_ id: String, parameter: sessionParameterType, value: Int) {
-		if let device = mConnectedDevices?[id] { device.setSessionParam(parameter, value: value) }
+		if let device = mConnectedDevices[id] { device.setSessionParam(parameter, value: value) }
 		else { self.setSessionParamComplete?(id, false, parameter) }
 
 	}
@@ -1249,7 +1357,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getSessionParam(_ id: String, parameter: sessionParameterType) {
-		if let device = mConnectedDevices?[id] { device.getSessionParam(parameter) }
+		if let device = mConnectedDevices[id] { device.getSessionParam(parameter) }
 		else { self.getSessionParamComplete?(id, false, parameter, 0) }
 	}
 
@@ -1261,7 +1369,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func resetSessionParams(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.resetSessionParams() }
+		if let device = mConnectedDevices[id] { device.resetSessionParams() }
 		else { self.resetSessionParamsComplete?(id, false) }
 	}
 
@@ -1274,7 +1382,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func acceptSessionParams(_ id: String) {
-		if let device = mConnectedDevices?[id] { device.acceptSessionParams() }
+		if let device = mConnectedDevices[id] { device.acceptSessionParams() }
 		else { self.acceptSessionParamsComplete?(id, false) }
 	}
 
