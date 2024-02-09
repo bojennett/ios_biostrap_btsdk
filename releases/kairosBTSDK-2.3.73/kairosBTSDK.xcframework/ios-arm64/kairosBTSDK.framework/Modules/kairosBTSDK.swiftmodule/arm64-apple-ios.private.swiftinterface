@@ -1,0 +1,824 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.9.2 (swiftlang-5.9.2.2.56 clang-1500.1.0.2.5)
+// swift-module-flags: -target arm64-apple-ios14.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name kairosBTSDK
+// swift-module-flags-ignorable: -enable-bare-slash-regex
+import CommonCrypto
+import CoreBluetooth
+import Foundation
+import Swift
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+import zlib
+@objc public enum algorithmPacketType : Swift.UInt8, Swift.Codable {
+  case philipsSleep = 0x2f
+  case unknown = 0xff
+  public var title: Swift.String {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum buttonTapType : Swift.UInt8, Swift.Codable, Swift.CaseIterable {
+  case single = 0x00
+  case double = 0x01
+  case triple = 0x02
+  case long = 0x03
+  case unknown = 0xff
+  public var title: Swift.String {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+  public init?(rawValue: Swift.UInt8)
+  public typealias AllCases = [kairosBTSDK.buttonTapType]
+  public typealias RawValue = Swift.UInt8
+  public static var allCases: [kairosBTSDK.buttonTapType] {
+    get
+  }
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum firmwareErorCode : Swift.UInt8 {
+  case invalid = 0x00
+  case success = 0x01
+  case opcodeNotSupported = 0x02
+  case invalidParameters = 0x03
+  case insufficientResources = 0x04
+  case invalidObject = 0x05
+  case unsupportedType = 0x07
+  case operationNotPermitted = 0x08
+  case operationFailed = 0x0A
+  case extendedError = 0x0B
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum extendedFirmwareError : Swift.UInt8 {
+  case NO_ERROR = 0x00
+  case INVALID_ERROR_CODE = 0x01
+  case WRONG_COMMAND_FORMAT = 0x02
+  case UNKNOWN_COMMAND = 0x03
+  case INIT_COMMAND_INVALID = 0x04
+  case FW_VERSION_FAILURE = 0x05
+  case HW_VERSION_FAILURE = 0x06
+  case SD_VERSION_FAILURE = 0x07
+  case SIGNATURE_MISSING = 0x08
+  case WRONG_HASH_TYPE = 0x09
+  case HASH_FAILED = 0x0A
+  case WRONG_SIGNATURE_TYPE = 0x0B
+  case VERIFICATION_FAILED = 0x0C
+  case INSUFFICIENT_SPACE = 0x0D
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum sessionParameterType : Swift.UInt8, Swift.Codable {
+  case ppgCapturePeriod = 0x00
+  case ppgCaptureDuration = 0x01
+  case tag = 0x10
+  case reset = 0xfd
+  case accept = 0xfe
+  case unknown = 0xff
+  public var title: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum deviceParameterType : Swift.UInt8, Swift.Codable {
+  case serialNumber = 0x01
+  case chargeCycle = 0x02
+  case advertisingInterval = 0x03
+  case canLogDiagnostics = 0x04
+  case paired = 0x07
+  case pageThreshold = 0x08
+  public var title: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum debugDevice : Swift.UInt8, Swift.Codable {
+  case spectralParameters = 0x00
+  case unknownDevice = 0xff
+  public var name: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum ppgStatusType : Swift.UInt8, Swift.Codable {
+  case userContinuous = 0x00
+  case userComplete = 0x01
+  case backgroundComplete = 0x02
+  case backgroundMedtor = 0x03
+  case backgroundWornStop = 0x04
+  case backgroundUserStop = 0x05
+  case backgroundMotionStop = 0x06
+  case userWornStop = 0x07
+  case userUserStop = 0x08
+  case userMotionStop = 0x09
+  case userMedtorMotion = 0x0a
+  case unknown = 0xff
+  public var title: Swift.String {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum eventType : Swift.UInt8, Swift.Codable {
+  case ppgUserTriggerButton = 0x00
+  case ppgUserTriggerAutoActivity = 0x01
+  case ppgUserTriggerBLE = 0x02
+  case ppgUserTriggerUART = 0x03
+  case ppgUserTriggerButtonStop = 0x04
+  case ppgUserTriggerAutoActivityStop = 0x05
+  case ppgUserTriggerBLEStop = 0x06
+  case ppgUserTriggerUARTStop = 0x07
+  case ppgUserTriggerManufacturingTestStop = 0x08
+  case singlePress = 0x09
+  case doublePress = 0x0a
+  case triplePress = 0x0b
+  case longPress = 0x0c
+  case none = 0x0d
+  case ppgWornStop = 0x0e
+  case ppgTimerStop = 0x0f
+  case ppgFWStop = 0x10
+  case ppgFWStart = 0x11
+  case unknown = 0xff
+  public init(from decoder: any Swift.Decoder) throws
+  public var title: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum kairosManufacturingTestType : Swift.UInt8, Swift.Codable, Swift.CaseIterable {
+  case flashIF = 0x01
+  case flashArray = 0x02
+  case spectralIF = 0x03
+  case spectralFIFO = 0x04
+  case imuIF = 0x05
+  case imuFIFO = 0x06
+  case led = 0x07
+  case ppgUserTriggerButton = 0x09
+  case spectralLEDS = 0x0A
+  case imuSelfTest = 0x0B
+  case spectralLEDLeakage = 0x0C
+  case imuNoiseFloor = 0x0D
+  case unknown = 0xff
+  public var title: Swift.String {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+  public init?(rawValue: Swift.UInt8)
+  public typealias AllCases = [kairosBTSDK.kairosManufacturingTestType]
+  public typealias RawValue = Swift.UInt8
+  public static var allCases: [kairosBTSDK.kairosManufacturingTestType] {
+    get
+  }
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@_inheritsConvenienceInitializers @objc public class biostrapDeviceSDK : ObjectiveC.NSObject {
+  @objc public enum biostrapDiscoveryType : Swift.Int {
+    case legacy = 1
+    case unpaired = 2
+    case unpaired_w_uuid = 3
+    case paired = 4
+    case paired_w_uuid = 5
+    case unknown = 99
+    public var title: Swift.String {
+      get
+    }
+    public var isPaired: Swift.Bool {
+      get
+    }
+    public var isNotPaired: Swift.Bool {
+      get
+    }
+    public init?(rawValue: Swift.Int)
+    public typealias RawValue = Swift.Int
+    public var rawValue: Swift.Int {
+      get
+    }
+  }
+  @objc public var logV: ((_ message: Swift.String?, _ file: Swift.String, _ function: Swift.String, _ line: Swift.Int) -> ())?
+  @objc public var logD: ((_ message: Swift.String?, _ file: Swift.String, _ function: Swift.String, _ line: Swift.Int) -> ())?
+  @objc public var logI: ((_ message: Swift.String?, _ file: Swift.String, _ function: Swift.String, _ line: Swift.Int) -> ())?
+  @objc public var logW: ((_ message: Swift.String?, _ file: Swift.String, _ function: Swift.String, _ line: Swift.Int) -> ())?
+  @objc public var logE: ((_ message: Swift.String?, _ file: Swift.String, _ function: Swift.String, _ line: Swift.Int) -> ())?
+  @objc public var bluetoothReady: ((_ isOn: Swift.Bool) -> ())?
+  @objc public var discovered: ((_ id: Swift.String, _ device: kairosBTSDK.Device) -> ())?
+  @objc public var discoveredUnnamed: ((_ id: Swift.String, _ device: kairosBTSDK.Device) -> ())?
+  @objc public var connected: ((_ id: Swift.String) -> ())?
+  @objc public var disconnected: ((_ id: Swift.String) -> ())?
+  @objc public var writeEpochComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var readEpochComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ value: Swift.Int) -> ())?
+  @objc public var endSleepComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var getAllPacketsComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var getAllPacketsAcknowledgeComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ ack: Swift.Bool) -> ())?
+  @objc public var getNextPacketComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ error_code: kairosBTSDK.nextPacketStatusType, _ caughtUp: Swift.Bool, _ packet: Swift.String) -> ())?
+  @objc public var getPacketCountComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ count: Swift.Int) -> ())?
+  @objc public var startManualComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var stopManualComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var ledComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var enterShipModeComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var writeSerialNumberComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var readSerialNumberComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ partID: Swift.String) -> ())?
+  @objc public var deleteSerialNumberComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var writeAdvIntervalComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var readAdvIntervalComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ seconds: Swift.Int) -> ())?
+  @objc public var deleteAdvIntervalComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var clearChargeCyclesComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var readChargeCyclesComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ cycles: Swift.Float) -> ())?
+  @objc public var readCanLogDiagnosticsComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ allow: Swift.Bool) -> ())?
+  @objc public var updateCanLogDiagnosticsComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var allowPPGComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var wornCheckComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ code: Swift.String, _ value: Swift.Int) -> ())?
+  @objc public var rawLoggingComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var resetComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var ppgMetrics: ((_ id: Swift.String, _ successful: Swift.Bool, _ packet: Swift.String) -> ())?
+  @objc public var ppgFailed: ((_ id: Swift.String, _ code: Swift.Int) -> ())?
+  @objc public var disableWornDetectComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var enableWornDetectComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var dataPackets: ((_ id: Swift.String, _ sequence_number: Swift.Int, _ packets: Swift.String) -> ())?
+  @objc public var dataComplete: ((_ id: Swift.String, _ bad_fw_read_count: Swift.Int, _ bad_fw_parse_count: Swift.Int, _ overflow_count: Swift.Int, _ bad_sdk_parse_count: Swift.Int, _ intermediate: Swift.Bool) -> ())?
+  @objc public var dataFailure: ((_ id: Swift.String) -> ())?
+  @objc public var streamingPacket: ((_ id: Swift.String, _ packet: Swift.String) -> ())?
+  @objc public var dataAvailable: ((_ id: Swift.String) -> ())?
+  @objc public var deviceWornStatus: ((_ id: Swift.String, _ isWorn: Swift.Bool) -> ())?
+  @objc public var updateFirmwareStarted: ((_ id: Swift.String) -> ())?
+  @objc public var updateFirmwareFinished: ((_ id: Swift.String) -> ())?
+  @objc public var updateFirmwareFailed: ((_ id: Swift.String, _ code: Swift.Int, _ message: Swift.String) -> ())?
+  @objc public var updateFirmwareProgress: ((_ id: Swift.String, _ percentage: Swift.Float) -> ())?
+  @objc public var manufacturingTestComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var manufacturingTestResult: ((_ id: Swift.String, _ valid: Swift.Bool, _ result: Swift.String) -> ())?
+  @objc public var endSleepStatus: ((_ id: Swift.String, _ hasSleep: Swift.Bool) -> ())?
+  @objc public var buttonClicked: ((_ id: Swift.String, _ presses: Swift.Int) -> ())?
+  @objc public var setAskForButtonResponseComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ enable: Swift.Bool) -> ())?
+  @objc public var getAskForButtonResponseComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ enable: Swift.Bool) -> ())?
+  @objc public var setHRZoneColorComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ type: kairosBTSDK.hrZoneRangeType) -> ())?
+  @objc public var getHRZoneColorComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ type: kairosBTSDK.hrZoneRangeType, _ red: Swift.Bool, _ green: Swift.Bool, _ blue: Swift.Bool, _ on_ms: Swift.Int, _ off_ms: Swift.Int) -> ())?
+  @objc public var setHRZoneRangeComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var getHRZoneRangeComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ enabled: Swift.Bool, _ high_value: Swift.Int, _ low_value: Swift.Int) -> ())?
+  @objc public var getPPGAlgorithmComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ algorithm: kairosBTSDK.ppgAlgorithmConfiguration, _ state: kairosBTSDK.eventType) -> ())?
+  @objc public var setAdvertiseAsHRMComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ asHRM: Swift.Bool) -> ())?
+  @objc public var getAdvertiseAsHRMComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ asHRM: Swift.Bool) -> ())?
+  @objc public var setButtonCommandComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ tap: kairosBTSDK.buttonTapType, _ command: kairosBTSDK.buttonCommandType) -> ())?
+  @objc public var getButtonCommandComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ tap: kairosBTSDK.buttonTapType, _ command: kairosBTSDK.buttonCommandType) -> ())?
+  @objc public var getPairedComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ paired: Swift.Bool) -> ())?
+  @objc public var setPairedComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var setUnpairedComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var getPageThresholdComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ threshold: Swift.Int) -> ())?
+  @objc public var setPageThresholdComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var deletePageThresholdComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var recalibratePPGComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var getRawLoggingStatusComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ enabled: Swift.Bool) -> ())?
+  @objc public var getWornOverrideStatusComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ overridden: Swift.Bool) -> ())?
+  @objc public var deviceChargingStatus: ((_ id: Swift.String, _ charging: Swift.Bool, _ on_charger: Swift.Bool, _ error: Swift.Bool) -> ())?
+  @objc public var setSessionParamComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ parameter: kairosBTSDK.sessionParameterType) -> ())?
+  @objc public var getSessionParamComplete: ((_ id: Swift.String, _ successful: Swift.Bool, _ parameter: kairosBTSDK.sessionParameterType, _ value: Swift.Int) -> ())?
+  @objc public var resetSessionParamsComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var acceptSessionParamsComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var batteryLevel: ((_ id: Swift.String, _ percentage: Swift.Int) -> ())?
+  @objc public var heartRate: ((_ id: Swift.String, _ epoch: Swift.Int, _ hr: Swift.Int, _ rr: [Swift.Double]) -> ())?
+  @objc public var airplaneModeComplete: ((_ id: Swift.String, _ successful: Swift.Bool) -> ())?
+  @objc public var connectedDevices: [kairosBTSDK.Device] {
+    @objc get
+  }
+  @objc public var discoveredDevices: [kairosBTSDK.Device] {
+    @objc get
+  }
+  @objc public var version: Swift.String {
+    @objc get
+  }
+  @objc public func addPairedDeviceWithId(_ id: Swift.String, name: Swift.String)
+  @objc public func removePairedDeviceWithId(_ id: Swift.String)
+  @objc public func clearPairedDevices()
+  @objc override dynamic public init()
+  public func acquireLicense(_ licenseKey: Swift.String) -> (Swift.Bool, Swift.Int, Swift.String)
+  @objc public func startScan(inBackground: Swift.Bool = false, forPaired: Swift.Bool = true, forUnpaired: Swift.Bool = true, forLegacy: Swift.Bool = true) -> Swift.Bool
+  @objc public func stopScan()
+  @objc public func connect(_ id: Swift.String)
+  @objc public func disconnect(_ id: Swift.String)
+  @objc public func getCSVFromDataPackets(_ json: Swift.String) -> Swift.String
+  @objc public func writeEpoch(_ id: Swift.String, newEpoch: Swift.Int)
+  @objc public func readEpoch(_ id: Swift.String)
+  @objc public func endSleep(_ id: Swift.String)
+  @objc public func getAllPackets(_ id: Swift.String, pages: Swift.Int, delay: Swift.Int)
+  @objc public func getAllPacketsAcknowledge(_ id: Swift.String, ack: Swift.Bool)
+  @objc public func getNextPacket(_ id: Swift.String, single: Swift.Bool)
+  @objc public func getPacketCount(_ id: Swift.String)
+  @objc public func disableWornDetect(_ id: Swift.String)
+  @objc public func enableWornDetect(_ id: Swift.String)
+  @objc public func startManual(_ id: Swift.String, algorithms: kairosBTSDK.ppgAlgorithmConfiguration)
+  @objc public func stopManual(_ id: Swift.String)
+  @objc public func led(_ id: Swift.String, red: Swift.Bool, green: Swift.Bool, blue: Swift.Bool, blink: Swift.Bool, seconds: Swift.Int)
+  @objc public func enterShipMode(_ id: Swift.String)
+  @objc public func writeSerialNumber(_ id: Swift.String, partID: Swift.String)
+  @objc public func readSerialNumber(_ id: Swift.String)
+  @objc public func deleteSerialNumber(_ id: Swift.String)
+  @objc public func writeAdvInterval(_ id: Swift.String, seconds: Swift.Int)
+  @objc public func readAdvInterval(_ id: Swift.String)
+  @objc public func deleteAdvInterval(_ id: Swift.String)
+  @objc public func clearChargeCycles(_ id: Swift.String)
+  @objc public func readChargeCycles(_ id: Swift.String)
+  @objc public func readCanLogDiagnostics(_ id: Swift.String)
+  @objc public func updateCanLogDiagnostics(_ id: Swift.String, allow: Swift.Bool)
+  @objc public func manufacturingTest(_ id: Swift.String, test: kairosBTSDK.kairosManufacturingTestType)
+  @objc public func setAskForButtonResponse(_ id: Swift.String, enable: Swift.Bool)
+  @objc public func getAskForButtonResponse(_ id: Swift.String)
+  @objc public func setHRZoneColor(_ id: Swift.String, type: kairosBTSDK.hrZoneRangeType, red: Swift.Bool, green: Swift.Bool, blue: Swift.Bool, on_milliseconds: Swift.Int, off_milliseconds: Swift.Int)
+  @objc public func getHRZoneColor(_ id: Swift.String, type: kairosBTSDK.hrZoneRangeType)
+  @objc public func setHRZoneRange(_ id: Swift.String, enabled: Swift.Bool, high_value: Swift.Int, low_value: Swift.Int)
+  @objc public func getHRZoneRange(_ id: Swift.String)
+  @objc public func getPPGAlgorithm(_ id: Swift.String)
+  @objc public func setAdvertiseAsHRM(_ id: Swift.String, asHRM: Swift.Bool)
+  @objc public func getAdvertiseAsHRM(_ id: Swift.String)
+  @objc public func setButtonCommand(_ id: Swift.String, tap: kairosBTSDK.buttonTapType, command: kairosBTSDK.buttonCommandType)
+  @objc public func getButtonCommand(_ id: Swift.String, tap: kairosBTSDK.buttonTapType)
+  @objc public func setPaired(_ id: Swift.String)
+  @objc public func setUnpaired(_ id: Swift.String)
+  @objc public func getPaired(_ id: Swift.String)
+  @objc public func setPageThreshold(_ id: Swift.String, threshold: Swift.Int)
+  @objc public func getPageThreshold(_ id: Swift.String)
+  @objc public func deletePageThreshold(_ id: Swift.String)
+  @objc public func recalibratePPG(_ id: Swift.String)
+  @objc public func allowPPG(_ id: Swift.String, allow: Swift.Bool)
+  @objc public func wornCheck(_ id: Swift.String)
+  @objc public func rawLogging(_ id: Swift.String, enable: Swift.Bool)
+  @objc public func getRawLoggingStatus(_ id: Swift.String)
+  @objc public func getWornOverrideStatus(_ id: Swift.String)
+  @objc public func airplaneMode(_ id: Swift.String)
+  @objc public func reset(_ id: Swift.String)
+  @objc public func updateFirmware(_ id: Swift.String, file: Foundation.URL)
+  @objc public func cancelFirmwareUpdate(_ id: Swift.String)
+  @objc public func setSessionParam(_ id: Swift.String, parameter: kairosBTSDK.sessionParameterType, value: Swift.Int)
+  @objc public func getSessionParam(_ id: Swift.String, parameter: kairosBTSDK.sessionParameterType)
+  @objc public func resetSessionParams(_ id: Swift.String)
+  @objc public func acceptSessionParams(_ id: Swift.String)
+  @objc deinit
+}
+@objc public enum wavelengthType : Swift.UInt8, Swift.Codable {
+  case green = 0x00
+  case red = 0x01
+  case IR = 0x02
+  case whiteIR = 0x03
+  case whiteWhite = 0x04
+  case unknown = 0xff
+  public init(from decoder: any Swift.Decoder) throws
+  public var title: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum hrZoneRangeType : Swift.UInt8, Swift.Codable {
+  case below = 0x00
+  case within = 0x01
+  case above = 0x02
+  case unknown = 0xff
+  public var title: Swift.String {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum nextPacketStatusType : Swift.UInt8, Swift.Codable {
+  case successful = 0x00
+  case busy = 0x01
+  case caughtUp = 0x02
+  case pageEmpty = 0x03
+  case unknownPacket = 0x04
+  case badCommandFormat = 0x05
+  case badJSON = 0xfc
+  case badSDKDecode = 0xfd
+  case missingDevice = 0xfe
+  case unknown = 0xff
+  public init(from decoder: any Swift.Decoder) throws
+  public var title: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum buttonCommandType : Swift.UInt8, Swift.Codable, Swift.CaseIterable {
+  case none = 0x00
+  case showBattery = 0x01
+  case advertiseShowConnection = 0x02
+  case hrmAdvertiseToggleActivity = 0x03
+  case shutDown = 0x04
+  case unknown = 0xff
+  public var title: Swift.String {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+  public init?(rawValue: Swift.UInt8)
+  public typealias AllCases = [kairosBTSDK.buttonCommandType]
+  public typealias RawValue = Swift.UInt8
+  public static var allCases: [kairosBTSDK.buttonCommandType] {
+    get
+  }
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class biostrapStreamingPacket : ObjectiveC.NSObject, Swift.Codable {
+  public var type: kairosBTSDK.streamingType
+  public var epoch_sec: Swift.Int
+  public var epoch_ms: Swift.Int
+  public var hr_bpm: Swift.Int
+  public var cadence_spm: Swift.Int
+  public var hr_confidence: Swift.Int
+  public var cadence_confidence: Swift.Int
+  public var rmssd_ms: Swift.Int
+  public var numberOfDatapoints: Swift.Int
+  public var rr_bpm: Swift.Int
+  public var snr_ratio: Swift.Int
+  public var bbi_ms: Swift.Int
+  public var snr_type: Swift.Int
+  public var ppg: Swift.Float
+  public var ppgWavelengths: kairosBTSDK.wavelengthType
+  public var motionState: Swift.Bool
+  public var raw_data_string: Swift.String
+  public var csv: Swift.String {
+    get
+  }
+  required public init(from decoder: any Swift.Decoder) throws
+  public func encode(to encoder: any Swift.Encoder) throws
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class biostrapDataPacket : ObjectiveC.NSObject, Swift.Codable {
+  public var type: kairosBTSDK.packetType
+  public var settings_type: kairosBTSDK.settingsType
+  public var epoch: Swift.Int
+  public var end_epoch: Swift.Int
+  public var worn: Swift.Bool
+  public var epoch_ms: Swift.Int
+  public var seconds: Swift.Int
+  public var value: Swift.Int
+  public var active_seconds: Swift.Int
+  public var voltage: Swift.Int
+  public var temperature: Swift.Float
+  public var hr_valid: Swift.Bool
+  public var hr_result: Swift.Float
+  public var hrv_valid: Swift.Bool
+  public var hrv_result: Swift.Float
+  public var rr_valid: Swift.Bool
+  public var rr_result: Swift.Float
+  public var spo2_valid: Swift.Bool
+  public var spo2_result: Swift.Float
+  public var tag: Swift.String
+  public var settings_value: Swift.Float
+  public var raw_data: Foundation.Data
+  public var raw_data_string: Swift.String
+  public var diagnostic_type: kairosBTSDK.diagnosticType
+  public var ppg_failed_type: kairosBTSDK.ppgFailedType
+  public var ppg_metrics_status: kairosBTSDK.ppgStatusType
+  public var continuous_hr: [Swift.Int]
+  public var bbi: [Swift.Int]
+  public var cadence_spm: [Swift.Int]
+  public var event_type: kairosBTSDK.eventType
+  public var bookend_type: kairosBTSDK.bookendType
+  public var bookend_payload: Swift.Int
+  public var duration_ms: Swift.Int
+  public var green_led_current: Swift.Int
+  public var red_led_current: Swift.Int
+  public var ir_led_current: Swift.Int
+  public var white_irr_led_current: Swift.Int
+  public var white_white_led_current: Swift.Int
+  public var charging: Swift.Bool
+  public var charge_full: Swift.Bool
+  public var algorithmPacketSubType: kairosBTSDK.algorithmPacketType
+  public var algorithmPacketIndex: Swift.Int
+  public var algorithmPacketCount: Swift.Int
+  public var algorithmPacketData: Foundation.Data
+  public var csv: Swift.String {
+    get
+  }
+  required public init(from decoder: any Swift.Decoder) throws
+  public func encode(to encoder: any Swift.Encoder) throws
+  @objc deinit
+}
+@objc public enum streamingType : Swift.UInt8, Swift.Codable {
+  case hr = 0x00
+  case hrv = 0x01
+  case rr = 0x02
+  case bbi = 0x03
+  case ppgSNR = 0x04
+  case ppgWave = 0x05
+  case motionState = 0x06
+  case unknown = 0xff
+  public init(from decoder: any Swift.Decoder) throws
+  public var title: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+extension kairosBTSDK.biostrapDeviceSDK : CoreBluetooth.CBPeripheralDelegate {
+  @objc dynamic public func peripheralDidUpdateName(_ peripheral: CoreBluetooth.CBPeripheral)
+  @objc dynamic public func peripheralIsReady(toSendWriteWithoutResponse peripheral: CoreBluetooth.CBPeripheral)
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didDiscoverServices error: (any Swift.Error)?)
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didModifyServices invalidatedServices: [CoreBluetooth.CBService])
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didReadRSSI RSSI: Foundation.NSNumber, error: (any Swift.Error)?)
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didOpen channel: CoreBluetooth.CBL2CAPChannel?, error: (any Swift.Error)?)
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didWriteValueFor descriptor: CoreBluetooth.CBDescriptor, error: (any Swift.Error)?)
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didUpdateValueFor descriptor: CoreBluetooth.CBDescriptor, error: (any Swift.Error)?)
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didDiscoverCharacteristicsFor service: CoreBluetooth.CBService, error: (any Swift.Error)?)
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didWriteValueFor characteristic: CoreBluetooth.CBCharacteristic, error: (any Swift.Error)?)
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didUpdateValueFor characteristic: CoreBluetooth.CBCharacteristic, error: (any Swift.Error)?)
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didDiscoverDescriptorsFor characteristic: CoreBluetooth.CBCharacteristic, error: (any Swift.Error)?)
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didDiscoverIncludedServicesFor service: CoreBluetooth.CBService, error: (any Swift.Error)?)
+  @objc dynamic public func peripheral(_ peripheral: CoreBluetooth.CBPeripheral, didUpdateNotificationStateFor characteristic: CoreBluetooth.CBCharacteristic, error: (any Swift.Error)?)
+  @objc dynamic public func centralManager(_ central: CoreBluetooth.CBCentralManager, didUpdateANCSAuthorizationFor peripheral: CoreBluetooth.CBPeripheral)
+}
+extension Swift.String {
+  public func versionGreaterThan(_ compare: Swift.String, separator: Swift.Character) -> Swift.Bool
+  public func versionLessThan(_ compare: Swift.String, separator: Swift.Character) -> Swift.Bool
+  public func versionEqualTo(_ compare: Swift.String, separator: Swift.Character) -> Swift.Bool
+}
+extension kairosBTSDK.biostrapDeviceSDK : CoreBluetooth.CBCentralManagerDelegate {
+  @objc dynamic public func centralManagerDidUpdateState(_ central: CoreBluetooth.CBCentralManager)
+  @objc dynamic public func centralManager(_ central: CoreBluetooth.CBCentralManager, didDiscover peripheral: CoreBluetooth.CBPeripheral, advertisementData: [Swift.String : Any], rssi RSSI: Foundation.NSNumber)
+  @objc dynamic public func centralManager(_ central: CoreBluetooth.CBCentralManager, didConnect peripheral: CoreBluetooth.CBPeripheral)
+  @objc dynamic public func centralManager(_ central: CoreBluetooth.CBCentralManager, didDisconnectPeripheral peripheral: CoreBluetooth.CBPeripheral, error: (any Swift.Error)?)
+  @objc dynamic public func centralManager(_ central: CoreBluetooth.CBCentralManager, didFailToConnect peripheral: CoreBluetooth.CBPeripheral, error: (any Swift.Error)?)
+  @objc dynamic public func centralManager(_ central: CoreBluetooth.CBCentralManager, willRestoreState dict: [Swift.String : Any])
+}
+@objc public enum packetType : Swift.UInt8, Swift.Codable {
+  case unknown = 0x00
+  case steps = 0x81
+  case activity = 0x83
+  case temp = 0x84
+  case worn = 0x85
+  case sleep = 0x86
+  case diagnostic = 0x87
+  case ppg_failed = 0x88
+  case battery = 0x89
+  case charger = 0x8a
+  case ppg_metrics = 0x8b
+  case continuous_hr = 0x8c
+  case steps_active = 0x8d
+  case bbi = 0x8e
+  case cadence = 0x8f
+  case event = 0x90
+  case bookend = 0x91
+  case algorithmData = 0x92
+  case rawAccelXADC = 0xc0
+  case rawAccelYADC = 0xc1
+  case rawAccelZADC = 0xc2
+  case rawAccelCompressedXADC = 0xc3
+  case rawAccelCompressedYADC = 0xc4
+  case rawAccelCompressedZADC = 0xc5
+  case rawGyroXADC = 0xc8
+  case rawGyroYADC = 0xc9
+  case rawGyroZADC = 0xca
+  case rawGyroCompressedXADC = 0xcb
+  case rawGyroCompressedYADC = 0xcc
+  case rawGyroCompressedZADC = 0xcd
+  case ppgCalibrationStart = 0xe0
+  case ppgCalibrationDone = 0xd0
+  case motionLevel = 0xd1
+  case rawPPGCompressedGreen = 0xd3
+  case rawPPGCompressedRed = 0xd4
+  case rawPPGCompressedIR = 0xd5
+  case rawAccelFifoCount = 0xe1
+  case rawPPGProximity = 0xe2
+  case rawPPGGreen = 0xe3
+  case rawPPGRed = 0xe4
+  case rawPPGIR = 0xe5
+  case rawPPGFifoCount = 0xe6
+  case milestone = 0xf0
+  case settings = 0xf1
+  case caughtUp = 0xfe
+  public init(from decoder: any Swift.Decoder) throws
+  public var title: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@_inheritsConvenienceInitializers @objc public class ppgAlgorithmConfiguration : ObjectiveC.NSObject {
+  public var hr: Swift.Bool
+  public var hrv: Swift.Bool
+  public var rr: Swift.Bool
+  public var spo2: Swift.Bool
+  public var continuous: Swift.Bool
+  @objc override dynamic public init()
+  @objc public var commandString: Swift.String {
+    @objc get
+  }
+  @objc deinit
+}
+@objc public enum settingsType : Swift.UInt8, Swift.Codable {
+  case accelHalfRange = 0x00
+  case gyroHalfRange = 0x01
+  case imuSamplingRate = 0x02
+  case ppgCapturePeriod = 0x03
+  case ppgCaptureDuration = 0x04
+  case ppgSamplingRate = 0x05
+  case unknown = 0xff
+  public init(from decoder: any Swift.Decoder) throws
+  public var title: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum ppgFailedType : Swift.UInt8, Swift.Codable {
+  case worn = 0x00
+  case start = 0x01
+  case interrupt = 0x02
+  case overflow = 0x03
+  case fifoRead = 0x04
+  case alreadyRunning = 0x05
+  case lowBattery = 0x06
+  case userDisallowed = 0x07
+  case timedNotWorn = 0x08
+  case unknown = 0xff
+  public var title: Swift.String {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers public class Device : ObjectiveC.NSObject {
+  @objc public var name: Swift.String
+  @objc public var id: Swift.String
+  @objc public var discovery_type: kairosBTSDK.biostrapDeviceSDK.biostrapDiscoveryType
+  @objc public var batteryValid: Swift.Bool
+  @objc public var batteryLevel: Swift.Int
+  @objc public var wornStatus: Swift.String
+  @objc public var chargingStatus: Swift.String
+  @objc public var modelNumber: Swift.String {
+    @objc get
+  }
+  @objc public var firmwareRevision: Swift.String {
+    @objc get
+  }
+  @objc public var hardwareRevision: Swift.String {
+    @objc get
+  }
+  @objc public var manufacturerName: Swift.String {
+    @objc get
+  }
+  @objc public var serialNumber: Swift.String {
+    @objc get
+  }
+  @objc public var bluetoothSoftwareRevision: Swift.String {
+    @objc get
+  }
+  @objc public var algorithmsSoftwareRevision: Swift.String {
+    @objc get
+  }
+  @objc public var sleepSoftwareRevision: Swift.String {
+    @objc get
+  }
+  @objc deinit
+}
+@objc public enum diagnosticType : Swift.UInt8, Swift.Codable {
+  case sleep = 0x00
+  case ppgBroken = 0x01
+  case pmicStatus = 0x02
+  case algorithm = 0x03
+  case rotation = 0x04
+  case pmicWatchdog = 0x05
+  case bluetoothPacket = 0xfe
+  case unknown = 0xff
+  public var title: Swift.String {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+@objc public enum bookendType : Swift.UInt8, Swift.Codable {
+  case activity = 0x00
+  case unknown = 0xff
+  public var title: Swift.String {
+    get
+  }
+  public init(from decoder: any Swift.Decoder) throws
+  public init?(rawValue: Swift.UInt8)
+  public typealias RawValue = Swift.UInt8
+  public var rawValue: Swift.UInt8 {
+    get
+  }
+}
+extension kairosBTSDK.algorithmPacketType : Swift.Equatable {}
+extension kairosBTSDK.algorithmPacketType : Swift.Hashable {}
+extension kairosBTSDK.algorithmPacketType : Swift.RawRepresentable {}
+extension kairosBTSDK.buttonTapType : Swift.Equatable {}
+extension kairosBTSDK.buttonTapType : Swift.Hashable {}
+extension kairosBTSDK.buttonTapType : Swift.RawRepresentable {}
+extension kairosBTSDK.firmwareErorCode : Swift.Equatable {}
+extension kairosBTSDK.firmwareErorCode : Swift.Hashable {}
+extension kairosBTSDK.firmwareErorCode : Swift.RawRepresentable {}
+extension kairosBTSDK.extendedFirmwareError : Swift.Equatable {}
+extension kairosBTSDK.extendedFirmwareError : Swift.Hashable {}
+extension kairosBTSDK.extendedFirmwareError : Swift.RawRepresentable {}
+extension kairosBTSDK.sessionParameterType : Swift.Equatable {}
+extension kairosBTSDK.sessionParameterType : Swift.Hashable {}
+extension kairosBTSDK.sessionParameterType : Swift.RawRepresentable {}
+extension kairosBTSDK.deviceParameterType : Swift.Equatable {}
+extension kairosBTSDK.deviceParameterType : Swift.Hashable {}
+extension kairosBTSDK.deviceParameterType : Swift.RawRepresentable {}
+extension kairosBTSDK.debugDevice : Swift.Equatable {}
+extension kairosBTSDK.debugDevice : Swift.Hashable {}
+extension kairosBTSDK.debugDevice : Swift.RawRepresentable {}
+extension kairosBTSDK.ppgStatusType : Swift.Equatable {}
+extension kairosBTSDK.ppgStatusType : Swift.Hashable {}
+extension kairosBTSDK.ppgStatusType : Swift.RawRepresentable {}
+extension kairosBTSDK.eventType : Swift.Equatable {}
+extension kairosBTSDK.eventType : Swift.Hashable {}
+extension kairosBTSDK.eventType : Swift.RawRepresentable {}
+extension kairosBTSDK.kairosManufacturingTestType : Swift.Equatable {}
+extension kairosBTSDK.kairosManufacturingTestType : Swift.Hashable {}
+extension kairosBTSDK.kairosManufacturingTestType : Swift.RawRepresentable {}
+extension kairosBTSDK.biostrapDeviceSDK.biostrapDiscoveryType : Swift.Equatable {}
+extension kairosBTSDK.biostrapDeviceSDK.biostrapDiscoveryType : Swift.Hashable {}
+extension kairosBTSDK.biostrapDeviceSDK.biostrapDiscoveryType : Swift.RawRepresentable {}
+extension kairosBTSDK.wavelengthType : Swift.Equatable {}
+extension kairosBTSDK.wavelengthType : Swift.Hashable {}
+extension kairosBTSDK.wavelengthType : Swift.RawRepresentable {}
+extension kairosBTSDK.hrZoneRangeType : Swift.Equatable {}
+extension kairosBTSDK.hrZoneRangeType : Swift.Hashable {}
+extension kairosBTSDK.hrZoneRangeType : Swift.RawRepresentable {}
+extension kairosBTSDK.nextPacketStatusType : Swift.Equatable {}
+extension kairosBTSDK.nextPacketStatusType : Swift.Hashable {}
+extension kairosBTSDK.nextPacketStatusType : Swift.RawRepresentable {}
+extension kairosBTSDK.buttonCommandType : Swift.Equatable {}
+extension kairosBTSDK.buttonCommandType : Swift.Hashable {}
+extension kairosBTSDK.buttonCommandType : Swift.RawRepresentable {}
+extension kairosBTSDK.streamingType : Swift.Equatable {}
+extension kairosBTSDK.streamingType : Swift.Hashable {}
+extension kairosBTSDK.streamingType : Swift.RawRepresentable {}
+extension kairosBTSDK.packetType : Swift.Equatable {}
+extension kairosBTSDK.packetType : Swift.Hashable {}
+extension kairosBTSDK.packetType : Swift.RawRepresentable {}
+extension kairosBTSDK.settingsType : Swift.Equatable {}
+extension kairosBTSDK.settingsType : Swift.Hashable {}
+extension kairosBTSDK.settingsType : Swift.RawRepresentable {}
+extension kairosBTSDK.ppgFailedType : Swift.Equatable {}
+extension kairosBTSDK.ppgFailedType : Swift.Hashable {}
+extension kairosBTSDK.ppgFailedType : Swift.RawRepresentable {}
+extension kairosBTSDK.diagnosticType : Swift.Equatable {}
+extension kairosBTSDK.diagnosticType : Swift.Hashable {}
+extension kairosBTSDK.diagnosticType : Swift.RawRepresentable {}
+extension kairosBTSDK.bookendType : Swift.Equatable {}
+extension kairosBTSDK.bookendType : Swift.Hashable {}
+extension kairosBTSDK.bookendType : Swift.RawRepresentable {}
