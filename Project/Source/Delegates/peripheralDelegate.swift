@@ -29,10 +29,8 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) {
-		DispatchQueue.main.async {
-			if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
-				device.isReady()
-			}
+		if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
+			device.isReady()
 		}
 	}
 	
