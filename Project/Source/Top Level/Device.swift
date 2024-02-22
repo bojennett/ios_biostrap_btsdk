@@ -332,53 +332,20 @@ public class Device: NSObject, ObservableObject {
 	@Published public var wornStatus: String = "Not worn"
 	@Published public var chargingStatus: String = "Not charging"
 
-	@objc public var modelNumber : String {
-		if let modelNumber = mModelNumber { return modelNumber.value }
-		else { return ("???") }
-	}
-
-	@objc public var firmwareRevision : String {
-		if let firmwareRevision = mFirmwareVersion { return firmwareRevision.value }
-		else { return ("???") }
-	}
-
-	@objc public var hardwareRevision : String {
-		if let hardwareRevision = mHardwareRevision { return hardwareRevision.value }
-		else { return ("???") }
-	}
-
-	@objc public var manufacturerName : String {
-		if let manufacturerName = mManufacturerName { return manufacturerName.value }
-		else { return ("???") }
-	}
-
-	@objc public var serialNumber : String {
-		if let serialNumber = mSerialNumber { return serialNumber.value }
-		else { return ("???") }
-	}
-	
-	@objc public var bluetoothSoftwareRevision	: String {
-		if let softwareRevision = mSoftwareRevision { return softwareRevision.bluetooth }
-		else { return ("???") }
-	}
-
-	@objc public var algorithmsSoftwareRevision	: String {
-		if let softwareRevision = mSoftwareRevision { return softwareRevision.algorithms }
-		else { return ("???") }
-	}
+	@Published public var modelNumber: String = "???"
+	@Published public var firmwareRevision: String = "???"
+	@Published public var hardwareRevision: String = "???"
+	@Published public var manufacturerName: String = "???"
+	@Published public var serialNumber: String = "???"
+	@Published public var bluetoothSoftwareRevision: String = "???"
+	@Published public var algorithmsSoftwareRevision: String = "???"
 
 	#if UNIVERSAL || ETHOS
-	@objc public var medtorSoftwareRevision		: String {
-		if let softwareRevision = mSoftwareRevision { return softwareRevision.medtor }
-		else { return ("???") }
-	}
+	@Published public var medtorSoftwareRevision: String = "???"
 	#endif
 
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
-	@objc public var sleepSoftwareRevision		: String {
-		if let softwareRevision = mSoftwareRevision { return softwareRevision.sleep }
-		else { return ("???") }
-	}
+	@Published public var sleepSoftwareRevision: String = "???"
 	#endif
 
 	internal var mModelNumber					: disStringCharacteristic?
@@ -2487,26 +2454,55 @@ public class Device: NSObject, ObservableObject {
 			switch (enumerated) {
 			case .model_number_string			:
 				mModelNumber?.didUpdateValue()
+				if let modelNumberCharacteristic = mModelNumber {
+					self.modelNumber = modelNumberCharacteristic.value
+				}
+
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
 			case .hardware_revision_string		:
 				mHardwareRevision?.didUpdateValue()
+				if let hardwareRevisionCharacteristic = mHardwareRevision {
+					self.hardwareRevision = hardwareRevisionCharacteristic.value
+				}
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
 			case .firmware_revision_string		:
 				mFirmwareVersion?.didUpdateValue()
+				if let firmwareVersionCharacteristic = mFirmwareVersion {
+					self.firmwareRevision = firmwareVersionCharacteristic.value
+				}
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
 			case .software_revision_string		:
 				mSoftwareRevision?.didUpdateValue()
+				if let softwareRevisionCharacteristic = mSoftwareRevision {
+					self.bluetoothSoftwareRevision = softwareRevisionCharacteristic.bluetooth
+					self.algorithmsSoftwareRevision	= softwareRevisionCharacteristic.algorithms
+
+					#if UNIVERSAL || ETHOS
+					self.medtorSoftwareRevision = softwareRevisionCharacteristic.medtor
+					#endif
+
+					#if UNIVERSAL || ALTER || KAIROS || ETHOS
+					self.sleepSoftwareRevision = softwareRevisionCharacteristic.sleep
+					#endif
+
+				}
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
 			case .manufacturer_name_string		:
 				mManufacturerName?.didUpdateValue()
+				if let manufacturerNameCharacteristic = mManufacturerName {
+					self.manufacturerName = manufacturerNameCharacteristic.value
+				}
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
 			case .serial_number_string			:
 				mSerialNumber?.didUpdateValue()
+				if let serialNumberCharacteristic = mSerialNumber {
+					self.serialNumber = serialNumberCharacteristic.value
+				}
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
 			case .battery_level					: mBatteryLevelCharacteristic?.didUpdateValue()
