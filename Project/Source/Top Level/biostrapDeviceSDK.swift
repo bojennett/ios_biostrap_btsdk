@@ -1037,7 +1037,7 @@ import iOSDFULibrary
 	//--------------------------------------------------------------------------------
 	@objc public func setHRZoneColor(_ id: String, type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
 		if let device = mConnectedDevices[id] {
-			device.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
+			device.setHRZoneColorInternal(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
 		}
 		else { self.setHRZoneColorComplete?(id, false, type) }
 	}
@@ -1050,7 +1050,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getHRZoneColor(_ id: String, type: hrZoneRangeType) {
-		if let device = mConnectedDevices[id] { device.getHRZoneColor(type) }
+		if let device = mConnectedDevices[id] { device.getHRZoneColorInternal(type) }
 		else { self.getHRZoneColorComplete?(id, false, type, false, false, false, 0, 0) }
 	}
 	
@@ -1063,7 +1063,7 @@ import iOSDFULibrary
 	//--------------------------------------------------------------------------------
 	@objc public func setHRZoneRange(_ id: String, enabled: Bool, high_value: Int, low_value: Int) {
 		if let device = mConnectedDevices[id] {
-			device.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
+			device.setHRZoneRangeInternal(enabled, high_value: high_value, low_value: low_value)
 		}
 		else { self.setHRZoneRangeComplete?(id, false) }
 	}
@@ -1076,7 +1076,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getHRZoneRange(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getHRZoneRange() }
+		if let device = mConnectedDevices[id] { device.getHRZoneRangeInternal() }
 		else { self.getHRZoneRangeComplete?(id, false, false, 0, 0) }
 	}
 	
@@ -1088,7 +1088,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getPPGAlgorithm(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getPPGAlgorithm() }
+		if let device = mConnectedDevices[id] { device.getPPGAlgorithmInternal() }
 		else { self.getPPGAlgorithmComplete?(id, false, ppgAlgorithmConfiguration(), eventType.unknown) }
 	}
 	

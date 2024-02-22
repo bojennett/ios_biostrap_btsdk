@@ -166,9 +166,9 @@ public class Device: NSObject, ObservableObject {
 	#endif
 	
 	var peripheral			: CBPeripheral?
-	@Published public var name	: String
-	@Published public var id		: String
-	@objc public var discovery_type : biostrapDeviceSDK.biostrapDiscoveryType
+	@Published public var name: String
+	@Published public var id: String
+	@Published public var discovery_type: biostrapDeviceSDK.biostrapDiscoveryType
 	
 	var epoch				: TimeInterval
 	
@@ -193,6 +193,12 @@ public class Device: NSObject, ObservableObject {
 	
 	public let setAskForButtonResponseComplete = PassthroughSubject<(Bool, Bool), Never>()
 	public let getAskForButtonResponseComplete = PassthroughSubject<(Bool, Bool), Never>()
+	
+	public let setHRZoneColorComplete = PassthroughSubject<(Bool, hrZoneRangeType), Never>()
+	public let getHRZoneColorComplete = PassthroughSubject<(Bool, hrZoneRangeType, Bool, Bool, Bool, Int, Int), Never>()
+	public let setHRZoneRangeComplete = PassthroughSubject<Bool, Never>()
+	public let getHRZoneRangeComplete = PassthroughSubject<(Bool, Bool, Int, Int), Never>()
+	public let getPPGAlgorithmComplete = PassthroughSubject<(Bool, ppgAlgorithmConfiguration, eventType), Never>()
 	#endif
 	
 	// MARK: Passthrough subjects (Notifications)
@@ -246,14 +252,14 @@ public class Device: NSObject, ObservableObject {
 	#endif
 
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
-	var lambdaSetAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
-	var lambdaGetAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
-	
 	var lambdaSetHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType)->())?
 	var lambdaGetHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
 	var lambdaSetHRZoneRangeComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaGetHRZoneRangeComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
 	var lambdaGetPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
+	
+	var lambdaSetAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
+	var lambdaGetAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
 	
 	var lambdaSetAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
 	var lambdaGetAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
@@ -1291,13 +1297,24 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setHRZoneColor(_ type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
+	func setHRZoneColorInternal(_ type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
 		}
 		else { self.lambdaSetHRZoneColorComplete?(self.id, false, type) }
 	}
-	
+
+	public func setHRZoneColor(_ type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
+		}
+		else {
+			DispatchQueue.main.async {
+				self.setHRZoneColorComplete.send((false, type))
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name: getHRZoneColor
 	//--------------------------------------------------------------------------------
@@ -1305,11 +1322,22 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getHRZoneColor(_ type: hrZoneRangeType) {
+	func getHRZoneColorInternal(_ type: hrZoneRangeType) {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getHRZoneColor(type)
 		}
 		else { self.lambdaGetHRZoneColorComplete?(self.id, false, type, false, false, false, 0, 0) }
+	}
+	
+	public func getHRZoneColor(_ type: hrZoneRangeType) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getHRZoneColor(type)
+		}
+		else {
+			DispatchQueue.main.async {
+				self.getHRZoneColorComplete.send((false, type, false, false, false, 0, 0))
+			}
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1319,11 +1347,22 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setHRZoneRange(_ enabled: Bool, high_value: Int, low_value: Int) {
+	func setHRZoneRangeInternal(_ enabled: Bool, high_value: Int, low_value: Int) {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
 		}
 		else { self.lambdaSetHRZoneRangeComplete?(self.id, false) }
+	}
+	
+	public func setHRZoneRange(_ enabled: Bool, high_value: Int, low_value: Int) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
+		}
+		else {
+			DispatchQueue.main.async {
+				self.setHRZoneRangeComplete.send(false)
+			}
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1333,11 +1372,22 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getHRZoneRange() {
+	func getHRZoneRangeInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getHRZoneRange()
 		}
 		else { self.lambdaGetHRZoneRangeComplete?(self.id, false, false, 0, 0) }
+	}
+	
+	public func getHRZoneRange() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getHRZoneRange()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.getHRZoneRangeComplete.send((false, false, 0, 0))
+			}
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1347,9 +1397,18 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getPPGAlgorithm() {
+	func getPPGAlgorithmInternal() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPPGAlgorithm() }
 		else { self.lambdaGetPPGAlgorithmComplete?(self.id, false, ppgAlgorithmConfiguration(), eventType.unknown) }
+	}
+	
+	public func getPPGAlgorithm() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPPGAlgorithm() }
+		else {
+			DispatchQueue.main.async {
+				self.getPPGAlgorithmComplete.send((false, ppgAlgorithmConfiguration(), eventType.unknown))
+			}
+		}
 	}
 	#endif
 
@@ -1879,12 +1938,56 @@ public class Device: NSObject, ObservableObject {
 				self.setAskForButtonResponseComplete.send((successful, enable))
 			}
 		}
+		
 		mMainCharacteristic?.getAskForButtonResponseComplete = { successful, enable in
 			self.lambdaGetAskForButtonResponseComplete?(self.id, successful, enable)
 			DispatchQueue.main.async {
 				self.getAskForButtonResponseComplete.send((successful, enable))
 			}
 		}
+		
+		mMainCharacteristic?.recalibratePPGComplete		= { successful in
+			self.lambdaRecalibratePPGComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				
+			}
+		}
+		
+		mMainCharacteristic?.setHRZoneColorComplete		= { successful, type in
+			self.lambdaSetHRZoneColorComplete?(self.id, successful, type)
+			DispatchQueue.main.async {
+				self.setHRZoneColorComplete.send((successful, type))
+			}
+		}
+		
+		mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in
+			self.lambdaGetHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms)
+			DispatchQueue.main.async {
+				self.getHRZoneColorComplete.send((successful, type, red, green, blue, on_ms, off_ms))
+			}
+		}
+		
+		mMainCharacteristic?.setHRZoneRangeComplete		= { successful in
+			self.lambdaSetHRZoneRangeComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.setHRZoneRangeComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in
+			self.lambdaGetHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value)
+			DispatchQueue.main.async {
+				self.getHRZoneRangeComplete.send((successful, enabled, high_value, low_value))
+			}
+		}
+		
+		mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm, state in
+			self.lambdaGetPPGAlgorithmComplete?(self.id, successful, algorithm, state)
+			DispatchQueue.main.async {
+				self.getPPGAlgorithmComplete.send((successful, algorithm, state))
+			}
+		}
+
 		#endif
 	}
 
@@ -2052,10 +2155,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.startLiveSyncComplete		= { successful in self.lambdaStartLiveSyncComplete?(self.id, successful) }
 					mMainCharacteristic?.stopLiveSyncComplete			= { successful in self.lambdaStopLiveSyncComplete?(self.id, successful) }
 					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.lambdaRecalibratePPGComplete?(self.id, successful) }
-					mMainCharacteristic?.setHRZoneColorComplete		= { successful, type in self.lambdaSetHRZoneColorComplete?(self.id, successful, type) }
-					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.lambdaGetHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
-					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.lambdaSetHRZoneRangeComplete?(self.id, successful) }
-					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.lambdaGetHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
 					mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }
 					mMainCharacteristic?.setUnpairedComplete		= { successful in self.lambdaSetUnpairedComplete?(self.id, successful) }
 					mMainCharacteristic?.getPairedComplete			= { successful, paired in self.lambdaGetPairedComplete?(self.id, successful, paired) }
@@ -2133,11 +2232,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.lambdaManufacturingTestComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result) }
 					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.lambdaRecalibratePPGComplete?(self.id, successful) }
-					mMainCharacteristic?.setHRZoneColorComplete		= { successful, type in self.lambdaSetHRZoneColorComplete?(self.id, successful, type) }
-					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.lambdaGetHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
-					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.lambdaSetHRZoneRangeComplete?(self.id, successful) }
-					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.lambdaGetHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
-					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm, state in self.lambdaGetPPGAlgorithmComplete?(self.id, successful, algorithm, state) }
 					mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }
 					mMainCharacteristic?.setUnpairedComplete		= { successful in self.lambdaSetUnpairedComplete?(self.id, successful) }
 					mMainCharacteristic?.getPairedComplete			= { successful, paired in self.lambdaGetPairedComplete?(self.id, successful, paired) }
@@ -2214,12 +2308,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.lambdaResetSessionParamsComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.lambdaManufacturingTestComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result) }
-					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.lambdaRecalibratePPGComplete?(self.id, successful) }
-					mMainCharacteristic?.setHRZoneColorComplete		= { successful, type in self.lambdaSetHRZoneColorComplete?(self.id, successful, type) }
-					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.lambdaGetHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
-					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.lambdaSetHRZoneRangeComplete?(self.id, successful) }
-					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.lambdaGetHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
-					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm, state in self.lambdaGetPPGAlgorithmComplete?(self.id, successful, algorithm, state) }
 					mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }
 					mMainCharacteristic?.setUnpairedComplete		= { successful in self.lambdaSetUnpairedComplete?(self.id, successful) }
 					mMainCharacteristic?.getPairedComplete			= { successful, paired in self.lambdaGetPairedComplete?(self.id, successful, paired) }
