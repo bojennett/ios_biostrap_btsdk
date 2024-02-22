@@ -183,6 +183,17 @@ public class Device: NSObject, ObservableObject {
 	
 	public let getRawLoggingStatusComplete = PassthroughSubject<(Bool, Bool), Never>()
 	public let getWornOverrideStatusComplete = PassthroughSubject<(Bool, Bool), Never>()
+	
+	public let writeSerialNumberComplete = PassthroughSubject<Bool, Never>()
+	public let readSerialNumberComplete = PassthroughSubject<(Bool, String), Never>()
+	public let deleteSerialNumberComplete = PassthroughSubject<Bool, Never>()
+	
+	public let writeAdvIntervalComplete = PassthroughSubject<Bool, Never>()
+	public let readAdvIntervalComplete = PassthroughSubject<(Bool, Int), Never>()
+	public let deleteAdvIntervalComplete = PassthroughSubject<Bool, Never>()
+	
+	public let clearChargeCyclesComplete = PassthroughSubject<Bool, Never>()
+	public let readChargeCyclesComplete = PassthroughSubject<(Bool, Float), Never>()
 
 	#if UNIVERSAL || ALTER || ETHOS || KAIROS
 	public let setAdvertiseAsHRMComplete = PassthroughSubject<(Bool, Bool), Never>()
@@ -247,6 +258,7 @@ public class Device: NSObject, ObservableObject {
 	
 	var lambdaDisableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaEnableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
+	
 	#if UNIVERSAL || ETHOS
 	var lambdaDebugComplete: ((_ id: String, _ successful: Bool, _ device: debugDevice, _ data: Data)->())?
 	#endif
@@ -1034,13 +1046,24 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func writeSerialNumber(_ id: String, partID: String) {
+	func writeSerialNumberInternal(_ partID: String) {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.writeSerialNumber(partID)
 		}
 		else { self.lamdaWriteSerialNumberComplete?(id, false) }
 	}
 
+	public func writeSerialNumber(_ partID: String) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.writeSerialNumber(partID)
+		}
+		else {
+			DispatchQueue.main.async {
+				self.writeSerialNumberComplete.send(false)
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1048,13 +1071,24 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func readSerialNumber(_ id: String) {
+	func readSerialNumberInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.readSerialNumber()
 		}
 		else { self.lambdaReadSerialNumberComplete?(id, false, "") }
 	}
 
+	public func readSerialNumber() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.readSerialNumber()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.readSerialNumberComplete.send((false, ""))
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1062,13 +1096,24 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func deleteSerialNumber(_ id: String) {
+	func deleteSerialNumberInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.deleteSerialNumber()
 		}
 		else { self.lambdaDeleteSerialNumberComplete?(id, false) }
 	}
 
+	public func deleteSerialNumber() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.deleteSerialNumber()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.deleteSerialNumberComplete.send(false)
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1076,13 +1121,24 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func writeAdvInterval(_ id: String, seconds: Int) {
+	func writeAdvIntervalInternal(_ seconds: Int) {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.writeAdvInterval(seconds)
 		}
 		else { self.lambdaWriteAdvIntervalComplete?(id, false) }
 	}
 
+	public func writeAdvInterval(_ seconds: Int) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.writeAdvInterval(seconds)
+		}
+		else {
+			DispatchQueue.main.async {
+				self.writeAdvIntervalComplete.send(false)
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1090,13 +1146,24 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func readAdvInterval(_ id: String) {
+	func readAdvIntervalInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.readAdvInterval()
 		}
 		else { self.lambdaReadAdvIntervalComplete?(id, false, 0) }
 	}
 
+	public func readAdvInterval() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.readAdvInterval()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.readAdvIntervalComplete.send((false, 0))
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1104,25 +1171,22 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func deleteAdvInterval(_ id: String) {
+	func deleteAdvIntervalInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.deleteAdvInterval()
 		}
 		else { self.lambdaDeleteAdvIntervalComplete?(id, false) }
 	}
 
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	func clearChargeCycles(_ id: String) {
+	public func deleteAdvInterval() {
 		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.clearChargeCycles()
+			mainCharacteristic.deleteAdvInterval()
 		}
-		else { self.lambdaClearChargeCyclesComplete?(id, false) }
+		else {
+			DispatchQueue.main.async {
+				self.deleteAdvIntervalComplete.send(false)
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1132,11 +1196,47 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func readChargeCycles(_ id: String) {
+	func clearChargeCyclesInternal() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.clearChargeCycles()
+		}
+		else { self.lambdaClearChargeCyclesComplete?(id, false) }
+	}
+
+	public func clearChargeCycles() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.clearChargeCycles()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.clearChargeCyclesComplete.send(false)
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func readChargeCyclesInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.readChargeCycles()
 		}
 		else { self.lambdaReadChargeCyclesComplete?(id, false, 0.0) }
+	}
+
+	public func readChargeCycles() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.readChargeCycles()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.readChargeCyclesComplete.send((false, 0.0))
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1899,6 +1999,7 @@ public class Device: NSObject, ObservableObject {
 				self.getRawLoggingStatusComplete.send((successful, enabled))
 			}
 		}
+		
 		mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in
 			self.lambdaGetWornOverrideStatusComplete?(self.id, successful, overridden)
 			DispatchQueue.main.async {
@@ -1906,6 +2007,62 @@ public class Device: NSObject, ObservableObject {
 			}
 		}
 		
+		mMainCharacteristic?.writeSerialNumberComplete = { successful in
+			self.lamdaWriteSerialNumberComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.writeSerialNumberComplete.send(successful)
+			}
+		}
+
+		mMainCharacteristic?.readSerialNumberComplete = { successful, partID in
+			self.lambdaReadSerialNumberComplete?(self.id, successful, partID)
+			DispatchQueue.main.async {
+				self.readSerialNumberComplete.send((successful, partID))
+			}
+		}
+		
+		mMainCharacteristic?.deleteSerialNumberComplete = { successful in
+			self.lambdaDeleteSerialNumberComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.deleteSerialNumberComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.writeAdvIntervalComplete = { successful in
+			self.lambdaWriteAdvIntervalComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.writeAdvIntervalComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.readAdvIntervalComplete = { successful, seconds in
+			self.lambdaReadAdvIntervalComplete?(self.id, successful, seconds)
+			DispatchQueue.main.async {
+				self.readAdvIntervalComplete.send((successful, seconds))
+			}
+		}
+		
+		mMainCharacteristic?.deleteAdvIntervalComplete = { successful in
+			self.lambdaDeleteAdvIntervalComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.deleteAdvIntervalComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.clearChargeCyclesComplete = { successful in
+			self.lambdaClearChargeCyclesComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.clearChargeCyclesComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.readChargeCyclesComplete = { successful, cycles in
+			self.lambdaReadChargeCyclesComplete?(self.id, successful, cycles)
+			DispatchQueue.main.async {
+				self.readChargeCyclesComplete.send((successful, cycles))
+			}
+		}
+
 		#if UNIVERSAL || ALTER || KAIROS || ETHOS
 		mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in
 			self.lambdaSetAdvertiseAsHRMComplete?(self.id, successful, asHRM)
@@ -1987,7 +2144,6 @@ public class Device: NSObject, ObservableObject {
 				self.getPPGAlgorithmComplete.send((successful, algorithm, state))
 			}
 		}
-
 		#endif
 	}
 
@@ -2117,14 +2273,6 @@ public class Device: NSObject, ObservableObject {
 					attachMainCharacteristicCallbacks()
 					mMainCharacteristic?.motorComplete = { successful in self.lambdaMotorComplete?(self.id, successful) }
 					mMainCharacteristic?.enterShipModeComplete = { successful in self.lambdaEnterShipModeComplete?(self.id, successful) }
-					mMainCharacteristic?.writeSerialNumberComplete = { successful in self.lamdaWriteSerialNumberComplete?(self.id, successful) }
-					mMainCharacteristic?.readSerialNumberComplete = { successful, partID in self.lambdaReadSerialNumberComplete?(self.id, successful, partID) }
-					mMainCharacteristic?.deleteSerialNumberComplete = { successful in self.lambdaDeleteSerialNumberComplete?(self.id, successful) }
-					mMainCharacteristic?.writeAdvIntervalComplete = { successful in self.lambdaWriteAdvIntervalComplete?(self.id, successful) }
-					mMainCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.lambdaReadAdvIntervalComplete?(self.id, successful, seconds) }
-					mMainCharacteristic?.deleteAdvIntervalComplete = { successful in self.lambdaDeleteAdvIntervalComplete?(self.id, successful) }
-					mMainCharacteristic?.clearChargeCyclesComplete = { successful in self.lambdaClearChargeCyclesComplete?(self.id, successful) }
-					mMainCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.lambdaReadChargeCyclesComplete?(self.id, successful, cycles) }
 					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow) }
 					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
@@ -2197,14 +2345,6 @@ public class Device: NSObject, ObservableObject {
 					#endif
 					attachMainCharacteristicCallbacks()
 					mMainCharacteristic?.enterShipModeComplete = { successful in self.lambdaEnterShipModeComplete?(self.id, successful) }
-					mMainCharacteristic?.writeSerialNumberComplete = { successful in self.lamdaWriteSerialNumberComplete?(self.id, successful) }
-					mMainCharacteristic?.readSerialNumberComplete = { successful, partID in self.lambdaReadSerialNumberComplete?(self.id, successful, partID) }
-					mMainCharacteristic?.deleteSerialNumberComplete = { successful in self.lambdaDeleteSerialNumberComplete?(self.id, successful) }
-					mMainCharacteristic?.writeAdvIntervalComplete = { successful in self.lambdaWriteAdvIntervalComplete?(self.id, successful) }
-					mMainCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.lambdaReadAdvIntervalComplete?(self.id, successful, seconds) }
-					mMainCharacteristic?.deleteAdvIntervalComplete = { successful in self.lambdaDeleteAdvIntervalComplete?(self.id, successful) }
-					mMainCharacteristic?.clearChargeCyclesComplete = { successful in self.lambdaClearChargeCyclesComplete?(self.id, successful) }
-					mMainCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.lambdaReadChargeCyclesComplete?(self.id, successful, cycles) }
 					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow) }
 					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
@@ -2274,14 +2414,6 @@ public class Device: NSObject, ObservableObject {
 					#endif
 					attachMainCharacteristicCallbacks()
 					mMainCharacteristic?.enterShipModeComplete = { successful in self.lambdaEnterShipModeComplete?(self.id, successful) }
-					mMainCharacteristic?.writeSerialNumberComplete = { successful in self.lamdaWriteSerialNumberComplete?(self.id, successful) }
-					mMainCharacteristic?.readSerialNumberComplete = { successful, partID in self.lambdaReadSerialNumberComplete?(self.id, successful, partID) }
-					mMainCharacteristic?.deleteSerialNumberComplete = { successful in self.lambdaDeleteSerialNumberComplete?(self.id, successful) }
-					mMainCharacteristic?.writeAdvIntervalComplete = { successful in self.lambdaWriteAdvIntervalComplete?(self.id, successful) }
-					mMainCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.lambdaReadAdvIntervalComplete?(self.id, successful, seconds) }
-					mMainCharacteristic?.deleteAdvIntervalComplete = { successful in self.lambdaDeleteAdvIntervalComplete?(self.id, successful) }
-					mMainCharacteristic?.clearChargeCyclesComplete = { successful in self.lambdaClearChargeCyclesComplete?(self.id, successful) }
-					mMainCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.lambdaReadChargeCyclesComplete?(self.id, successful, cycles) }
 					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow) }
 					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
@@ -2377,14 +2509,6 @@ public class Device: NSObject, ObservableObject {
 					#endif
 					attachMainCharacteristicCallbacks()
 					mMainCharacteristic?.enterShipModeComplete = { successful in self.lambdaEnterShipModeComplete?(self.id, successful) }
-					mMainCharacteristic?.writeSerialNumberComplete = { successful in self.lamdaWriteSerialNumberComplete?(self.id, successful) }
-					mMainCharacteristic?.readSerialNumberComplete = { successful, partID in self.lambdaReadSerialNumberComplete?(self.id, successful, partID) }
-					mMainCharacteristic?.deleteSerialNumberComplete = { successful in self.lambdaDeleteSerialNumberComplete?(self.id, successful) }
-					mMainCharacteristic?.writeAdvIntervalComplete = { successful in self.lambdaWriteAdvIntervalComplete?(self.id, successful) }
-					mMainCharacteristic?.readAdvIntervalComplete = { successful, seconds in self.lambdaReadAdvIntervalComplete?(self.id, successful, seconds) }
-					mMainCharacteristic?.deleteAdvIntervalComplete = { successful in self.lambdaDeleteAdvIntervalComplete?(self.id, successful) }
-					mMainCharacteristic?.clearChargeCyclesComplete = { successful in self.lambdaClearChargeCyclesComplete?(self.id, successful) }
-					mMainCharacteristic?.readChargeCyclesComplete = { successful, cycles in self.lambdaReadChargeCyclesComplete?(self.id, successful, cycles) }
 					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow) }
 					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }

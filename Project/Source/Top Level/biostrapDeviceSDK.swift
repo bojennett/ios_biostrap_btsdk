@@ -815,7 +815,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func writeSerialNumber(_ id: String, partID: String) {
-		if let device = mConnectedDevices[id] { device.writeSerialNumber(id, partID: partID) }
+		if let device = mConnectedDevices[id] { device.writeSerialNumberInternal(partID) }
 		else { self.writeSerialNumberComplete?(id, false) }
 	}
 
@@ -827,7 +827,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func readSerialNumber(_ id: String) {
-		if let device = mConnectedDevices[id] { device.readSerialNumber(id) }
+		if let device = mConnectedDevices[id] { device.readSerialNumberInternal() }
 		else { self.readSerialNumberComplete?(id, false, "") }
 	}
 
@@ -839,7 +839,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func deleteSerialNumber(_ id: String) {
-		if let device = mConnectedDevices[id] { device.deleteSerialNumber(id) }
+		if let device = mConnectedDevices[id] { device.deleteSerialNumberInternal() }
 		else { self.deleteSerialNumberComplete?(id, false) }
 	}
 
@@ -851,7 +851,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func writeAdvInterval(_ id: String, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.writeAdvInterval(id, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.writeAdvIntervalInternal(seconds) }
 		else { self.writeAdvIntervalComplete?(id, false) }
 	}
 
@@ -863,7 +863,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func readAdvInterval(_ id: String) {
-		if let device = mConnectedDevices[id] { device.readAdvInterval(id) }
+		if let device = mConnectedDevices[id] { device.readAdvIntervalInternal() }
 		else { self.readAdvIntervalComplete?(id, false, 0) }
 	}
 
@@ -875,7 +875,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func deleteAdvInterval(_ id: String) {
-		if let device = mConnectedDevices[id] { device.deleteAdvInterval(id) }
+		if let device = mConnectedDevices[id] { device.deleteAdvIntervalInternal() }
 		else { self.deleteAdvIntervalComplete?(id, false) }
 	}
 
@@ -887,7 +887,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func clearChargeCycles(_ id: String) {
-		if let device = mConnectedDevices[id] { device.clearChargeCycles(id) }
+		if let device = mConnectedDevices[id] { device.clearChargeCyclesInternal() }
 		else { self.clearChargeCyclesComplete?(id, false) }
 	}
 
@@ -899,7 +899,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func readChargeCycles(_ id: String) {
-		if let device = mConnectedDevices[id] { device.readChargeCycles(id) }
+		if let device = mConnectedDevices[id] { device.readChargeCyclesInternal() }
 		else { self.readChargeCyclesComplete?(id, false, 0) }
 	}
 
