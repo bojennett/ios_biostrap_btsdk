@@ -1012,7 +1012,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func setAskForButtonResponse(_ id: String, enable: Bool) {
-		if let device = mConnectedDevices[id] { device.setAskForButtonResponse(enable) }
+		if let device = mConnectedDevices[id] { device.setAskForButtonResponseInternal(enable) }
 		else { self.setAskForButtonResponseComplete?(id, false, enable) }
 	}
 	
@@ -1024,7 +1024,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getAskForButtonResponse(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getAskForButtonResponse() }
+		if let device = mConnectedDevices[id] { device.getAskForButtonResponseInternal() }
 		else { self.getAskForButtonResponseComplete?(id, false, false) }
 	}
 
@@ -1100,7 +1100,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func setAdvertiseAsHRM(_ id: String, asHRM: Bool) {
-		if let device = mConnectedDevices[id] { device.setAdvertiseAsHRM(asHRM) }
+		if let device = mConnectedDevices[id] { device.setAdvertiseAsHRMInternal(asHRM) }
 		else { self.setAdvertiseAsHRMComplete?(id, false, false) }
 	}
 	
@@ -1112,7 +1112,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getAdvertiseAsHRM(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getAdvertiseAsHRM() }
+		if let device = mConnectedDevices[id] { device.getAdvertiseAsHRMInternal() }
 		else { self.getAdvertiseAsHRMComplete?(id, false, false) }
 	}
 
@@ -1124,7 +1124,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func setButtonCommand(_ id: String, tap: buttonTapType, command: buttonCommandType) {
-		if let device = mConnectedDevices[id] { device.setButtonCommand(tap, command: command) }
+		if let device = mConnectedDevices[id] { device.setButtonCommandInternal(tap, command: command) }
 		else { self.setButtonCommandComplete?(id, false, tap, command) }
 	}
 	
@@ -1136,7 +1136,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getButtonCommand(_ id: String, tap: buttonTapType) {
-		if let device = mConnectedDevices[id] { device.getButtonCommand(tap) }
+		if let device = mConnectedDevices[id] { device.getButtonCommandInternal(tap) }
 		else { self.getButtonCommandComplete?(id, false, tap, .unknown) }
 	}
 	
@@ -1269,7 +1269,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getRawLoggingStatus(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getRawLoggingStatus(id) }
+		if let device = mConnectedDevices[id] { device.getRawLoggingStatusInternal() }
 		else { self.getRawLoggingStatusComplete?(id, false, false) }
 	}
 
@@ -1281,7 +1281,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func getWornOverrideStatus(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getWornOverrideStatus(id) }
+		if let device = mConnectedDevices[id] { device.getWornOverrideStatusInternal() }
 		else { self.getWornOverrideStatusComplete?(id, false, false) }
 	}
 

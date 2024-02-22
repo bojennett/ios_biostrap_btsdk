@@ -180,8 +180,26 @@ public class Device: NSObject, ObservableObject {
 	public let stopManualComplete = PassthroughSubject<Bool, Never>()
 	
 	public let ledComplete = PassthroughSubject<Bool, Never>()
+	
+	public let getRawLoggingStatusComplete = PassthroughSubject<(Bool, Bool), Never>()
+	public let getWornOverrideStatusComplete = PassthroughSubject<(Bool, Bool), Never>()
 
-	// MARK: Completions
+	#if UNIVERSAL || ALTER || ETHOS || KAIROS
+	public let setAdvertiseAsHRMComplete = PassthroughSubject<(Bool, Bool), Never>()
+	public let getAdvertiseAsHRMComplete = PassthroughSubject<(Bool, Bool), Never>()
+
+	public let setButtonCommandComplete = PassthroughSubject<(Bool, buttonTapType, buttonCommandType), Never>()
+	public let getButtonCommandComplete = PassthroughSubject<(Bool, buttonTapType, buttonCommandType), Never>()
+	
+	public let setAskForButtonResponseComplete = PassthroughSubject<(Bool, Bool), Never>()
+	public let getAskForButtonResponseComplete = PassthroughSubject<(Bool, Bool), Never>()
+	#endif
+	
+	// MARK: Passthrough subjects (Notifications)
+	public let heartRateUpdated = PassthroughSubject<(Int, Int, [Double]), Never>()
+
+
+	// MARK: Lambda Completions
 	var lambdaWriteEpochComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaReadEpochComplete: ((_ id: String, _ successful: Bool, _ value: Int)->())?
 
@@ -274,7 +292,7 @@ public class Device: NSObject, ObservableObject {
 	var lambdaAirplaneModeComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 
-	// MARK: Notifications
+	// MARK: Lambda Notifications
 	var lambdaBatteryLevelUpdated: ((_ id: String, _ percentage: Int)->())?
 
 	#if UNIVERSAL || ETHOS
@@ -1264,9 +1282,18 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setAskForButtonResponse(_ enable: Bool) {
+	func setAskForButtonResponseInternal(_ enable: Bool) {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAskForButtonResponse(enable) }
 		else { self.lambdaSetAskForButtonResponseComplete?(self.id, false, enable) }
+	}
+	
+	public func setAskForButtonResponse(_ enable: Bool) {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAskForButtonResponse(enable) }
+		else {
+			DispatchQueue.main.async {
+				self.setAskForButtonResponseComplete.send((false, enable))
+			}
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1276,9 +1303,18 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getAskForButtonResponse() {
+	func getAskForButtonResponseInternal() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAskForButtonResponse() }
 		else { self.lambdaGetAskForButtonResponseComplete?(self.id, false, false) }
+	}
+	
+	public func getAskForButtonResponse() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAskForButtonResponse() }
+		else {
+			DispatchQueue.main.async {
+				self.getAskForButtonResponseComplete.send((false, false))
+			}
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1358,11 +1394,20 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setAdvertiseAsHRM(_ asHRM: Bool) {
+	func setAdvertiseAsHRMInternal(_ asHRM: Bool) {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAdvertiseAsHRM(asHRM) }
 		else { self.lambdaSetAdvertiseAsHRMComplete?(self.id, false, false) }
 	}
-	
+
+	public func setAdvertiseAsHRM(_ asHRM: Bool) {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAdvertiseAsHRM(asHRM) }
+		else {
+			DispatchQueue.main.async {
+				self.setAdvertiseAsHRMComplete.send((false, false))
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name: getAdvertiseAsHRM
 	//--------------------------------------------------------------------------------
@@ -1370,9 +1415,18 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getAdvertiseAsHRM() {
+	func getAdvertiseAsHRMInternal() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAdvertiseAsHRM() }
 		else { self.lambdaGetAdvertiseAsHRMComplete?(self.id, false, false) }
+	}
+
+	public func getAdvertiseAsHRM() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAdvertiseAsHRM() }
+		else {
+			DispatchQueue.main.async {
+				self.getAdvertiseAsHRMComplete.send((false, false))
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1382,9 +1436,18 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setButtonCommand(_ tap: buttonTapType, command: buttonCommandType) {
+	func setButtonCommandInternal(_ tap: buttonTapType, command: buttonCommandType) {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setButtonCommand(tap, command: command) }
 		else { self.lambdaSetButtonCommandComplete?(self.id, false, tap, command) }
+	}
+
+	public func setButtonCommand(_ tap: buttonTapType, command: buttonCommandType) {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setButtonCommand(tap, command: command) }
+		else {
+			DispatchQueue.main.async {
+				self.setButtonCommandComplete.send((false, tap, command))
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1394,9 +1457,18 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getButtonCommand(_ tap: buttonTapType) {
+	func getButtonCommandInternal(_ tap: buttonTapType) {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getButtonCommand(tap) }
 		else { self.lambdaGetButtonCommandComplete?(self.id, false, tap, .unknown) }
+	}
+	
+	public func getButtonCommand(_ tap: buttonTapType) {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getButtonCommand(tap) }
+		else {
+			DispatchQueue.main.async {
+				self.getButtonCommandComplete.send((false, tap, .unknown))
+			}
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1521,11 +1593,22 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getRawLoggingStatus(_ id: String) {
+	func getRawLoggingStatusInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getRawLoggingStatus()
 		}
 		else { self.lambdaGetRawLoggingStatusComplete?(id, false, false) }
+	}
+	
+	public func getRawLoggingStatus() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getRawLoggingStatus()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.getRawLoggingStatusComplete.send((false, false))
+			}
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1535,11 +1618,22 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getWornOverrideStatus(_ id: String) {
+	func getWornOverrideStatusInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getWornOverrideStatus()
 		}
 		else { self.lambdaGetWornOverrideStatusComplete?(id, false, false) }
+	}
+	
+	public func getWornOverrideStatus() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getWornOverrideStatus()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.getWornOverrideStatusComplete.send((false, false))
+			}
+		}
 	}
 	
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
@@ -1772,6 +1866,59 @@ public class Device: NSObject, ObservableObject {
 			self.lambdaLEDComplete?(self.id, successful)
 			DispatchQueue.main.async { self.ledComplete.send(successful) }
 		}
+		
+		mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in
+			self.lambdaGetRawLoggingStatusComplete?(self.id, successful, enabled)
+			DispatchQueue.main.async {
+				self.getRawLoggingStatusComplete.send((successful, enabled))
+			}
+		}
+		mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in
+			self.lambdaGetWornOverrideStatusComplete?(self.id, successful, overridden)
+			DispatchQueue.main.async {
+				self.getWornOverrideStatusComplete.send((successful, overridden))
+			}
+		}
+		
+		#if UNIVERSAL || ALTER || KAIROS || ETHOS
+		mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in
+			self.lambdaSetAdvertiseAsHRMComplete?(self.id, successful, asHRM)
+			DispatchQueue.main.async {
+				self.setAdvertiseAsHRMComplete.send((successful, asHRM))
+			}
+		}
+		mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in
+			self.lambdaGetAdvertiseAsHRMComplete?(self.id, successful, asHRM)
+			DispatchQueue.main.async {
+				self.getAdvertiseAsHRMComplete.send((successful, asHRM))
+			}
+		}
+		mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in
+			self.lambdaSetButtonCommandComplete?(self.id, successful, tap, command)
+			DispatchQueue.main.async {
+				self.setButtonCommandComplete.send((successful, tap, command))
+			}
+		}
+		mMainCharacteristic?.getButtonCommandComplete	= { successful, tap, command in
+			self.lambdaGetButtonCommandComplete?(self.id, successful, tap, command)
+			DispatchQueue.main.async {
+				self.getButtonCommandComplete.send((successful, tap, command))
+			}
+		}
+		
+		mMainCharacteristic?.setAskForButtonResponseComplete = { successful, enable in
+			self.lambdaSetAskForButtonResponseComplete?(self.id, successful, enable)
+			DispatchQueue.main.async {
+				self.setAskForButtonResponseComplete.send((successful, enable))
+			}
+		}
+		mMainCharacteristic?.getAskForButtonResponseComplete = { successful, enable in
+			self.lambdaGetAskForButtonResponseComplete?(self.id, successful, enable)
+			DispatchQueue.main.async {
+				self.getAskForButtonResponseComplete.send((successful, enable))
+			}
+		}
+		#endif
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1868,7 +2015,12 @@ public class Device: NSObject, ObservableObject {
 				case .heart_rate_measurement:
 					log?.v ("\(self.id) '\(testCharacteristic.title)' - and enable notifications")
 					mHeartRateMeasurementCharacteristic	= heartRateMeasurementCharacteristic(peripheral, characteristic: characteristic)
-					mHeartRateMeasurementCharacteristic?.updated	= { id, epoch, hr, rr in self.lambdaHeartRateUpdated?(id, epoch, hr, rr) }
+					mHeartRateMeasurementCharacteristic?.updated	= { id, epoch, hr, rr in
+						self.lambdaHeartRateUpdated?(id, epoch, hr, rr)
+						DispatchQueue.main.async {
+							self.heartRateUpdated.send((epoch, hr, rr))
+						}
+					}
 					mHeartRateMeasurementCharacteristic?.discoverDescriptors()
 				#endif
 				case .body_sensor_location:
@@ -1906,8 +2058,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow) }
 					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
-					mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.lambdaGetRawLoggingStatusComplete?(self.id, successful, enabled) }
-					mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.lambdaGetWornOverrideStatusComplete?(self.id, successful, overridden) }
 					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
 					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.lambdaWornCheckComplete?(self.id, successful, code, value )}
 					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
@@ -1924,8 +2074,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-					mMainCharacteristic?.setAskForButtonResponseComplete = { successful, enable in self.lambdaSetAskForButtonResponseComplete?(self.id, successful, enable) }
-					mMainCharacteristic?.getAskForButtonResponseComplete = { successful, enable in self.lambdaGetAskForButtonResponseComplete?(self.id, successful, enable) }
 					mMainCharacteristic?.endSleepStatus = { enable in self.lambdaEndSleepStatus?(self.id, enable) }
 					mMainCharacteristic?.buttonClicked = { presses in self.lambdaButtonClicked?(self.id, presses) }
 					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.lambdaSetSessionParamComplete?(self.id, successful, parameter) }
@@ -1941,10 +2089,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in self.lambdaGetHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms) }
 					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.lambdaSetHRZoneRangeComplete?(self.id, successful) }
 					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.lambdaGetHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
-					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.lambdaSetAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
-					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.lambdaGetAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
-					mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in self.lambdaSetButtonCommandComplete?(self.id, successful, tap, command) }
-					mMainCharacteristic?.getButtonCommandComplete	= { successful, tap, command in self.lambdaGetButtonCommandComplete?(self.id, successful, tap, command) }
 					mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }
 					mMainCharacteristic?.setUnpairedComplete		= { successful in self.lambdaSetUnpairedComplete?(self.id, successful) }
 					mMainCharacteristic?.getPairedComplete			= { successful, paired in self.lambdaGetPairedComplete?(self.id, successful, paired) }
@@ -1998,8 +2142,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow) }
 					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
-					mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.lambdaGetRawLoggingStatusComplete?(self.id, successful, enabled) }
-					mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.lambdaGetWornOverrideStatusComplete?(self.id, successful, overridden) }
 					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
 					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.lambdaWornCheckComplete?(self.id, successful, code, value )}
 					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
@@ -2015,8 +2157,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-					mMainCharacteristic?.setAskForButtonResponseComplete = { successful, enable in self.lambdaSetAskForButtonResponseComplete?(self.id, successful, enable) }
-					mMainCharacteristic?.getAskForButtonResponseComplete = { successful, enable in self.lambdaGetAskForButtonResponseComplete?(self.id, successful, enable) }
 					mMainCharacteristic?.endSleepStatus = { enable in self.lambdaEndSleepStatus?(self.id, enable) }
 					mMainCharacteristic?.buttonClicked = { presses in self.lambdaButtonClicked?(self.id, presses) }
 					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.lambdaSetSessionParamComplete?(self.id, successful, parameter) }
@@ -2031,10 +2171,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.lambdaSetHRZoneRangeComplete?(self.id, successful) }
 					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.lambdaGetHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
 					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm, state in self.lambdaGetPPGAlgorithmComplete?(self.id, successful, algorithm, state) }
-					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.lambdaSetAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
-					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.lambdaGetAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
-					mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in self.lambdaSetButtonCommandComplete?(self.id, successful, tap, command) }
-					mMainCharacteristic?.getButtonCommandComplete	= { successful, tap, command in self.lambdaGetButtonCommandComplete?(self.id, successful, tap, command) }
 					mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }
 					mMainCharacteristic?.setUnpairedComplete		= { successful in self.lambdaSetUnpairedComplete?(self.id, successful) }
 					mMainCharacteristic?.getPairedComplete			= { successful, paired in self.lambdaGetPairedComplete?(self.id, successful, paired) }
@@ -2088,8 +2224,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow) }
 					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
-					mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.lambdaGetRawLoggingStatusComplete?(self.id, successful, enabled) }
-					mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.lambdaGetWornOverrideStatusComplete?(self.id, successful, overridden) }
 					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
 					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.lambdaWornCheckComplete?(self.id, successful, code, value )}
 					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
@@ -2105,8 +2239,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-					mMainCharacteristic?.setAskForButtonResponseComplete = { successful, enable in self.lambdaSetAskForButtonResponseComplete?(self.id, successful, enable) }
-					mMainCharacteristic?.getAskForButtonResponseComplete = { successful, enable in self.lambdaGetAskForButtonResponseComplete?(self.id, successful, enable) }
 					mMainCharacteristic?.endSleepStatus = { enable in self.lambdaEndSleepStatus?(self.id, enable) }
 					mMainCharacteristic?.buttonClicked = { presses in self.lambdaButtonClicked?(self.id, presses) }
 					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.lambdaSetSessionParamComplete?(self.id, successful, parameter) }
@@ -2121,10 +2253,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.setHRZoneRangeComplete		= { successful in self.lambdaSetHRZoneRangeComplete?(self.id, successful) }
 					mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in self.lambdaGetHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value) }
 					mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm, state in self.lambdaGetPPGAlgorithmComplete?(self.id, successful, algorithm, state) }
-					mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in self.lambdaSetAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
-					mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in self.lambdaGetAdvertiseAsHRMComplete?(self.id, successful, asHRM) }
-					mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in self.lambdaSetButtonCommandComplete?(self.id, successful, tap, command) }
-					mMainCharacteristic?.getButtonCommandComplete	= { successful, tap, command in self.lambdaGetButtonCommandComplete?(self.id, successful, tap, command) }
 					mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }
 					mMainCharacteristic?.setUnpairedComplete		= { successful in self.lambdaSetUnpairedComplete?(self.id, successful) }
 					mMainCharacteristic?.getPairedComplete			= { successful, paired in self.lambdaGetPairedComplete?(self.id, successful, paired) }
@@ -2205,8 +2333,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow) }
 					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
-					mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in self.lambdaGetRawLoggingStatusComplete?(self.id, successful, enabled) }
-					mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in self.lambdaGetWornOverrideStatusComplete?(self.id, successful, overridden) }
 					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
 					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.lambdaWornCheckComplete?(self.id, successful, code, value )}
 					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
