@@ -568,7 +568,7 @@ import iOSDFULibrary
 	@objc public func writeEpoch(_ id: String, newEpoch: Int) {
 		log?.v("\(id): \(newEpoch)")
 		
-		if let device = mConnectedDevices[id] { device.writeEpoch(id, newEpoch: newEpoch) }
+		if let device = mConnectedDevices[id] { device.writeEpochInternal(newEpoch) }
 		else { self.writeEpochComplete?(id, false) }
 	}
 
@@ -582,7 +582,7 @@ import iOSDFULibrary
 	@objc public func readEpoch(_ id: String) {
 		log?.v("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.readEpoch(id) }
+		if let device = mConnectedDevices[id] { device.readEpochInternal() }
 		else { self.readEpochComplete?(id, false, 0) }
 	}
 
@@ -706,7 +706,7 @@ import iOSDFULibrary
 	@objc public func startManual(_ id: String, algorithms: ppgAlgorithmConfiguration) {
 		log?.v ("\(id): Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
 		
-		if let device = mConnectedDevices[id] { device.startManual(id, algorithms: algorithms) }
+		if let device = mConnectedDevices[id] { device.startManual(algorithms) }
 		else { self.startManualComplete?(id, false) }
 	}
 
@@ -720,7 +720,7 @@ import iOSDFULibrary
 	@objc public func stopManual(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.stopManual(id) }
+		if let device = mConnectedDevices[id] { device.stopManual() }
 		else { self.stopManualComplete?(id, false) }
 	}
 
@@ -733,50 +733,50 @@ import iOSDFULibrary
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL
 	@objc public func livotalLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.livotalLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.livotalLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	
 	@objc public func ethosLED(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
-		if let device = mConnectedDevices[id] { device.ethosLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
+		if let device = mConnectedDevices[id] { device.ethosLEDInternal(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
 		else { self.ledComplete?(id, false) }
 	}
 
 	@objc public func alterLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.alterLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.alterLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	
 	@objc public func kairosLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.kairosLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.kairosLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
 
 	#if LIVOTAL
 	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.livotalLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.livotalLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
 
 	#if ETHOS
 	@objc public func led(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
-		if let device = mConnectedDevices[id] { device.ethosLED(id, red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
+		if let device = mConnectedDevices[id] { device.ethosLEDInternal(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
 
 	#if ALTER
 	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.alterLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.alterLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
 
 	#if KAIROS
 	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.kairosLED(id, red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = mConnectedDevices[id] { device.kairosLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
@@ -937,21 +937,21 @@ import iOSDFULibrary
 	#if LIVOTAL
 	@objc public func manufacturingTest(_ id: String) {
 		if let device = mConnectedDevices[id] { device.livotalManufacturingTest(id) }
-		else { self.manufacturingTestComplete?(id, false) }
+		else { self.lambdaManufacturingTestComplete?(id, false) }
 	}
 	#endif
 	
 	#if ALTER
 	@objc public func manufacturingTest(_ id: String, test: alterManufacturingTestType) {
 		if let device = mConnectedDevices[id] { device.alterManufacturingTest(id, test: test) }
-		else { self.manufacturingTestComplete?(id, false) }
+		else { self.lambdaManufacturingTestComplete?(id, false) }
 	}
 	#endif
 
 	#if KAIROS
 	@objc public func manufacturingTest(_ id: String, test: kairosManufacturingTestType) {
 		if let device = mConnectedDevices[id] { device.kairosManufacturingTest(id, test: test) }
-		else { self.manufacturingTestComplete?(id, false) }
+		else { self.lambdaManufacturingTestComplete?(id, false) }
 	}
 	#endif
 

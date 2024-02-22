@@ -104,7 +104,7 @@ class customStreamingCharacteristic: Characteristic {
 				}
 				catch {
 					log?.e ("\(pID): Result jsonData Failed")
-					self.manufacturingTestResult?(false, "")
+					self.lambdaManufacturingTestResult?(false, "")
 				}
 				#endif
 				
@@ -114,20 +114,20 @@ class customStreamingCharacteristic: Characteristic {
 					do {
 						let jsonData = try JSONEncoder().encode(testResult)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
+							self.lambdaManufacturingTestResult?(true, jsonString)
 						}
 						else {
 							log?.e ("\(pID): Result jsonString Failed")
-							self.manufacturingTestResult?(false, "")
+							self.lambdaManufacturingTestResult?(false, "")
 						}
 					}
 					catch {
 						log?.e ("\(pID): Result jsonData Failed")
-						self.manufacturingTestResult?(false, "")
+						self.lambdaManufacturingTestResult?(false, "")
 					}
 				}
 				else {
-					self.manufacturingTestResult?(false, "")
+					self.lambdaManufacturingTestResult?(false, "")
 				}
 				#endif
 				
@@ -137,20 +137,20 @@ class customStreamingCharacteristic: Characteristic {
 					do {
 						let jsonData = try JSONEncoder().encode(testResult)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
+							self.lambdaManufacturingTestResult?(true, jsonString)
 						}
 						else {
 							log?.e ("\(pID): Result jsonString Failed")
-							self.manufacturingTestResult?(false, "")
+							self.lambdaManufacturingTestResult?(false, "")
 						}
 					}
 					catch {
 						log?.e ("\(pID): Result jsonData Failed")
-						self.manufacturingTestResult?(false, "")
+						self.lambdaManufacturingTestResult?(false, "")
 					}
 				}
 				else {
-					self.manufacturingTestResult?(false, "")
+					self.lambdaManufacturingTestResult?(false, "")
 				}
 				#endif
 				
@@ -160,16 +160,16 @@ class customStreamingCharacteristic: Characteristic {
 					do {
 						let jsonData = try JSONEncoder().encode(testResult)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
+							self.lambdaManufacturingTestResult?(true, jsonString)
 						}
 						else {
 							log?.e ("\(pID): Result jsonString Failed")
-							self.manufacturingTestResult?(false, "")
+							self.lambdaManufacturingTestResult?(false, "")
 						}
 					}
 					catch {
 						log?.e ("\(pID): Result jsonData Failed")
-						self.manufacturingTestResult?(false, "")
+						self.lambdaManufacturingTestResult?(false, "")
 					}
 				}
 				else {
