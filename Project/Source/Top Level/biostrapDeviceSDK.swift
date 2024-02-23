@@ -108,107 +108,183 @@ import iOSDFULibrary
 	@objc public var connected: ((_ id: String)->())?
 	@objc public var disconnected: ((_ id: String)->())?
 	
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var writeEpochComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var readEpochComplete: ((_ id: String, _ successful: Bool, _ value: Int)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var endSleepComplete: ((_ id: String, _ successful: Bool)->())?
 	#if UNIVERSAL || ETHOS
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var debugComplete: ((_ id: String, _ successful: Bool, _ device: debugDevice, _ data: Data)->())?
 	#endif
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getAllPacketsComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getAllPacketsAcknowledgeComplete: ((_ id: String, _ successful: Bool, _ ack: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getNextPacketComplete: ((_ id: String, _ successful: Bool, _ error_code: nextPacketStatusType, _ caughtUp: Bool, _ packet: String)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getPacketCountComplete: ((_ id: String, _ successful: Bool, _ count: Int)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var startManualComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var stopManualComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var ledComplete: ((_ id: String, _ successful: Bool)->())?
 	#if UNIVERSAL || ETHOS
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var motorComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var enterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
 	
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var writeSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var readSerialNumberComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var deleteSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var writeAdvIntervalComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var readAdvIntervalComplete: ((_ id: String, _ successful: Bool, _ seconds: Int)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var deleteAdvIntervalComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var clearChargeCyclesComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var readChargeCyclesComplete: ((_ id: String, _ successful: Bool, _ cycles: Float)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var readCanLogDiagnosticsComplete: ((_ id: String, _ successful: Bool, _ allow: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var updateCanLogDiagnosticsComplete: ((_ id: String, _ successful: Bool)->())?
 
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var allowPPGComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var wornCheckComplete: ((_ id: String, _ successful: Bool, _ code: String, _ value: Int)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var rawLoggingComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var resetComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var ppgMetrics: ((_ id: String, _ successful: Bool, _ packet: String)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var ppgFailed: ((_ id: String, _ code: Int)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var disableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var enableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
 
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var dataPackets: ((_ id: String, _ sequence_number: Int, _ packets: String)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var dataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int, _ intermediate: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var dataFailure: ((_ id: String)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var streamingPacket: ((_ id: String, _ packet: String)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var dataAvailable: ((_ id: String)->())?
 
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var deviceWornStatus: ((_ id: String, _ isWorn: Bool)->())?
 
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var updateFirmwareStarted: ((_ id: String)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var updateFirmwareFinished: ((_ id: String)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var updateFirmwareFailed: ((_ id: String, _ code: Int, _ message: String)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var updateFirmwareProgress: ((_ id: String, _ percentage: Float)->())?
 	
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var manufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var manufacturingTestResult: ((_ id: String, _ valid: Bool, _ result: String)->())?
 
 	#if UNIVERSAL || ETHOS
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var startLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var stopLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 	
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var endSleepStatus: ((_ id: String, _ hasSleep: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var buttonClicked: ((_ id: String, _ presses: Int)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var setAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getAskForButtonResponseComplete: ((_ id: String, _ successful: Bool, _ enable: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var setHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getHRZoneColorComplete: ((_ id: String, _ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var setHRZoneRangeComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getHRZoneRangeComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getPPGAlgorithmComplete: ((_ id: String, _ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var setAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getAdvertiseAsHRMComplete: ((_ id: String, _ successful: Bool, _ asHRM: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var setButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getButtonCommandComplete: ((_ id: String, _ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getPairedComplete: ((_ id: String, _ successful: Bool, _ paired: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var setPairedComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var setUnpairedComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getPageThresholdComplete: ((_ id: String, _ successful: Bool, _ threshold: Int)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var setPageThresholdComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var deletePageThresholdComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
 
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getRawLoggingStatusComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getWornOverrideStatusComplete: ((_ id: String, _ successful: Bool, _ overridden: Bool)->())?
 
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var deviceChargingStatus: ((_ id: String, _ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
 
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var setSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getSessionParamComplete: ((_ id: String, _ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var resetSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var acceptSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
 
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var batteryLevel: ((_ id: String, _ percentage: Int)->())?
 
 	#if UNIVERSAL || ETHOS
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var pulseOx: ((_ id: String, _ spo2: Float, _ hr: Float)->())?
 	#endif
 
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var heartRate: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
+	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var airplaneModeComplete: ((_ id: String, _ successful: Bool)->())?
 	#endif
 
@@ -565,6 +641,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func writeEpoch(_ id: String, newEpoch: Int) {
 		log?.v("\(id): \(newEpoch)")
 		
@@ -579,6 +656,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readEpoch(_ id: String) {
 		log?.v("\(id)")
 		
@@ -593,6 +671,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func endSleep(_ id: String) {
 		log?.v("\(id)")
 		
@@ -608,6 +687,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || ETHOS
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func debug(_ id: String, device: debugDevice, data: Data) {
 		log?.v("\(id): \(device.name) -> \(data.hexString)")
 		
@@ -623,6 +703,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAllPackets(_ id: String, pages: Int, delay: Int) {
 		if let device = mConnectedDevices[id] { device.getAllPackets(id, pages: pages, delay: delay) }
 		else { self.getAllPacketsComplete?(id, false) }
@@ -635,6 +716,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAllPacketsAcknowledge(_ id: String, ack: Bool) {
 		if let device = mConnectedDevices[id] { device.getAllPacketsAcknowledge(id, ack: ack) }
 		else { self.getAllPacketsAcknowledgeComplete?(id, false, ack) }
@@ -647,6 +729,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getNextPacket(_ id: String, single: Bool) {
 		log?.v ("\(id)")
 		
@@ -661,6 +744,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPacketCount(_ id: String) {
 		log?.v ("\(id)")
 		
@@ -675,6 +759,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func disableWornDetect(_ id: String) {
 		log?.v ("\(id)")
 		
@@ -689,6 +774,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func enableWornDetect(_ id: String) {
 		log?.v ("\(id)")
 		
@@ -703,6 +789,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func startManual(_ id: String, algorithms: ppgAlgorithmConfiguration) {
 		log?.v ("\(id): Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
 		
@@ -717,6 +804,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func stopManual(_ id: String) {
 		log?.v ("\(id)")
 		
@@ -732,21 +820,25 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func livotalLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let device = mConnectedDevices[id] { device.livotalLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func ethosLED(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
 		if let device = mConnectedDevices[id] { device.ethosLEDInternal(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
 		else { self.ledComplete?(id, false) }
 	}
 
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func alterLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let device = mConnectedDevices[id] { device.alterLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func kairosLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let device = mConnectedDevices[id] { device.kairosLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
@@ -754,6 +846,7 @@ import iOSDFULibrary
 	#endif
 
 	#if LIVOTAL
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let device = mConnectedDevices[id] { device.livotalLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
@@ -761,6 +854,7 @@ import iOSDFULibrary
 	#endif
 
 	#if ETHOS
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func led(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
 		if let device = mConnectedDevices[id] { device.ethosLEDInternal(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
 		else { self.ledComplete?(id, false) }
@@ -768,6 +862,7 @@ import iOSDFULibrary
 	#endif
 
 	#if ALTER
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let device = mConnectedDevices[id] { device.alterLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
@@ -775,6 +870,7 @@ import iOSDFULibrary
 	#endif
 
 	#if KAIROS
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let device = mConnectedDevices[id] { device.kairosLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
@@ -789,6 +885,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || ETHOS
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func motor(_ id: String, milliseconds: Int, pulses: Int) {
 		if let device = mConnectedDevices[id] { device.motor(id, milliseconds: milliseconds, pulses: pulses) }
 		else { self.motorComplete?(id, false) }
@@ -802,6 +899,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func enterShipMode(_ id: String) {
 		if let device = mConnectedDevices[id] { device.enterShipMode(id) }
 		else { self.enterShipModeComplete?(id, false) }
@@ -814,6 +912,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func writeSerialNumber(_ id: String, partID: String) {
 		if let device = mConnectedDevices[id] { device.writeSerialNumberInternal(partID) }
 		else { self.writeSerialNumberComplete?(id, false) }
@@ -826,6 +925,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readSerialNumber(_ id: String) {
 		if let device = mConnectedDevices[id] { device.readSerialNumberInternal() }
 		else { self.readSerialNumberComplete?(id, false, "") }
@@ -838,6 +938,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func deleteSerialNumber(_ id: String) {
 		if let device = mConnectedDevices[id] { device.deleteSerialNumberInternal() }
 		else { self.deleteSerialNumberComplete?(id, false) }
@@ -850,6 +951,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func writeAdvInterval(_ id: String, seconds: Int) {
 		if let device = mConnectedDevices[id] { device.writeAdvIntervalInternal(seconds) }
 		else { self.writeAdvIntervalComplete?(id, false) }
@@ -862,6 +964,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readAdvInterval(_ id: String) {
 		if let device = mConnectedDevices[id] { device.readAdvIntervalInternal() }
 		else { self.readAdvIntervalComplete?(id, false, 0) }
@@ -874,6 +977,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func deleteAdvInterval(_ id: String) {
 		if let device = mConnectedDevices[id] { device.deleteAdvIntervalInternal() }
 		else { self.deleteAdvIntervalComplete?(id, false) }
@@ -886,6 +990,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func clearChargeCycles(_ id: String) {
 		if let device = mConnectedDevices[id] { device.clearChargeCyclesInternal() }
 		else { self.clearChargeCyclesComplete?(id, false) }
@@ -898,6 +1003,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readChargeCycles(_ id: String) {
 		if let device = mConnectedDevices[id] { device.readChargeCyclesInternal() }
 		else { self.readChargeCyclesComplete?(id, false, 0) }
@@ -910,6 +1016,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readCanLogDiagnostics(_ id: String) {
 		if let device = mConnectedDevices[id] { device.readCanLogDiagnostics(id) }
 		else { self.readCanLogDiagnosticsComplete?(id, false, false) }
@@ -922,6 +1029,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func updateCanLogDiagnostics(_ id: String, allow: Bool) {
 		if let device = mConnectedDevices[id] { device.updateCanLogDiagnostics(id, allow: allow) }
 		else { self.updateCanLogDiagnosticsComplete?(id, false) }
@@ -935,6 +1043,7 @@ import iOSDFULibrary
 	//
 	//--------------------------------------------------------------------------------
 	#if LIVOTAL
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String) {
 		if let device = mConnectedDevices[id] { device.livotalManufacturingTest(id) }
 		else { self.lambdaManufacturingTestComplete?(id, false) }
@@ -942,6 +1051,7 @@ import iOSDFULibrary
 	#endif
 	
 	#if ALTER
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: alterManufacturingTestType) {
 		if let device = mConnectedDevices[id] { device.alterManufacturingTest(id, test: test) }
 		else { self.lambdaManufacturingTestComplete?(id, false) }
@@ -949,6 +1059,7 @@ import iOSDFULibrary
 	#endif
 
 	#if KAIROS
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: kairosManufacturingTestType) {
 		if let device = mConnectedDevices[id] { device.kairosManufacturingTest(id, test: test) }
 		else { self.lambdaManufacturingTestComplete?(id, false) }
@@ -956,6 +1067,7 @@ import iOSDFULibrary
 	#endif
 
 	#if ETHOS
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: ethosManufacturingTestType) {
 		if let device = mConnectedDevices[id] { device.ethosManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
@@ -963,21 +1075,25 @@ import iOSDFULibrary
 	#endif
 
 	#if UNIVERSAL
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func livotalManufacturingTest(_ id: String) {
 		if let device = mConnectedDevices[id] { device.livotalManufacturingTest(id) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func ethosManufacturingTest(_ id: String, test: ethosManufacturingTestType) {
 		if let device = mConnectedDevices[id] { device.ethosManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func alterManufacturingTest(_ id: String, test: alterManufacturingTestType) {
 		if let device = mConnectedDevices[id] { device.alterManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func kairosManufacturingTest(_ id: String, test: kairosManufacturingTestType) {
 		if let device = mConnectedDevices[id] { device.kairosManufacturingTest(id, test: test) }
 		else { self.manufacturingTestComplete?(id, false) }
@@ -992,11 +1108,13 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func startLiveSync(_ id: String, configuration: liveSyncConfiguration) {
 		if let device = mConnectedDevices[id] { device.startLiveSync(id, configuration: configuration) }
 		else { self.startLiveSyncComplete?(id, false) }
 	}
 	
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func stopLiveSync(_ id: String) {
 		if let device = mConnectedDevices[id] { device.stopLiveSync(id) }
 		else { self.stopLiveSyncComplete?(id, false) }
@@ -1011,6 +1129,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setAskForButtonResponse(_ id: String, enable: Bool) {
 		if let device = mConnectedDevices[id] { device.setAskForButtonResponseInternal(enable) }
 		else { self.setAskForButtonResponseComplete?(id, false, enable) }
@@ -1023,6 +1142,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAskForButtonResponse(_ id: String) {
 		if let device = mConnectedDevices[id] { device.getAskForButtonResponseInternal() }
 		else { self.getAskForButtonResponseComplete?(id, false, false) }
@@ -1035,6 +1155,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setHRZoneColor(_ id: String, type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
 		if let device = mConnectedDevices[id] {
 			device.setHRZoneColorInternal(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
@@ -1049,6 +1170,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getHRZoneColor(_ id: String, type: hrZoneRangeType) {
 		if let device = mConnectedDevices[id] { device.getHRZoneColorInternal(type) }
 		else { self.getHRZoneColorComplete?(id, false, type, false, false, false, 0, 0) }
@@ -1061,6 +1183,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setHRZoneRange(_ id: String, enabled: Bool, high_value: Int, low_value: Int) {
 		if let device = mConnectedDevices[id] {
 			device.setHRZoneRangeInternal(enabled, high_value: high_value, low_value: low_value)
@@ -1075,6 +1198,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getHRZoneRange(_ id: String) {
 		if let device = mConnectedDevices[id] { device.getHRZoneRangeInternal() }
 		else { self.getHRZoneRangeComplete?(id, false, false, 0, 0) }
@@ -1087,6 +1211,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPPGAlgorithm(_ id: String) {
 		if let device = mConnectedDevices[id] { device.getPPGAlgorithmInternal() }
 		else { self.getPPGAlgorithmComplete?(id, false, ppgAlgorithmConfiguration(), eventType.unknown) }
@@ -1099,6 +1224,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setAdvertiseAsHRM(_ id: String, asHRM: Bool) {
 		if let device = mConnectedDevices[id] { device.setAdvertiseAsHRMInternal(asHRM) }
 		else { self.setAdvertiseAsHRMComplete?(id, false, false) }
@@ -1111,6 +1237,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAdvertiseAsHRM(_ id: String) {
 		if let device = mConnectedDevices[id] { device.getAdvertiseAsHRMInternal() }
 		else { self.getAdvertiseAsHRMComplete?(id, false, false) }
@@ -1123,6 +1250,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setButtonCommand(_ id: String, tap: buttonTapType, command: buttonCommandType) {
 		if let device = mConnectedDevices[id] { device.setButtonCommandInternal(tap, command: command) }
 		else { self.setButtonCommandComplete?(id, false, tap, command) }
@@ -1135,6 +1263,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getButtonCommand(_ id: String, tap: buttonTapType) {
 		if let device = mConnectedDevices[id] { device.getButtonCommandInternal(tap) }
 		else { self.getButtonCommandComplete?(id, false, tap, .unknown) }
@@ -1147,6 +1276,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setPaired(_ id: String) {
 		if let device = mConnectedDevices[id] { device.setPaired() }
 		else { self.setPairedComplete?(id, false) }
@@ -1159,6 +1289,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setUnpaired(_ id: String) {
 		if let device = mConnectedDevices[id] { device.setUnpaired() }
 		else { self.setUnpairedComplete?(id, false) }
@@ -1171,6 +1302,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPaired(_ id: String) {
 		if let device = mConnectedDevices[id] { device.getPaired() }
 		else { self.getPairedComplete?(id, false, false) }
@@ -1183,6 +1315,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setPageThreshold(_ id: String, threshold: Int) {
 		if let device = mConnectedDevices[id] { device.setPageThreshold(threshold) }
 		else { self.setPageThresholdComplete?(id, false) }
@@ -1195,6 +1328,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPageThreshold(_ id: String) {
 		if let device = mConnectedDevices[id] { device.getPageThreshold() }
 		else { self.getPageThresholdComplete?(id, false, 1) }
@@ -1207,6 +1341,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func deletePageThreshold(_ id: String) {
 		if let device = mConnectedDevices[id] { device.deletePageThreshold() }
 		else { self.deletePageThresholdComplete?(id, false) }
@@ -1220,6 +1355,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func recalibratePPG(_ id: String) {
 		if let device = mConnectedDevices[id] { device.recalibratePPG(id) }
 		else { self.recalibratePPGComplete?(id, false) }
@@ -1232,6 +1368,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func allowPPG(_ id: String, allow: Bool) {
 		if let device = mConnectedDevices[id] { device.allowPPG(id, allow: allow) }
 		else { self.allowPPGComplete?(id, false) }
@@ -1244,6 +1381,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func wornCheck(_ id: String) {
 		if let device = mConnectedDevices[id] { device.wornCheck(id) }
 		else { self.wornCheckComplete?(id, false, "No device", 0) }
@@ -1256,6 +1394,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func rawLogging(_ id: String, enable: Bool) {
 		if let device = mConnectedDevices[id] { device.rawLogging(id, enable: enable) }
 		else { self.rawLoggingComplete?(id, false) }
@@ -1268,6 +1407,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getRawLoggingStatus(_ id: String) {
 		if let device = mConnectedDevices[id] { device.getRawLoggingStatusInternal() }
 		else { self.getRawLoggingStatusComplete?(id, false, false) }
@@ -1280,6 +1420,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getWornOverrideStatus(_ id: String) {
 		if let device = mConnectedDevices[id] { device.getWornOverrideStatusInternal() }
 		else { self.getWornOverrideStatusComplete?(id, false, false) }
@@ -1293,6 +1434,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func airplaneMode(_ id: String) {
 		if let device = mConnectedDevices[id] { device.airplaneMode(id) }
 		else { self.airplaneModeComplete?(id, false) }
@@ -1306,6 +1448,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func reset(_ id: String) {
 		if let device = mConnectedDevices[id] { device.reset(id) }
 		else { self.resetComplete?(id, false) }
@@ -1318,6 +1461,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func updateFirmware(_ id: String, file: URL) {
 		if let device = mConnectedDevices[id] { device.updateFirmware(file) }
 		else { self.updateFirmwareFailed?(id, 10000, "No connected device to update") }
@@ -1331,6 +1475,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func cancelFirmwareUpdate(_ id: String) {
 		if let device = mConnectedDevices[id] { device.cancelFirmwareUpdate() }
 		else { self.updateFirmwareFailed?(id, 10000, "No connected device to update") }
@@ -1343,6 +1488,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setSessionParam(_ id: String, parameter: sessionParameterType, value: Int) {
 		if let device = mConnectedDevices[id] { device.setSessionParam(parameter, value: value) }
 		else { self.setSessionParamComplete?(id, false, parameter) }
@@ -1356,6 +1502,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getSessionParam(_ id: String, parameter: sessionParameterType) {
 		if let device = mConnectedDevices[id] { device.getSessionParam(parameter) }
 		else { self.getSessionParamComplete?(id, false, parameter, 0) }
@@ -1368,6 +1515,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func resetSessionParams(_ id: String) {
 		if let device = mConnectedDevices[id] { device.resetSessionParams() }
 		else { self.resetSessionParamsComplete?(id, false) }
@@ -1381,6 +1529,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func acceptSessionParams(_ id: String) {
 		if let device = mConnectedDevices[id] { device.acceptSessionParams() }
 		else { self.acceptSessionParamsComplete?(id, false) }
