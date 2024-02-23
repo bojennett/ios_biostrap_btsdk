@@ -9,6 +9,35 @@ import Foundation
 import CoreBluetooth
 import Combine
 
+public class hrZoneRangeValueType: ObservableObject, Equatable {
+	@Published public var valid: Bool = false
+	@Published public var enabled: Bool = false
+	@Published public var lower: Int = 0
+	@Published public var upper: Int = 0
+	
+	public init() {
+		self.valid = false
+		self.enabled = false
+		self.lower = 0
+		self.upper = 0
+	}
+	
+	public init(enabled: Bool, lower: Int, upper: Int) {
+		self.valid = true
+		self.enabled = enabled
+		self.lower = lower
+		self.upper = upper
+	}
+	
+	public var stringValue: String {
+		return ("Valid: \(self.valid), enabled: \(self.enabled), lower: \(self.lower), upper: \(self.upper)")
+	}
+	
+	public static func == (lhs: hrZoneRangeValueType, rhs: hrZoneRangeValueType) -> Bool {
+		return lhs.valid == rhs.valid && lhs.enabled == rhs.enabled && lhs.lower == rhs.lower && lhs.upper == rhs.upper
+	}
+}
+
 public class Device: NSObject, ObservableObject {
 	
 	enum prefixes: String {
@@ -208,8 +237,10 @@ public class Device: NSObject, ObservableObject {
 	public let setHRZoneColorComplete = PassthroughSubject<(Bool, hrZoneRangeType), Never>()
 	public let getHRZoneColorComplete = PassthroughSubject<(Bool, hrZoneRangeType, Bool, Bool, Bool, Int, Int), Never>()
 	public let setHRZoneRangeComplete = PassthroughSubject<Bool, Never>()
-	public let getHRZoneRangeComplete = PassthroughSubject<(Bool, Bool, Int, Int), Never>()
+	public let getHRZoneRangeComplete = PassthroughSubject<Bool, Never>()
 	public let getPPGAlgorithmComplete = PassthroughSubject<(Bool, ppgAlgorithmConfiguration, eventType), Never>()
+	
+	@Published public var hrZoneRange = hrZoneRangeValueType(enabled: false, lower: 0, upper: 0)
 	#endif
 	
 	// MARK: Passthrough subjects (Notifications)
@@ -306,10 +337,6 @@ public class Device: NSObject, ObservableObject {
 	var lambdaResetSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaAcceptSessionParamsComplete: ((_ id: String, _ successful: Bool)->())?
 
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
-	var lambdaAirplaneModeComplete: ((_ id: String, _ successful: Bool)->())?
-	#endif
-
 	// MARK: Lambda Notifications
 	var lambdaBatteryLevelUpdated: ((_ id: String, _ percentage: Int)->())?
 
@@ -317,25 +344,21 @@ public class Device: NSObject, ObservableObject {
 	var lambdaPulseOxUpdated: ((_ id: String, _ spo2: Float, _ hr: Float)->())?
 	#endif
 
-	#if UNIVERSAL || ETHOS || ALTER || KAIROS
-	var lambdaHeartRateUpdated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
-	#endif
-
 	var lambdaPPGMetrics: ((_ id: String, _ successful: Bool, _ packet: String)->())?
 	var lambdaPPGFailed: ((_ id: String, _ code: Int)->())?
 	
 	#if UNIVERSAL || ALTER || KAIROS || ETHOS
+	var lambdaAirplaneModeComplete: ((_ id: String, _ successful: Bool)->())?
+	var lambdaHeartRateUpdated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
 	var lambdaEndSleepStatus: ((_ id: String, _ hasSleep: Bool)->())?
 	var lambdaButtonClicked: ((_ id: String, _ presses: Int)->())?
+	var lambdaDataAvailable: ((_ id: String)->())?
 	#endif
 
 	var lambdaDataPackets: ((_ id: String, _ sequence_number: Int, _ packets: String)->())?
 	var lambdaDataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int, _ intermediate: Bool)->())?
 	var lambdaDataFailure: ((_ id: String)->())?
 	var lambdaStreamingPacket: ((_ id: String, _ packet: String)->())?
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
-	var lambdaDataAvailable: ((_ id: String)->())?
-	#endif
 	
 	var lambdaWornStatus: ((_ id: String, _ isWorn: Bool)->())?
 	var lambdaChargingStatus: ((_ id: String, _ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
@@ -466,7 +489,7 @@ public class Device: NSObject, ObservableObject {
 		}
 	}
 
-	override init() {
+	override public init() {
 		self.mState							= .disconnected
 		
 		self.name							= "UNKNOWN"
@@ -482,7 +505,7 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	#if UNIVERSAL
-	convenience init(_ name: String, id: String, peripheral: CBPeripheral?, type: biostrapDeviceSDK.biostrapDeviceType, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
+	convenience public init(_ name: String, id: String, peripheral: CBPeripheral?, type: biostrapDeviceSDK.biostrapDeviceType, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
 		self.name		= name
@@ -493,7 +516,7 @@ public class Device: NSObject, ObservableObject {
 	}
 	#endif
 
-	convenience init(_ name: String, id: String, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
+	convenience public init(_ name: String, id: String, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
 		self.name		= name
@@ -1485,7 +1508,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.getHRZoneRangeComplete.send((false, false, 0, 0))
+				self.getHRZoneRangeComplete.send(false)
 			}
 		}
 	}
@@ -2134,7 +2157,11 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in
 			self.lambdaGetHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value)
 			DispatchQueue.main.async {
-				self.getHRZoneRangeComplete.send((successful, enabled, high_value, low_value))
+				if successful {
+					log?.v ("\(self.id): getHRZoneRangeComplete - Successful: \(enabled) \(high_value), \(low_value)")
+					self.hrZoneRange = hrZoneRangeValueType(enabled: enabled, lower: low_value, upper: high_value)
+				}
+				self.getHRZoneRangeComplete.send(successful)
 			}
 		}
 		
