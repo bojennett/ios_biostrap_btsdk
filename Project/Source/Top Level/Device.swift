@@ -9,32 +9,54 @@ import Foundation
 import CoreBluetooth
 import Combine
 
-public class hrZoneRangeValueType: ObservableObject, Equatable {
-	@Published public var valid: Bool = false
+public class hrZoneLEDValueType: ObservableObject {
+	@Published public var red: Bool
+	@Published public var green: Bool
+	@Published public var blue: Bool
+	@Published public var on_ms: Int
+	@Published public var off_ms: Int
+	
+	public init() {
+		self.red = false
+		self.green = false
+		self.blue = false
+		self.on_ms = 0
+		self.off_ms = 0
+	}
+	
+	public init(red: Bool, green: Bool, blue: Bool, on_ms: Int, off_ms: Int) {
+		self.red = red
+		self.green = green
+		self.blue = blue
+		self.on_ms = on_ms
+		self.off_ms = off_ms
+	}
+	
+	public var stringValue: String {
+		return ("Red: \(self.red), green: \(self.green), blue: \(self.blue), on_ms: \(self.on_ms), off_ms: \(self.off_ms)")
+	}
+}
+
+
+public class hrZoneRangeValueType: ObservableObject {
 	@Published public var enabled: Bool = false
 	@Published public var lower: Int = 0
 	@Published public var upper: Int = 0
 	
 	public init() {
-		self.valid = false
 		self.enabled = false
 		self.lower = 0
 		self.upper = 0
 	}
 	
 	public init(enabled: Bool, lower: Int, upper: Int) {
-		self.valid = true
 		self.enabled = enabled
 		self.lower = lower
 		self.upper = upper
 	}
 	
 	public var stringValue: String {
-		return ("Valid: \(self.valid), enabled: \(self.enabled), lower: \(self.lower), upper: \(self.upper)")
-	}
-	
-	public static func == (lhs: hrZoneRangeValueType, rhs: hrZoneRangeValueType) -> Bool {
-		return lhs.valid == rhs.valid && lhs.enabled == rhs.enabled && lhs.lower == rhs.lower && lhs.upper == rhs.upper
+		return ("Enabled: \(self.enabled), lower: \(self.lower), upper: \(self.upper)")
 	}
 }
 
@@ -235,12 +257,15 @@ public class Device: NSObject, ObservableObject {
 	public let getAskForButtonResponseComplete = PassthroughSubject<(Bool, Bool), Never>()
 	
 	public let setHRZoneColorComplete = PassthroughSubject<(Bool, hrZoneRangeType), Never>()
-	public let getHRZoneColorComplete = PassthroughSubject<(Bool, hrZoneRangeType, Bool, Bool, Bool, Int, Int), Never>()
+	public let getHRZoneColorComplete = PassthroughSubject<(Bool, hrZoneRangeType), Never>()
 	public let setHRZoneRangeComplete = PassthroughSubject<Bool, Never>()
 	public let getHRZoneRangeComplete = PassthroughSubject<Bool, Never>()
 	public let getPPGAlgorithmComplete = PassthroughSubject<(Bool, ppgAlgorithmConfiguration, eventType), Never>()
 	
-	@Published public var hrZoneRange = hrZoneRangeValueType(enabled: false, lower: 0, upper: 0)
+	@Published public var hrZoneLEDBelow = hrZoneLEDValueType()
+	@Published public var hrZoneLEDWithin = hrZoneLEDValueType()
+	@Published public var hrZoneLEDAbove = hrZoneLEDValueType()
+	@Published public var hrZoneRange = hrZoneRangeValueType()
 	#endif
 	
 	// MARK: Passthrough subjects (Notifications)
@@ -1458,7 +1483,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.getHRZoneColorComplete.send((false, type, false, false, false, 0, 0))
+				self.getHRZoneColorComplete.send((false, type))
 			}
 		}
 	}
@@ -2143,7 +2168,13 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in
 			self.lambdaGetHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms)
 			DispatchQueue.main.async {
-				self.getHRZoneColorComplete.send((successful, type, red, green, blue, on_ms, off_ms))
+				switch (type) {
+				case .below: self.hrZoneLEDBelow = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
+				case .within: self.hrZoneLEDWithin = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
+				case .above: self.hrZoneLEDAbove = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
+				default: break
+				}
+				self.getHRZoneColorComplete.send((successful, type))
 			}
 		}
 		
