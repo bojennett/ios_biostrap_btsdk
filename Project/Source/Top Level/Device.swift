@@ -74,11 +74,7 @@ public class Device: NSObject, ObservableObject {
 		#if UNIVERSAL || KAIROS
 		case kairos = "KAI"
 		#endif
-		
-		#if UNIVERSAL || LIVOTAL
-		case livotal = "LIV"
-		#endif
-		
+				
 		case unknown = "UNK"
 	}
 		
@@ -99,11 +95,6 @@ public class Device: NSObject, ObservableObject {
 		case ambiqOTA		= "00002760-08C2-11E1-9073-0E8AC72E1001"
 		#endif
 		
-		#if UNIVERSAL || LIVOTAL
-		case livotal		= "58950000-A53F-11EB-BCBC-0242AC130002"
-		case nordicDFU		= "FE59"
-		#endif
-
 		var UUID: CBUUID {
 			return CBUUID(string: self.rawValue)
 		}
@@ -124,11 +115,6 @@ public class Device: NSObject, ObservableObject {
 				
 			#if UNIVERSAL || ETHOS || ALTER || KAIROS
 			case .ambiqOTA	: return "Ambiq OTA Service"
-			#endif
-
-			#if UNIVERSAL || LIVOTAL
-			case .livotal	: return "Livotal Service"
-			case .nordicDFU	: return "Nordic DFU Service"
 			#endif
 			}
 		}
@@ -158,13 +144,6 @@ public class Device: NSObject, ObservableObject {
 		case ambiqOTATXCharacteristic	= "00002760-08C2-11E1-9073-0E8AC72E0002"
 		#endif
 
-		#if UNIVERSAL || LIVOTAL
-		case livotalMainCharacteristic	= "58950001-A53F-11EB-BCBC-0242AC130002"
-		case livotalDataCharacteristic	= "58950002-A53F-11EB-BCBC-0242AC130002"
-		case livotalStrmCharacteristic	= "58950003-A53F-11EB-BCBC-0242AC130002"
-		case nordicDFUCharacteristic	= "8EC90003-F315-4F60-9FB8-838830DAEA50"
-		#endif
-
 		var UUID: CBUUID {
 			return CBUUID(string: self.rawValue)
 		}
@@ -192,13 +171,6 @@ public class Device: NSObject, ObservableObject {
 			#if UNIVERSAL || ETHOS || ALTER || KAIROS
 			case .ambiqOTARXCharacteristic	: return "Ambiq OTA RX Characteristic"
 			case .ambiqOTATXCharacteristic	: return "Ambiq OTA TX Characteristic"
-			#endif
-
-			#if UNIVERSAL || LIVOTAL
-			case .livotalMainCharacteristic	: return "Livotal Command Characteristic"
-			case .livotalDataCharacteristic	: return "Livotal Data Characteristic"
-			case .livotalStrmCharacteristic	: return "Livotal Streaming Characteristic"
-			case .nordicDFUCharacteristic	: return "Nordic DFU Characteristic"
 			#endif
 			}
 		}
@@ -429,10 +401,6 @@ public class Device: NSObject, ObservableObject {
 	internal var mDataCharacteristic			: customDataCharacteristic?
 	internal var mStreamingCharacteristic		: customStreamingCharacteristic?
 
-	#if UNIVERSAL || LIVOTAL
-	internal var mNordicDFUCharacteristic		: nordicDFUCharacteristic?
-	#endif
-
 	#if UNIVERSAL || ETHOS
 	internal var mPulseOxContinuousCharacteristic		: pulseOxContinuousCharacteristic?
 	#endif
@@ -445,13 +413,9 @@ public class Device: NSObject, ObservableObject {
 	
 	class var manufacturer_prefixes: [String] {
 		#if UNIVERSAL
-		return [prefixes.livotal.rawValue, prefixes.ethos.rawValue, prefixes.alter.rawValue, prefixes.kairos.rawValue]
+		return [prefixes.ethos.rawValue, prefixes.alter.rawValue, prefixes.kairos.rawValue]
 		#endif
-		
-		#if LIVOTAL
-		return [prefixes.livotal.rawValue]
-		#endif
-		
+				
 		#if ETHOS
 		return [prefixes.ethos.rawValue]
 		#endif
@@ -467,13 +431,9 @@ public class Device: NSObject, ObservableObject {
 	
 	class var scan_services: [CBUUID] {
 		#if UNIVERSAL
-		return [services.livotal.UUID, services.nordicDFU.UUID, services.ethos.UUID, services.alter.UUID, services.kairos.UUID]
+		return [services.ethos.UUID, services.alter.UUID, services.kairos.UUID]
 		#endif
-		
-		#if LIVOTAL
-		return [services.livotal.UUID, services.nordicDFU.UUID]
-		#endif
-		
+				
 		#if ETHOS
 		return [services.ethos.UUID]
 		#endif
@@ -550,34 +510,6 @@ public class Device: NSObject, ObservableObject {
 		self.peripheral	= peripheral
 		self.discovery_type = discoveryType
 	}
-
-	#if UNIVERSAL || LIVOTAL
-	private var mLivotalConfigured: Bool {
-		if let nordicDFUCharacteristic = mNordicDFUCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
-						
-			if let dataCharacteristic = mDataCharacteristic, let strmCharacteristic = mStreamingCharacteristic {
-				//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), SN: \(serialNumber.configured), LIV MAIN: \(mainCharacteristic.configured), LIV DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
-				
-				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-						batteryCharacteristic.configured &&
-						mainCharacteristic.configured &&
-						dataCharacteristic.configured &&
-						strmCharacteristic.configured &&
-						nordicDFUCharacteristic.configured)
-			}
-			else {
-				//log?.v ("MN: \(modelNumber.configured), HV: \(hardwareRevision.configured), FV: \(firmwareVersion.configured), Name: \(manufacturerName.configured), SN: \(serialNumber.configured), LIV: \(mainCharacteristic.configured), BAT: \(batteryCharacteristic.configured), DFU: \(dfuCharacteristic.configured)")
-
-				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-						batteryCharacteristic.configured &&
-						mainCharacteristic.configured &&
-						nordicDFUCharacteristic.configured)
-			}
-
-		}
-		else { return (false) }
-	}
-	#endif
 
 	#if UNIVERSAL || ETHOS
 	private var mEthosConfigured: Bool {
@@ -703,18 +635,13 @@ public class Device: NSObject, ObservableObject {
 		
 		#if UNIVERSAL
 		switch type {
-		case .livotal	: return mLivotalConfigured
 		case .ethos		: return mEthosConfigured
 		case .alter		: return mAlterConfigured
 		case .kairos	: return mKairosConfigured
 		case .unknown	: return false
 		}
 		#endif
-		
-		#if LIVOTAL
-		return mLivotalConfigured
-		#endif
-		
+				
 		#if ETHOS
 		return mEthosConfigured
 		#endif
@@ -958,25 +885,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || LIVOTAL
-	func livotalLEDInternal(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.livotalLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
-		}
-		else { self.lambdaLEDComplete?(id, false) }
-	}
-	
-	public func livotalLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.livotalLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
-		}
-		else {
-			DispatchQueue.main.async { self.ledComplete.send(false) }
-		}
-	}
-
-	#endif
-
 	#if UNIVERSAL || ETHOS
 	func ethosLEDInternal(red: Int, green: Int, blue: Int, mode: biostrapDeviceSDK.ethosLEDMode, seconds: Int, percent: Int) {
 		if let mainCharacteristic = mMainCharacteristic {
@@ -1303,22 +1211,6 @@ public class Device: NSObject, ObservableObject {
 		}
 		else { self.lambdaAllowPPGComplete?(id, false) }
 	}
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	#if LIVOTAL || UNIVERSAL
-	func livotalManufacturingTest(_ id: String) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.livotalManufacturingTest()
-		}
-		else { self.lambdaManufacturingTestComplete?(id, false) }
-	}
-	#endif
 
 	#if UNIVERSAL || ETHOS
 	func ethosManufacturingTest(_ id: String, test: ethosManufacturingTestType) {
@@ -1825,9 +1717,6 @@ public class Device: NSObject, ObservableObject {
 	func updateFirmware(_ file: URL) {
 		#if UNIVERSAL
 		switch (type) {
-		case .livotal:
-			if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.start(file) }
-			else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No DFU characteristic to update") }
 		case .ethos,
 			 .alter,
 			 .kairos:
@@ -1845,12 +1734,7 @@ public class Device: NSObject, ObservableObject {
 		default: lambdaUpdateFirmwareFailed?(self.id, 10001, "Do not understand type to update: \(type.title)")
 		}
 		#endif
-		
-		#if LIVOTAL
-		if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.start(file) }
-		else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No DFU characteristic to update") }
-		#endif
-		
+				
 		#if ETHOS || ALTER || KAIROS
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
 			do {
@@ -1874,11 +1758,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func cancelFirmwareUpdate() {
-		#if LIVOTAL
-		if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.cancel() }
-		else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
-		#endif
-
 		#if ETHOS || ALTER || KAIROS
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic { ambiqOTARXCharacteristic.cancel() }
 		else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
@@ -1886,10 +1765,7 @@ public class Device: NSObject, ObservableObject {
 		
 		#if UNIVERSAL
 		switch (type) {
-		case .livotal:
-			if let nordicDFUCharacteristic = mNordicDFUCharacteristic { nordicDFUCharacteristic.cancel() }
-			else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
-		case .alter, .ethos:
+		case .alter, .ethos, .kairos:
 			if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic { ambiqOTARXCharacteristic.cancel() }
 			else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
 		default:
@@ -2534,72 +2410,6 @@ public class Device: NSObject, ObservableObject {
 					mAmbiqOTATXCharacteristic?.discoverDescriptors()
 				#endif
 				
-				#if UNIVERSAL || LIVOTAL
-				case .livotalMainCharacteristic:
-					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic)
-					#if UNIVERSAL
-					mMainCharacteristic?.type	= .livotal
-					#endif
-					attachMainCharacteristicCallbacks()
-					mMainCharacteristic?.enterShipModeComplete = { successful in self.lambdaEnterShipModeComplete?(self.id, successful) }
-					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow) }
-					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
-					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
-					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
-					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.lambdaWornCheckComplete?(self.id, successful, code, value )}
-					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
-					mMainCharacteristic?.endSleepComplete = { successful in self.lambdaEndSleepComplete?(self.id, successful) }
-					mMainCharacteristic?.getAllPacketsComplete = { successful in self.lambdaGetAllPacketsComplete?(self.id, successful) }
-					mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, successful, ack) }
-					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.lambdaGetNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
-					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.lambdaGetPacketCountComplete?(self.id, successful, count) }
-					mMainCharacteristic?.disableWornDetectComplete = { successful in self.lambdaDisableWornDetectComplete?(self.id, successful) }
-					mMainCharacteristic?.enableWornDetectComplete = { successful in self.lambdaEnableWornDetectComplete?(self.id, successful) }
-					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.lambdaSetSessionParamComplete?(self.id, successful, parameter) }
-					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.lambdaGetSessionParamComplete?(self.id, successful, parameter, value) }
-					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.lambdaAcceptSessionParamsComplete?(self.id, successful) }
-					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.lambdaResetSessionParamsComplete?(self.id, successful) }
-					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.lambdaManufacturingTestComplete?(self.id, successful) }
-
-					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
-					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
-					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-					mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
-					mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mMainCharacteristic?.manufacturingTestResult		= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result)}
-
-					mMainCharacteristic?.discoverDescriptors()
-					
-				case .livotalDataCharacteristic:
-					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
-					mDataCharacteristic?.dataPackets = { sequence_number, packets in self.lambdaDataPackets?(self.id, sequence_number, packets) }
-					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate) }
-					mDataCharacteristic?.discoverDescriptors()
-					
-				case .livotalStrmCharacteristic:
-					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
-					#if UNIVERSAL
-					mStreamingCharacteristic?.type	= .livotal
-					#endif
-					attachStreamingCharacteristicCallbacks()
-					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
-					mStreamingCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result)}
-					mStreamingCharacteristic?.streamingPacket = { packet in self.lambdaStreamingPacket?(self.id, packet) }
-
-					mStreamingCharacteristic?.discoverDescriptors()
-
-				case .nordicDFUCharacteristic:
-					if let name = peripheral.name {
-						mNordicDFUCharacteristic	= nordicDFUCharacteristic(peripheral, characteristic: characteristic, name: name)
-					}
-					else {
-						mNordicDFUCharacteristic	= nordicDFUCharacteristic(peripheral, characteristic: characteristic)
-					}
-					mNordicDFUCharacteristic?.failed = { id, code, message in self.lambdaUpdateFirmwareFailed?(id, code, message) }
-					mNordicDFUCharacteristic?.discoverDescriptors()
-				#endif
-
 				}
 			}
 			else {
@@ -2651,13 +2461,6 @@ public class Device: NSObject, ObservableObject {
 					#if UNIVERSAL || ETHOS || ALTER || KAIROS
 					case .ambiqOTARXCharacteristic		: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
 					case .ambiqOTATXCharacteristic		: mAmbiqOTATXCharacteristic?.didDiscoverDescriptor()
-					#endif
-					
-					#if UNIVERSAL || LIVOTAL
-					case .livotalMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
-					case .livotalDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
-					case .livotalStrmCharacteristic		: mStreamingCharacteristic?.didDiscoverDescriptor()
-					case .nordicDFUCharacteristic		: mNordicDFUCharacteristic?.didDiscoverDescriptor()
 					#endif
 					}
 				}
@@ -2797,13 +2600,6 @@ public class Device: NSObject, ObservableObject {
 					log?.e ("\(self.id) '\(enumerated.title)' - No data received for RX command")
 				}
 			#endif
-			
-			#if UNIVERSAL || LIVOTAL
-			case .livotalMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
-			case .livotalDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
-			case .livotalStrmCharacteristic		: mStreamingCharacteristic?.didUpdateValue()
-			case .nordicDFUCharacteristic		: mNordicDFUCharacteristic?.didUpdateValue()
-			#endif
 			}
 		}
 		else {
@@ -2846,13 +2642,6 @@ public class Device: NSObject, ObservableObject {
 					#if UNIVERSAL || ETHOS || ALTER || KAIROS
 					case .ambiqOTARXCharacteristic			: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
 					case .ambiqOTATXCharacteristic			: mAmbiqOTATXCharacteristic?.didUpdateNotificationState()
-					#endif
-
-					#if UNIVERSAL || LIVOTAL
-					case .livotalMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
-					case .livotalDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
-					case .livotalStrmCharacteristic			: mStreamingCharacteristic?.didUpdateNotificationState()
-					case .nordicDFUCharacteristic			: mNordicDFUCharacteristic?.didUpdateNotificationState()
 					#endif
 					}
 				}

@@ -7,9 +7,6 @@
 
 import Foundation
 import CoreBluetooth
-#if UNIVERSAL || LIVOTAL
-import iOSDFULibrary
-#endif
 
 @objc public class biostrapDeviceSDK: NSObject {
 	
@@ -50,7 +47,6 @@ import iOSDFULibrary
 	
 	#if UNIVERSAL
 	@objc public enum biostrapDeviceType: Int {
-		case livotal	= 1
 		case ethos		= 2
 		case alter		= 3
 		case kairos		= 4
@@ -58,7 +54,6 @@ import iOSDFULibrary
 		
 		public var title: String {
 			switch (self) {
-			case .livotal	: return "Livotal"
 			case .ethos		: return "Ethos"
 			case .alter		: return "Alter"
 			case .kairos	: return "Kairos"
@@ -386,14 +381,7 @@ import iOSDFULibrary
 			case .error:	self.logE?(message, file, function, line)
 			}
 		}
-		
-		#if UNIVERSAL || LIVOTAL
-		dfu.finished		= { id in DispatchQueue.main.async { self.updateFirmwareFinished?(id) } }
-		dfu.failed			= { id, code, message in DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) } }
-		dfu.started			= { id in DispatchQueue.main.async { self.updateFirmwareStarted?(id) } }
-		dfu.progress		= { id, percentage in DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) } }
-		#endif
-		
+				
 		let backgroundQueue	= DispatchQueue.global(qos: DispatchQoS.QoSClass.background)
 		mCentralManager		= CBCentralManager(delegate: self, queue: backgroundQueue, options: [CBCentralManagerOptionRestoreIdentifierKey: Bundle.main.bundleIdentifier ?? ""])
 		
@@ -408,7 +396,7 @@ import iOSDFULibrary
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if KAIROS || ETHOS || LIVOTAL || UNIVERSAL
+	#if KAIROS || ETHOS || UNIVERSAL
 	public func acquireLicense(_ licenseKey: String) -> (Bool, Int, String) {
 		mLicensed		= false
 		
@@ -494,7 +482,7 @@ import iOSDFULibrary
 		scanForUnpaired = forUnpaired
 		scanForLegacy = forLegacy
 		
-		#if KAIROS || ETHOS || LIVOTAL || UNIVERSAL
+		#if KAIROS || ETHOS || UNIVERSAL
 		if (!mLicensed) {
 			log?.e ("Not licensed - cannot start scanning")
 			return (false)
@@ -821,12 +809,6 @@ import iOSDFULibrary
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func livotalLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.livotalLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
-		else { self.ledComplete?(id, false) }
-	}
-	
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func ethosLED(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
 		if let device = mConnectedDevices[id] { device.ethosLEDInternal(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
 		else { self.ledComplete?(id, false) }
@@ -841,14 +823,6 @@ import iOSDFULibrary
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func kairosLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let device = mConnectedDevices[id] { device.kairosLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
-		else { self.ledComplete?(id, false) }
-	}
-	#endif
-
-	#if LIVOTAL
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.livotalLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
@@ -1041,15 +1015,7 @@ import iOSDFULibrary
 	//
 	//
 	//
-	//--------------------------------------------------------------------------------
-	#if LIVOTAL
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func manufacturingTest(_ id: String) {
-		if let device = mConnectedDevices[id] { device.livotalManufacturingTest(id) }
-		else { self.lambdaManufacturingTestComplete?(id, false) }
-	}
-	#endif
-	
+	//--------------------------------------------------------------------------------	
 	#if ALTER
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: alterManufacturingTestType) {
@@ -1075,12 +1041,6 @@ import iOSDFULibrary
 	#endif
 
 	#if UNIVERSAL
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func livotalManufacturingTest(_ id: String) {
-		if let device = mConnectedDevices[id] { device.livotalManufacturingTest(id) }
-		else { self.manufacturingTestComplete?(id, false) }
-	}
-
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func ethosManufacturingTest(_ id: String, test: ethosManufacturingTestType) {
 		if let device = mConnectedDevices[id] { device.ethosManufacturingTest(id, test: test) }

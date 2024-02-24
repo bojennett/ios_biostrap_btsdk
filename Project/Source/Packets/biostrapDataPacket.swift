@@ -1,5 +1,5 @@
 //
-//  livotalPacket.swift
+//  biostrapDataPacket.swift
 //  biostrapDeviceSDK
 //
 //  Created by Joseph A. Bennett on 8/12/21.

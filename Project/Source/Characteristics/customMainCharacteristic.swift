@@ -491,32 +491,6 @@ class customMainCharacteristic: Characteristic {
 		
 		if (!mSimpleCommand(.stopManual)) { self.stopManualComplete?(false) }
 	}
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || LIVOTAL
-	func livotalLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		log?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
-		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.led.rawValue)
-			data.append(red ? 0x01 : 0x00)		// Red
-			data.append(green ? 0x01 : 0x00)	// Green
-			data.append(blue ? 0x01 : 0x00)		// Blue
-			data.append(blink ? 0x01 : 0x00)	// Blink
-			data.append(UInt8(seconds & 0xff))	// Seconds
-
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.ledComplete?(false) }
-	}
-	#endif
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -1044,19 +1018,6 @@ class customMainCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if LIVOTAL || UNIVERSAL
-	func livotalManufacturingTest() {
-		log?.v("\(pID)")
-		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.manufacturingTest.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.manufacturingTestComplete?(false) }
-	}
-	#endif
-
 	#if UNIVERSAL || ETHOS
 	func ethosManufacturingTest(_ test: ethosManufacturingTestType) {
 		log?.v("\(pID): \(test.title)")
@@ -2039,25 +2000,7 @@ class customMainCharacteristic: Characteristic {
 					})
 				}
 				
-			case .manufacturingTest:
-				#if LIVOTAL
-				let testResult = livotalManufacturingTestResult(data.subdata(in: Range(1...4)))
-				do {
-					let jsonData = try JSONEncoder().encode(testResult)
-					if let jsonString = String(data: jsonData, encoding: .utf8) {
-						self.manufacturingTestResult?(true, jsonString)
-					}
-					else {
-						log?.e ("\(pID): Result jsonString Failed")
-						self.manufacturingTestResult?(false, "")
-					}
-				}
-				catch {
-					log?.e ("\(pID): Result jsonData Failed")
-					self.manufacturingTestResult?(false, "")
-				}
-				#endif
-				
+			case .manufacturingTest:				
 				#if ETHOS
 				if (data.count == 3) {
 					let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...2)))
@@ -2129,23 +2072,6 @@ class customMainCharacteristic: Characteristic {
 
 				#if UNIVERSAL
 				switch (type) {
-				case .livotal	:
-					let testResult = livotalManufacturingTestResult(data.subdata(in: Range(1...4)))
-					do {
-						let jsonData = try JSONEncoder().encode(testResult)
-						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
-						}
-						else {
-							log?.e ("\(pID): Result jsonString Failed")
-							self.manufacturingTestResult?(false, "")
-						}
-					}
-					catch {
-						log?.e ("\(pID): Result jsonData Failed")
-						self.manufacturingTestResult?(false, "")
-					}
-
 				case .ethos		:
 					if (data.count == 3) {
 						let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...2)))

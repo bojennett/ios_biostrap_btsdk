@@ -14,7 +14,7 @@ use File::Path qw(make_path remove_tree);
 ########################################################################################################################
 sub Usage {
 	print "Usage:\n\n";
-	print "    $0 -s [ alterBTSDK | kairosBTSDK | ethosBTSDK | livotalBTSDK | universalBTSDK | pods | all ] [-k]\n";
+	print "    $0 -s [ alterBTSDK | kairosBTSDK | ethosBTSDK | universalBTSDK | pods | all ] [-k]\n";
 	print "\n\n";
 	
 	print "The scheme (-s or --scheme) is the scheme in that workspace\n";
@@ -84,7 +84,6 @@ if ($scheme eq "all") {
 	push (@schemes, "alterBTSDK");
 	push (@schemes, "ethosBTSDK");
 	push (@schemes, "kairosBTSDK");
-	push (@schemes, "livotalBTSDK");
 	push (@schemes, "universalBTSDK");
 }
 else {

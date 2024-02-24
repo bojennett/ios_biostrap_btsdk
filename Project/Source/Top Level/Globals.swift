@@ -10,11 +10,6 @@ import CoreBluetooth
 
 var log				: Logging?
 
-#if UNIVERSAL || LIVOTAL
-var gblDFUName		= "DFU"
-var dfu				= nordicDFU()
-#endif
-
 //--------------------------------------------------------------------------------
 //
 //

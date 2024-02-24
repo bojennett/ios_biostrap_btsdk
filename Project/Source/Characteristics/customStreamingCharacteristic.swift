@@ -89,25 +89,7 @@ class customStreamingCharacteristic: Characteristic {
 				}
 			#endif
 								
-			case .manufacturingTest:
-				#if LIVOTAL
-				let testResult = livotalManufacturingTestResult(data.subdata(in: Range(1...4)))
-				do {
-					let jsonData = try JSONEncoder().encode(testResult)
-					if let jsonString = String(data: jsonData, encoding: .utf8) {
-						self.manufacturingTestResult?(true, jsonString)
-					}
-					else {
-						log?.e ("\(pID): Result jsonString Failed")
-						self.manufacturingTestResult?(false, "")
-					}
-				}
-				catch {
-					log?.e ("\(pID): Result jsonData Failed")
-					self.lambdaManufacturingTestResult?(false, "")
-				}
-				#endif
-				
+			case .manufacturingTest:				
 				#if ETHOS
 				if (data.count == 3) {
 					let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...2)))
@@ -179,23 +161,6 @@ class customStreamingCharacteristic: Characteristic {
 				
 				#if UNIVERSAL
 				switch (type) {
-				case .livotal	:
-					let testResult = livotalManufacturingTestResult(data.subdata(in: Range(1...4)))
-					do {
-						let jsonData = try JSONEncoder().encode(testResult)
-						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
-						}
-						else {
-							log?.e ("\(pID): Result jsonString Failed")
-							self.manufacturingTestResult?(false, "")
-						}
-					}
-					catch {
-						log?.e ("\(pID): Result jsonData Failed")
-						self.manufacturingTestResult?(false, "")
-					}
-					
 				case .ethos		:
 					if (data.count == 3) {
 						let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...2)))

@@ -7,370 +7,127 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		012CAC511B4D3F785AB30CDC659EC325 /* Pods-universalBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 80A8F9525207D890BA41FD5F5FB7F732 /* Pods-universalBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		039BF2A8B8EAEAC2938B8CF171463836 /* Archive+Writing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9C336D5457D6C3F32DC3FB4D9CB4FE /* Archive+Writing.swift */; };
-		050AA128A8A6546ED57441C442F6C9D3 /* Pods-ethosBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = DA1A874AE8B20807546DE9A66418DE42 /* Pods-ethosBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		05485E4A58846EA4BACA7D6EBDAEA45D /* Pods-livotalBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = B2B8B8E529724830DD969F3523980280 /* Pods-livotalBTSDK-dummy.m */; };
-		0662A907AA9E9F45BA9A4E6A71021F65 /* DFUStarterPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726E1869BBB4DAF7B2540D2D336531DE /* DFUStarterPeripheral.swift */; };
-		089A8E059B06B1E7F792665351A0F61C /* LegacyDFUService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E63ADFB3398229548E3E236CB6D548 /* LegacyDFUService.swift */; };
-		11853CE031314F923BA369506778A966 /* LoggerHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23FBBFD147F25BA8FE4885A41EE3C34A /* LoggerHelper.swift */; };
-		11DFD0437F647D06C214D62AF36A14B2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
-		151BB90335133890C4F723D87CA7EAEE /* DFUPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A58FA63FD7021E2B508172EFFE5928 /* DFUPeripheral.swift */; };
-		1A5D63060CDCB7F6BFAABBE1929B8ACD /* LegacyDFUPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C10D9AFD30FC034265216D2A642B93 /* LegacyDFUPeripheral.swift */; };
-		224CA88F372D699C3BD4CCF6D1F72F34 /* DFUController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF8389270B36CB0BC6D2DEC01BDCD1EA /* DFUController.swift */; };
-		24DF629255D1917B58409880603B5951 /* DFUServiceInitiator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8199BDD08AF535F0ECB1CAEC15256D6 /* DFUServiceInitiator.swift */; };
-		270FEF0D863F77F1AF3DBA388BA55648 /* Data+Serialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E8A397BA272BEA7E0BE51DACE6231B /* Data+Serialization.swift */; };
-		283371AC7DE1864E8713745610CEC255 /* Pods-ethosBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 177BD2DA03FDCDA3A224862B633B03A3 /* Pods-ethosBTSDK-dummy.m */; };
-		2B82C51F4AAFEB71EC3258E529E3C7E3 /* DFUControlPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 082517F1E7675BE3E0E269809748324F /* DFUControlPoint.swift */; };
-		2E30B95D4B5D022B87A18EE6E70D27D2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
-		31207C4DE0BE3F94E02A8FABEDF81F31 /* DFUService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EC9F3D07E81B8D9BFCC6C26121FF65A /* DFUService.swift */; };
-		3537136F9FDBC88DECC59E00976E9C9B /* DFUUuidHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ADE52D468E19A2484470237CABA49EC /* DFUUuidHelper.swift */; };
-		378AEC594EC49EA03B9D8C607C8154C8 /* SecureDFUControlPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67F08BB53B5B17F45187F3586338738 /* SecureDFUControlPoint.swift */; };
-		3994CAABCB581F10FFFEE082604EE41B /* IntelHex2BinConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E280BA84760A5E7D4911C2CABD3601B6 /* IntelHex2BinConverter.swift */; };
-		3BF47DE8CF587BCF5839D396F16C6F0A /* LegacyDFUServiceInitiator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA338B16BCC7FB84A9CFF784AC892B1 /* LegacyDFUServiceInitiator.swift */; };
-		463C10A56090477517F0B0A250203D49 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A16E5B6DFB4BB158DCA7214FAE1B1A /* Data.swift */; };
-		4C9A8D0527AC45F9B21B28BA7E021305 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
-		57E9097515A93CBB5B2D1C489F66A2A4 /* ZIPFoundation-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = D309A2896B383C0779ECAE06A973F7B7 /* ZIPFoundation-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		5E04905076F5B09159906225DA880997 /* SecureDFUPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69C067B6340C567A0D396E96D55D54E3 /* SecureDFUPeripheral.swift */; };
-		65DEE3A91B7836DD422247B69EC92204 /* DFUServiceSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3224150F899907A85E7CFC5A8E5CFC7 /* DFUServiceSelector.swift */; };
-		6C4B67F2EF49AC4E98A451C9E69A9317 /* LegacyDFUPeripheralDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F85C38F699A6D7DE2965E91F207E1AD8 /* LegacyDFUPeripheralDelegate.swift */; };
-		6FE110AE57C06F174A4B86A3D4A93D13 /* iOSDFULibrary-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 51072BA120E8222DD35ED6168686AFC8 /* iOSDFULibrary-dummy.m */; };
-		70C2D1FF1B690CA206704F7146727094 /* ManifestFirmwareInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 415292E4E48EBE8F0A5C36FBBC9F1462 /* ManifestFirmwareInfo.swift */; };
-		73CECD21AC1289A7788B3AE0EFE4B18A /* DFUCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FC9959E9EC44846E14D87518A2C5A4 /* DFUCharacteristic.swift */; };
-		7412FBB1A852A0F444F7790CC56F2775 /* FileManager+ZIP.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD372EBBC9E69FC86DB43F99F67C915 /* FileManager+ZIP.swift */; };
-		778EA427EF89E42C7C565BFAA2455CA0 /* ButtonlessDFU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D7AE75DD0454E5D0C1C1693BA420557 /* ButtonlessDFU.swift */; };
-		7AED2D3EFD556BEA839F5692738B120F /* Data+Compression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B62E564E8AB869EAC4C30C2A49D8D5F /* Data+Compression.swift */; };
-		8699D80213079650BADADA30738370A2 /* Double.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA62136B7C75692A3DE484E901A3AC71 /* Double.swift */; };
-		90FECF555CD94B0BCFACF72C8FE569AB /* SecureDFUPeripheralDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDC3BEF37FA601B8CA55F7998646EB9 /* SecureDFUPeripheralDelegate.swift */; };
-		9A379C18F5FFC61C688128B1C1DFA1B1 /* Entry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EBA0361357EC2B72CD9284F3746303 /* Entry.swift */; };
-		A18F68E410E7B110070781E34121191F /* DFUStreamHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6FAB9617EEA22963FE848444D94A066 /* DFUStreamHex.swift */; };
-		A1A014C9DF616B009A68B779BDD2519F /* crc32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A6183CBB252E5300448765D3FF32630 /* crc32.swift */; };
-		A2C2BE038228E94BDA1E555116F655C7 /* Archive+MemoryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C28C3AD645807DEF987722C5F06B482 /* Archive+MemoryFile.swift */; };
-		A2F5D2EA70C32C6A107F5103B7E7ED82 /* DFUServiceDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43163FB9A11118C89744911293C1EF78 /* DFUServiceDelegate.swift */; };
-		A4DA84C6D440A301BBE691E8AC1661C3 /* ZIPFoundation-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 97F3D506E4609FC883E6EED0DCB4B82D /* ZIPFoundation-dummy.m */; };
-		A82BA205B5954F08A2FF50E737A031CC /* DFUStreamZip.swift in Sources */ = {isa = PBXBuildFile; fileRef = A47C7FBCB101D6DEB2146E60DC32F9EC /* DFUStreamZip.swift */; };
-		A95709560C4CE29F107F608D33CA45E2 /* DFUVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8F8D33267B250EDA1C85A30D37ECEFE /* DFUVersion.swift */; };
-		AC0F27360A6F57C81C050892C6D41AE4 /* DFUExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBB4208751E0C624DC44B7A408CB7CA /* DFUExecutor.swift */; };
-		AE7A76B9994D7CDB292DA737D8FD03BC /* SecureDFUExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3173C0FE87C3026697D2E408B2D641DB /* SecureDFUExecutor.swift */; };
-		B03C4D2E1B0632CBB46B40ABD0826E41 /* Pods-universalBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 408D48EDF0B36B3ADBCEFCE54BA7A3F1 /* Pods-universalBTSDK-dummy.m */; };
-		B219754A0D9EC983C750C332919DA3EC /* DFUPeripheralDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7EBBD696CA792494810CA9A8A3A083 /* DFUPeripheralDelegate.swift */; };
-		B552C49BBF1FA9CD8DFBA782E7ABCA0C /* DFUStreamBin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A5995FF11D65769F08BD3C6C5BA5E95 /* DFUStreamBin.swift */; };
-		B750D9E164C0411D4204A8B3842C1461 /* Pods-livotalBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D6A260C5BE3A22473864BDC7C9D7427 /* Pods-livotalBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		BCFF565B301305EA51A80646F297D63E /* SecureDFUPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE486EF26BDFF85A04389D7A50202057 /* SecureDFUPacket.swift */; };
-		C48C65DFCD6B0384E4CE3441FDCD4933 /* DFUStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8A3BC0D6A73077B247DEB6AEAD5BD6 /* DFUStream.swift */; };
-		C68E6ADA32DA46106CA2F46C6B06256B /* LegacyDFUExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5853985A776318B56DAE74B83323724 /* LegacyDFUExecutor.swift */; };
-		C88DDC511E24E2045D1ABEAB26E115CD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
-		CCB0067F7B2BA7B596EC5DEBE6D8B05D /* SecureDFUService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1DC540860C2A382B320054AAE7DD12C /* SecureDFUService.swift */; };
-		D137BD99585055DC4E5641C8192D76FF /* Manifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB3A502E272A3C8A4B89303A28147547 /* Manifest.swift */; };
-		D25611D4C363001626500330FB90DCD0 /* LoggerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CABED02AD24CD54998AF8BC5AB1CFAF0 /* LoggerDelegate.swift */; };
-		DA5645DD109DC23FA2E4156020C33D12 /* Archive.swift in Sources */ = {isa = PBXBuildFile; fileRef = B75D78101DB76028672E05CD20EFBB91 /* Archive.swift */; };
-		E011DA75AA9485140CB059E22D886D12 /* Archive+Reading.swift in Sources */ = {isa = PBXBuildFile; fileRef = D86E94CF75208B8DF13B31FD5F9E96C3 /* Archive+Reading.swift */; };
-		E29921E67E1C5D3C5213B55166ADB64F /* DFUServiceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FAA5840B2068D9249A9657F9A33FB58 /* DFUServiceController.swift */; };
-		E7D6604E832889EE18FE8309116BB726 /* DFUFirmware.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC14467E351393ED15CC5F1860B4686E /* DFUFirmware.swift */; };
-		E9B88745638C211AD45948A58D6B17FC /* DFUPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8693173627C63D930C3B06F0153CC879 /* DFUPacket.swift */; };
-		EC7F9B36BF5D48CDFB57C4D9F83D763B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
-		ECF0F1E0537C4B0533ADA16D735632B1 /* SoftdeviceBootloaderInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6229F31557AF00F9F10BA7CD3E822EB6 /* SoftdeviceBootloaderInfo.swift */; };
-		F32FAA85220858ABCE4DAA5932B0C54C /* SecureDFUServiceInitiator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40E02868F63AA248ADE21033F5FADC4 /* SecureDFUServiceInitiator.swift */; };
-		F3F24CF4A0F86EE3EDD0555EC793F404 /* iOSDFULibrary-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = E58EDC641A504C67B7C8FD9B1F3D31BF /* iOSDFULibrary-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		F4C4474037A7749B2892A455D663449E /* DFUPeripheralSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1FE71098D26180484AD84B6A7FE09DD /* DFUPeripheralSelector.swift */; };
-		F94988CD64D35C6C0999743EA9D4B327 /* DFUPeripheralSelectorDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D5FD2726FE8B100CED90BBC995EAC8 /* DFUPeripheralSelectorDelegate.swift */; };
-		FEB96459C6B053FAD39C42213EC6EEFF /* ZipArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 912C1202DE106E2E42DE09BDB2E88AE6 /* ZipArchive.swift */; };
+		00A8A48F7831ED75C8856D12E7163CA1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
+		02035144947660BC8E0F789A3F7310BA /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
+		15A8218293A0B739ED5DDF39BEE3B993 /* Pods-ethosBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E154891CC698D7B92861FAB55199BA1 /* Pods-ethosBTSDK-dummy.m */; };
+		1DB9F93729A583D757934FA34A169773 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
+		200FFCDC767DAF5E71AEBDBDA7876717 /* Pods-ethosBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = F7DE52F843EF4A3F8E3DD58CE462BC0C /* Pods-ethosBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		59554586831C0A4BDF569394FAF983E2 /* Pods-alterBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D177F7025C3FEF669BEAD2438813DC9 /* Pods-alterBTSDK-dummy.m */; };
+		6FA129485F331A666D5DF52B353049E8 /* Pods-universalBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 93CED443C0BA19D6E08F55A88347EBF0 /* Pods-universalBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A080E6CA326C881FEA1F085429DBED07 /* Pods-universalBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD8F9056026E643E69410EBBF90D42 /* Pods-universalBTSDK-dummy.m */; };
+		C28004D73D930D2F301EE3013F0FAC36 /* Pods-alterBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 9A708194D5FD3F495B2CD925EF240541 /* Pods-alterBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		0967AF43CBC3F07A67B4276BEFC013DB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9506C7FCDAE6E6967A99655F452EEE93;
-			remoteInfo = iOSDFULibrary;
-		};
-		0B227E4AD12B862FBA0E6626F0FCB42F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = AA15C8469D67684160CC2A7098EB841C;
-			remoteInfo = ZIPFoundation;
-		};
-		5B74B073161F4B1ADB6ED41078DD29E9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = AA15C8469D67684160CC2A7098EB841C;
-			remoteInfo = ZIPFoundation;
-		};
-		5BEB8DA29F32AB18B8D80B5EC270A1EA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9506C7FCDAE6E6967A99655F452EEE93;
-			remoteInfo = iOSDFULibrary;
-		};
-		7E4FAE41382CB8E0FB1BF84DA05E5197 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9506C7FCDAE6E6967A99655F452EEE93;
-			remoteInfo = iOSDFULibrary;
-		};
-		80488B009D11CAFE48EF399C6A6320F3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = AA15C8469D67684160CC2A7098EB841C;
-			remoteInfo = ZIPFoundation;
-		};
-		DEDDC2BFF60C8ACB0CD0D43EFE524D81 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFDFE7DC352907FC980B868725387E98 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = AA15C8469D67684160CC2A7098EB841C;
-			remoteInfo = ZIPFoundation;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
-		06EBA0361357EC2B72CD9284F3746303 /* Entry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Entry.swift; path = Sources/ZIPFoundation/Entry.swift; sourceTree = "<group>"; };
-		082517F1E7675BE3E0E269809748324F /* DFUControlPoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUControlPoint.swift; path = iOSDFULibrary/Classes/Implementation/LegacyDFU/Characteristics/DFUControlPoint.swift; sourceTree = "<group>"; };
-		0C103F892820FDA5831447BE74943DA1 /* Pods-livotalBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-livotalBTSDK.release.xcconfig"; sourceTree = "<group>"; };
+		04AD8F9056026E643E69410EBBF90D42 /* Pods-universalBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-universalBTSDK-dummy.m"; sourceTree = "<group>"; };
+		06F4319AD6490E49C4CDB2A0C8E37195 /* Pods-alterBTSDK */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-alterBTSDK"; path = Pods_alterBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0EC61B566538EB6F7161BC581E9516A5 /* Pods-universalBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-universalBTSDK.release.xcconfig"; sourceTree = "<group>"; };
 		13E2043D1B2A7096101C25CDAA4B68FA /* Pods-ethosBTSDK */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-ethosBTSDK"; path = Pods_ethosBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		15524CD2E7350EEFC002E43C3413F8F5 /* Pods-ethosBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-ethosBTSDK.modulemap"; sourceTree = "<group>"; };
-		16FC9959E9EC44846E14D87518A2C5A4 /* DFUCharacteristic.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUCharacteristic.swift; path = iOSDFULibrary/Classes/Implementation/GenericDFU/DFUCharacteristic.swift; sourceTree = "<group>"; };
-		177BD2DA03FDCDA3A224862B633B03A3 /* Pods-ethosBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-ethosBTSDK-dummy.m"; sourceTree = "<group>"; };
-		17A58FA63FD7021E2B508172EFFE5928 /* DFUPeripheral.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUPeripheral.swift; path = iOSDFULibrary/Classes/Implementation/GenericDFU/DFUPeripheral.swift; sourceTree = "<group>"; };
-		1D6A260C5BE3A22473864BDC7C9D7427 /* Pods-livotalBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-livotalBTSDK-umbrella.h"; sourceTree = "<group>"; };
-		21B1375088A0310C7AE2BE4C8188D12F /* iOSDFULibrary.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = iOSDFULibrary.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		23FBBFD147F25BA8FE4885A41EE3C34A /* LoggerHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LoggerHelper.swift; path = iOSDFULibrary/Classes/Utilities/Logging/LoggerHelper.swift; sourceTree = "<group>"; };
-		2D8A3BC0D6A73077B247DEB6AEAD5BD6 /* DFUStream.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUStream.swift; path = iOSDFULibrary/Classes/Utilities/Streams/DFUStream.swift; sourceTree = "<group>"; };
-		2FAA5840B2068D9249A9657F9A33FB58 /* DFUServiceController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUServiceController.swift; path = iOSDFULibrary/Classes/Implementation/DFUServiceController.swift; sourceTree = "<group>"; };
-		3173C0FE87C3026697D2E408B2D641DB /* SecureDFUExecutor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecureDFUExecutor.swift; path = iOSDFULibrary/Classes/Implementation/SecureDFU/DFU/SecureDFUExecutor.swift; sourceTree = "<group>"; };
+		2E84E1F41681BA8C34E7F449E0415BCB /* Pods-universalBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-universalBTSDK-Info.plist"; sourceTree = "<group>"; };
+		348943D2BE0E5F83188D15F61A8DFCAA /* Pods-alterBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-alterBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
 		36CDEB2A52EF480B5148B840C2804922 /* Pods-universalBTSDK */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-universalBTSDK"; path = Pods_universalBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3EC9F3D07E81B8D9BFCC6C26121FF65A /* DFUService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUService.swift; path = iOSDFULibrary/Classes/Implementation/GenericDFU/DFUService.swift; sourceTree = "<group>"; };
-		3F9C336D5457D6C3F32DC3FB4D9CB4FE /* Archive+Writing.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Archive+Writing.swift"; path = "Sources/ZIPFoundation/Archive+Writing.swift"; sourceTree = "<group>"; };
-		408D48EDF0B36B3ADBCEFCE54BA7A3F1 /* Pods-universalBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-universalBTSDK-dummy.m"; sourceTree = "<group>"; };
-		415292E4E48EBE8F0A5C36FBBC9F1462 /* ManifestFirmwareInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ManifestFirmwareInfo.swift; path = iOSDFULibrary/Classes/Utilities/DFUPackage/Manifest/ManifestFirmwareInfo.swift; sourceTree = "<group>"; };
-		43163FB9A11118C89744911293C1EF78 /* DFUServiceDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUServiceDelegate.swift; path = iOSDFULibrary/Classes/Implementation/DFUServiceDelegate.swift; sourceTree = "<group>"; };
-		43A16E5B6DFB4BB158DCA7214FAE1B1A /* Data.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Data.swift; path = iOSDFULibrary/Classes/Utilities/Data.swift; sourceTree = "<group>"; };
-		48A4A6EDC08C8AC933D0DCD507E9D173 /* ZIPFoundation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ZIPFoundation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		4F7EBBD696CA792494810CA9A8A3A083 /* DFUPeripheralDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUPeripheralDelegate.swift; path = iOSDFULibrary/Classes/Implementation/GenericDFU/DFUPeripheralDelegate.swift; sourceTree = "<group>"; };
-		4FBB4208751E0C624DC44B7A408CB7CA /* DFUExecutor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUExecutor.swift; path = iOSDFULibrary/Classes/Implementation/GenericDFU/DFUExecutor.swift; sourceTree = "<group>"; };
-		508749754BD1619CE97679448BA5BD05 /* ZIPFoundation-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "ZIPFoundation-Info.plist"; sourceTree = "<group>"; };
-		50C9E0A8F55F712B3252820A438C4B97 /* Pods-universalBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-universalBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
-		51072BA120E8222DD35ED6168686AFC8 /* iOSDFULibrary-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "iOSDFULibrary-dummy.m"; sourceTree = "<group>"; };
-		5B89E02D678E91C49289E4A40732E78E /* iOSDFULibrary-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "iOSDFULibrary-prefix.pch"; sourceTree = "<group>"; };
-		5BE25F8A9C9AAE0C77F41CF5D642FB08 /* ZIPFoundation.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = ZIPFoundation.modulemap; sourceTree = "<group>"; };
-		5EA079ECF54571994F182012AD1ABFD8 /* Pods-ethosBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ethosBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
-		6229F31557AF00F9F10BA7CD3E822EB6 /* SoftdeviceBootloaderInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SoftdeviceBootloaderInfo.swift; path = iOSDFULibrary/Classes/Utilities/DFUPackage/Manifest/SoftdeviceBootloaderInfo.swift; sourceTree = "<group>"; };
-		66E8A397BA272BEA7E0BE51DACE6231B /* Data+Serialization.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Data+Serialization.swift"; path = "Sources/ZIPFoundation/Data+Serialization.swift"; sourceTree = "<group>"; };
-		676316802E911885D0B51F53F8B92BCB /* Pods-universalBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-universalBTSDK.modulemap"; sourceTree = "<group>"; };
-		69C067B6340C567A0D396E96D55D54E3 /* SecureDFUPeripheral.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecureDFUPeripheral.swift; path = iOSDFULibrary/Classes/Implementation/SecureDFU/Peripheral/SecureDFUPeripheral.swift; sourceTree = "<group>"; };
-		6A5995FF11D65769F08BD3C6C5BA5E95 /* DFUStreamBin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUStreamBin.swift; path = iOSDFULibrary/Classes/Utilities/Streams/DFUStreamBin.swift; sourceTree = "<group>"; };
-		6ADE52D468E19A2484470237CABA49EC /* DFUUuidHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUUuidHelper.swift; path = iOSDFULibrary/Classes/Implementation/DFUUuidHelper.swift; sourceTree = "<group>"; };
-		71609231CE414E46959F03FE5003789F /* Pods-livotalBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-livotalBTSDK.modulemap"; sourceTree = "<group>"; };
-		726E1869BBB4DAF7B2540D2D336531DE /* DFUStarterPeripheral.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUStarterPeripheral.swift; path = iOSDFULibrary/Classes/Implementation/DFUSelector/DFUStarterPeripheral.swift; sourceTree = "<group>"; };
+		3AD29CA1D4908F8D2175FBAB759A5BC3 /* Pods-alterBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-alterBTSDK.modulemap"; sourceTree = "<group>"; };
+		3D8A93B445AFA3AFD5E58077BF446F95 /* Pods-ethosBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ethosBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
+		4E154891CC698D7B92861FAB55199BA1 /* Pods-ethosBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-ethosBTSDK-dummy.m"; sourceTree = "<group>"; };
+		67F1E3A03F33720BC7116325F992934C /* Pods-ethosBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-ethosBTSDK.modulemap"; sourceTree = "<group>"; };
+		6879780C8C03778F089B912E8875DDE4 /* Pods-alterBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-alterBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
 		73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		7A24A802C50F3D99F9926C085BA1D544 /* Pods-livotalBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-livotalBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
-		7A6183CBB252E5300448765D3FF32630 /* crc32.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = crc32.swift; path = iOSDFULibrary/Classes/Utilities/crc32.swift; sourceTree = "<group>"; };
-		7AA26DFDDAAE8A8E20352628BB3A12DF /* iOSDFULibrary-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "iOSDFULibrary-Info.plist"; sourceTree = "<group>"; };
-		7C28C3AD645807DEF987722C5F06B482 /* Archive+MemoryFile.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Archive+MemoryFile.swift"; path = "Sources/ZIPFoundation/Archive+MemoryFile.swift"; sourceTree = "<group>"; };
-		80A8F9525207D890BA41FD5F5FB7F732 /* Pods-universalBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-universalBTSDK-umbrella.h"; sourceTree = "<group>"; };
-		85865B93DA1F1EB44257DB2060D866BE /* Pods-livotalBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-livotalBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
-		8693173627C63D930C3B06F0153CC879 /* DFUPacket.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUPacket.swift; path = iOSDFULibrary/Classes/Implementation/LegacyDFU/Characteristics/DFUPacket.swift; sourceTree = "<group>"; };
-		912C1202DE106E2E42DE09BDB2E88AE6 /* ZipArchive.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ZipArchive.swift; path = iOSDFULibrary/Classes/Utilities/ZipArchive.swift; sourceTree = "<group>"; };
-		95BAB4D9D84E76A9021D8170B1A6363C /* Pods-livotalBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-livotalBTSDK-Info.plist"; sourceTree = "<group>"; };
-		97F3D506E4609FC883E6EED0DCB4B82D /* ZIPFoundation-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "ZIPFoundation-dummy.m"; sourceTree = "<group>"; };
-		9A61C58FD5F2053DEEDE5E74058108DE /* iOSDFULibrary.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = iOSDFULibrary.release.xcconfig; sourceTree = "<group>"; };
-		9B62E564E8AB869EAC4C30C2A49D8D5F /* Data+Compression.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Data+Compression.swift"; path = "Sources/ZIPFoundation/Data+Compression.swift"; sourceTree = "<group>"; };
-		9D7AE75DD0454E5D0C1C1693BA420557 /* ButtonlessDFU.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ButtonlessDFU.swift; path = iOSDFULibrary/Classes/Implementation/SecureDFU/Characteristics/ButtonlessDFU.swift; sourceTree = "<group>"; };
-		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		A46EF1B58242582AE70CBFE767146EE8 /* Pods-ethosBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ethosBTSDK-Info.plist"; sourceTree = "<group>"; };
-		A47C7FBCB101D6DEB2146E60DC32F9EC /* DFUStreamZip.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUStreamZip.swift; path = iOSDFULibrary/Classes/Utilities/Streams/DFUStreamZip.swift; sourceTree = "<group>"; };
-		A6FAB9617EEA22963FE848444D94A066 /* DFUStreamHex.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUStreamHex.swift; path = iOSDFULibrary/Classes/Utilities/Streams/DFUStreamHex.swift; sourceTree = "<group>"; };
-		ABA338B16BCC7FB84A9CFF784AC892B1 /* LegacyDFUServiceInitiator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LegacyDFUServiceInitiator.swift; path = iOSDFULibrary/Classes/Implementation/LegacyDFU/DFU/LegacyDFUServiceInitiator.swift; sourceTree = "<group>"; };
-		AC14467E351393ED15CC5F1860B4686E /* DFUFirmware.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUFirmware.swift; path = iOSDFULibrary/Classes/Implementation/Firmware/DFUFirmware.swift; sourceTree = "<group>"; };
-		AE71EB9B146ECDF8C11410C79D32403A /* Pods-ethosBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ethosBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
-		AF8389270B36CB0BC6D2DEC01BDCD1EA /* DFUController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUController.swift; path = iOSDFULibrary/Classes/Implementation/GenericDFU/DFUController.swift; sourceTree = "<group>"; };
-		B1FE71098D26180484AD84B6A7FE09DD /* DFUPeripheralSelector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUPeripheralSelector.swift; path = iOSDFULibrary/Classes/Implementation/DFUPeripheralSelector.swift; sourceTree = "<group>"; };
-		B2B8B8E529724830DD969F3523980280 /* Pods-livotalBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-livotalBTSDK-dummy.m"; sourceTree = "<group>"; };
-		B3224150F899907A85E7CFC5A8E5CFC7 /* DFUServiceSelector.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUServiceSelector.swift; path = iOSDFULibrary/Classes/Implementation/DFUSelector/DFUServiceSelector.swift; sourceTree = "<group>"; };
-		B4C10D9AFD30FC034265216D2A642B93 /* LegacyDFUPeripheral.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LegacyDFUPeripheral.swift; path = iOSDFULibrary/Classes/Implementation/LegacyDFU/Peripherals/LegacyDFUPeripheral.swift; sourceTree = "<group>"; };
-		B75D78101DB76028672E05CD20EFBB91 /* Archive.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Archive.swift; path = Sources/ZIPFoundation/Archive.swift; sourceTree = "<group>"; };
-		B8E63ADFB3398229548E3E236CB6D548 /* LegacyDFUService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LegacyDFUService.swift; path = iOSDFULibrary/Classes/Implementation/LegacyDFU/Services/LegacyDFUService.swift; sourceTree = "<group>"; };
-		BE486EF26BDFF85A04389D7A50202057 /* SecureDFUPacket.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecureDFUPacket.swift; path = iOSDFULibrary/Classes/Implementation/SecureDFU/Characteristics/SecureDFUPacket.swift; sourceTree = "<group>"; };
-		BE83DAA878C1F8B3262265FEA130CAB4 /* ZIPFoundation.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = ZIPFoundation.release.xcconfig; sourceTree = "<group>"; };
-		C1BEBA59ED7B36EF57ED8D9AA426B808 /* iOSDFULibrary.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = iOSDFULibrary.modulemap; sourceTree = "<group>"; };
-		CABED02AD24CD54998AF8BC5AB1CFAF0 /* LoggerDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LoggerDelegate.swift; path = iOSDFULibrary/Classes/Utilities/Logging/LoggerDelegate.swift; sourceTree = "<group>"; };
-		CD4EAC56ED00928A0E7F2B25931C3D2E /* Pods-universalBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-universalBTSDK.release.xcconfig"; sourceTree = "<group>"; };
-		D309A2896B383C0779ECAE06A973F7B7 /* ZIPFoundation-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "ZIPFoundation-umbrella.h"; sourceTree = "<group>"; };
-		D4D5FD2726FE8B100CED90BBC995EAC8 /* DFUPeripheralSelectorDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUPeripheralSelectorDelegate.swift; path = iOSDFULibrary/Classes/Implementation/DFUPeripheralSelectorDelegate.swift; sourceTree = "<group>"; };
-		D65AAFF9767B983BBF1D5767C0869E2A /* Pods-ethosBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ethosBTSDK.release.xcconfig"; sourceTree = "<group>"; };
-		D8199BDD08AF535F0ECB1CAEC15256D6 /* DFUServiceInitiator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUServiceInitiator.swift; path = iOSDFULibrary/Classes/Implementation/DFUServiceInitiator.swift; sourceTree = "<group>"; };
-		D86E94CF75208B8DF13B31FD5F9E96C3 /* Archive+Reading.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "Archive+Reading.swift"; path = "Sources/ZIPFoundation/Archive+Reading.swift"; sourceTree = "<group>"; };
-		D8A48564EDA6F2184CF62CDEAC47C7AB /* Pods-universalBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-universalBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
-		D8F8D33267B250EDA1C85A30D37ECEFE /* DFUVersion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DFUVersion.swift; path = iOSDFULibrary/Classes/Implementation/LegacyDFU/Characteristics/DFUVersion.swift; sourceTree = "<group>"; };
-		DA1A874AE8B20807546DE9A66418DE42 /* Pods-ethosBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-ethosBTSDK-umbrella.h"; sourceTree = "<group>"; };
-		E1DC540860C2A382B320054AAE7DD12C /* SecureDFUService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecureDFUService.swift; path = iOSDFULibrary/Classes/Implementation/SecureDFU/Services/SecureDFUService.swift; sourceTree = "<group>"; };
-		E280BA84760A5E7D4911C2CABD3601B6 /* IntelHex2BinConverter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = IntelHex2BinConverter.swift; path = iOSDFULibrary/Classes/Utilities/HexToBinConverter/IntelHex2BinConverter.swift; sourceTree = "<group>"; };
-		E3CC550E91E4B651EE80FA9CBC61D29B /* ZIPFoundation-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "ZIPFoundation-prefix.pch"; sourceTree = "<group>"; };
-		E40E02868F63AA248ADE21033F5FADC4 /* SecureDFUServiceInitiator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecureDFUServiceInitiator.swift; path = iOSDFULibrary/Classes/Implementation/SecureDFU/DFU/SecureDFUServiceInitiator.swift; sourceTree = "<group>"; };
-		E58EDC641A504C67B7C8FD9B1F3D31BF /* iOSDFULibrary-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "iOSDFULibrary-umbrella.h"; sourceTree = "<group>"; };
-		EA62136B7C75692A3DE484E901A3AC71 /* Double.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Double.swift; path = iOSDFULibrary/Classes/Utilities/Double.swift; sourceTree = "<group>"; };
-		EB3A502E272A3C8A4B89303A28147547 /* Manifest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Manifest.swift; path = iOSDFULibrary/Classes/Utilities/DFUPackage/Manifest/Manifest.swift; sourceTree = "<group>"; };
-		EECDC19D599551C4D7D19CA14B836D34 /* Pods-universalBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-universalBTSDK-Info.plist"; sourceTree = "<group>"; };
-		F5853985A776318B56DAE74B83323724 /* LegacyDFUExecutor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LegacyDFUExecutor.swift; path = iOSDFULibrary/Classes/Implementation/LegacyDFU/DFU/LegacyDFUExecutor.swift; sourceTree = "<group>"; };
-		F67F08BB53B5B17F45187F3586338738 /* SecureDFUControlPoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecureDFUControlPoint.swift; path = iOSDFULibrary/Classes/Implementation/SecureDFU/Characteristics/SecureDFUControlPoint.swift; sourceTree = "<group>"; };
-		F85C38F699A6D7DE2965E91F207E1AD8 /* LegacyDFUPeripheralDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LegacyDFUPeripheralDelegate.swift; path = iOSDFULibrary/Classes/Implementation/LegacyDFU/Peripherals/LegacyDFUPeripheralDelegate.swift; sourceTree = "<group>"; };
-		FBDC3BEF37FA601B8CA55F7998646EB9 /* SecureDFUPeripheralDelegate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SecureDFUPeripheralDelegate.swift; path = iOSDFULibrary/Classes/Implementation/SecureDFU/Peripheral/SecureDFUPeripheralDelegate.swift; sourceTree = "<group>"; };
-		FBF34DB79D1AD9179F72A695BD475651 /* Pods-livotalBTSDK */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-livotalBTSDK"; path = Pods_livotalBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		FCD372EBBC9E69FC86DB43F99F67C915 /* FileManager+ZIP.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "FileManager+ZIP.swift"; path = "Sources/ZIPFoundation/FileManager+ZIP.swift"; sourceTree = "<group>"; };
+		7596AA79DE38B5DA82D357DF40A35E5B /* Pods-alterBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-alterBTSDK.release.xcconfig"; sourceTree = "<group>"; };
+		7D177F7025C3FEF669BEAD2438813DC9 /* Pods-alterBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-alterBTSDK-dummy.m"; sourceTree = "<group>"; };
+		8C26F14C7CA21C6CE7816E793D77B29F /* Pods-universalBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-universalBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
+		8FF61F858150D9E12D1C8BA295CB0C39 /* Pods-ethosBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ethosBTSDK-Info.plist"; sourceTree = "<group>"; };
+		93CED443C0BA19D6E08F55A88347EBF0 /* Pods-universalBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-universalBTSDK-umbrella.h"; sourceTree = "<group>"; };
+		98D17821A531E2D356F2FD1D4428FA51 /* Pods-universalBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-universalBTSDK.modulemap"; sourceTree = "<group>"; };
+		9A708194D5FD3F495B2CD925EF240541 /* Pods-alterBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-alterBTSDK-umbrella.h"; sourceTree = "<group>"; };
+		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		BDB57863D92251A1E331284984DDDC24 /* Pods-universalBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-universalBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
+		C713793B7166FB0FFB19E2649BEC81F5 /* Pods-ethosBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ethosBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
+		D504BF038E2F88264F41C78167861498 /* Pods-ethosBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ethosBTSDK.release.xcconfig"; sourceTree = "<group>"; };
+		DEE620A9D0A8F42AA138D1E0966FB4CB /* Pods-alterBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-alterBTSDK-Info.plist"; sourceTree = "<group>"; };
+		F7DE52F843EF4A3F8E3DD58CE462BC0C /* Pods-ethosBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-ethosBTSDK-umbrella.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		9E8B0EE08DD28DC68A52EE9090026523 /* Frameworks */ = {
+		4C2E274C40530DAF44C1D55BC58B0A8C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2E30B95D4B5D022B87A18EE6E70D27D2 /* Foundation.framework in Frameworks */,
+				1DB9F93729A583D757934FA34A169773 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A60237B259AD1C116BA18E15E2811C60 /* Frameworks */ = {
+		9E8E23E2DDD1BA10ED17BF159103A95F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EC7F9B36BF5D48CDFB57C4D9F83D763B /* Foundation.framework in Frameworks */,
+				00A8A48F7831ED75C8856D12E7163CA1 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		CEE3F15C864001BA424C4996A97C2FCB /* Frameworks */ = {
+		EEBBC08CE1D7CB2A3E048B714C5ACA70 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				11DFD0437F647D06C214D62AF36A14B2 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E53D7112BC796472D7D5587E5B49CA74 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C88DDC511E24E2045D1ABEAB26E115CD /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		E5B0A608C1C066A8D13DE26BFB4C0514 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				4C9A8D0527AC45F9B21B28BA7E021305 /* Foundation.framework in Frameworks */,
+				02035144947660BC8E0F789A3F7310BA /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0E6E2C7B30D00F3F69C362907FE1519B /* Targets Support Files */ = {
+		02441C4B51E580A9B5128D21C898681F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				820DCA82263EC83DE2843FAD9F45C81E /* Pods-ethosBTSDK */,
-				97E838448E3EF94A01B9619860212085 /* Pods-livotalBTSDK */,
-				36E1E61FCF3C39617372C2EED805B3FB /* Pods-universalBTSDK */,
+				06F4319AD6490E49C4CDB2A0C8E37195 /* Pods-alterBTSDK */,
+				13E2043D1B2A7096101C25CDAA4B68FA /* Pods-ethosBTSDK */,
+				36CDEB2A52EF480B5148B840C2804922 /* Pods-universalBTSDK */,
 			);
-			name = "Targets Support Files";
+			name = Products;
 			sourceTree = "<group>";
 		};
-		19DE9B892F75607A4278BAFDCF4563FB /* Support Files */ = {
+		1D433AEEB02FEFA21BB09E7B7085CDC4 /* Pods-universalBTSDK */ = {
 			isa = PBXGroup;
 			children = (
-				5BE25F8A9C9AAE0C77F41CF5D642FB08 /* ZIPFoundation.modulemap */,
-				97F3D506E4609FC883E6EED0DCB4B82D /* ZIPFoundation-dummy.m */,
-				508749754BD1619CE97679448BA5BD05 /* ZIPFoundation-Info.plist */,
-				E3CC550E91E4B651EE80FA9CBC61D29B /* ZIPFoundation-prefix.pch */,
-				D309A2896B383C0779ECAE06A973F7B7 /* ZIPFoundation-umbrella.h */,
-				BE83DAA878C1F8B3262265FEA130CAB4 /* ZIPFoundation.release.xcconfig */,
-			);
-			name = "Support Files";
-			path = "../Target Support Files/ZIPFoundation";
-			sourceTree = "<group>";
-		};
-		36E1E61FCF3C39617372C2EED805B3FB /* Pods-universalBTSDK */ = {
-			isa = PBXGroup;
-			children = (
-				676316802E911885D0B51F53F8B92BCB /* Pods-universalBTSDK.modulemap */,
-				50C9E0A8F55F712B3252820A438C4B97 /* Pods-universalBTSDK-acknowledgements.markdown */,
-				D8A48564EDA6F2184CF62CDEAC47C7AB /* Pods-universalBTSDK-acknowledgements.plist */,
-				408D48EDF0B36B3ADBCEFCE54BA7A3F1 /* Pods-universalBTSDK-dummy.m */,
-				EECDC19D599551C4D7D19CA14B836D34 /* Pods-universalBTSDK-Info.plist */,
-				80A8F9525207D890BA41FD5F5FB7F732 /* Pods-universalBTSDK-umbrella.h */,
-				CD4EAC56ED00928A0E7F2B25931C3D2E /* Pods-universalBTSDK.release.xcconfig */,
+				98D17821A531E2D356F2FD1D4428FA51 /* Pods-universalBTSDK.modulemap */,
+				8C26F14C7CA21C6CE7816E793D77B29F /* Pods-universalBTSDK-acknowledgements.markdown */,
+				BDB57863D92251A1E331284984DDDC24 /* Pods-universalBTSDK-acknowledgements.plist */,
+				04AD8F9056026E643E69410EBBF90D42 /* Pods-universalBTSDK-dummy.m */,
+				2E84E1F41681BA8C34E7F449E0415BCB /* Pods-universalBTSDK-Info.plist */,
+				93CED443C0BA19D6E08F55A88347EBF0 /* Pods-universalBTSDK-umbrella.h */,
+				0EC61B566538EB6F7161BC581E9516A5 /* Pods-universalBTSDK.release.xcconfig */,
 			);
 			name = "Pods-universalBTSDK";
 			path = "Target Support Files/Pods-universalBTSDK";
 			sourceTree = "<group>";
 		};
-		4644FC506589E10A33337CF73512E777 /* iOSDFULibrary */ = {
+		41161A2F979F61E9BB9B177D4F528943 /* Pods-ethosBTSDK */ = {
 			isa = PBXGroup;
 			children = (
-				9D7AE75DD0454E5D0C1C1693BA420557 /* ButtonlessDFU.swift */,
-				7A6183CBB252E5300448765D3FF32630 /* crc32.swift */,
-				43A16E5B6DFB4BB158DCA7214FAE1B1A /* Data.swift */,
-				16FC9959E9EC44846E14D87518A2C5A4 /* DFUCharacteristic.swift */,
-				AF8389270B36CB0BC6D2DEC01BDCD1EA /* DFUController.swift */,
-				082517F1E7675BE3E0E269809748324F /* DFUControlPoint.swift */,
-				4FBB4208751E0C624DC44B7A408CB7CA /* DFUExecutor.swift */,
-				AC14467E351393ED15CC5F1860B4686E /* DFUFirmware.swift */,
-				8693173627C63D930C3B06F0153CC879 /* DFUPacket.swift */,
-				17A58FA63FD7021E2B508172EFFE5928 /* DFUPeripheral.swift */,
-				4F7EBBD696CA792494810CA9A8A3A083 /* DFUPeripheralDelegate.swift */,
-				B1FE71098D26180484AD84B6A7FE09DD /* DFUPeripheralSelector.swift */,
-				D4D5FD2726FE8B100CED90BBC995EAC8 /* DFUPeripheralSelectorDelegate.swift */,
-				3EC9F3D07E81B8D9BFCC6C26121FF65A /* DFUService.swift */,
-				2FAA5840B2068D9249A9657F9A33FB58 /* DFUServiceController.swift */,
-				43163FB9A11118C89744911293C1EF78 /* DFUServiceDelegate.swift */,
-				D8199BDD08AF535F0ECB1CAEC15256D6 /* DFUServiceInitiator.swift */,
-				B3224150F899907A85E7CFC5A8E5CFC7 /* DFUServiceSelector.swift */,
-				726E1869BBB4DAF7B2540D2D336531DE /* DFUStarterPeripheral.swift */,
-				2D8A3BC0D6A73077B247DEB6AEAD5BD6 /* DFUStream.swift */,
-				6A5995FF11D65769F08BD3C6C5BA5E95 /* DFUStreamBin.swift */,
-				A6FAB9617EEA22963FE848444D94A066 /* DFUStreamHex.swift */,
-				A47C7FBCB101D6DEB2146E60DC32F9EC /* DFUStreamZip.swift */,
-				6ADE52D468E19A2484470237CABA49EC /* DFUUuidHelper.swift */,
-				D8F8D33267B250EDA1C85A30D37ECEFE /* DFUVersion.swift */,
-				EA62136B7C75692A3DE484E901A3AC71 /* Double.swift */,
-				E280BA84760A5E7D4911C2CABD3601B6 /* IntelHex2BinConverter.swift */,
-				F5853985A776318B56DAE74B83323724 /* LegacyDFUExecutor.swift */,
-				B4C10D9AFD30FC034265216D2A642B93 /* LegacyDFUPeripheral.swift */,
-				F85C38F699A6D7DE2965E91F207E1AD8 /* LegacyDFUPeripheralDelegate.swift */,
-				B8E63ADFB3398229548E3E236CB6D548 /* LegacyDFUService.swift */,
-				ABA338B16BCC7FB84A9CFF784AC892B1 /* LegacyDFUServiceInitiator.swift */,
-				CABED02AD24CD54998AF8BC5AB1CFAF0 /* LoggerDelegate.swift */,
-				23FBBFD147F25BA8FE4885A41EE3C34A /* LoggerHelper.swift */,
-				EB3A502E272A3C8A4B89303A28147547 /* Manifest.swift */,
-				415292E4E48EBE8F0A5C36FBBC9F1462 /* ManifestFirmwareInfo.swift */,
-				F67F08BB53B5B17F45187F3586338738 /* SecureDFUControlPoint.swift */,
-				3173C0FE87C3026697D2E408B2D641DB /* SecureDFUExecutor.swift */,
-				BE486EF26BDFF85A04389D7A50202057 /* SecureDFUPacket.swift */,
-				69C067B6340C567A0D396E96D55D54E3 /* SecureDFUPeripheral.swift */,
-				FBDC3BEF37FA601B8CA55F7998646EB9 /* SecureDFUPeripheralDelegate.swift */,
-				E1DC540860C2A382B320054AAE7DD12C /* SecureDFUService.swift */,
-				E40E02868F63AA248ADE21033F5FADC4 /* SecureDFUServiceInitiator.swift */,
-				6229F31557AF00F9F10BA7CD3E822EB6 /* SoftdeviceBootloaderInfo.swift */,
-				912C1202DE106E2E42DE09BDB2E88AE6 /* ZipArchive.swift */,
-				F49CB3EFF6056CAE9E6E77857FE6625A /* Support Files */,
+				67F1E3A03F33720BC7116325F992934C /* Pods-ethosBTSDK.modulemap */,
+				C713793B7166FB0FFB19E2649BEC81F5 /* Pods-ethosBTSDK-acknowledgements.markdown */,
+				3D8A93B445AFA3AFD5E58077BF446F95 /* Pods-ethosBTSDK-acknowledgements.plist */,
+				4E154891CC698D7B92861FAB55199BA1 /* Pods-ethosBTSDK-dummy.m */,
+				8FF61F858150D9E12D1C8BA295CB0C39 /* Pods-ethosBTSDK-Info.plist */,
+				F7DE52F843EF4A3F8E3DD58CE462BC0C /* Pods-ethosBTSDK-umbrella.h */,
+				D504BF038E2F88264F41C78167861498 /* Pods-ethosBTSDK.release.xcconfig */,
 			);
-			path = iOSDFULibrary;
+			name = "Pods-ethosBTSDK";
+			path = "Target Support Files/Pods-ethosBTSDK";
 			sourceTree = "<group>";
 		};
-		49CF0F45DE1B3E0BE65ADDBFF5E88F3E /* Products */ = {
+		4F3962FFD1E1E2696D8C1998A4FA6967 /* Pods-alterBTSDK */ = {
 			isa = PBXGroup;
 			children = (
-				21B1375088A0310C7AE2BE4C8188D12F /* iOSDFULibrary.framework */,
-				13E2043D1B2A7096101C25CDAA4B68FA /* Pods-ethosBTSDK */,
-				FBF34DB79D1AD9179F72A695BD475651 /* Pods-livotalBTSDK */,
-				36CDEB2A52EF480B5148B840C2804922 /* Pods-universalBTSDK */,
-				48A4A6EDC08C8AC933D0DCD507E9D173 /* ZIPFoundation.framework */,
+				3AD29CA1D4908F8D2175FBAB759A5BC3 /* Pods-alterBTSDK.modulemap */,
+				348943D2BE0E5F83188D15F61A8DFCAA /* Pods-alterBTSDK-acknowledgements.markdown */,
+				6879780C8C03778F089B912E8875DDE4 /* Pods-alterBTSDK-acknowledgements.plist */,
+				7D177F7025C3FEF669BEAD2438813DC9 /* Pods-alterBTSDK-dummy.m */,
+				DEE620A9D0A8F42AA138D1E0966FB4CB /* Pods-alterBTSDK-Info.plist */,
+				9A708194D5FD3F495B2CD925EF240541 /* Pods-alterBTSDK-umbrella.h */,
+				7596AA79DE38B5DA82D357DF40A35E5B /* Pods-alterBTSDK.release.xcconfig */,
 			);
-			name = Products;
+			name = "Pods-alterBTSDK";
+			path = "Target Support Files/Pods-alterBTSDK";
 			sourceTree = "<group>";
 		};
 		578452D2E740E91742655AC8F1636D1F /* iOS */ = {
@@ -381,43 +138,14 @@
 			name = iOS;
 			sourceTree = "<group>";
 		};
-		59E738FC7D63EC9A76576C71648BC3FB /* Pods */ = {
+		9EAA4E88AABA80F81DA08135A5BE4F19 /* Targets Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				4644FC506589E10A33337CF73512E777 /* iOSDFULibrary */,
-				FF8AD33A44CBB63D43197DC2D65BD17F /* ZIPFoundation */,
+				4F3962FFD1E1E2696D8C1998A4FA6967 /* Pods-alterBTSDK */,
+				41161A2F979F61E9BB9B177D4F528943 /* Pods-ethosBTSDK */,
+				1D433AEEB02FEFA21BB09E7B7085CDC4 /* Pods-universalBTSDK */,
 			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
-		820DCA82263EC83DE2843FAD9F45C81E /* Pods-ethosBTSDK */ = {
-			isa = PBXGroup;
-			children = (
-				15524CD2E7350EEFC002E43C3413F8F5 /* Pods-ethosBTSDK.modulemap */,
-				5EA079ECF54571994F182012AD1ABFD8 /* Pods-ethosBTSDK-acknowledgements.markdown */,
-				AE71EB9B146ECDF8C11410C79D32403A /* Pods-ethosBTSDK-acknowledgements.plist */,
-				177BD2DA03FDCDA3A224862B633B03A3 /* Pods-ethosBTSDK-dummy.m */,
-				A46EF1B58242582AE70CBFE767146EE8 /* Pods-ethosBTSDK-Info.plist */,
-				DA1A874AE8B20807546DE9A66418DE42 /* Pods-ethosBTSDK-umbrella.h */,
-				D65AAFF9767B983BBF1D5767C0869E2A /* Pods-ethosBTSDK.release.xcconfig */,
-			);
-			name = "Pods-ethosBTSDK";
-			path = "Target Support Files/Pods-ethosBTSDK";
-			sourceTree = "<group>";
-		};
-		97E838448E3EF94A01B9619860212085 /* Pods-livotalBTSDK */ = {
-			isa = PBXGroup;
-			children = (
-				71609231CE414E46959F03FE5003789F /* Pods-livotalBTSDK.modulemap */,
-				85865B93DA1F1EB44257DB2060D866BE /* Pods-livotalBTSDK-acknowledgements.markdown */,
-				7A24A802C50F3D99F9926C085BA1D544 /* Pods-livotalBTSDK-acknowledgements.plist */,
-				B2B8B8E529724830DD969F3523980280 /* Pods-livotalBTSDK-dummy.m */,
-				95BAB4D9D84E76A9021D8170B1A6363C /* Pods-livotalBTSDK-Info.plist */,
-				1D6A260C5BE3A22473864BDC7C9D7427 /* Pods-livotalBTSDK-umbrella.h */,
-				0C103F892820FDA5831447BE74943DA1 /* Pods-livotalBTSDK.release.xcconfig */,
-			);
-			name = "Pods-livotalBTSDK";
-			path = "Target Support Files/Pods-livotalBTSDK";
+			name = "Targets Support Files";
 			sourceTree = "<group>";
 		};
 		CF1408CF629C7361332E53B88F7BD30C = {
@@ -425,9 +153,8 @@
 			children = (
 				9D940727FF8FB9C785EB98E56350EF41 /* Podfile */,
 				D210D550F4EA176C3123ED886F8F87F5 /* Frameworks */,
-				59E738FC7D63EC9A76576C71648BC3FB /* Pods */,
-				49CF0F45DE1B3E0BE65ADDBFF5E88F3E /* Products */,
-				0E6E2C7B30D00F3F69C362907FE1519B /* Targets Support Files */,
+				02441C4B51E580A9B5128D21C898681F /* Products */,
+				9EAA4E88AABA80F81DA08135A5BE4F19 /* Targets Support Files */,
 			);
 			sourceTree = "<group>";
 		};
@@ -439,76 +166,30 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		F49CB3EFF6056CAE9E6E77857FE6625A /* Support Files */ = {
-			isa = PBXGroup;
-			children = (
-				C1BEBA59ED7B36EF57ED8D9AA426B808 /* iOSDFULibrary.modulemap */,
-				51072BA120E8222DD35ED6168686AFC8 /* iOSDFULibrary-dummy.m */,
-				7AA26DFDDAAE8A8E20352628BB3A12DF /* iOSDFULibrary-Info.plist */,
-				5B89E02D678E91C49289E4A40732E78E /* iOSDFULibrary-prefix.pch */,
-				E58EDC641A504C67B7C8FD9B1F3D31BF /* iOSDFULibrary-umbrella.h */,
-				9A61C58FD5F2053DEEDE5E74058108DE /* iOSDFULibrary.release.xcconfig */,
-			);
-			name = "Support Files";
-			path = "../Target Support Files/iOSDFULibrary";
-			sourceTree = "<group>";
-		};
-		FF8AD33A44CBB63D43197DC2D65BD17F /* ZIPFoundation */ = {
-			isa = PBXGroup;
-			children = (
-				B75D78101DB76028672E05CD20EFBB91 /* Archive.swift */,
-				7C28C3AD645807DEF987722C5F06B482 /* Archive+MemoryFile.swift */,
-				D86E94CF75208B8DF13B31FD5F9E96C3 /* Archive+Reading.swift */,
-				3F9C336D5457D6C3F32DC3FB4D9CB4FE /* Archive+Writing.swift */,
-				9B62E564E8AB869EAC4C30C2A49D8D5F /* Data+Compression.swift */,
-				66E8A397BA272BEA7E0BE51DACE6231B /* Data+Serialization.swift */,
-				06EBA0361357EC2B72CD9284F3746303 /* Entry.swift */,
-				FCD372EBBC9E69FC86DB43F99F67C915 /* FileManager+ZIP.swift */,
-				19DE9B892F75607A4278BAFDCF4563FB /* Support Files */,
-			);
-			path = ZIPFoundation;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		131BC69A854A59520532C3185D9B7FAB /* Headers */ = {
+		0610535538EB55D3783D2CEC0D2937FD /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B750D9E164C0411D4204A8B3842C1461 /* Pods-livotalBTSDK-umbrella.h in Headers */,
+				200FFCDC767DAF5E71AEBDBDA7876717 /* Pods-ethosBTSDK-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		21FB0ECF096E99146172311150064CD7 /* Headers */ = {
+		54FE7DCD37592BE1CF0E90F0124E405E /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				012CAC511B4D3F785AB30CDC659EC325 /* Pods-universalBTSDK-umbrella.h in Headers */,
+				C28004D73D930D2F301EE3013F0FAC36 /* Pods-alterBTSDK-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		9050B93E623D333D6062556FE8FDAE32 /* Headers */ = {
+		E9D061B97A14096124321F28CF468A72 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				57E9097515A93CBB5B2D1C489F66A2A4 /* ZIPFoundation-umbrella.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C442F97AD8334FFBF1CE184A0F8B8872 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				F3F24CF4A0F86EE3EDD0555EC793F404 /* iOSDFULibrary-umbrella.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F692F0AD4F4B80582F79A0E7D2151989 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				050AA128A8A6546ED57441C442F6C9D3 /* Pods-ethosBTSDK-umbrella.h in Headers */,
+				6FA129485F331A666D5DF52B353049E8 /* Pods-universalBTSDK-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -517,99 +198,56 @@
 /* Begin PBXNativeTarget section */
 		46F36765BFD373367BF5C6D2A9EAEF1A /* Pods-universalBTSDK */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 033025D11623BFB8BD9449805A1C7B30 /* Build configuration list for PBXNativeTarget "Pods-universalBTSDK" */;
+			buildConfigurationList = A9804902BB272A73BF6FC437F81E02A2 /* Build configuration list for PBXNativeTarget "Pods-universalBTSDK" */;
 			buildPhases = (
-				21FB0ECF096E99146172311150064CD7 /* Headers */,
-				F3C2CBF8A380EDBB933B0CAC442258B4 /* Sources */,
-				CEE3F15C864001BA424C4996A97C2FCB /* Frameworks */,
-				7E4C01ECE6B82A81EA93470DA4347A88 /* Resources */,
+				E9D061B97A14096124321F28CF468A72 /* Headers */,
+				82F12759D176E39E85F257B4E0B08EEC /* Sources */,
+				EEBBC08CE1D7CB2A3E048B714C5ACA70 /* Frameworks */,
+				F4AB5E2C9C895B7FD7B46CAB53A39CA6 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				2D0277368FD9AB07BDE15C3DFCBDF38B /* PBXTargetDependency */,
-				81D3CA0522875D1C31EDF712F38A928B /* PBXTargetDependency */,
 			);
 			name = "Pods-universalBTSDK";
 			productName = Pods_universalBTSDK;
 			productReference = 36CDEB2A52EF480B5148B840C2804922 /* Pods-universalBTSDK */;
 			productType = "com.apple.product-type.framework";
 		};
-		4C7C0EBA5A357A4467DB5840096B06FB /* Pods-ethosBTSDK */ = {
+		4A1EEEAAF731D66FF6534113083AAE14 /* Pods-alterBTSDK */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0353E32A60A3D0CB73A3B18DE1D2C902 /* Build configuration list for PBXNativeTarget "Pods-ethosBTSDK" */;
+			buildConfigurationList = 5B126E41B7910C39C8C022536F92593F /* Build configuration list for PBXNativeTarget "Pods-alterBTSDK" */;
 			buildPhases = (
-				F692F0AD4F4B80582F79A0E7D2151989 /* Headers */,
-				5DB093A0F469261BA4EA1063235BF177 /* Sources */,
-				E53D7112BC796472D7D5587E5B49CA74 /* Frameworks */,
-				0AEC0768816D94E9ADB727E18513AE9C /* Resources */,
+				54FE7DCD37592BE1CF0E90F0124E405E /* Headers */,
+				B8F1303FC7F0010566DA67DA241365F6 /* Sources */,
+				4C2E274C40530DAF44C1D55BC58B0A8C /* Frameworks */,
+				42CB6E7C42BD0A6C8A17629F027155DE /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				04219218F804EE6ABF33B04ED1DBD89E /* PBXTargetDependency */,
-				F796BC24546A968CC301334DBD4F6ACE /* PBXTargetDependency */,
+			);
+			name = "Pods-alterBTSDK";
+			productName = Pods_alterBTSDK;
+			productReference = 06F4319AD6490E49C4CDB2A0C8E37195 /* Pods-alterBTSDK */;
+			productType = "com.apple.product-type.framework";
+		};
+		4C7C0EBA5A357A4467DB5840096B06FB /* Pods-ethosBTSDK */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D3CA8B67F76DC03343DABC45C539F1BC /* Build configuration list for PBXNativeTarget "Pods-ethosBTSDK" */;
+			buildPhases = (
+				0610535538EB55D3783D2CEC0D2937FD /* Headers */,
+				8F613945A8CDCA154555C121D906DBAB /* Sources */,
+				9E8E23E2DDD1BA10ED17BF159103A95F /* Frameworks */,
+				58B67EE8A37D342AF0A2CA353173B20C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
 			);
 			name = "Pods-ethosBTSDK";
 			productName = Pods_ethosBTSDK;
 			productReference = 13E2043D1B2A7096101C25CDAA4B68FA /* Pods-ethosBTSDK */;
-			productType = "com.apple.product-type.framework";
-		};
-		6EE0FC2E7380B76CD97031D45FD20C1B /* Pods-livotalBTSDK */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 96539D51EFC6B54516ED99239EC74BBD /* Build configuration list for PBXNativeTarget "Pods-livotalBTSDK" */;
-			buildPhases = (
-				131BC69A854A59520532C3185D9B7FAB /* Headers */,
-				75E421E08ACCC5AC841D53E244ACA772 /* Sources */,
-				E5B0A608C1C066A8D13DE26BFB4C0514 /* Frameworks */,
-				A654CE676B6B7785E74562B64E84BDDD /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				8FBEDCC340EAEA96A6D5C9504F275647 /* PBXTargetDependency */,
-				9CD803DF92C4D23700D7C793CED40B6D /* PBXTargetDependency */,
-			);
-			name = "Pods-livotalBTSDK";
-			productName = Pods_livotalBTSDK;
-			productReference = FBF34DB79D1AD9179F72A695BD475651 /* Pods-livotalBTSDK */;
-			productType = "com.apple.product-type.framework";
-		};
-		9506C7FCDAE6E6967A99655F452EEE93 /* iOSDFULibrary */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 38226BB4B01C1C29E1AFFDF5B46E2F1E /* Build configuration list for PBXNativeTarget "iOSDFULibrary" */;
-			buildPhases = (
-				C442F97AD8334FFBF1CE184A0F8B8872 /* Headers */,
-				B014C62ED0861064E2A10FB30F43BB1E /* Sources */,
-				9E8B0EE08DD28DC68A52EE9090026523 /* Frameworks */,
-				5232C58F003895FB4B98E44676D4A4B4 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				BA528182ABB5E2F56B4246618B2E5A15 /* PBXTargetDependency */,
-			);
-			name = iOSDFULibrary;
-			productName = iOSDFULibrary;
-			productReference = 21B1375088A0310C7AE2BE4C8188D12F /* iOSDFULibrary.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		AA15C8469D67684160CC2A7098EB841C /* ZIPFoundation */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = A4F3F936499B7E514EC56F586BA4B62E /* Build configuration list for PBXNativeTarget "ZIPFoundation" */;
-			buildPhases = (
-				9050B93E623D333D6062556FE8FDAE32 /* Headers */,
-				A7BCC3982FB272E9886AC85444633C3A /* Sources */,
-				A60237B259AD1C116BA18E15E2811C60 /* Frameworks */,
-				BA1B8856619874577831C7EE79AA3D8D /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = ZIPFoundation;
-			productName = ZIPFoundation;
-			productReference = 48A4A6EDC08C8AC933D0DCD507E9D173 /* ZIPFoundation.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -618,8 +256,8 @@
 		BFDFE7DC352907FC980B868725387E98 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1240;
-				LastUpgradeCheck = 1240;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
 			};
 			buildConfigurationList = 4821239608C13582E20E6DA73FD5F1F9 /* Build configuration list for PBXProject "Pods" */;
 			compatibilityVersion = "Xcode 9.3";
@@ -630,49 +268,33 @@
 				en,
 			);
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
-			productRefGroup = 49CF0F45DE1B3E0BE65ADDBFF5E88F3E /* Products */;
+			productRefGroup = 02441C4B51E580A9B5128D21C898681F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9506C7FCDAE6E6967A99655F452EEE93 /* iOSDFULibrary */,
+				4A1EEEAAF731D66FF6534113083AAE14 /* Pods-alterBTSDK */,
 				4C7C0EBA5A357A4467DB5840096B06FB /* Pods-ethosBTSDK */,
-				6EE0FC2E7380B76CD97031D45FD20C1B /* Pods-livotalBTSDK */,
 				46F36765BFD373367BF5C6D2A9EAEF1A /* Pods-universalBTSDK */,
-				AA15C8469D67684160CC2A7098EB841C /* ZIPFoundation */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		0AEC0768816D94E9ADB727E18513AE9C /* Resources */ = {
+		42CB6E7C42BD0A6C8A17629F027155DE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		5232C58F003895FB4B98E44676D4A4B4 /* Resources */ = {
+		58B67EE8A37D342AF0A2CA353173B20C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7E4C01ECE6B82A81EA93470DA4347A88 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		A654CE676B6B7785E74562B64E84BDDD /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		BA1B8856619874577831C7EE79AA3D8D /* Resources */ = {
+		F4AB5E2C9C895B7FD7B46CAB53A39CA6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -682,151 +304,39 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		5DB093A0F469261BA4EA1063235BF177 /* Sources */ = {
+		82F12759D176E39E85F257B4E0B08EEC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				283371AC7DE1864E8713745610CEC255 /* Pods-ethosBTSDK-dummy.m in Sources */,
+				A080E6CA326C881FEA1F085429DBED07 /* Pods-universalBTSDK-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		75E421E08ACCC5AC841D53E244ACA772 /* Sources */ = {
+		8F613945A8CDCA154555C121D906DBAB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				05485E4A58846EA4BACA7D6EBDAEA45D /* Pods-livotalBTSDK-dummy.m in Sources */,
+				15A8218293A0B739ED5DDF39BEE3B993 /* Pods-ethosBTSDK-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		A7BCC3982FB272E9886AC85444633C3A /* Sources */ = {
+		B8F1303FC7F0010566DA67DA241365F6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA5645DD109DC23FA2E4156020C33D12 /* Archive.swift in Sources */,
-				A2C2BE038228E94BDA1E555116F655C7 /* Archive+MemoryFile.swift in Sources */,
-				E011DA75AA9485140CB059E22D886D12 /* Archive+Reading.swift in Sources */,
-				039BF2A8B8EAEAC2938B8CF171463836 /* Archive+Writing.swift in Sources */,
-				7AED2D3EFD556BEA839F5692738B120F /* Data+Compression.swift in Sources */,
-				270FEF0D863F77F1AF3DBA388BA55648 /* Data+Serialization.swift in Sources */,
-				9A379C18F5FFC61C688128B1C1DFA1B1 /* Entry.swift in Sources */,
-				7412FBB1A852A0F444F7790CC56F2775 /* FileManager+ZIP.swift in Sources */,
-				A4DA84C6D440A301BBE691E8AC1661C3 /* ZIPFoundation-dummy.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		B014C62ED0861064E2A10FB30F43BB1E /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				778EA427EF89E42C7C565BFAA2455CA0 /* ButtonlessDFU.swift in Sources */,
-				A1A014C9DF616B009A68B779BDD2519F /* crc32.swift in Sources */,
-				463C10A56090477517F0B0A250203D49 /* Data.swift in Sources */,
-				73CECD21AC1289A7788B3AE0EFE4B18A /* DFUCharacteristic.swift in Sources */,
-				224CA88F372D699C3BD4CCF6D1F72F34 /* DFUController.swift in Sources */,
-				2B82C51F4AAFEB71EC3258E529E3C7E3 /* DFUControlPoint.swift in Sources */,
-				AC0F27360A6F57C81C050892C6D41AE4 /* DFUExecutor.swift in Sources */,
-				E7D6604E832889EE18FE8309116BB726 /* DFUFirmware.swift in Sources */,
-				E9B88745638C211AD45948A58D6B17FC /* DFUPacket.swift in Sources */,
-				151BB90335133890C4F723D87CA7EAEE /* DFUPeripheral.swift in Sources */,
-				B219754A0D9EC983C750C332919DA3EC /* DFUPeripheralDelegate.swift in Sources */,
-				F4C4474037A7749B2892A455D663449E /* DFUPeripheralSelector.swift in Sources */,
-				F94988CD64D35C6C0999743EA9D4B327 /* DFUPeripheralSelectorDelegate.swift in Sources */,
-				31207C4DE0BE3F94E02A8FABEDF81F31 /* DFUService.swift in Sources */,
-				E29921E67E1C5D3C5213B55166ADB64F /* DFUServiceController.swift in Sources */,
-				A2F5D2EA70C32C6A107F5103B7E7ED82 /* DFUServiceDelegate.swift in Sources */,
-				24DF629255D1917B58409880603B5951 /* DFUServiceInitiator.swift in Sources */,
-				65DEE3A91B7836DD422247B69EC92204 /* DFUServiceSelector.swift in Sources */,
-				0662A907AA9E9F45BA9A4E6A71021F65 /* DFUStarterPeripheral.swift in Sources */,
-				C48C65DFCD6B0384E4CE3441FDCD4933 /* DFUStream.swift in Sources */,
-				B552C49BBF1FA9CD8DFBA782E7ABCA0C /* DFUStreamBin.swift in Sources */,
-				A18F68E410E7B110070781E34121191F /* DFUStreamHex.swift in Sources */,
-				A82BA205B5954F08A2FF50E737A031CC /* DFUStreamZip.swift in Sources */,
-				3537136F9FDBC88DECC59E00976E9C9B /* DFUUuidHelper.swift in Sources */,
-				A95709560C4CE29F107F608D33CA45E2 /* DFUVersion.swift in Sources */,
-				8699D80213079650BADADA30738370A2 /* Double.swift in Sources */,
-				3994CAABCB581F10FFFEE082604EE41B /* IntelHex2BinConverter.swift in Sources */,
-				6FE110AE57C06F174A4B86A3D4A93D13 /* iOSDFULibrary-dummy.m in Sources */,
-				C68E6ADA32DA46106CA2F46C6B06256B /* LegacyDFUExecutor.swift in Sources */,
-				1A5D63060CDCB7F6BFAABBE1929B8ACD /* LegacyDFUPeripheral.swift in Sources */,
-				6C4B67F2EF49AC4E98A451C9E69A9317 /* LegacyDFUPeripheralDelegate.swift in Sources */,
-				089A8E059B06B1E7F792665351A0F61C /* LegacyDFUService.swift in Sources */,
-				3BF47DE8CF587BCF5839D396F16C6F0A /* LegacyDFUServiceInitiator.swift in Sources */,
-				D25611D4C363001626500330FB90DCD0 /* LoggerDelegate.swift in Sources */,
-				11853CE031314F923BA369506778A966 /* LoggerHelper.swift in Sources */,
-				D137BD99585055DC4E5641C8192D76FF /* Manifest.swift in Sources */,
-				70C2D1FF1B690CA206704F7146727094 /* ManifestFirmwareInfo.swift in Sources */,
-				378AEC594EC49EA03B9D8C607C8154C8 /* SecureDFUControlPoint.swift in Sources */,
-				AE7A76B9994D7CDB292DA737D8FD03BC /* SecureDFUExecutor.swift in Sources */,
-				BCFF565B301305EA51A80646F297D63E /* SecureDFUPacket.swift in Sources */,
-				5E04905076F5B09159906225DA880997 /* SecureDFUPeripheral.swift in Sources */,
-				90FECF555CD94B0BCFACF72C8FE569AB /* SecureDFUPeripheralDelegate.swift in Sources */,
-				CCB0067F7B2BA7B596EC5DEBE6D8B05D /* SecureDFUService.swift in Sources */,
-				F32FAA85220858ABCE4DAA5932B0C54C /* SecureDFUServiceInitiator.swift in Sources */,
-				ECF0F1E0537C4B0533ADA16D735632B1 /* SoftdeviceBootloaderInfo.swift in Sources */,
-				FEB96459C6B053FAD39C42213EC6EEFF /* ZipArchive.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		F3C2CBF8A380EDBB933B0CAC442258B4 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				B03C4D2E1B0632CBB46B40ABD0826E41 /* Pods-universalBTSDK-dummy.m in Sources */,
+				59554586831C0A4BDF569394FAF983E2 /* Pods-alterBTSDK-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		04219218F804EE6ABF33B04ED1DBD89E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = ZIPFoundation;
-			target = AA15C8469D67684160CC2A7098EB841C /* ZIPFoundation */;
-			targetProxy = 0B227E4AD12B862FBA0E6626F0FCB42F /* PBXContainerItemProxy */;
-		};
-		2D0277368FD9AB07BDE15C3DFCBDF38B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = ZIPFoundation;
-			target = AA15C8469D67684160CC2A7098EB841C /* ZIPFoundation */;
-			targetProxy = 80488B009D11CAFE48EF399C6A6320F3 /* PBXContainerItemProxy */;
-		};
-		81D3CA0522875D1C31EDF712F38A928B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = iOSDFULibrary;
-			target = 9506C7FCDAE6E6967A99655F452EEE93 /* iOSDFULibrary */;
-			targetProxy = 0967AF43CBC3F07A67B4276BEFC013DB /* PBXContainerItemProxy */;
-		};
-		8FBEDCC340EAEA96A6D5C9504F275647 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = ZIPFoundation;
-			target = AA15C8469D67684160CC2A7098EB841C /* ZIPFoundation */;
-			targetProxy = 5B74B073161F4B1ADB6ED41078DD29E9 /* PBXContainerItemProxy */;
-		};
-		9CD803DF92C4D23700D7C793CED40B6D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = iOSDFULibrary;
-			target = 9506C7FCDAE6E6967A99655F452EEE93 /* iOSDFULibrary */;
-			targetProxy = 7E4FAE41382CB8E0FB1BF84DA05E5197 /* PBXContainerItemProxy */;
-		};
-		BA528182ABB5E2F56B4246618B2E5A15 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = ZIPFoundation;
-			target = AA15C8469D67684160CC2A7098EB841C /* ZIPFoundation */;
-			targetProxy = DEDDC2BFF60C8ACB0CD0D43EFE524D81 /* PBXContainerItemProxy */;
-		};
-		F796BC24546A968CC301334DBD4F6ACE /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = iOSDFULibrary;
-			target = 9506C7FCDAE6E6967A99655F452EEE93 /* iOSDFULibrary */;
-			targetProxy = 5BEB8DA29F32AB18B8D80B5EC270A1EA /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin XCBuildConfiguration section */
-		1CF4C4AF2848A1E6AD8BA4A086DAEA12 /* Debug */ = {
+		0DF38854FC202968622AD9D59EE66FFC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7596AA79DE38B5DA82D357DF40A35E5B /* Pods-alterBTSDK.release.xcconfig */;
 			buildSettings = {
-				BITCODE_GENERATION_MODE = bitcode;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
@@ -835,31 +345,33 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/ZIPFoundation/ZIPFoundation-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/ZIPFoundation/ZIPFoundation-Info.plist";
+				INFOPLIST_FILE = "Target Support Files/Pods-alterBTSDK/Pods-alterBTSDK-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MODULEMAP_FILE = "Target Support Files/ZIPFoundation/ZIPFoundation.modulemap";
-				PRODUCT_MODULE_NAME = ZIPFoundation;
-				PRODUCT_NAME = ZIPFoundation;
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-alterBTSDK/Pods-alterBTSDK.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
-			name = Debug;
+			name = Release;
 		};
-		218120C7F1401DBD2CF7414946EC7B64 /* Release */ = {
+		2F7504C7AE779BB0F1621B127DCAECA5 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CD4EAC56ED00928A0E7F2B25931C3D2E /* Pods-universalBTSDK.release.xcconfig */;
+			baseConfigurationReference = 0EC61B566538EB6F7161BC581E9516A5 /* Pods-universalBTSDK.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -895,78 +407,9 @@
 			};
 			name = Release;
 		};
-		249108F4C6C2F4EA4BFA4518CF468DCF /* Debug */ = {
+		3ECFFC3D7EFD59439D21A0564D3E594C /* Release */ = {
 			isa = XCBuildConfiguration;
-			buildSettings = {
-				BITCODE_GENERATION_MODE = bitcode;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/iOSDFULibrary/iOSDFULibrary-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/iOSDFULibrary/iOSDFULibrary-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/iOSDFULibrary/iOSDFULibrary.modulemap";
-				PRODUCT_MODULE_NAME = iOSDFULibrary;
-				PRODUCT_NAME = iOSDFULibrary;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.5;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		64CF74FA032534796FB2A0B345088A13 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Target Support Files/Pods-universalBTSDK/Pods-universalBTSDK-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-universalBTSDK/Pods-universalBTSDK.modulemap";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		7993351E2D9451D172FEDCDDA4E0D6F6 /* Debug */ = {
-			isa = XCBuildConfiguration;
+			baseConfigurationReference = D504BF038E2F88264F41C78167861498 /* Pods-ethosBTSDK.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -996,10 +439,11 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
-			name = Debug;
+			name = Release;
 		};
 		8DE5143C03248BB6CD542DE3963D6F3A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1129,119 +573,8 @@
 			};
 			name = Release;
 		};
-		9F3C580BF8B0687BE450D8F318F2A154 /* Release */ = {
+		ACAA3868C4A2CBA6AAC28FC8FB8BA4F5 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BE83DAA878C1F8B3262265FEA130CAB4 /* ZIPFoundation.release.xcconfig */;
-			buildSettings = {
-				BITCODE_GENERATION_MODE = bitcode;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/ZIPFoundation/ZIPFoundation-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/ZIPFoundation/ZIPFoundation-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MODULEMAP_FILE = "Target Support Files/ZIPFoundation/ZIPFoundation.modulemap";
-				PRODUCT_MODULE_NAME = ZIPFoundation;
-				PRODUCT_NAME = ZIPFoundation;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
-		CF440A939A9894C5EEA325C305D2580F /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0C103F892820FDA5831447BE74943DA1 /* Pods-livotalBTSDK.release.xcconfig */;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Target Support Files/Pods-livotalBTSDK/Pods-livotalBTSDK-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-livotalBTSDK/Pods-livotalBTSDK.modulemap";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
-		D19F86AD9AF81936B79DEFCC2EABADEC /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Target Support Files/Pods-livotalBTSDK/Pods-livotalBTSDK-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-livotalBTSDK/Pods-livotalBTSDK.modulemap";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		D1F16F6FF3E304F19BB5A808EE1B38BF /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = D65AAFF9767B983BBF1D5767C0869E2A /* Pods-ethosBTSDK.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -1271,17 +604,16 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
-			name = Release;
+			name = Debug;
 		};
-		F84F93C21E0E9216B9A37E16BDA56A75 /* Release */ = {
+		C066E0EB1425FC887333A6498D87414A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9A61C58FD5F2053DEEDE5E74058108DE /* iOSDFULibrary.release.xcconfig */;
 			buildSettings = {
-				BITCODE_GENERATION_MODE = bitcode;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
@@ -1290,59 +622,68 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/iOSDFULibrary/iOSDFULibrary-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/iOSDFULibrary/iOSDFULibrary-Info.plist";
+				INFOPLIST_FILE = "Target Support Files/Pods-alterBTSDK/Pods-alterBTSDK-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MODULEMAP_FILE = "Target Support Files/iOSDFULibrary/iOSDFULibrary.modulemap";
-				PRODUCT_MODULE_NAME = iOSDFULibrary;
-				PRODUCT_NAME = iOSDFULibrary;
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-alterBTSDK/Pods-alterBTSDK.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 5.5;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
-			name = Release;
+			name = Debug;
+		};
+		DAB37F233663D92D2FF96EF462B56816 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-universalBTSDK/Pods-universalBTSDK-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-universalBTSDK/Pods-universalBTSDK.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		033025D11623BFB8BD9449805A1C7B30 /* Build configuration list for PBXNativeTarget "Pods-universalBTSDK" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				64CF74FA032534796FB2A0B345088A13 /* Debug */,
-				218120C7F1401DBD2CF7414946EC7B64 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		0353E32A60A3D0CB73A3B18DE1D2C902 /* Build configuration list for PBXNativeTarget "Pods-ethosBTSDK" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7993351E2D9451D172FEDCDDA4E0D6F6 /* Debug */,
-				D1F16F6FF3E304F19BB5A808EE1B38BF /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		38226BB4B01C1C29E1AFFDF5B46E2F1E /* Build configuration list for PBXNativeTarget "iOSDFULibrary" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				249108F4C6C2F4EA4BFA4518CF468DCF /* Debug */,
-				F84F93C21E0E9216B9A37E16BDA56A75 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		4821239608C13582E20E6DA73FD5F1F9 /* Build configuration list for PBXProject "Pods" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1352,20 +693,29 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		96539D51EFC6B54516ED99239EC74BBD /* Build configuration list for PBXNativeTarget "Pods-livotalBTSDK" */ = {
+		5B126E41B7910C39C8C022536F92593F /* Build configuration list for PBXNativeTarget "Pods-alterBTSDK" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D19F86AD9AF81936B79DEFCC2EABADEC /* Debug */,
-				CF440A939A9894C5EEA325C305D2580F /* Release */,
+				C066E0EB1425FC887333A6498D87414A /* Debug */,
+				0DF38854FC202968622AD9D59EE66FFC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A4F3F936499B7E514EC56F586BA4B62E /* Build configuration list for PBXNativeTarget "ZIPFoundation" */ = {
+		A9804902BB272A73BF6FC437F81E02A2 /* Build configuration list for PBXNativeTarget "Pods-universalBTSDK" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				1CF4C4AF2848A1E6AD8BA4A086DAEA12 /* Debug */,
-				9F3C580BF8B0687BE450D8F318F2A154 /* Release */,
+				DAB37F233663D92D2FF96EF462B56816 /* Debug */,
+				2F7504C7AE779BB0F1621B127DCAECA5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D3CA8B67F76DC03343DABC45C539F1BC /* Build configuration list for PBXNativeTarget "Pods-ethosBTSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ACAA3868C4A2CBA6AAC28FC8FB8BA4F5 /* Debug */,
+				3ECFFC3D7EFD59439D21A0564D3E594C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
