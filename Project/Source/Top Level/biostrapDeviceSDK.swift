@@ -564,7 +564,7 @@ import iOSDFULibrary
 		
 		if let device = mDiscoveredDevices[id] {
 			if let peripheral = device.peripheral {
-				device.connecting = true
+				device.connectionState = .connecting
 				mCentralManager?.connect(peripheral, options: nil)
 			}
 			else {

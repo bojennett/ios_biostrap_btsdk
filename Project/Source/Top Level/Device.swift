@@ -204,14 +204,15 @@ public class Device: NSObject, ObservableObject {
 		}
 	}
 
-	internal enum ConnectionState {
+	public enum ConnectionState {
 		case disconnected
 		case connecting
 		case configuring
 		case connected
 	}
 	
-	internal var mState		: ConnectionState!
+	@Published public var connectionState : ConnectionState = .disconnected
+	
 	#if UNIVERSAL
 	@objc public var type	: biostrapDeviceSDK.biostrapDeviceType
 	#endif
@@ -515,7 +516,7 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	override public init() {
-		self.mState							= .disconnected
+		self.connectionState = .disconnected
 		
 		self.name							= "UNKNOWN"
 		self.id								= "UNKNOWN"
@@ -548,32 +549,6 @@ public class Device: NSObject, ObservableObject {
 		self.id			= id
 		self.peripheral	= peripheral
 		self.discovery_type = discoveryType
-	}
-
-	var disconnected: Bool {
-		get { return (mState == .disconnected) }
-		set {
-			if (newValue) {
-				batteryValid	= false
-				batteryLevel	= 0
-				mState			= .disconnected
-			}
-		}
-	}
-	
-	var connecting: Bool {
-		get { return (mState == .connecting) }
-		set { if (newValue) { mState = .connecting } }
-	}
-
-	var configuring: Bool {
-		get { return (mState == .configuring) }
-		set { if (newValue) { mState = .configuring } }
-	}
-
-	var connected: Bool {
-		get { return (mState == .connected) }
-		set { if (newValue) { mState = .connected } }
 	}
 
 	#if UNIVERSAL || LIVOTAL

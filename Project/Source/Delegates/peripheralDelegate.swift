@@ -140,8 +140,8 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 						device.didDiscoverCharacteristic(characteristic)
 						
 						if (device.configured) {
-							if (device.configuring) {
-								device.connected = true
+							if device.connectionState == .configuring {
+								device.connectionState = .connected
 								self.connected?(peripheral.prettyID)
 							}
 						}
@@ -170,24 +170,26 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-		if let error = error {
-			log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription)")
-			//self.mCentralManager?.cancelPeripheralConnection(peripheral)
-			//return
-		}
-		
-		if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
-			device.didUpdateValue(characteristic)
-			
-			if (device.configured) {
-				if (device.configuring) {
-					device.connected = true
-					self.connected?(peripheral.prettyID)
+		DispatchQueue.main.async {
+			if let error = error {
+				log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription)")
+				//self.mCentralManager?.cancelPeripheralConnection(peripheral)
+				//return
+			}
+	
+			if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
+				device.didUpdateValue(characteristic)
+				
+				if (device.configured) {
+					if device.connectionState == .configuring {
+						device.connectionState = .connected
+						self.connected?(peripheral.prettyID)
+					}
 				}
 			}
-		}
-		else {
-			log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - No connected device found...")
+			else {
+				log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - No connected device found...")
+			}
 		}
 	}
 	
@@ -252,8 +254,8 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 				device.didUpdateNotificationState(characteristic)
 				
 				if (device.configured) {
-					if (device.configuring) {
-						device.connected = true
+					if device.connectionState == .configuring {
+						device.connectionState = .connected
 						self.connected?(peripheral.prettyID)
 					}
 				}

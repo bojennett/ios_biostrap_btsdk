@@ -752,13 +752,13 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		
 		DispatchQueue.main.async { [self] in
 			if let device = mDiscoveredDevices[peripheral.prettyID] {
-				if (device.connecting) {
+				if device.connectionState == .connecting {
 					if let devicePeripheral = device.peripheral {
 						if (peripheral == devicePeripheral) {
 							devicePeripheral.delegate = self
 							device.peripheral	= devicePeripheral
 							device.epoch		= Date().timeIntervalSince1970
-							device.configuring	= true
+							device.connectionState = .configuring
 							mDiscoveredDevices.removeValue(forKey: peripheral.prettyID)
 							mConnectedDevices[peripheral.prettyID] = device
 							devicePeripheral.discoverServices(nil)
@@ -795,7 +795,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	internal func mProcessDisconnection(_ id: String) {
 		DispatchQueue.main.async {
 			if let device = self.mDiscoveredDevices[id] {
-				if (device.connecting) {
+				if device.connectionState == .connecting {
+					device.connectionState = .disconnected
 					self.mDiscoveredDevices.removeValue(forKey: id)
 				}
 				else {
@@ -807,7 +808,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 			}
 
 			if let device = self.mConnectedDevices[id] {
-				if (device.configuring || device.connected) {
+				if device.connectionState == .configuring || device.connectionState == .connected {
+					device.connectionState = .disconnected
 					self.mConnectedDevices.removeValue(forKey: id)
 				}
 				else {
