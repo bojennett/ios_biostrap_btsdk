@@ -27,12 +27,6 @@ class customMainCharacteristic: Characteristic {
 		case enterShipMode				= 0x11
 		case readEpoch					= 0x12
 		case endSleep					= 0x13
-		#if UNIVERSAL || ETHOS
-		case motor						= 0x14
-		case debug						= 0x20
-		#endif
-
-		#if UNIVERSAL || ALTER || KAIROS || ETHOS
 		case setAskForButtonResponse	= 0x50
 		case getAskForButtonResponse	= 0x51
 		case setHRZoneColor				= 0x60
@@ -44,24 +38,13 @@ class customMainCharacteristic: Characteristic {
 		case getAdvertiseAsHRM			= 0x66
 		case setButtonCommand			= 0x67
 		case getButtonCommand			= 0x68
-		#endif
-		
 		case setDeviceParam				= 0x70
 		case getDeviceParam				= 0x71
 		case delDeviceParam				= 0x72
 		case setSessionParam			= 0x80
 		case getSessionParam			= 0x81
 		case recalibratePPG				= 0xed
-		
-		#if UNIVERSAL || ETHOS
-		case startLiveSync				= 0xee
-		case stopLiveSync				= 0xef
-		#endif
-		
-		#if UNIVERSAL || ALTER || KAIROS || ETHOS
 		case airplaneMode				= 0xf4
-		#endif
-		
 		case getRawLoggingStatus		= 0xf5
 		case getWornOverrideStatus		= 0xf6
 		case manufacturingTest			= 0xf7
@@ -98,9 +81,6 @@ class customMainCharacteristic: Characteristic {
 	var startManualComplete: ((_ successful: Bool)->())?
 	var stopManualComplete: ((_ successful: Bool)->())?
 	var ledComplete: ((_ successful: Bool)->())?
-	#if UNIVERSAL || ETHOS
-	var motorComplete: ((_ successful: Bool)->())?
-	#endif
 	var enterShipModeComplete: ((_ successful: Bool)->())?
 
 	var writeSerialNumberComplete: ((_ successful: Bool)->())?
@@ -130,16 +110,9 @@ class customMainCharacteristic: Characteristic {
 	var ppgFailed: ((_ code: Int)->())?
 	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
 
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var endSleepStatus: ((_ hasSleep: Bool)->())?
 	var buttonClicked: ((_ presses: Int)->())?
-	#endif
 	
-	#if UNIVERSAL || ETHOS
-	var debugComplete: ((_ successful: Bool, _ device: debugDevice, _ data: Data)->())?
-	#endif
-
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var setAskForButtonResponseComplete: ((_ successful: Bool, _ enable: Bool)->())?
 	var getAskForButtonResponseComplete: ((_ successful: Bool, _ enable: Bool)->())?
 	var setHRZoneColorComplete: ((_ successful: Bool, _ type: hrZoneRangeType)->())?
@@ -157,7 +130,6 @@ class customMainCharacteristic: Characteristic {
 	var getPageThresholdComplete: ((_ successful: Bool, _ threshold: Int)->())?
 	var setPageThresholdComplete: ((_ successful: Bool)->())?
 	var deletePageThresholdComplete: ((_ successful: Bool)->())?
-	#endif
 	
 	var dataPackets: ((_ packets: String)->())?
 	var dataComplete: ((_ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
@@ -165,11 +137,6 @@ class customMainCharacteristic: Characteristic {
 		
 	var recalibratePPGComplete: ((_ successful: Bool)->())?
 
-	#if UNIVERSAL || ETHOS
-	var startLiveSyncComplete: ((_ successful: Bool)->())?
-	var stopLiveSyncComplete: ((_ successful: Bool)->())?
-	#endif
-	
 	var setSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType)->())?
 	var getSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
 	var resetSessionParamsComplete: ((_ successful: Bool)->())?
@@ -178,9 +145,7 @@ class customMainCharacteristic: Characteristic {
 	var getRawLoggingStatusComplete: ((_ successful: Bool, _ enabled: Bool)->())?
 	var getWornOverrideStatusComplete: ((_ successful: Bool, _ overridden: Bool)->())?
 	
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var airplaneModeComplete: ((_ successful: Bool)->())?
-	#endif
 		
 	var firmwareVersion						: String = ""
 	
@@ -312,29 +277,6 @@ class customMainCharacteristic: Characteristic {
 		}
 		else { self.endSleepComplete?(false) }
 	}
-	
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || ETHOS
-	func debug(_ device: debugDevice, data: Data) {
-		log?.v("\(pID): \(device.name) -> \(data.hexString)")
-
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var commandData = Data()
-			commandData.append(commands.debug.rawValue)
-			commandData.append(device.rawValue)
-			commandData.append(contentsOf: data)
-			
-			peripheral.writeValue(commandData, for: characteristic, type: .withResponse)
-		}
-		else { self.debugComplete?(false, device, Data()) }
-	}
-	#endif
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -499,33 +441,6 @@ class customMainCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || ETHOS
-	func ethosLED(red: Int, green: Int, blue: Int, mode: biostrapDeviceSDK.ethosLEDMode, seconds: Int, percent: Int) {
-		log?.v("\(pID): Red: \(String(format: "0x%02X", red)), Green: \(String(format: "0x%02X", green)), Blue: \(String(format: "0x%02X", blue)), Mode: \(mode.title), Seconds: \(seconds), Percent: \(percent)")
-		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.led.rawValue)
-			data.append(UInt8(red & 0xff))		// Red
-			data.append(UInt8(green & 0xff))	// Green
-			data.append(UInt8(blue & 0xff))		// Blue
-			data.append(UInt8(mode.value))		// Mode
-			data.append(UInt8(seconds & 0xff))	// Seconds
-			data.append(UInt8(percent & 0xff))	// Percent
-
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.ledComplete?(false) }
-	}
-	#endif
-		
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || ALTER
 	func alterLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		log?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
@@ -568,29 +483,6 @@ class customMainCharacteristic: Characteristic {
 			peripheral.writeValue(data, for: characteristic, type: .withResponse)
 		}
 		else { self.ledComplete?(false) }
-	}
-	#endif
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || ETHOS
-	func motor(milliseconds: Int, pulses: Int) {
-		log?.v("\(pID): milliseconds: \(milliseconds), pulses: \(pulses)")
-		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.motor.rawValue)
-			data.append(contentsOf: milliseconds.leData32)
-			data.append(UInt8(pulses & 0xff))
-
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.motorComplete?(false) }
 	}
 	#endif
 
@@ -913,13 +805,11 @@ class customMainCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	func airplaneMode() {
 		log?.v("\(pID)")
 		
 		if (!mSimpleCommand(.airplaneMode)) { self.airplaneModeComplete?(false) }
 	}
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -1018,20 +908,6 @@ class customMainCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || ETHOS
-	func ethosManufacturingTest(_ test: ethosManufacturingTestType) {
-		log?.v("\(pID): \(test.title)")
-		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.manufacturingTest.rawValue)
-			data.append(test.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.manufacturingTestComplete?(false) }
-	}
-	#endif
-
 	#if UNIVERSAL || ALTER
 	func alterManufacturingTest(_ test: alterManufacturingTestType) {
 		log?.v("\(pID): \(test.title)")
@@ -1059,40 +935,7 @@ class customMainCharacteristic: Characteristic {
 		else { self.manufacturingTestComplete?(false) }
 	}
 	#endif
-	
-	#if UNIVERSAL || ETHOS
-	//--------------------------------------------------------------------------------
-	// Function Name: Live Sync start and stop
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	func startLiveSync(_ configuration: liveSyncConfiguration) {
-		log?.v("\(pID): \(configuration.commandString) -> \(String(format: "0x%02X", configuration.commandByte))")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.startLiveSync.rawValue)
-			data.append(configuration.commandByte)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.startLiveSyncComplete?(false) }
-	}
-	
-	func stopLiveSync() {
-		log?.v("\(pID)")
-		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.stopLiveSync.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.stopLiveSyncComplete?(false) }
-	}
-	#endif
-	
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	//--------------------------------------------------------------------------------
 	// Function Name: setAskForButtonResponse
 	//--------------------------------------------------------------------------------
@@ -1425,7 +1268,6 @@ class customMainCharacteristic: Characteristic {
 		}
 		else { self.deletePageThresholdComplete?(false) }
 	}
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -1560,29 +1402,11 @@ class customMainCharacteristic: Characteristic {
 								self.getPacketCountComplete?(false, 0)
 							}
 
-						#if UNIVERSAL || ETHOS
-						case .debug:
-							if (successful) {
-								if (data.count == 12) {
-									if let device = debugDevice(rawValue: data[3]) {
-										let response_data = data.subdata(in: Range(4...11))
-										self.debugComplete?(true, device, response_data)
-									}
-									else { self.debugComplete?(false, .unknownDevice, Data()) }
-								}
-								else { self.debugComplete?(false, .unknownDevice, Data()) }
-							}
-							else { self.debugComplete?(false, .unknownDevice, Data()) }
-						#endif
-							
 						case .disableWornDetect	: self.disableWornDetectComplete?(successful)
 						case .enableWornDetect	: self.enableWornDetectComplete?(successful)
 						case .startManual		: self.startManualComplete?(successful)
 						case .stopManual		: self.stopManualComplete?(successful)
 						case .led				: self.ledComplete?(successful)
-						#if UNIVERSAL || ETHOS
-						case .motor				: self.motorComplete?(successful)
-						#endif
 
 						case .enterShipMode		: self.enterShipModeComplete?(successful)
 						case .setDeviceParam	:
@@ -1693,12 +1517,7 @@ class customMainCharacteristic: Characteristic {
 
 						case .manufacturingTest	: self.manufacturingTestComplete?(successful)
 						case .recalibratePPG	: self.recalibratePPGComplete?(successful)
-						#if UNIVERSAL || ETHOS
-						case .startLiveSync		: self.startLiveSyncComplete?(successful)
-						case .stopLiveSync		: self.stopLiveSyncComplete?(successful)
-						#endif
 							
-						#if UNIVERSAL || ALTER || KAIROS || ETHOS
 						case .setAskForButtonResponse:
 							if (data.count == 4) {
 								let enable		= data[3] == 0x01 ? true : false
@@ -1816,7 +1635,6 @@ class customMainCharacteristic: Characteristic {
 							else {
 								self.getButtonCommandComplete?(false, .unknown, .unknown)
 							}
-						#endif
 
 						case .allowPPG			: self.allowPPGComplete?(successful)
 						case .wornCheck			:
@@ -1853,10 +1671,7 @@ class customMainCharacteristic: Characteristic {
 								self.getWornOverrideStatusComplete?(false, false)
 							}
 							
-						#if UNIVERSAL || ALTER || KAIROS || ETHOS
 						case .airplaneMode		: self.airplaneModeComplete?(successful)
-						#endif
-							
 						case .reset				: self.resetComplete?(successful)
 						case .validateCRC		: break
 							//log?.v ("\(pID): Got Validate CRC completion: \(data.hexString)")
@@ -1933,7 +1748,6 @@ class customMainCharacteristic: Characteristic {
 					self.dataComplete?(-1, -1, -1, self.pFailedDecodeCount)
 				}
 				
-			#if UNIVERSAL || ALTER || KAIROS || ETHOS
 			case .endSleepStatus:
 				if (data.count == 2) {
 					let hasSleep	= data[1] == 0x01 ? true : false
@@ -1951,7 +1765,6 @@ class customMainCharacteristic: Characteristic {
 				else {
 					log?.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
 				}
-			#endif
 				
 			case .validateCRC:
 				//log?.v ("\(pID): \(response) - \(data.hexString)")
@@ -2000,30 +1813,7 @@ class customMainCharacteristic: Characteristic {
 					})
 				}
 				
-			case .manufacturingTest:				
-				#if ETHOS
-				if (data.count == 3) {
-					let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...2)))
-					do {
-						let jsonData = try JSONEncoder().encode(testResult)
-						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
-						}
-						else {
-							log?.e ("\(pID): Result jsonString Failed")
-							self.manufacturingTestResult?(false, "")
-						}
-					}
-					catch {
-						log?.e ("\(pID): Result jsonData Failed")
-						self.manufacturingTestResult?(false, "")
-					}
-				}
-				else {
-					self.manufacturingTestResult?(false, "")
-				}
-				#endif
-				
+			case .manufacturingTest:
 				#if ALTER
 				if (data.count == 3) {
 					let testResult = alterManufacturingTestResult(data.subdata(in: Range(1...2)))
@@ -2072,28 +1862,6 @@ class customMainCharacteristic: Characteristic {
 
 				#if UNIVERSAL
 				switch (type) {
-				case .ethos		:
-					if (data.count == 3) {
-						let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...2)))
-						do {
-							let jsonData = try JSONEncoder().encode(testResult)
-							if let jsonString = String(data: jsonData, encoding: .utf8) {
-								self.manufacturingTestResult?(true, jsonString)
-							}
-							else {
-								log?.e ("\(pID): Result jsonString Failed")
-								self.manufacturingTestResult?(false, "")
-							}
-						}
-						catch {
-							log?.e ("\(pID): Result jsonData Failed")
-							self.manufacturingTestResult?(false, "")
-						}
-					}
-					else {
-						self.manufacturingTestResult?(false, "")
-					}
-
 				case .alter		:
 					if (data.count == 3) {
 						let testResult = alterManufacturingTestResult(data.subdata(in: Range(1...2)))

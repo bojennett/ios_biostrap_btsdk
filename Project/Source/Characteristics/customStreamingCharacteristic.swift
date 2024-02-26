@@ -21,10 +21,8 @@ class customStreamingCharacteristic: Characteristic {
 	var streamingPacket: ((_ packet: String)->())?
 	var dataAvailable: (()->())?
 
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var endSleepStatus: ((_ hasSleep: Bool)->())?
 	var buttonClicked: ((_ presses: Int)->())?
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -69,7 +67,6 @@ class customStreamingCharacteristic: Characteristic {
 					self.ppgFailed?(999)
 				}
 								
-			#if UNIVERSAL || ALTER || KAIROS || ETHOS
 			case .endSleepStatus:
 				if (data.count == 2) {
 					let hasSleep	= data[1] == 0x01 ? true : false
@@ -87,32 +84,8 @@ class customStreamingCharacteristic: Characteristic {
 				else {
 					log?.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
 				}
-			#endif
 								
-			case .manufacturingTest:				
-				#if ETHOS
-				if (data.count == 3) {
-					let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...2)))
-					do {
-						let jsonData = try JSONEncoder().encode(testResult)
-						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.lambdaManufacturingTestResult?(true, jsonString)
-						}
-						else {
-							log?.e ("\(pID): Result jsonString Failed")
-							self.lambdaManufacturingTestResult?(false, "")
-						}
-					}
-					catch {
-						log?.e ("\(pID): Result jsonData Failed")
-						self.lambdaManufacturingTestResult?(false, "")
-					}
-				}
-				else {
-					self.lambdaManufacturingTestResult?(false, "")
-				}
-				#endif
-				
+			case .manufacturingTest:
 				#if ALTER
 				if (data.count == 3) {
 					let testResult = alterManufacturingTestResult(data.subdata(in: Range(1...2)))
@@ -161,28 +134,6 @@ class customStreamingCharacteristic: Characteristic {
 				
 				#if UNIVERSAL
 				switch (type) {
-				case .ethos		:
-					if (data.count == 3) {
-						let testResult = ethosManufacturingTestResult(data.subdata(in: Range(1...2)))
-						do {
-							let jsonData = try JSONEncoder().encode(testResult)
-							if let jsonString = String(data: jsonData, encoding: .utf8) {
-								self.manufacturingTestResult?(true, jsonString)
-							}
-							else {
-								log?.e ("\(pID): Result jsonString Failed")
-								self.manufacturingTestResult?(false, "")
-							}
-						}
-						catch {
-							log?.e ("\(pID): Result jsonData Failed")
-							self.manufacturingTestResult?(false, "")
-						}
-					}
-					else {
-						self.manufacturingTestResult?(false, "")
-					}
-					
 				case .alter		:
 					if (data.count == 3) {
 						let testResult = alterManufacturingTestResult(data.subdata(in: Range(1...2)))

@@ -7,60 +7,60 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		00A8A48F7831ED75C8856D12E7163CA1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
 		02035144947660BC8E0F789A3F7310BA /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
-		15A8218293A0B739ED5DDF39BEE3B993 /* Pods-ethosBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E154891CC698D7B92861FAB55199BA1 /* Pods-ethosBTSDK-dummy.m */; };
 		1DB9F93729A583D757934FA34A169773 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
-		200FFCDC767DAF5E71AEBDBDA7876717 /* Pods-ethosBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = F7DE52F843EF4A3F8E3DD58CE462BC0C /* Pods-ethosBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		59554586831C0A4BDF569394FAF983E2 /* Pods-alterBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 7D177F7025C3FEF669BEAD2438813DC9 /* Pods-alterBTSDK-dummy.m */; };
-		6FA129485F331A666D5DF52B353049E8 /* Pods-universalBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 93CED443C0BA19D6E08F55A88347EBF0 /* Pods-universalBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		A080E6CA326C881FEA1F085429DBED07 /* Pods-universalBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 04AD8F9056026E643E69410EBBF90D42 /* Pods-universalBTSDK-dummy.m */; };
-		C28004D73D930D2F301EE3013F0FAC36 /* Pods-alterBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 9A708194D5FD3F495B2CD925EF240541 /* Pods-alterBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		1E4A07C043D708A760645D0CF5202FA0 /* Pods-kairosBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D3C6B911D94F96218869B61918649A7 /* Pods-kairosBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		59554586831C0A4BDF569394FAF983E2 /* Pods-alterBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = E0B748F411018BC7E52EE873374A676E /* Pods-alterBTSDK-dummy.m */; };
+		6FA129485F331A666D5DF52B353049E8 /* Pods-universalBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 997C93341414394638F6847F767BDF7E /* Pods-universalBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		824D7E78A51F514B5E45B65B6C09E139 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */; };
+		A080E6CA326C881FEA1F085429DBED07 /* Pods-universalBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = CD5E02CC4AC3829430A8475C0F86C5CB /* Pods-universalBTSDK-dummy.m */; };
+		C28004D73D930D2F301EE3013F0FAC36 /* Pods-alterBTSDK-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 2A2AD5487E6D16A2C9C419BCCE70C9CC /* Pods-alterBTSDK-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FF8F0D7F2D8847A7F1B68BA908185FBB /* Pods-kairosBTSDK-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = F54F1BF09354426D0B8F6E05BB8E1FA7 /* Pods-kairosBTSDK-dummy.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		04AD8F9056026E643E69410EBBF90D42 /* Pods-universalBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-universalBTSDK-dummy.m"; sourceTree = "<group>"; };
 		06F4319AD6490E49C4CDB2A0C8E37195 /* Pods-alterBTSDK */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-alterBTSDK"; path = Pods_alterBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		0EC61B566538EB6F7161BC581E9516A5 /* Pods-universalBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-universalBTSDK.release.xcconfig"; sourceTree = "<group>"; };
-		13E2043D1B2A7096101C25CDAA4B68FA /* Pods-ethosBTSDK */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-ethosBTSDK"; path = Pods_ethosBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		2E84E1F41681BA8C34E7F449E0415BCB /* Pods-universalBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-universalBTSDK-Info.plist"; sourceTree = "<group>"; };
-		348943D2BE0E5F83188D15F61A8DFCAA /* Pods-alterBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-alterBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
+		098DE8A63C14B43D585CFA2E7B461612 /* Pods-universalBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-universalBTSDK.modulemap"; sourceTree = "<group>"; };
+		1FFEFA25CEEC0F4062FECC77487154CF /* Pods-kairosBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-kairosBTSDK.modulemap"; sourceTree = "<group>"; };
+		28470EDB45D33454F15E9221339C9380 /* Pods-alterBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-alterBTSDK.release.xcconfig"; sourceTree = "<group>"; };
+		2A2AD5487E6D16A2C9C419BCCE70C9CC /* Pods-alterBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-alterBTSDK-umbrella.h"; sourceTree = "<group>"; };
+		3260D670ACCA75DF7737099673D994D8 /* Pods-universalBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-universalBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
 		36CDEB2A52EF480B5148B840C2804922 /* Pods-universalBTSDK */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-universalBTSDK"; path = Pods_universalBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3AD29CA1D4908F8D2175FBAB759A5BC3 /* Pods-alterBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-alterBTSDK.modulemap"; sourceTree = "<group>"; };
-		3D8A93B445AFA3AFD5E58077BF446F95 /* Pods-ethosBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ethosBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
-		4E154891CC698D7B92861FAB55199BA1 /* Pods-ethosBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-ethosBTSDK-dummy.m"; sourceTree = "<group>"; };
-		67F1E3A03F33720BC7116325F992934C /* Pods-ethosBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-ethosBTSDK.modulemap"; sourceTree = "<group>"; };
-		6879780C8C03778F089B912E8875DDE4 /* Pods-alterBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-alterBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
+		3D3C6B911D94F96218869B61918649A7 /* Pods-kairosBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-kairosBTSDK-umbrella.h"; sourceTree = "<group>"; };
+		3EA5C8B1A7819B04AB22586F9E2DB534 /* Pods-alterBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-alterBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
+		47FFE0B95AE1A45326D8B76FD7EFC642 /* Pods-alterBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-alterBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
+		49810468BD76EEE9660A30100D6F2F9D /* Pods-kairosBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-kairosBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
+		5396DA0EF926D1838F4CFF16DC19A65F /* Pods-kairosBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-kairosBTSDK.release.xcconfig"; sourceTree = "<group>"; };
 		73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		7596AA79DE38B5DA82D357DF40A35E5B /* Pods-alterBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-alterBTSDK.release.xcconfig"; sourceTree = "<group>"; };
-		7D177F7025C3FEF669BEAD2438813DC9 /* Pods-alterBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-alterBTSDK-dummy.m"; sourceTree = "<group>"; };
-		8C26F14C7CA21C6CE7816E793D77B29F /* Pods-universalBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-universalBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
-		8FF61F858150D9E12D1C8BA295CB0C39 /* Pods-ethosBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-ethosBTSDK-Info.plist"; sourceTree = "<group>"; };
-		93CED443C0BA19D6E08F55A88347EBF0 /* Pods-universalBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-universalBTSDK-umbrella.h"; sourceTree = "<group>"; };
-		98D17821A531E2D356F2FD1D4428FA51 /* Pods-universalBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-universalBTSDK.modulemap"; sourceTree = "<group>"; };
-		9A708194D5FD3F495B2CD925EF240541 /* Pods-alterBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-alterBTSDK-umbrella.h"; sourceTree = "<group>"; };
+		7622B4DADC2AFA3ED1AE25CD64F571DB /* Pods-universalBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-universalBTSDK.release.xcconfig"; sourceTree = "<group>"; };
+		9242CF9454FF45D07E9371809AAAD02D /* Pods-kairosBTSDK */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-kairosBTSDK"; path = Pods_kairosBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		926B94F98B151B54F407A3D73396C9A7 /* Pods-alterBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-alterBTSDK-Info.plist"; sourceTree = "<group>"; };
+		997C93341414394638F6847F767BDF7E /* Pods-universalBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-universalBTSDK-umbrella.h"; sourceTree = "<group>"; };
 		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		BDB57863D92251A1E331284984DDDC24 /* Pods-universalBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-universalBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
-		C713793B7166FB0FFB19E2649BEC81F5 /* Pods-ethosBTSDK-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-ethosBTSDK-acknowledgements.markdown"; sourceTree = "<group>"; };
-		D504BF038E2F88264F41C78167861498 /* Pods-ethosBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-ethosBTSDK.release.xcconfig"; sourceTree = "<group>"; };
-		DEE620A9D0A8F42AA138D1E0966FB4CB /* Pods-alterBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-alterBTSDK-Info.plist"; sourceTree = "<group>"; };
-		F7DE52F843EF4A3F8E3DD58CE462BC0C /* Pods-ethosBTSDK-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-ethosBTSDK-umbrella.h"; sourceTree = "<group>"; };
+		9EB9043D45DDD544428629F6A4C784A4 /* Pods-alterBTSDK.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-alterBTSDK.modulemap"; sourceTree = "<group>"; };
+		B912F8E61EF6B7332F5D1A63405375F2 /* Pods-kairosBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-kairosBTSDK-Info.plist"; sourceTree = "<group>"; };
+		CD5E02CC4AC3829430A8475C0F86C5CB /* Pods-universalBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-universalBTSDK-dummy.m"; sourceTree = "<group>"; };
+		D0D6AD38B91E441DC5F3FCA430FF7CD7 /* Pods-kairosBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-kairosBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
+		E0B748F411018BC7E52EE873374A676E /* Pods-alterBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-alterBTSDK-dummy.m"; sourceTree = "<group>"; };
+		E61803C2D09308F1C37CF12CC320D109 /* Pods-universalBTSDK-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-universalBTSDK-Info.plist"; sourceTree = "<group>"; };
+		F54F1BF09354426D0B8F6E05BB8E1FA7 /* Pods-kairosBTSDK-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-kairosBTSDK-dummy.m"; sourceTree = "<group>"; };
+		FCBF5ADD0383EDE6E2C39BD9A56E5CCE /* Pods-universalBTSDK-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-universalBTSDK-acknowledgements.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1F163CE29D4E272DA3723F54213C4E6C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				824D7E78A51F514B5E45B65B6C09E139 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4C2E274C40530DAF44C1D55BC58B0A8C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				1DB9F93729A583D757934FA34A169773 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9E8E23E2DDD1BA10ED17BF159103A95F /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				00A8A48F7831ED75C8856D12E7163CA1 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,59 +75,44 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		02441C4B51E580A9B5128D21C898681F /* Products */ = {
+		14A13CE47EBB092251DAB42035188055 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				06F4319AD6490E49C4CDB2A0C8E37195 /* Pods-alterBTSDK */,
-				13E2043D1B2A7096101C25CDAA4B68FA /* Pods-ethosBTSDK */,
+				9242CF9454FF45D07E9371809AAAD02D /* Pods-kairosBTSDK */,
 				36CDEB2A52EF480B5148B840C2804922 /* Pods-universalBTSDK */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1D433AEEB02FEFA21BB09E7B7085CDC4 /* Pods-universalBTSDK */ = {
+		2DD8F0116787AEBD0D2ECCDF2D4A2D30 /* Pods-alterBTSDK */ = {
 			isa = PBXGroup;
 			children = (
-				98D17821A531E2D356F2FD1D4428FA51 /* Pods-universalBTSDK.modulemap */,
-				8C26F14C7CA21C6CE7816E793D77B29F /* Pods-universalBTSDK-acknowledgements.markdown */,
-				BDB57863D92251A1E331284984DDDC24 /* Pods-universalBTSDK-acknowledgements.plist */,
-				04AD8F9056026E643E69410EBBF90D42 /* Pods-universalBTSDK-dummy.m */,
-				2E84E1F41681BA8C34E7F449E0415BCB /* Pods-universalBTSDK-Info.plist */,
-				93CED443C0BA19D6E08F55A88347EBF0 /* Pods-universalBTSDK-umbrella.h */,
-				0EC61B566538EB6F7161BC581E9516A5 /* Pods-universalBTSDK.release.xcconfig */,
-			);
-			name = "Pods-universalBTSDK";
-			path = "Target Support Files/Pods-universalBTSDK";
-			sourceTree = "<group>";
-		};
-		41161A2F979F61E9BB9B177D4F528943 /* Pods-ethosBTSDK */ = {
-			isa = PBXGroup;
-			children = (
-				67F1E3A03F33720BC7116325F992934C /* Pods-ethosBTSDK.modulemap */,
-				C713793B7166FB0FFB19E2649BEC81F5 /* Pods-ethosBTSDK-acknowledgements.markdown */,
-				3D8A93B445AFA3AFD5E58077BF446F95 /* Pods-ethosBTSDK-acknowledgements.plist */,
-				4E154891CC698D7B92861FAB55199BA1 /* Pods-ethosBTSDK-dummy.m */,
-				8FF61F858150D9E12D1C8BA295CB0C39 /* Pods-ethosBTSDK-Info.plist */,
-				F7DE52F843EF4A3F8E3DD58CE462BC0C /* Pods-ethosBTSDK-umbrella.h */,
-				D504BF038E2F88264F41C78167861498 /* Pods-ethosBTSDK.release.xcconfig */,
-			);
-			name = "Pods-ethosBTSDK";
-			path = "Target Support Files/Pods-ethosBTSDK";
-			sourceTree = "<group>";
-		};
-		4F3962FFD1E1E2696D8C1998A4FA6967 /* Pods-alterBTSDK */ = {
-			isa = PBXGroup;
-			children = (
-				3AD29CA1D4908F8D2175FBAB759A5BC3 /* Pods-alterBTSDK.modulemap */,
-				348943D2BE0E5F83188D15F61A8DFCAA /* Pods-alterBTSDK-acknowledgements.markdown */,
-				6879780C8C03778F089B912E8875DDE4 /* Pods-alterBTSDK-acknowledgements.plist */,
-				7D177F7025C3FEF669BEAD2438813DC9 /* Pods-alterBTSDK-dummy.m */,
-				DEE620A9D0A8F42AA138D1E0966FB4CB /* Pods-alterBTSDK-Info.plist */,
-				9A708194D5FD3F495B2CD925EF240541 /* Pods-alterBTSDK-umbrella.h */,
-				7596AA79DE38B5DA82D357DF40A35E5B /* Pods-alterBTSDK.release.xcconfig */,
+				9EB9043D45DDD544428629F6A4C784A4 /* Pods-alterBTSDK.modulemap */,
+				3EA5C8B1A7819B04AB22586F9E2DB534 /* Pods-alterBTSDK-acknowledgements.markdown */,
+				47FFE0B95AE1A45326D8B76FD7EFC642 /* Pods-alterBTSDK-acknowledgements.plist */,
+				E0B748F411018BC7E52EE873374A676E /* Pods-alterBTSDK-dummy.m */,
+				926B94F98B151B54F407A3D73396C9A7 /* Pods-alterBTSDK-Info.plist */,
+				2A2AD5487E6D16A2C9C419BCCE70C9CC /* Pods-alterBTSDK-umbrella.h */,
+				28470EDB45D33454F15E9221339C9380 /* Pods-alterBTSDK.release.xcconfig */,
 			);
 			name = "Pods-alterBTSDK";
 			path = "Target Support Files/Pods-alterBTSDK";
+			sourceTree = "<group>";
+		};
+		4AC4A3A519ADEFA8A26AFD83BFA5EEEA /* Pods-kairosBTSDK */ = {
+			isa = PBXGroup;
+			children = (
+				1FFEFA25CEEC0F4062FECC77487154CF /* Pods-kairosBTSDK.modulemap */,
+				49810468BD76EEE9660A30100D6F2F9D /* Pods-kairosBTSDK-acknowledgements.markdown */,
+				D0D6AD38B91E441DC5F3FCA430FF7CD7 /* Pods-kairosBTSDK-acknowledgements.plist */,
+				F54F1BF09354426D0B8F6E05BB8E1FA7 /* Pods-kairosBTSDK-dummy.m */,
+				B912F8E61EF6B7332F5D1A63405375F2 /* Pods-kairosBTSDK-Info.plist */,
+				3D3C6B911D94F96218869B61918649A7 /* Pods-kairosBTSDK-umbrella.h */,
+				5396DA0EF926D1838F4CFF16DC19A65F /* Pods-kairosBTSDK.release.xcconfig */,
+			);
+			name = "Pods-kairosBTSDK";
+			path = "Target Support Files/Pods-kairosBTSDK";
 			sourceTree = "<group>";
 		};
 		578452D2E740E91742655AC8F1636D1F /* iOS */ = {
@@ -138,23 +123,13 @@
 			name = iOS;
 			sourceTree = "<group>";
 		};
-		9EAA4E88AABA80F81DA08135A5BE4F19 /* Targets Support Files */ = {
-			isa = PBXGroup;
-			children = (
-				4F3962FFD1E1E2696D8C1998A4FA6967 /* Pods-alterBTSDK */,
-				41161A2F979F61E9BB9B177D4F528943 /* Pods-ethosBTSDK */,
-				1D433AEEB02FEFA21BB09E7B7085CDC4 /* Pods-universalBTSDK */,
-			);
-			name = "Targets Support Files";
-			sourceTree = "<group>";
-		};
 		CF1408CF629C7361332E53B88F7BD30C = {
 			isa = PBXGroup;
 			children = (
 				9D940727FF8FB9C785EB98E56350EF41 /* Podfile */,
 				D210D550F4EA176C3123ED886F8F87F5 /* Frameworks */,
-				02441C4B51E580A9B5128D21C898681F /* Products */,
-				9EAA4E88AABA80F81DA08135A5BE4F19 /* Targets Support Files */,
+				14A13CE47EBB092251DAB42035188055 /* Products */,
+				D36A04615C555EEDF82D618F8B934296 /* Targets Support Files */,
 			);
 			sourceTree = "<group>";
 		};
@@ -166,14 +141,39 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		D36A04615C555EEDF82D618F8B934296 /* Targets Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				2DD8F0116787AEBD0D2ECCDF2D4A2D30 /* Pods-alterBTSDK */,
+				4AC4A3A519ADEFA8A26AFD83BFA5EEEA /* Pods-kairosBTSDK */,
+				F4E9C69B0262AAC32303D89181AB4308 /* Pods-universalBTSDK */,
+			);
+			name = "Targets Support Files";
+			sourceTree = "<group>";
+		};
+		F4E9C69B0262AAC32303D89181AB4308 /* Pods-universalBTSDK */ = {
+			isa = PBXGroup;
+			children = (
+				098DE8A63C14B43D585CFA2E7B461612 /* Pods-universalBTSDK.modulemap */,
+				3260D670ACCA75DF7737099673D994D8 /* Pods-universalBTSDK-acknowledgements.markdown */,
+				FCBF5ADD0383EDE6E2C39BD9A56E5CCE /* Pods-universalBTSDK-acknowledgements.plist */,
+				CD5E02CC4AC3829430A8475C0F86C5CB /* Pods-universalBTSDK-dummy.m */,
+				E61803C2D09308F1C37CF12CC320D109 /* Pods-universalBTSDK-Info.plist */,
+				997C93341414394638F6847F767BDF7E /* Pods-universalBTSDK-umbrella.h */,
+				7622B4DADC2AFA3ED1AE25CD64F571DB /* Pods-universalBTSDK.release.xcconfig */,
+			);
+			name = "Pods-universalBTSDK";
+			path = "Target Support Files/Pods-universalBTSDK";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		0610535538EB55D3783D2CEC0D2937FD /* Headers */ = {
+		46A130BCCA3E4FD0F4CCB2A934B870C5 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				200FFCDC767DAF5E71AEBDBDA7876717 /* Pods-ethosBTSDK-umbrella.h in Headers */,
+				1E4A07C043D708A760645D0CF5202FA0 /* Pods-kairosBTSDK-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,22 +232,22 @@
 			productReference = 06F4319AD6490E49C4CDB2A0C8E37195 /* Pods-alterBTSDK */;
 			productType = "com.apple.product-type.framework";
 		};
-		4C7C0EBA5A357A4467DB5840096B06FB /* Pods-ethosBTSDK */ = {
+		CCC364304FF700D2D5D6DB776203C6A4 /* Pods-kairosBTSDK */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D3CA8B67F76DC03343DABC45C539F1BC /* Build configuration list for PBXNativeTarget "Pods-ethosBTSDK" */;
+			buildConfigurationList = 9ED65F9CF6824A91861015CB1BDEBDA0 /* Build configuration list for PBXNativeTarget "Pods-kairosBTSDK" */;
 			buildPhases = (
-				0610535538EB55D3783D2CEC0D2937FD /* Headers */,
-				8F613945A8CDCA154555C121D906DBAB /* Sources */,
-				9E8E23E2DDD1BA10ED17BF159103A95F /* Frameworks */,
-				58B67EE8A37D342AF0A2CA353173B20C /* Resources */,
+				46A130BCCA3E4FD0F4CCB2A934B870C5 /* Headers */,
+				70A9A896101225D98D87FCDB6A3487C8 /* Sources */,
+				1F163CE29D4E272DA3723F54213C4E6C /* Frameworks */,
+				41AA905067E73D8463A545069E86EFB6 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = "Pods-ethosBTSDK";
-			productName = Pods_ethosBTSDK;
-			productReference = 13E2043D1B2A7096101C25CDAA4B68FA /* Pods-ethosBTSDK */;
+			name = "Pods-kairosBTSDK";
+			productName = Pods_kairosBTSDK;
+			productReference = 9242CF9454FF45D07E9371809AAAD02D /* Pods-kairosBTSDK */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -268,26 +268,26 @@
 				en,
 			);
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
-			productRefGroup = 02441C4B51E580A9B5128D21C898681F /* Products */;
+			productRefGroup = 14A13CE47EBB092251DAB42035188055 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				4A1EEEAAF731D66FF6534113083AAE14 /* Pods-alterBTSDK */,
-				4C7C0EBA5A357A4467DB5840096B06FB /* Pods-ethosBTSDK */,
+				CCC364304FF700D2D5D6DB776203C6A4 /* Pods-kairosBTSDK */,
 				46F36765BFD373367BF5C6D2A9EAEF1A /* Pods-universalBTSDK */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		42CB6E7C42BD0A6C8A17629F027155DE /* Resources */ = {
+		41AA905067E73D8463A545069E86EFB6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		58B67EE8A37D342AF0A2CA353173B20C /* Resources */ = {
+		42CB6E7C42BD0A6C8A17629F027155DE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -304,19 +304,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		70A9A896101225D98D87FCDB6A3487C8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FF8F0D7F2D8847A7F1B68BA908185FBB /* Pods-kairosBTSDK-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		82F12759D176E39E85F257B4E0B08EEC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				A080E6CA326C881FEA1F085429DBED07 /* Pods-universalBTSDK-dummy.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		8F613945A8CDCA154555C121D906DBAB /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				15A8218293A0B739ED5DDF39BEE3B993 /* Pods-ethosBTSDK-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,7 +333,7 @@
 /* Begin XCBuildConfiguration section */
 		0DF38854FC202968622AD9D59EE66FFC /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7596AA79DE38B5DA82D357DF40A35E5B /* Pods-alterBTSDK.release.xcconfig */;
+			baseConfigurationReference = 28470EDB45D33454F15E9221339C9380 /* Pods-alterBTSDK.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -371,7 +371,7 @@
 		};
 		2F7504C7AE779BB0F1621B127DCAECA5 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0EC61B566538EB6F7161BC581E9516A5 /* Pods-universalBTSDK.release.xcconfig */;
+			baseConfigurationReference = 7622B4DADC2AFA3ED1AE25CD64F571DB /* Pods-universalBTSDK.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -407,9 +407,8 @@
 			};
 			name = Release;
 		};
-		3ECFFC3D7EFD59439D21A0564D3E594C /* Release */ = {
+		85DE4B95ED5F5827D1314F8AE22CE574 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D504BF038E2F88264F41C78167861498 /* Pods-ethosBTSDK.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -421,7 +420,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Target Support Files/Pods-ethosBTSDK/Pods-ethosBTSDK-Info.plist";
+				INFOPLIST_FILE = "Target Support Files/Pods-kairosBTSDK/Pods-kairosBTSDK-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -430,7 +429,7 @@
 					"@loader_path/Frameworks",
 				);
 				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-ethosBTSDK/Pods-ethosBTSDK.modulemap";
+				MODULEMAP_FILE = "Target Support Files/Pods-kairosBTSDK/Pods-kairosBTSDK.modulemap";
 				OTHER_LDFLAGS = "";
 				OTHER_LIBTOOLFLAGS = "";
 				PODS_ROOT = "$(SRCROOT)";
@@ -439,11 +438,10 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
-			name = Release;
+			name = Debug;
 		};
 		8DE5143C03248BB6CD542DE3963D6F3A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -573,42 +571,6 @@
 			};
 			name = Release;
 		};
-		ACAA3868C4A2CBA6AAC28FC8FB8BA4F5 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = "Target Support Files/Pods-ethosBTSDK/Pods-ethosBTSDK-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MACH_O_TYPE = staticlib;
-				MODULEMAP_FILE = "Target Support Files/Pods-ethosBTSDK/Pods-ethosBTSDK.modulemap";
-				OTHER_LDFLAGS = "";
-				OTHER_LIBTOOLFLAGS = "";
-				PODS_ROOT = "$(SRCROOT)";
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
 		C066E0EB1425FC887333A6498D87414A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -644,6 +606,44 @@
 				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
+		};
+		D945106288C300E70B60CF8A76C40F3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5396DA0EF926D1838F4CFF16DC19A65F /* Pods-kairosBTSDK.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = "Target Support Files/Pods-kairosBTSDK/Pods-kairosBTSDK-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				MODULEMAP_FILE = "Target Support Files/Pods-kairosBTSDK/Pods-kairosBTSDK.modulemap";
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
 		};
 		DAB37F233663D92D2FF96EF462B56816 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -702,20 +702,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		9ED65F9CF6824A91861015CB1BDEBDA0 /* Build configuration list for PBXNativeTarget "Pods-kairosBTSDK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				85DE4B95ED5F5827D1314F8AE22CE574 /* Debug */,
+				D945106288C300E70B60CF8A76C40F3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		A9804902BB272A73BF6FC437F81E02A2 /* Build configuration list for PBXNativeTarget "Pods-universalBTSDK" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				DAB37F233663D92D2FF96EF462B56816 /* Debug */,
 				2F7504C7AE779BB0F1621B127DCAECA5 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		D3CA8B67F76DC03343DABC45C539F1BC /* Build configuration list for PBXNativeTarget "Pods-ethosBTSDK" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				ACAA3868C4A2CBA6AAC28FC8FB8BA4F5 /* Debug */,
-				3ECFFC3D7EFD59439D21A0564D3E594C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

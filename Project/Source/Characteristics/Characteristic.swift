@@ -20,14 +20,10 @@ class Characteristic {
 		case manufacturingTest	= 0x07
 		case charging			= 0x08
 		case ppg_metrics		= 0x09
-		#if UNIVERSAL || ALTER || KAIROS || ETHOS
 		case endSleepStatus		= 0x0a
 		case buttonResponse		= 0x0b
-		#endif
 		case streamPacket		= 0x0c
-		#if UNIVERSAL || ALTER || KAIROS || ETHOS
 		case dataAvailable		= 0x0d
-		#endif
 	}
 	
 	// MARK: Internal Variables
@@ -96,27 +92,7 @@ class Characteristic {
 					log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
-				
-			#if UNIVERSAL || ETHOS
-			case .rawPPGCompressedWhiteIRRPD,
-					.rawPPGCompressedWhiteWhitePD:
-				if ((index + 1) < data.count) {
-					let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
-					if ((index + length) <= data.count) {
-						let packetData = data.subdata(in: Range(index...(index + length - 1)))
-						return (true, type, biostrapDataPacket(packetData))
-					}
-					else {
-						log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-						return (false, .unknown, biostrapDataPacket())
-					}
-				}
-				else {
-					log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-					return (false, .unknown, biostrapDataPacket())
-				}
-			#endif
-				
+								
 			case .rawAccelCompressedXADC,
 					.rawAccelCompressedYADC,
 					.rawAccelCompressedZADC:
@@ -136,7 +112,6 @@ class Characteristic {
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
-			#if UNIVERSAL || ETHOS
 			case .rawGyroCompressedXADC,
 					.rawGyroCompressedYADC,
 					.rawGyroCompressedZADC:
@@ -155,9 +130,7 @@ class Characteristic {
 					log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
-			#endif
 				
-			#if UNIVERSAL || ALTER || KAIROS || ETHOS
 			case .bbi:
 				if ((index + 9) < data.count) {
 					let packets = Int(data[index + 9])
@@ -193,9 +166,7 @@ class Characteristic {
 					log?.e ("\(pID): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
-			#endif
 				
-			#if UNIVERSAL || ALTER || KAIROS
 			case .algorithmData:
 				if ((index + 1) < data.count) {
 					let length = Int(data[index + 1]) + 1
@@ -213,7 +184,6 @@ class Characteristic {
 					log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
-			#endif
 				
 			case .unknown:
 				log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
@@ -390,24 +360,6 @@ class Characteristic {
 					let packets = mDecompressPPGPackets(packet.raw_data)
 					dataPackets.append(contentsOf: packets)
 					
-				#if UNIVERSAL || ETHOS
-				case .rawPPGCompressedWhiteIRRPD,
-						.rawPPGCompressedWhiteWhitePD:
-					index = index + packet.raw_data.count
-					
-					let packets = mDecompressPPGPackets(packet.raw_data)
-					dataPackets.append(contentsOf: packets)
-					
-				case .rawGyroCompressedXADC,
-						.rawGyroCompressedYADC,
-						.rawGyroCompressedZADC:
-					index = index + packet.raw_data.count
-					
-					let packets = mDecompressIMUPackets(packet.raw_data)
-					dataPackets.append(contentsOf: packets)
-				#endif
-					
-				#if UNIVERSAL || ALTER || KAIROS || ETHOS
 				case .bbi:
 					index = index + packet.raw_data.count
 					dataPackets.append(packet)
@@ -415,13 +367,10 @@ class Characteristic {
 				case .cadence:
 					index = index + packet.raw_data.count
 					dataPackets.append(packet)
-				#endif
 					
-				#if UNIVERSAL || ALTER || KAIROS
 				case .algorithmData:
 					index = index + packet.raw_data.count
 					dataPackets.append(packet)
-				#endif
 					
 				default:
 					index = index + type.length

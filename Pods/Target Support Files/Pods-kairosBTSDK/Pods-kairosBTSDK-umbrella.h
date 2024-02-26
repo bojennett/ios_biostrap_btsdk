@@ -11,6 +11,6 @@
 #endif
 
 
-FOUNDATION_EXPORT double Pods_ethosBTSDKVersionNumber;
-FOUNDATION_EXPORT const unsigned char Pods_ethosBTSDKVersionString[];
+FOUNDATION_EXPORT double Pods_kairosBTSDKVersionNumber;
+FOUNDATION_EXPORT const unsigned char Pods_kairosBTSDKVersionString[];
 

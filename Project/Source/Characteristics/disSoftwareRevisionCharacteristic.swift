@@ -12,13 +12,7 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 	
 	var bluetooth			: String	= ""
 	var algorithms			: String	= ""
-	#if UNIVERSAL || ETHOS
-	var medtor				: String	= ""
-	#endif
-	
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	var sleep				: String	= ""
-	#endif
 	
 	#if UNIVERSAL
 	var type				: biostrapDeviceSDK.biostrapDeviceType	= .unknown
@@ -68,13 +62,7 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 			if let data = characteristic.value {
 				bluetooth	= ""
 				algorithms	= ""
-				#if UNIVERSAL || ETHOS
-				medtor		= ""
-				#endif
-				
-				#if UNIVERSAL || ALTER || KAIROS || ETHOS
 				sleep		= ""
-				#endif
 
 				let dataString = String(decoding: data, as: UTF8.self).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"])))
 				let components = dataString.split(separator: "_")
@@ -83,26 +71,7 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 				for component in components {
 					if (index == 0) { bluetooth		= String(component) }
 					if (index == 1) { algorithms	= String(component) }
-					
-					#if UNIVERSAL
-					if ((type == .alter) || (type == .kairos)) {
-						if (index == 2) { sleep		= String(component) }
-					}
-					
-					if (type == .ethos) {
-						if (index == 2) { medtor	= String(component) }
-						if (index == 3) { sleep		= String(component) }
-					}
-					#endif
-										
-					#if ETHOS
-					if (index == 2) { medtor		= String(component) }
-					if (index == 3) { sleep			= String(component) }
-					#endif
-					
-					#if ALTER || KAIROS
-					if (index == 2) { sleep			= String(component) }
-					#endif
+					if (index == 2) { sleep		= String(component) }
 
 					index = index + 1
 				}
@@ -126,10 +95,4 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 	func algorithmsGreaterThan(_ compare: String) -> Bool { return algorithms.versionGreaterThan(compare, separator: ".") }
 	func algorithmsLessThan(_ compare: String) -> Bool { return algorithms.versionLessThan(compare, separator: ".") }
 	func algorithmsEqualTo(_ compare: String) -> Bool { return algorithms.versionEqualTo(compare, separator: ".") }
-
-	#if UNIVERSAL || ETHOS
-	func medtorGreaterThan(_ compare: String) -> Bool { return medtor.versionGreaterThan(compare, separator: ".") }
-	func medtorLessThan(_ compare: String) -> Bool { return medtor.versionLessThan(compare, separator: ".") }
-	func medtorEqualTo(_ compare: String) -> Bool { return medtor.versionEqualTo(compare, separator: ".") }
-	#endif
 }

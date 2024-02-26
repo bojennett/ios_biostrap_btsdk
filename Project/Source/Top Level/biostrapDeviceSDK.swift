@@ -47,14 +47,12 @@ import CoreBluetooth
 	
 	#if UNIVERSAL
 	@objc public enum biostrapDeviceType: Int {
-		case ethos		= 2
 		case alter		= 3
 		case kairos		= 4
 		case unknown	= 99
 		
 		public var title: String {
 			switch (self) {
-			case .ethos		: return "Ethos"
 			case .alter		: return "Alter"
 			case .kairos	: return "Kairos"
 			case .unknown	: return "Unknown"
@@ -63,32 +61,6 @@ import CoreBluetooth
 	}
 	#endif
 	
-	#if UNIVERSAL || ETHOS
-	@objc public enum ethosLEDMode: Int {
-		case blink		= 0
-		case fade		= 1
-		case sweep		= 2
-		case pulse		= 3
-		case sparkle	= 4
-		case percent	= 5
-		
-		public var title: String {
-			switch (self) {
-			case .blink		: return "Blink"
-			case .fade		: return "Fade"
-			case .sweep		: return "Sweep"
-			case .pulse		: return "Pulse"
-			case .sparkle	: return "Sparkle"
-			case .percent	: return "Percent"
-			}
-		}
-		
-		public var value: UInt8 {
-			return UInt8(self.rawValue)
-		}
-	}
-	#endif
-
 	// Lambdas
 	@objc public var logV: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
 	@objc public var logD: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
@@ -109,10 +81,6 @@ import CoreBluetooth
 	@objc public var readEpochComplete: ((_ id: String, _ successful: Bool, _ value: Int)->())?
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var endSleepComplete: ((_ id: String, _ successful: Bool)->())?
-	#if UNIVERSAL || ETHOS
-	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
-	@objc public var debugComplete: ((_ id: String, _ successful: Bool, _ device: debugDevice, _ data: Data)->())?
-	#endif
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getAllPacketsComplete: ((_ id: String, _ successful: Bool)->())?
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
@@ -127,10 +95,6 @@ import CoreBluetooth
 	@objc public var stopManualComplete: ((_ id: String, _ successful: Bool)->())?
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var ledComplete: ((_ id: String, _ successful: Bool)->())?
-	#if UNIVERSAL || ETHOS
-	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
-	@objc public var motorComplete: ((_ id: String, _ successful: Bool)->())?
-	#endif
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var enterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
 	
@@ -200,14 +164,6 @@ import CoreBluetooth
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var manufacturingTestResult: ((_ id: String, _ valid: Bool, _ result: String)->())?
 
-	#if UNIVERSAL || ETHOS
-	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
-	@objc public var startLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
-	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
-	@objc public var stopLiveSyncComplete: ((_ id: String, _ successful: Bool)->())?
-	#endif
-	
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var endSleepStatus: ((_ id: String, _ hasSleep: Bool)->())?
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
@@ -246,7 +202,6 @@ import CoreBluetooth
 	@objc public var setPageThresholdComplete: ((_ id: String, _ successful: Bool)->())?
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var deletePageThresholdComplete: ((_ id: String, _ successful: Bool)->())?
-	#endif
 
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
@@ -271,17 +226,10 @@ import CoreBluetooth
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var batteryLevel: ((_ id: String, _ percentage: Int)->())?
 
-	#if UNIVERSAL || ETHOS
-	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
-	@objc public var pulseOx: ((_ id: String, _ spo2: Float, _ hr: Float)->())?
-	#endif
-
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var heartRate: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var airplaneModeComplete: ((_ id: String, _ successful: Bool)->())?
-	#endif
 
 	//--------------------------------------------------------------------------------
 	//
@@ -396,7 +344,7 @@ import CoreBluetooth
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if KAIROS || ETHOS || UNIVERSAL
+	#if KAIROS || UNIVERSAL
 	public func acquireLicense(_ licenseKey: String) -> (Bool, Int, String) {
 		mLicensed		= false
 		
@@ -482,7 +430,7 @@ import CoreBluetooth
 		scanForUnpaired = forUnpaired
 		scanForLegacy = forLegacy
 		
-		#if KAIROS || ETHOS || UNIVERSAL
+		#if KAIROS || UNIVERSAL
 		if (!mLicensed) {
 			log?.e ("Not licensed - cannot start scanning")
 			return (false)
@@ -674,23 +622,6 @@ import CoreBluetooth
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || ETHOS
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func debug(_ id: String, device: debugDevice, data: Data) {
-		log?.v("\(id): \(device.name) -> \(data.hexString)")
-		
-		if let connectedDevice = mConnectedDevices[id] { connectedDevice.debug(id, device: device, data: data) }
-		else { self.debugComplete?(id, false, device, data) }
-	}
-	#endif
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAllPackets(_ id: String, pages: Int, delay: Int) {
 		if let device = mConnectedDevices[id] { device.getAllPackets(id, pages: pages, delay: delay) }
@@ -809,11 +740,6 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func ethosLED(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
-		if let device = mConnectedDevices[id] { device.ethosLEDInternal(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
-		else { self.ledComplete?(id, false) }
-	}
-
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func alterLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let device = mConnectedDevices[id] { device.alterLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
@@ -823,14 +749,6 @@ import CoreBluetooth
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func kairosLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let device = mConnectedDevices[id] { device.kairosLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
-		else { self.ledComplete?(id, false) }
-	}
-	#endif
-
-	#if ETHOS
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func led(_ id: String, red: Int, green: Int, blue: Int, mode: ethosLEDMode, seconds: Int, percent: Int) {
-		if let device = mConnectedDevices[id] { device.ethosLEDInternal(red: red, green: green, blue: blue, mode: mode, seconds: seconds, percent: percent) }
 		else { self.ledComplete?(id, false) }
 	}
 	#endif
@@ -848,21 +766,6 @@ import CoreBluetooth
 	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let device = mConnectedDevices[id] { device.kairosLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
-	}
-	#endif
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || ETHOS
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func motor(_ id: String, milliseconds: Int, pulses: Int) {
-		if let device = mConnectedDevices[id] { device.motor(id, milliseconds: milliseconds, pulses: pulses) }
-		else { self.motorComplete?(id, false) }
 	}
 	#endif
 
@@ -1032,21 +935,7 @@ import CoreBluetooth
 	}
 	#endif
 
-	#if ETHOS
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func manufacturingTest(_ id: String, test: ethosManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.ethosManufacturingTest(id, test: test) }
-		else { self.manufacturingTestComplete?(id, false) }
-	}
-	#endif
-
 	#if UNIVERSAL
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func ethosManufacturingTest(_ id: String, test: ethosManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.ethosManufacturingTest(id, test: test) }
-		else { self.manufacturingTestComplete?(id, false) }
-	}
-	
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func alterManufacturingTest(_ id: String, test: alterManufacturingTestType) {
 		if let device = mConnectedDevices[id] { device.alterManufacturingTest(id, test: test) }
@@ -1060,28 +949,6 @@ import CoreBluetooth
 	}
 	#endif
 
-	#if UNIVERSAL || ETHOS
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func startLiveSync(_ id: String, configuration: liveSyncConfiguration) {
-		if let device = mConnectedDevices[id] { device.startLiveSync(id, configuration: configuration) }
-		else { self.startLiveSyncComplete?(id, false) }
-	}
-	
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func stopLiveSync(_ id: String) {
-		if let device = mConnectedDevices[id] { device.stopLiveSync(id) }
-		else { self.stopLiveSyncComplete?(id, false) }
-	}
-	#endif
-	
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	//--------------------------------------------------------------------------------
 	// Function Name: setAskForButtonResponse
 	//--------------------------------------------------------------------------------
@@ -1306,7 +1173,6 @@ import CoreBluetooth
 		if let device = mConnectedDevices[id] { device.deletePageThreshold() }
 		else { self.deletePageThresholdComplete?(id, false) }
 	}
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -1386,7 +1252,6 @@ import CoreBluetooth
 		else { self.getWornOverrideStatusComplete?(id, false, false) }
 	}
 
-	#if UNIVERSAL || ALTER || KAIROS || ETHOS
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1399,7 +1264,6 @@ import CoreBluetooth
 		if let device = mConnectedDevices[id] { device.airplaneMode(id) }
 		else { self.airplaneModeComplete?(id, false) }
 	}
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:

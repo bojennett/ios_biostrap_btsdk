@@ -34,7 +34,6 @@ import Foundation
 	public var diagnostic_type			: diagnosticType	= .unknown
 	public var ppg_failed_type			: ppgFailedType		= .unknown
 	public var ppg_metrics_status		: ppgStatusType		= .unknown
-	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	public var continuous_hr			: [Int]			= [Int]()
 	public var bbi						: [Int]			= [Int]()
 	public var cadence_spm				: [Int]			= [Int]()
@@ -42,7 +41,6 @@ import Foundation
 	public var bookend_type				: bookendType	= .unknown
 	public var bookend_payload			: Int			= 0
 	public var duration_ms				: Int			= 0
-	#endif
 	public var green_led_current		: Int			= 0
 	public var red_led_current			: Int			= 0
 	public var ir_led_current			: Int			= 0
@@ -50,13 +48,10 @@ import Foundation
 	public var white_white_led_current	: Int			= 0
 	public var charging					: Bool			= false
 	public var charge_full				: Bool			= false
-	
-	#if UNIVERSAL || ALTER || KAIROS
 	public var algorithmPacketSubType	: algorithmPacketType	= .unknown
 	public var algorithmPacketIndex		: Int			= 0
 	public var algorithmPacketCount		: Int			= 0
 	public var algorithmPacketData		: Data			= Data()
-	#endif
 
 	//--------------------------------------------------------------------------------
 	//
@@ -90,7 +85,6 @@ import Foundation
 		case diagnostic_type
 		case ppg_failed_type
 		case ppg_metrics_status
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case continuous_hr
 		case bbi
 		case cadence_spm
@@ -98,13 +92,10 @@ import Foundation
 		case bookend_type
 		case bookend_payload
 		case duration_ms
-		#endif
-		#if UNIVERSAL || ALTER || KAIROS
 		case algorithmPacketSubType
 		case algorithmPacketIndex
 		case algorithmPacketCount
 		case algorithmPacketData
-		#endif
 		case green_led_current
 		case red_led_current
 		case ir_led_current
@@ -144,14 +135,12 @@ import Foundation
 		case .rawAccelCompressedYADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawAccelCompressedZADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
 
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .rawGyroXADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawGyroYADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawGyroZADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawGyroCompressedXADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawGyroCompressedYADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawGyroCompressedZADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
-		#endif
 
 		case .ppgCalibrationStart			: return ("\(raw_data.hexString),\(type.title),\(epoch_ms)")
 		case .ppgCalibrationDone			: return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(green_led_current),\(red_led_current),\(ir_led_current),\(white_irr_led_current),\(white_white_led_current)")
@@ -161,16 +150,6 @@ import Foundation
 			 .rawPPGCompressedIR,
 			 .rawPPGCompressedRed			: return ("\(raw_data.hexString),\(type.title),\(value)")
 
-		#if UNIVERSAL || ETHOS
-		case .rawPPGCompressedWhiteIRRPD,
-			 .rawPPGCompressedWhiteWhitePD	: return ("\(raw_data.hexString),\(type.title),\(value)")
-		#endif
-			
-		#if UNIVERSAL || ETHOS
-		case .rawPPGWhiteIRRPD,
-			 .rawPPGWhiteWhitePD			: return ("\(raw_data.hexString),\(type.title),\(value)")
-		#endif
-
 		case .ppg_metrics					:
 			let root	= "\(raw_data.hexString),\(type.title),\(epoch_ms),\(ppg_metrics_status.title)"
 			let hr		= "\(root),HR,\(hr_valid),\(hr_result)"
@@ -179,7 +158,6 @@ import Foundation
 			let spo2	= "\(root),SPO2,\(spo2_valid),\(spo2_result)"
 			return ("\(hr)\n\(hrv)\n\(rr)\n\(spo2)")
 			
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr					:
 			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(mIntegerArrayToString(continuous_hr))")
 		case .bbi							:
@@ -190,12 +168,9 @@ import Foundation
 			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(event_type.title)")
 		case .bookend						:
 			return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(duration_ms),\(bookend_type.title),\(bookend_payload)")
-		#endif
 			
-		#if UNIVERSAL || ALTER || KAIROS
 		case .algorithmData					:
 			return ("\(raw_data.hexString),\(type.title),\(algorithmPacketSubType.title),\(algorithmPacketCount),\(algorithmPacketIndex),\(algorithmPacketData.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: ""))")
-		#endif
 
 		case .unknown						: return ("\(raw_data.hexString),\(type.title)")
 		case .steps							: return ("\(raw_data.hexString),\(type.title),\(epoch),\(value)")
@@ -321,11 +296,6 @@ import Foundation
 				 .rawPPGCompressedIR,
 				 .rawPPGCompressedRed:	break	// use raw_data
 
-			#if UNIVERSAL || ETHOS
-			case .rawPPGCompressedWhiteIRRPD,
-				 .rawPPGCompressedWhiteWhitePD	:	break	// use raw_data
-			#endif
-
 			case .rawPPGRed,
 				 .rawPPGIR,
 				 .rawPPGGreen:
@@ -340,7 +310,6 @@ import Foundation
 				 .rawAccelCompressedYADC,
 				 .rawAccelCompressedZADC: break // use raw_data
 
-			#if UNIVERSAL || ETHOS || ALTER || KAIROS
 			case .rawGyroXADC,
 				 .rawGyroYADC,
 				 .rawGyroZADC:
@@ -349,14 +318,6 @@ import Foundation
 			case .rawGyroCompressedXADC,
 				 .rawGyroCompressedYADC,
 				 .rawGyroCompressedZADC: break // use raw_data
-			#endif
-
-			#if UNIVERSAL || ETHOS
-			case .rawPPGWhiteIRRPD,
-				 .rawPPGWhiteWhitePD:
-				value				= data.subdata(in: Range(1...4)).leInt32
-			#endif
-
 				
 			case .ppgCalibrationStart:
 				epoch_ms				= data.subdata(in: Range(1...8)).leInt64
@@ -398,7 +359,6 @@ import Foundation
 				hrv_result			= data.subdata(in: Range(15...16)).leFloat16
 				hr_result			= data.subdata(in: Range(17...18)).leFloat16
 				
-			#if UNIVERSAL || ETHOS || ALTER || KAIROS
 			case .continuous_hr:
 				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
 				continuous_hr.removeAll()
@@ -446,9 +406,7 @@ import Foundation
 				bookend_payload		= data[2].Int8
 				epoch_ms			= data.subdata(in: Range(3...10)).leInt64
 				duration_ms			= data.subdata(in: Range(11...14)).leInt32
-			#endif
 				
-			#if UNIVERSAL || ALTER || KAIROS
 			case .algorithmData:
 				if let thisType = algorithmPacketType(rawValue: data[2]) {
 					algorithmPacketSubType	= thisType
@@ -459,7 +417,6 @@ import Foundation
 				algorithmPacketCount	= Int(data[3])
 				algorithmPacketIndex	= Int(data[4])
 				algorithmPacketData		= data.subdata(in: Range(5...(data.count - 1)))
-			#endif
 				
 			case .ppg_failed:
 				epoch				= data.subdata(in: Range(1...4)).leInt32
@@ -537,7 +494,6 @@ import Foundation
 			 .rawAccelCompressedZADC:
 			value				= try values.decode(Int.self, forKey: .value)
 
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .rawGyroXADC,
 			 .rawGyroYADC,
 			 .rawGyroZADC:
@@ -547,18 +503,11 @@ import Foundation
 			 .rawGyroCompressedYADC,
 			 .rawGyroCompressedZADC:
 			value				= try values.decode(Int.self, forKey: .value)
-		#endif
 
 		case .rawPPGCompressedGreen,
 			 .rawPPGCompressedIR,
 			 .rawPPGCompressedRed:
 			value				= try values.decode(Int.self, forKey: .value)
-
-		#if UNIVERSAL || ETHOS
-		case .rawPPGCompressedWhiteIRRPD,
-			 .rawPPGCompressedWhiteWhitePD:
-			value				= try values.decode(Int.self, forKey: .value)
-		#endif
 
 		case .diagnostic:
 			diagnostic_type		= try values.decode(diagnosticType.self, forKey: .diagnostic_type)
@@ -582,12 +531,6 @@ import Foundation
 			 .rawPPGGreen,
 			 .rawPPGProximity:
 			value				= try values.decode(Int.self, forKey: .value)
-
-		#if UNIVERSAL || ETHOS
-		case .rawPPGWhiteIRRPD,
-			 .rawPPGWhiteWhitePD:
-			value				= try values.decode(Int.self, forKey: .value)
-		#endif
 
 		case .ppgCalibrationStart:
 			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
@@ -616,7 +559,6 @@ import Foundation
 			spo2_valid			= try values.decode(Bool.self, forKey: .spo2_valid)
 			spo2_result			= try values.decode(Float.self, forKey: .spo2_result)
 			
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr:
 			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
 			let elements		= try values.decode(String.self, forKey: .continuous_hr)
@@ -641,16 +583,13 @@ import Foundation
 			bookend_payload		= try values.decode(Int.self, forKey: .bookend_payload)
 			epoch_ms			= try values.decode(Int.self, forKey: .epoch_ms)
 			duration_ms			= try values.decode(Int.self, forKey: .duration_ms)
-		#endif
 			
-		#if UNIVERSAL || ALTER || KAIROS
 		case .algorithmData:
 			algorithmPacketSubType	= try values.decode(algorithmPacketType.self, forKey: .algorithmPacketSubType)
 			algorithmPacketCount	= try values.decode(Int.self, forKey: .algorithmPacketCount)
 			algorithmPacketIndex	= try values.decode(Int.self, forKey: .algorithmPacketIndex)
 			let elements			= try values.decode(String.self, forKey: .algorithmPacketData)
 			algorithmPacketData		= mStringArrayToData(elements)
-		#endif
 			
 		case .ppg_failed:
 			epoch				= try values.decode(Int.self, forKey: .epoch)
@@ -738,7 +677,6 @@ import Foundation
 			 .rawAccelCompressedZADC:
 			try container.encode(value, forKey: .value)
 
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .rawGyroXADC,
 			 .rawGyroYADC,
 			 .rawGyroZADC:
@@ -748,18 +686,11 @@ import Foundation
 			 .rawGyroCompressedYADC,
 			 .rawGyroCompressedZADC:
 			try container.encode(value, forKey: .value)
-		#endif
 
 		case .rawPPGCompressedGreen,
 			 .rawPPGCompressedIR,
 			 .rawPPGCompressedRed:
 			try container.encode(value, forKey: .value)
-
-		#if UNIVERSAL || ETHOS
-		case .rawPPGCompressedWhiteIRRPD,
-			 .rawPPGCompressedWhiteWhitePD:
-			try container.encode(value, forKey: .value)
-		#endif
 
 		case .rawPPGFifoCount,
 			 .rawAccelFifoCount:
@@ -777,14 +708,6 @@ import Foundation
 
 		case .rawPPGGreen:
 			try container.encode(value, forKey: .value)
-
-		#if UNIVERSAL || ETHOS
-		case .rawPPGWhiteIRRPD:
-			try container.encode(value, forKey: .value)
-
-		case .rawPPGWhiteWhitePD:
-			try container.encode(value, forKey: .value)
-		#endif
 
 		case .ppgCalibrationStart:
 			try container.encode(epoch_ms, forKey: .epoch_ms)
@@ -813,7 +736,6 @@ import Foundation
 			try container.encode(spo2_valid, forKey: .spo2_valid)
 			try container.encode(spo2_result, forKey: .spo2_result)
 			
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr:
 			try container.encode(epoch_ms, forKey: .epoch_ms)
 			try container.encode(mIntegerArrayToString(continuous_hr), forKey: .continuous_hr)
@@ -835,16 +757,13 @@ import Foundation
 			try container.encode(bookend_payload, forKey: .bookend_payload)
 			try container.encode(epoch_ms, forKey: .epoch_ms)
 			try container.encode(duration_ms, forKey: .duration_ms)
-		#endif
 			
-		#if UNIVERSAL || ALTER || KAIROS
 		case .algorithmData:
 			try container.encode(algorithmPacketSubType.title, forKey: .algorithmPacketSubType)
 			try container.encode(algorithmPacketCount, forKey: .algorithmPacketCount)
 			try container.encode(algorithmPacketIndex, forKey: .algorithmPacketIndex)
 			let outputString = algorithmPacketData.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
 			try container.encode(outputString, forKey: .algorithmPacketData)
-		#endif
 			
 		case .ppg_failed:
 			try container.encode(epoch, forKey: .epoch)

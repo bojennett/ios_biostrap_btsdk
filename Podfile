@@ -6,12 +6,12 @@ target 'universalBTSDK' do
 	project 'Project/biostrapDeviceSDK.xcodeproj'
 end
 
-target 'ethosBTSDK' do
+target 'alterBTSDK' do
 	use_frameworks!
 	project 'Project/biostrapDeviceSDK.xcodeproj'
 end
 
-target 'alterBTSDK' do
+target 'kairosBTSDK' do
 	use_frameworks!
 	project 'Project/biostrapDeviceSDK.xcodeproj'
 end

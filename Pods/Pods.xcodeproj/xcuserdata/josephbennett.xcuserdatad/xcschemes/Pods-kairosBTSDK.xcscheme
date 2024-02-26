@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4C7C0EBA5A357A4467DB5840096B06FB"
-               BuildableName = "Pods_ethosBTSDK.framework"
-               BlueprintName = "Pods-ethosBTSDK"
+               BlueprintIdentifier = "CCC364304FF700D2D5D6DB776203C6A4"
+               BuildableName = "Pods_kairosBTSDK.framework"
+               BlueprintName = "Pods-kairosBTSDK"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

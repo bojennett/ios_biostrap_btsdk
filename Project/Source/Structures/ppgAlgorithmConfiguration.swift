@@ -17,26 +17,14 @@ import Foundation
 	public var hrv			: Bool
 	public var rr			: Bool
 	public var spo2			: Bool
-	#if UNIVERSAL || ETHOS
-	public var fda_spo2		: Bool
-	#endif
-	#if UNIVERSAL || ETHOS || ALTER  || KAIROS
 	public var continuous	: Bool
-	#endif
 	
 	override public init() {
 		hr			= false
 		hrv			= false
 		rr			= false
 		spo2		= false
-		
-		#if UNIVERSAL || ETHOS
-		fda_spo2	= false
-		#endif
-		
-		#if UNIVERSAL || ETHOS || ALTER  || KAIROS
 		continuous	= false
-		#endif
 	}
 	
 	convenience init(_ data: UInt8) {
@@ -46,15 +34,7 @@ import Foundation
 		hrv			= ((data & 0x02) != 0x00)
 		rr			= ((data & 0x04) != 0x00)
 		spo2		= ((data & 0x08) != 0x00)
-
-		#if UNIVERSAL || ETHOS
-		fda_spo2	= ((data & 0x10) != 0x00)
-		#endif
-		
-		#if UNIVERSAL || ETHOS || ALTER  || KAIROS
 		continuous	= ((data & 0x80) != 0x00)
-		#endif
-
 	}
 	
 	var commandByte: UInt8 {
@@ -64,14 +44,7 @@ import Foundation
 		if (hrv)		{ result = result | 0x02 }
 		if (rr)			{ result = result | 0x04 }
 		if (spo2)		{ result = result | 0x08 }
-		
-		#if UNIVERSAL || ETHOS
-		if (fda_spo2)	{ result = result | 0x10 }
-		#endif
-		
-		#if UNIVERSAL || ETHOS || ALTER  || KAIROS
 		if (continuous)	{ result = result | 0x80 }
-		#endif
 
 		return result
 	}
@@ -83,14 +56,7 @@ import Foundation
 		if (hrv)		{ if (result != "") { result = "\(result), " }; result = "\(result)HRV" }
 		if (rr)			{ if (result != "") { result = "\(result), " }; result = "\(result)RR" }
 		if (spo2)		{ if (result != "") { result = "\(result), " }; result = "\(result)SPO2" }
-		
-		#if UNIVERSAL || ETHOS
-		if (fda_spo2)	{ if (result != "") { result = "\(result), " }; result = "\(result)FDA_SPO2" }
-		#endif
-
-		#if UNIVERSAL || ETHOS || ALTER  || KAIROS
 		if (continuous)	{ if (result != "") { result = "\(result), " }; result = "\(result)Continous" }
-		#endif
 		
 		if (result == "") { return ("Idle") }
 

@@ -19,39 +19,25 @@ import Foundation
 	case battery						= 0x89
 	case charger						= 0x8a
 	case ppg_metrics					= 0x8b
-	
-	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	case continuous_hr					= 0x8c
-	#endif
-	
 	case steps_active					= 0x8d
-
-	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	case bbi							= 0x8e
 	case cadence						= 0x8f
 	case event							= 0x90
 	case bookend						= 0x91
-	#endif
-	
-	#if UNIVERSAL || ALTER || KAIROS
 	case algorithmData					= 0x92
-	#endif
-
 	case rawAccelXADC					= 0xc0
 	case rawAccelYADC					= 0xc1
 	case rawAccelZADC					= 0xc2
 	case rawAccelCompressedXADC			= 0xc3
 	case rawAccelCompressedYADC			= 0xc4
 	case rawAccelCompressedZADC			= 0xc5
-	
-	#if UNIVERSAL || ETHOS || ALTER || KAIROS
 	case rawGyroXADC					= 0xc8
 	case rawGyroYADC					= 0xc9
 	case rawGyroZADC					= 0xca
 	case rawGyroCompressedXADC			= 0xcb
 	case rawGyroCompressedYADC			= 0xcc
 	case rawGyroCompressedZADC			= 0xcd
-	#endif
 
 	case ppgCalibrationStart			= 0xe0
 	case ppgCalibrationDone				= 0xd0
@@ -62,23 +48,13 @@ import Foundation
 	case rawPPGCompressedRed			= 0xd4
 	case rawPPGCompressedIR				= 0xd5
 
-	#if UNIVERSAL || ETHOS
-	case rawPPGCompressedWhiteIRRPD     = 0xd7
-	case rawPPGCompressedWhiteWhitePD   = 0xd8
-	#endif
-
 	case rawAccelFifoCount				= 0xe1
 	case rawPPGProximity				= 0xe2
 	case rawPPGGreen					= 0xe3
 	case rawPPGRed						= 0xe4
 	case rawPPGIR						= 0xe5
 	case rawPPGFifoCount				= 0xe6
-	
-	#if UNIVERSAL || ETHOS
-	case rawPPGWhiteIRRPD				= 0xe8
-	case rawPPGWhiteWhitePD				= 0xe9
-	#endif
-	
+		
 	case milestone						= 0xf0
 	case settings						= 0xf1
 	case caughtUp						= 0xfe
@@ -99,22 +75,16 @@ import Foundation
 		case "Diagnostic"							: self	= .diagnostic
 		case "PPG Metrics"							: self	= .ppg_metrics
 		
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case "Continuous Heart Rate"				: self	= .continuous_hr
-		#endif
 			
 		case "Steps with Active Seconds"			: self	= .steps_active
 			
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case "Beat-to-Beat Interval"				: self = .bbi
 		case "Cadence"								: self = .cadence
 		case "Event"								: self = .event
 		case "Bookend"								: self = .bookend
-		#endif
 			
-		#if UNIVERSAL || ALTER || KAIROS
 		case "Algorithm Data"						: self = .algorithmData
-		#endif
 
 		case "Raw Accel FIFO Count"					: self	= .rawAccelFifoCount
 		case "Raw PPG Proximity"					: self	= .rawPPGProximity
@@ -126,14 +96,12 @@ import Foundation
 		case "Raw Accel Compressed Y ADC"			: self	= .rawAccelCompressedYADC
 		case "Raw Accel Compressed Z ADC"			: self	= .rawAccelCompressedZADC
 
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case "Raw Gyro X ADC"						: self	= .rawGyroXADC
 		case "Raw Gyro Y ADC"						: self	= .rawGyroYADC
 		case "Raw Gyro Z ADC"						: self	= .rawGyroZADC
 		case "Raw Gyro Compressed X ADC"			: self	= .rawGyroCompressedXADC
 		case "Raw Gyro Compressed Y ADC"			: self	= .rawGyroCompressedYADC
 		case "Raw Gyro Compressed Z ADC"			: self	= .rawGyroCompressedZADC
-		#endif
 
 		case "PPG Calibration Start"				: self	= .ppgCalibrationStart
 		case "PPG Calibration Done"					: self	= .ppgCalibrationDone
@@ -144,21 +112,11 @@ import Foundation
 		case "Raw PPG Compressed Red"				: self	= .rawPPGCompressedRed
 		case "Raw PPG Compressed IR"				: self	= .rawPPGCompressedIR
 
-		#if UNIVERSAL || ETHOS
-		case "Raw PPG Compressed White IRR PD"		: self	= .rawPPGCompressedWhiteIRRPD
-		case "Raw PPG Compressed White White PD"	: self	= .rawPPGCompressedWhiteWhitePD
-		#endif
-
 		case "Raw PPG Green Sample"					: self	= .rawPPGGreen
 		case "Raw PPG Red Sample"					: self	= .rawPPGRed
 		case "Raw PPG IR Sample"					: self	= .rawPPGIR
 		case "Raw PPG FIFO Count"					: self	= .rawPPGFifoCount
 			
-		#if UNIVERSAL || ETHOS
-		case "Raw PPG White Sample IRR PD"			: self	= .rawPPGWhiteIRRPD
-		case "Raw PPG White Sample White PD"		: self	= .rawPPGWhiteWhitePD
-		#endif
-	
 		case "Milestone"							: self	= .milestone
 		case "Settings"								: self	= .settings
 		case "Caught Up"							: self	= .caughtUp
@@ -180,22 +138,16 @@ import Foundation
 		case .diagnostic							: return "Diagnostic"
 		case .ppg_metrics							: return "PPG Metrics"
 			
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr							: return "Continuous Heart Rate"
-		#endif
 			
 		case .steps_active							: return "Steps with Active Seconds"
 
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .bbi									: return "Beat-to-Beat Interval"
 		case .cadence								: return "Cadence"
 		case .event									: return "Event"
 		case .bookend								: return "Bookend"
-		#endif
 			
-		#if UNIVERSAL || ALTER || KAIROS
 		case .algorithmData							: return "Algorithm Data"
-		#endif
 
 		case .rawAccelFifoCount						: return "Raw Accel FIFO Count"
 		case .rawPPGProximity						: return "Raw PPG Proximity"
@@ -207,14 +159,12 @@ import Foundation
 		case .rawAccelCompressedYADC				: return "Raw Accel Compressed Y ADC"
 		case .rawAccelCompressedZADC				: return "Raw Accel Compressed Z ADC"
 
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .rawGyroXADC							: return "Raw Gyro X ADC"
 		case .rawGyroYADC							: return "Raw Gyro Y ADC"
 		case .rawGyroZADC							: return "Raw Gyro Z ADC"
 		case .rawGyroCompressedXADC					: return "Raw Gyro Compressed X ADC"
 		case .rawGyroCompressedYADC					: return "Raw Gyro Compressed Y ADC"
 		case .rawGyroCompressedZADC					: return "Raw Gyro Compressed Z ADC"
-		#endif
 
 		case .ppgCalibrationStart					: return "PPG Calibration Start"
 		case .ppgCalibrationDone					: return "PPG Calibration Done"
@@ -225,21 +175,11 @@ import Foundation
 		case .rawPPGCompressedRed					: return "Raw PPG Compressed Red"
 		case .rawPPGCompressedIR					: return "Raw PPG Compressed IR"
 			
-		#if UNIVERSAL || ETHOS
-		case .rawPPGCompressedWhiteIRRPD			: return "Raw PPG Compressed White IRR PD"
-		case .rawPPGCompressedWhiteWhitePD			: return "Raw PPG Compressed White White PD"
-		#endif
-
 		case .rawPPGGreen							: return "Raw PPG Green Sample"
 		case .rawPPGRed								: return "Raw PPG Red Sample"
 		case .rawPPGIR								: return "Raw PPG IR Sample"
 		case .rawPPGFifoCount						: return "Raw PPG FIFO Count"
 			
-		#if UNIVERSAL || ETHOS
-		case .rawPPGWhiteIRRPD						: return "Raw PPG White Sample IRR PD"
-		case .rawPPGWhiteWhitePD					: return "Raw PPG White Sample White PD"
-		#endif
-
 		case .milestone								: return "Milestone"
 		case .settings								: return "Settings"
 			
@@ -261,22 +201,15 @@ import Foundation
 		case .diagnostic							: return 0 	// Done by calculation
 		case .ppg_metrics							: return 19
 			
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .continuous_hr							: return 19
-		#endif
-			
 		case .steps_active							: return 7
 
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .bbi									: return 0 // Done by calculation
 		case .event									: return 10
 		case .cadence								: return 0 // Done by calculation
 		case .bookend								: return 15
-		#endif
 			
-		#if UNIVERSAL || ALTER || KAIROS
 		case .algorithmData							: return 0
-		#endif
 
 		case .rawAccelFifoCount						: return 10
 		case .rawPPGProximity						: return 5
@@ -288,14 +221,12 @@ import Foundation
 		case .rawAccelCompressedYADC				: return 0	// Done by calculation
 		case .rawAccelCompressedZADC				: return 0	// Done by calculation
 
-		#if UNIVERSAL || ETHOS || ALTER || KAIROS
 		case .rawGyroXADC							: return 3
 		case .rawGyroYADC							: return 3
 		case .rawGyroZADC							: return 3
 		case .rawGyroCompressedXADC					: return 0	// Done by calculation
 		case .rawGyroCompressedYADC					: return 0	// Done by calculation
 		case .rawGyroCompressedZADC					: return 0	// Done by calculation
-		#endif
 
 		case .ppgCalibrationStart					: return 9
 		case .ppgCalibrationDone					: return 14
@@ -306,20 +237,10 @@ import Foundation
 		case .rawPPGCompressedRed					: return 0	// Done by calculation
 		case .rawPPGCompressedIR					: return 0	// Done by calculation
 
-		#if UNIVERSAL || ETHOS
-		case .rawPPGCompressedWhiteIRRPD			: return 0	// Done by calculation
-		case .rawPPGCompressedWhiteWhitePD			: return 0	// Done by calculation
-		#endif
-
 		case .rawPPGGreen							: return 5
 		case .rawPPGRed								: return 5
 		case .rawPPGIR								: return 5
 		case .rawPPGFifoCount						: return 10
-
-		#if UNIVERSAL || ETHOS
-		case .rawPPGWhiteIRRPD						: return 5
-		case .rawPPGWhiteWhitePD					: return 5
-		#endif
 
 		case .milestone								: return 7
 		case .settings								: return 6
