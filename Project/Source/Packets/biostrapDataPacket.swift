@@ -135,13 +135,6 @@ import Foundation
 		case .rawAccelCompressedYADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
 		case .rawAccelCompressedZADC		: return ("\(raw_data.hexString),\(type.title),\(value)")
 
-		case .rawGyroXADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
-		case .rawGyroYADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
-		case .rawGyroZADC					: return ("\(raw_data.hexString),\(type.title),\(value)")
-		case .rawGyroCompressedXADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
-		case .rawGyroCompressedYADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
-		case .rawGyroCompressedZADC			: return ("\(raw_data.hexString),\(type.title),\(value)")
-
 		case .ppgCalibrationStart			: return ("\(raw_data.hexString),\(type.title),\(epoch_ms)")
 		case .ppgCalibrationDone			: return ("\(raw_data.hexString),\(type.title),\(epoch_ms),\(green_led_current),\(red_led_current),\(ir_led_current),\(white_irr_led_current),\(white_white_led_current)")
 		case .motionLevel					: return ("\(raw_data.hexString),\(type.title),\(value),\(epoch_ms)")
@@ -310,15 +303,6 @@ import Foundation
 				 .rawAccelCompressedYADC,
 				 .rawAccelCompressedZADC: break // use raw_data
 
-			case .rawGyroXADC,
-				 .rawGyroYADC,
-				 .rawGyroZADC:
-				value				= data.subdata(in: Range(1...2)).leInt16
-
-			case .rawGyroCompressedXADC,
-				 .rawGyroCompressedYADC,
-				 .rawGyroCompressedZADC: break // use raw_data
-				
 			case .ppgCalibrationStart:
 				epoch_ms				= data.subdata(in: Range(1...8)).leInt64
 				
@@ -494,16 +478,6 @@ import Foundation
 			 .rawAccelCompressedZADC:
 			value				= try values.decode(Int.self, forKey: .value)
 
-		case .rawGyroXADC,
-			 .rawGyroYADC,
-			 .rawGyroZADC:
-			value				= try values.decode(Int.self, forKey: .value)
-
-		case .rawGyroCompressedXADC,
-			 .rawGyroCompressedYADC,
-			 .rawGyroCompressedZADC:
-			value				= try values.decode(Int.self, forKey: .value)
-
 		case .rawPPGCompressedGreen,
 			 .rawPPGCompressedIR,
 			 .rawPPGCompressedRed:
@@ -675,16 +649,6 @@ import Foundation
 		case .rawAccelCompressedXADC,
 			 .rawAccelCompressedYADC,
 			 .rawAccelCompressedZADC:
-			try container.encode(value, forKey: .value)
-
-		case .rawGyroXADC,
-			 .rawGyroYADC,
-			 .rawGyroZADC:
-			try container.encode(value, forKey: .value)
-
-		case .rawGyroCompressedXADC,
-			 .rawGyroCompressedYADC,
-			 .rawGyroCompressedZADC:
 			try container.encode(value, forKey: .value)
 
 		case .rawPPGCompressedGreen,

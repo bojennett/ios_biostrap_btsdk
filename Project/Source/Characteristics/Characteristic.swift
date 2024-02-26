@@ -112,25 +112,6 @@ class Characteristic {
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
-			case .rawGyroCompressedXADC,
-					.rawGyroCompressedYADC,
-					.rawGyroCompressedZADC:
-				if ((index + 1) < data.count) {
-					let length = Int(data[index + 1]) + 1 + 1 + 2 + 2
-					if ((index + length) <= data.count) {
-						let packetData = data.subdata(in: Range(index...(index + length - 1)))
-						return (true, type, biostrapDataPacket(packetData))
-					}
-					else {
-						log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-						return (false, .unknown, biostrapDataPacket())
-					}
-				}
-				else {
-					log?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
-					return (false, .unknown, biostrapDataPacket())
-				}
-				
 			case .bbi:
 				if ((index + 9) < data.count) {
 					let packets = Int(data[index + 9])

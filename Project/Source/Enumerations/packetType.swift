@@ -32,12 +32,6 @@ import Foundation
 	case rawAccelCompressedXADC			= 0xc3
 	case rawAccelCompressedYADC			= 0xc4
 	case rawAccelCompressedZADC			= 0xc5
-	case rawGyroXADC					= 0xc8
-	case rawGyroYADC					= 0xc9
-	case rawGyroZADC					= 0xca
-	case rawGyroCompressedXADC			= 0xcb
-	case rawGyroCompressedYADC			= 0xcc
-	case rawGyroCompressedZADC			= 0xcd
 
 	case ppgCalibrationStart			= 0xe0
 	case ppgCalibrationDone				= 0xd0
@@ -96,13 +90,6 @@ import Foundation
 		case "Raw Accel Compressed Y ADC"			: self	= .rawAccelCompressedYADC
 		case "Raw Accel Compressed Z ADC"			: self	= .rawAccelCompressedZADC
 
-		case "Raw Gyro X ADC"						: self	= .rawGyroXADC
-		case "Raw Gyro Y ADC"						: self	= .rawGyroYADC
-		case "Raw Gyro Z ADC"						: self	= .rawGyroZADC
-		case "Raw Gyro Compressed X ADC"			: self	= .rawGyroCompressedXADC
-		case "Raw Gyro Compressed Y ADC"			: self	= .rawGyroCompressedYADC
-		case "Raw Gyro Compressed Z ADC"			: self	= .rawGyroCompressedZADC
-
 		case "PPG Calibration Start"				: self	= .ppgCalibrationStart
 		case "PPG Calibration Done"					: self	= .ppgCalibrationDone
 
@@ -159,13 +146,6 @@ import Foundation
 		case .rawAccelCompressedYADC				: return "Raw Accel Compressed Y ADC"
 		case .rawAccelCompressedZADC				: return "Raw Accel Compressed Z ADC"
 
-		case .rawGyroXADC							: return "Raw Gyro X ADC"
-		case .rawGyroYADC							: return "Raw Gyro Y ADC"
-		case .rawGyroZADC							: return "Raw Gyro Z ADC"
-		case .rawGyroCompressedXADC					: return "Raw Gyro Compressed X ADC"
-		case .rawGyroCompressedYADC					: return "Raw Gyro Compressed Y ADC"
-		case .rawGyroCompressedZADC					: return "Raw Gyro Compressed Z ADC"
-
 		case .ppgCalibrationStart					: return "PPG Calibration Start"
 		case .ppgCalibrationDone					: return "PPG Calibration Done"
 
@@ -220,13 +200,6 @@ import Foundation
 		case .rawAccelCompressedXADC				: return 0	// Done by calculation
 		case .rawAccelCompressedYADC				: return 0	// Done by calculation
 		case .rawAccelCompressedZADC				: return 0	// Done by calculation
-
-		case .rawGyroXADC							: return 3
-		case .rawGyroYADC							: return 3
-		case .rawGyroZADC							: return 3
-		case .rawGyroCompressedXADC					: return 0	// Done by calculation
-		case .rawGyroCompressedYADC					: return 0	// Done by calculation
-		case .rawGyroCompressedZADC					: return 0	// Done by calculation
 
 		case .ppgCalibrationStart					: return 9
 		case .ppgCalibrationDone					: return 14
