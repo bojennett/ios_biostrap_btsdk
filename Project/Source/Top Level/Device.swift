@@ -202,13 +202,21 @@ public class Device: NSObject, ObservableObject {
 	public let getHRZoneRangeComplete = PassthroughSubject<Bool, Never>()
 	public let getPPGAlgorithmComplete = PassthroughSubject<(Bool, ppgAlgorithmConfiguration, eventType), Never>()
 	
+	public let endSleepComplete = PassthroughSubject<Bool, Never>()
+
+	public let disableWornDetectComplete = PassthroughSubject<Bool, Never>()
+	public let enableWornDetectComplete = PassthroughSubject<Bool, Never>()
+
 	@Published public var hrZoneLEDBelow = hrZoneLEDValueType()
 	@Published public var hrZoneLEDWithin = hrZoneLEDValueType()
 	@Published public var hrZoneLEDAbove = hrZoneLEDValueType()
 	@Published public var hrZoneRange = hrZoneRangeValueType()
 	
+	@Published public var buttonPresses = 0
+	
 	// MARK: Passthrough subjects (Notifications)
 	public let heartRateUpdated = PassthroughSubject<(Int, Int, [Double]), Never>()
+	public let endSleepStatus = PassthroughSubject<Bool, Never>()
 
 
 	// MARK: Lambda Completions
@@ -574,12 +582,22 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func endSleep(_ id: String) {
+	func endSleepInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.endSleep()
 		}
 		else { self.lambdaEndSleepComplete?(id, false) }
 	}
+	
+	public func endSleep() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.endSleep()
+		}
+		else {
+			DispatchQueue.main.async { self.endSleepComplete.send(false) }
+		}
+	}
+
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -659,11 +677,20 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func disableWornDetect(_ id: String) {
+	func disableWornDetectInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.disableWornDetect()
 		}
 		else { self.lambdaDisableWornDetectComplete?(id, false) }
+	}
+
+	public func disableWornDetect() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.disableWornDetect()
+		}
+		else {
+			DispatchQueue.main.async { self.disableWornDetectComplete.send(false) }
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -673,11 +700,20 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func enableWornDetect(_ id: String) {
+	func enableWornDetectInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.enableWornDetect()
 		}
 		else { self.lambdaEnableWornDetectComplete?(id, false) }
+	}
+
+	public func enableWornDetect() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.enableWornDetect()
+		}
+		else {
+			DispatchQueue.main.async { self.enableWornDetectComplete.send(false) }
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1523,7 +1559,6 @@ public class Device: NSObject, ObservableObject {
 			mainCharacteristic.setSessionParam(parameter, value: value)
 		}
 		else { self.lambdaSetSessionParamComplete?(self.id, false, parameter) }
-
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1785,6 +1820,41 @@ public class Device: NSObject, ObservableObject {
 				self.getPPGAlgorithmComplete.send((successful, algorithm, state))
 			}
 		}
+		
+		mMainCharacteristic?.endSleepComplete = { successful in
+			self.lambdaEndSleepComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.endSleepComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.endSleepStatus = { enable in
+			self.lambdaEndSleepStatus?(self.id, enable)
+			DispatchQueue.main.async {
+				self.endSleepStatus.send(enable)
+			}
+		}
+		
+		mMainCharacteristic?.disableWornDetectComplete = { successful in
+			self.lambdaDisableWornDetectComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.disableWornDetectComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.enableWornDetectComplete = { successful in
+			self.lambdaEnableWornDetectComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.enableWornDetectComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.buttonClicked = { presses in
+			self.lambdaButtonClicked?(self.id, presses)
+			DispatchQueue.main.async {
+				self.buttonPresses = presses
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1809,6 +1879,20 @@ public class Device: NSObject, ObservableObject {
 				else if (on_charger) { self.chargingStatus = "On Charger" }
 				else if (error) { self.chargingStatus = "Charging Error" }
 				else { self.chargingStatus = "Not Charging" }
+			}
+		}
+		
+		mStreamingCharacteristic?.endSleepStatus = { enable in
+			self.lambdaEndSleepStatus?(self.id, enable)
+			DispatchQueue.main.async {
+				self.endSleepStatus.send(enable)
+			}
+		}
+		
+		mStreamingCharacteristic?.buttonClicked = { presses in
+			self.lambdaButtonClicked?(self.id, presses)
+			DispatchQueue.main.async {
+				self.buttonPresses = presses
 			}
 		}
 	}
@@ -1911,18 +1995,13 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
 					mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mMainCharacteristic?.endSleepComplete = { successful in self.lambdaEndSleepComplete?(self.id, successful) }
 					mMainCharacteristic?.getAllPacketsComplete = { successful in self.lambdaGetAllPacketsComplete?(self.id, successful) }
 					mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, successful, ack) }
 					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.lambdaGetNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
 					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.lambdaGetPacketCountComplete?(self.id, successful, count) }
-					mMainCharacteristic?.disableWornDetectComplete = { successful in self.lambdaDisableWornDetectComplete?(self.id, successful) }
-					mMainCharacteristic?.enableWornDetectComplete = { successful in self.lambdaEnableWornDetectComplete?(self.id, successful) }
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-					mMainCharacteristic?.endSleepStatus = { enable in self.lambdaEndSleepStatus?(self.id, enable) }
-					mMainCharacteristic?.buttonClicked = { presses in self.lambdaButtonClicked?(self.id, presses) }
 					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.lambdaSetSessionParamComplete?(self.id, successful, parameter) }
 					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.lambdaGetSessionParamComplete?(self.id, successful, parameter, value) }
 					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.lambdaAcceptSessionParamsComplete?(self.id, successful) }
@@ -1955,8 +2034,6 @@ public class Device: NSObject, ObservableObject {
 					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mStreamingCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
 					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result)}
-					mStreamingCharacteristic?.endSleepStatus = { enable in self.lambdaEndSleepStatus?(self.id, enable) }
-					mStreamingCharacteristic?.buttonClicked = { presses in self.lambdaButtonClicked?(self.id, presses) }
 					mStreamingCharacteristic?.streamingPacket = { packet in self.lambdaStreamingPacket?(self.id, packet) }
 					mStreamingCharacteristic?.dataAvailable = { self.lambdaDataAvailable?(self.id) }
 
@@ -1980,18 +2057,13 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
 					mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mMainCharacteristic?.endSleepComplete = { successful in self.lambdaEndSleepComplete?(self.id, successful) }
 					mMainCharacteristic?.getAllPacketsComplete = { successful in self.lambdaGetAllPacketsComplete?(self.id, successful) }
 					mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, successful, ack) }
 					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.lambdaGetNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
 					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.lambdaGetPacketCountComplete?(self.id, successful, count) }
-					mMainCharacteristic?.disableWornDetectComplete = { successful in self.lambdaDisableWornDetectComplete?(self.id, successful) }
-					mMainCharacteristic?.enableWornDetectComplete = { successful in self.lambdaEnableWornDetectComplete?(self.id, successful) }
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-					mMainCharacteristic?.endSleepStatus = { enable in self.lambdaEndSleepStatus?(self.id, enable) }
-					mMainCharacteristic?.buttonClicked = { presses in self.lambdaButtonClicked?(self.id, presses) }
 					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.lambdaSetSessionParamComplete?(self.id, successful, parameter) }
 					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.lambdaGetSessionParamComplete?(self.id, successful, parameter, value) }
 					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.lambdaAcceptSessionParamsComplete?(self.id, successful) }
@@ -2023,8 +2095,6 @@ public class Device: NSObject, ObservableObject {
 					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mStreamingCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
 					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result)}
-					mStreamingCharacteristic?.endSleepStatus = { enable in self.lambdaEndSleepStatus?(self.id, enable) }
-					mStreamingCharacteristic?.buttonClicked = { presses in self.lambdaButtonClicked?(self.id, presses) }
 					mStreamingCharacteristic?.streamingPacket = { packet in self.lambdaStreamingPacket?(self.id, packet) }
 					mStreamingCharacteristic?.dataAvailable = { self.lambdaDataAvailable?(self.id) }
 

@@ -611,7 +611,7 @@ import CoreBluetooth
 	@objc public func endSleep(_ id: String) {
 		log?.v("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.endSleep(id) }
+		if let device = mConnectedDevices[id] { device.endSleepInternal() }
 		else { self.endSleepComplete?(id, false) }
 	}
 	
@@ -682,7 +682,7 @@ import CoreBluetooth
 	@objc public func disableWornDetect(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.disableWornDetect(id) }
+		if let device = mConnectedDevices[id] { device.disableWornDetectInternal() }
 		else { self.disableWornDetectComplete?(id, false) }
 	}
 
@@ -697,7 +697,7 @@ import CoreBluetooth
 	@objc public func enableWornDetect(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.enableWornDetect(id) }
+		if let device = mConnectedDevices[id] { device.enableWornDetectInternal() }
 		else { self.enableWornDetectComplete?(id, false) }
 	}
 
