@@ -74,6 +74,37 @@ public class wornCheckResultType: ObservableObject {
 	}
 }
 
+public class ppgMetricsType: ObservableObject {
+	@Published public var status = ""
+	@Published public var hr: Float?
+	@Published public var hrv: Float?
+	@Published public var rr: Float?
+	//@Published public var spo2 = Float(0.0)
+	
+	init(_ jsonPacket: String) {
+		do {
+			if let jsonData = jsonPacket.data(using: .utf8) {
+				let packet  = try JSONDecoder().decode(biostrapDataPacket.self, from: jsonData)
+				
+				status = packet.ppg_metrics_status.title
+				
+				if (packet.hr_valid) { hr = packet.hr_result }
+				if (packet.hrv_valid) { hrv = packet.hrv_result }
+				if (packet.rr_valid) { rr = packet.rr_result }
+				//if (packet.spo2_valid) { spo2	= packet.spo2_result }
+			}
+			else {
+				log?.e ("Cannot get PPG Metrics data from json String")
+				status = "Cannot get PPG Metrics data from json String"
+			}
+		}
+		catch {
+			log?.e ("\(error.localizedDescription)")
+			status = error.localizedDescription
+		}
+	}
+}
+
 public class Device: NSObject, ObservableObject {
 	
 	enum prefixes: String {
@@ -259,10 +290,15 @@ public class Device: NSObject, ObservableObject {
 	@Published public var ppgCaptureDuration: Int?
 	@Published public var tag: String?
 	
+	@Published public var ppgMetrics: ppgMetricsType?
+	
 	// MARK: Passthrough subjects (Notifications)
 	public let heartRateUpdated = PassthroughSubject<(Int, Int, [Double]), Never>()
 	public let endSleepStatus = PassthroughSubject<Bool, Never>()
 	public let manufacturingTestResult = PassthroughSubject<(Bool, String), Never>()
+
+	public let ppgFailed = PassthroughSubject<Int, Never>()
+	public let streamingPacket = PassthroughSubject<String, Never>()
 
 	// MARK: Lambda Completions
 	var lambdaWriteEpochComplete: ((_ id: String, _ successful: Bool)->())?
@@ -342,7 +378,8 @@ public class Device: NSObject, ObservableObject {
 
 	var lambdaPPGMetrics: ((_ id: String, _ successful: Bool, _ packet: String)->())?
 	var lambdaPPGFailed: ((_ id: String, _ code: Int)->())?
-	
+	var lambdaStreamingPacket: ((_ id: String, _ packet: String)->())?
+
 	var lambdaHeartRateUpdated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
 	var lambdaEndSleepStatus: ((_ id: String, _ hasSleep: Bool)->())?
 	var lambdaButtonClicked: ((_ id: String, _ presses: Int)->())?
@@ -351,7 +388,6 @@ public class Device: NSObject, ObservableObject {
 	var lambdaDataPackets: ((_ id: String, _ sequence_number: Int, _ packets: String)->())?
 	var lambdaDataComplete: ((_ id: String, _ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int, _ intermediate: Bool)->())?
 	var lambdaDataFailure: ((_ id: String)->())?
-	var lambdaStreamingPacket: ((_ id: String, _ packet: String)->())?
 	
 	var lambdaWornStatus: ((_ id: String, _ isWorn: Bool)->())?
 	var lambdaChargingStatus: ((_ id: String, _ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
@@ -2241,8 +2277,20 @@ public class Device: NSObject, ObservableObject {
 			}
 		}
 		
-		mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
-		mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
+		mMainCharacteristic?.ppgMetrics = { successful, packet in
+			self.lambdaPPGMetrics?(self.id, successful, packet)
+			DispatchQueue.main.async {
+				self.ppgMetrics = ppgMetricsType(packet)
+			}
+		}
+		
+		mMainCharacteristic?.ppgFailed = { code in
+			self.lambdaPPGFailed?(self.id, code)
+			DispatchQueue.main.async {
+				self.ppgFailed.send(code)
+			}
+		}
+		
 		mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 		mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 		mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
@@ -2306,9 +2354,27 @@ public class Device: NSObject, ObservableObject {
 			}
 		}
 		
-		mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
-		mStreamingCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-		mStreamingCharacteristic?.streamingPacket = { packet in self.lambdaStreamingPacket?(self.id, packet) }
+		mStreamingCharacteristic?.ppgMetrics = { successful, packet in
+			self.lambdaPPGMetrics?(self.id, successful, packet)
+			DispatchQueue.main.async {
+				self.ppgMetrics = ppgMetricsType(packet)
+			}
+		}
+		
+		mStreamingCharacteristic?.ppgFailed = { code in
+			self.lambdaPPGFailed?(self.id, code)
+			DispatchQueue.main.async {
+				self.ppgFailed.send(code)
+			}
+		}
+		
+		mStreamingCharacteristic?.streamingPacket = { packet in
+			self.lambdaStreamingPacket?(self.id, packet)
+			DispatchQueue.main.async {
+				self.streamingPacket.send(packet)
+			}
+		}
+		
 		mStreamingCharacteristic?.dataAvailable = { self.lambdaDataAvailable?(self.id) }
 	}
 	
