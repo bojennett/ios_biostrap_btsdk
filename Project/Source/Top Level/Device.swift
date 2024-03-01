@@ -37,7 +37,6 @@ public class hrZoneLEDValueType: ObservableObject {
 	}
 }
 
-
 public class hrZoneRangeValueType: ObservableObject {
 	@Published public var enabled: Bool = false
 	@Published public var lower: Int = 0
@@ -244,6 +243,8 @@ public class Device: NSObject, ObservableObject {
 	public let updateFirmwareFinished = PassthroughSubject<Void, Never>()
 	public let updateFirmwareProgress = PassthroughSubject<Float, Never>()
 	public let updateFirmwareFailed = PassthroughSubject<(Int, String), Never>()
+	
+	public let manufacturingTestComplete = PassthroughSubject<Bool, Never>()
 
 	@Published public var hrZoneLEDBelow = hrZoneLEDValueType()
 	@Published public var hrZoneLEDWithin = hrZoneLEDValueType()
@@ -259,6 +260,7 @@ public class Device: NSObject, ObservableObject {
 	// MARK: Passthrough subjects (Notifications)
 	public let heartRateUpdated = PassthroughSubject<(Int, Int, [Double]), Never>()
 	public let endSleepStatus = PassthroughSubject<Bool, Never>()
+	public let manufacturingTestResult = PassthroughSubject<(Bool, String), Never>()
 
 	// MARK: Lambda Completions
 	var lambdaWriteEpochComplete: ((_ id: String, _ successful: Bool)->())?
@@ -1217,20 +1219,42 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	#if UNIVERSAL || ALTER
-	func alterManufacturingTest(_ id: String, test: alterManufacturingTestType) {
+	func alterManufacturingTestInternal(_ test: alterManufacturingTestType) {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.alterManufacturingTest(test)
 		}
 		else { self.lambdaManufacturingTestComplete?(id, false) }
 	}
+	
+	public func alterManufacturingTest(_ test: alterManufacturingTestType) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.alterManufacturingTest(test)
+		}
+		else {
+			DispatchQueue.main.async {
+				self.manufacturingTestComplete.send(false)
+			}
+		}
+	}
 	#endif
 
 	#if UNIVERSAL || KAIROS
-	func kairosManufacturingTest(_ id: String, test: kairosManufacturingTestType) {
+	func kairosManufacturingTestInternal(_ test: kairosManufacturingTestType) {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.kairosManufacturingTest(test)
 		}
 		else { self.lambdaManufacturingTestComplete?(id, false) }
+	}
+	
+	public func kairosManufacturingTest(_ test: kairosManufacturingTestType) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.kairosManufacturingTest(test)
+		}
+		else {
+			DispatchQueue.main.async {
+				self.manufacturingTestComplete.send(false)
+			}
+		}
 	}
 	#endif
 
@@ -2211,6 +2235,21 @@ public class Device: NSObject, ObservableObject {
 				self.airplaneModeComplete.send(successful)
 			}
 		}
+		
+		mMainCharacteristic?.manufacturingTestComplete	= { successful in
+			self.lambdaManufacturingTestComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.manufacturingTestComplete.send(successful)
+			}
+		}
+		
+		// MARK: Notifications
+		mMainCharacteristic?.manufacturingTestResult	= { valid, result in
+			self.lambdaManufacturingTestResult?(self.id, valid, result)
+			DispatchQueue.main.async {
+				self.manufacturingTestResult.send((valid, result))
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2249,6 +2288,13 @@ public class Device: NSObject, ObservableObject {
 			self.lambdaButtonClicked?(self.id, presses)
 			DispatchQueue.main.async {
 				self.buttonPresses = presses
+			}
+		}
+		
+		mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in
+			self.lambdaManufacturingTestResult?(self.id, valid, result)
+			DispatchQueue.main.async {
+				self.manufacturingTestResult.send((valid, result))
 			}
 		}
 	}
@@ -2349,8 +2395,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.lambdaManufacturingTestComplete?(self.id, successful) }
-					mMainCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result) }
 					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.lambdaRecalibratePPGComplete?(self.id, successful) }
 
 					mMainCharacteristic?.discoverDescriptors()
@@ -2369,7 +2413,6 @@ public class Device: NSObject, ObservableObject {
 					attachStreamingCharacteristicCallbacks()
 					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mStreamingCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result)}
 					mStreamingCharacteristic?.streamingPacket = { packet in self.lambdaStreamingPacket?(self.id, packet) }
 					mStreamingCharacteristic?.dataAvailable = { self.lambdaDataAvailable?(self.id) }
 
@@ -2391,8 +2434,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.lambdaManufacturingTestComplete?(self.id, successful) }
-					mMainCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result) }
 
 					mMainCharacteristic?.discoverDescriptors()
 
@@ -2410,7 +2451,6 @@ public class Device: NSObject, ObservableObject {
 					attachStreamingCharacteristicCallbacks()
 					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mStreamingCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result)}
 					mStreamingCharacteristic?.streamingPacket = { packet in self.lambdaStreamingPacket?(self.id, packet) }
 					mStreamingCharacteristic?.dataAvailable = { self.lambdaDataAvailable?(self.id) }
 

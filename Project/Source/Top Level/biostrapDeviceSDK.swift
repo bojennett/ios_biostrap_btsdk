@@ -907,7 +907,7 @@ import CoreBluetooth
 	#if ALTER
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: alterManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.alterManufacturingTest(id, test: test) }
+		if let device = mConnectedDevices[id] { device.alterManufacturingTestInternal(id, test: test) }
 		else { self.lambdaManufacturingTestComplete?(id, false) }
 	}
 	#endif
@@ -915,7 +915,7 @@ import CoreBluetooth
 	#if KAIROS
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: kairosManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.kairosManufacturingTest(id, test: test) }
+		if let device = mConnectedDevices[id] { device.kairosManufacturingTestInternal(id, test: test) }
 		else { self.lambdaManufacturingTestComplete?(id, false) }
 	}
 	#endif
@@ -923,13 +923,13 @@ import CoreBluetooth
 	#if UNIVERSAL
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func alterManufacturingTest(_ id: String, test: alterManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.alterManufacturingTest(id, test: test) }
+		if let device = mConnectedDevices[id] { device.alterManufacturingTestInternal(test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func kairosManufacturingTest(_ id: String, test: kairosManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.kairosManufacturingTest(id, test: test) }
+		if let device = mConnectedDevices[id] { device.kairosManufacturingTestInternal(test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
