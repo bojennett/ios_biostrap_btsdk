@@ -321,7 +321,6 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						device.lambdaEndSleepComplete						= { id, successful in DispatchQueue.main.async { self.endSleepComplete?(id, successful) } }
 						device.lambdaGetAllPacketsComplete				= { id, successful in DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) } }
 						device.lambdaGetAllPacketsAcknowledgeComplete		= { id, successful, ack in DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) } }
-						device.lambdaGetNextPacketComplete				= { id, successful, error_code, caughtUp, packet in DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) } }
 						device.lambdaGetPacketCountComplete				= { id, successful, count in DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) } }
 						device.lambdaStartManualComplete 					= { id, successful in DispatchQueue.main.async { self.startManualComplete?(id, successful) } }
 						device.lambdaStopManualComplete 					= { id, successful in DispatchQueue.main.async { self.stopManualComplete?(id, successful) } }
@@ -428,7 +427,6 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						device.lambdaEndSleepComplete						= { id, successful in DispatchQueue.main.async { self.endSleepComplete?(id, successful) } }
 						device.lambdaGetAllPacketsComplete				= { id, successful in DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) } }
 						device.lambdaGetAllPacketsAcknowledgeComplete		= { id, successful, ack in DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) } }
-						device.lambdaGetNextPacketComplete				= { id, successful, error_code, caughtUp, packet in DispatchQueue.main.async { self.getNextPacketComplete?(id, successful, error_code, caughtUp, packet) } }
 						device.lambdaGetPacketCountComplete				= { id, successful, count in DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) } }
 						device.lambdaStartManualComplete 					= { id, successful in DispatchQueue.main.async { self.startManualComplete?(id, successful) } }
 						device.lambdaStopManualComplete 					= { id, successful in DispatchQueue.main.async { self.stopManualComplete?(id, successful) } }

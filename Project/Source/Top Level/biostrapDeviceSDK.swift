@@ -624,7 +624,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAllPackets(_ id: String, pages: Int, delay: Int) {
-		if let device = mConnectedDevices[id] { device.getAllPackets(id, pages: pages, delay: delay) }
+		if let device = mConnectedDevices[id] { device.getAllPackets(pages: pages, delay: delay) }
 		else { self.getAllPacketsComplete?(id, false) }
 	}
 
@@ -637,7 +637,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAllPacketsAcknowledge(_ id: String, ack: Bool) {
-		if let device = mConnectedDevices[id] { device.getAllPacketsAcknowledge(id, ack: ack) }
+		if let device = mConnectedDevices[id] { device.getAllPacketsAcknowledgeInternal(ack) }
 		else { self.getAllPacketsAcknowledgeComplete?(id, false, ack) }
 	}
 	
@@ -649,25 +649,10 @@ import CoreBluetooth
 	//
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func getNextPacket(_ id: String, single: Bool) {
-		log?.v ("\(id)")
-		
-		if let device = mConnectedDevices[id] { device.getNextPacket(id, single: single) }
-		else { self.getNextPacketComplete?(id, false, .missingDevice, true, "") }
-	}
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPacketCount(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.getPacketCount(id) }
+		if let device = mConnectedDevices[id] { device.getPacketCountInternal() }
 		else { self.getPacketCountComplete?(id, false, 0) }
 	}
 

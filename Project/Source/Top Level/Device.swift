@@ -236,6 +236,10 @@ public class Device: NSObject, ObservableObject {
 	public let resetComplete = PassthroughSubject<Bool, Never>()
 	public let airplaneModeComplete = PassthroughSubject<Bool, Never>()
 
+	public let getPacketCountComplete = PassthroughSubject<(Bool, Int), Never>()
+	public let getAllPacketsComplete = PassthroughSubject<Bool, Never>()
+	public let getAllPacketsAcknowledgeComplete = PassthroughSubject<(Bool, Bool), Never>()
+
 	@Published public var hrZoneLEDBelow = hrZoneLEDValueType()
 	@Published public var hrZoneLEDWithin = hrZoneLEDValueType()
 	@Published public var hrZoneLEDAbove = hrZoneLEDValueType()
@@ -251,15 +255,13 @@ public class Device: NSObject, ObservableObject {
 	public let heartRateUpdated = PassthroughSubject<(Int, Int, [Double]), Never>()
 	public let endSleepStatus = PassthroughSubject<Bool, Never>()
 
-
 	// MARK: Lambda Completions
 	var lambdaWriteEpochComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaReadEpochComplete: ((_ id: String, _ successful: Bool, _ value: Int)->())?
 
+	var lambdaGetPacketCountComplete: ((_ id: String, _ successful: Bool, _ count: Int)->())?
 	var lambdaGetAllPacketsComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaGetAllPacketsAcknowledgeComplete: ((_ id: String, _ successful: Bool, _ ack: Bool)->())?
-	var lambdaGetNextPacketComplete: ((_ id: String, _ successful: Bool, _ error_code: nextPacketStatusType, _ caughtUp: Bool, _ packet: String)->())?
-	var lambdaGetPacketCountComplete: ((_ id: String, _ successful: Bool, _ count: Int)->())?
 	
 	var lambdaStartManualComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaStopManualComplete: ((_ id: String, _ successful: Bool)->())?
@@ -643,7 +645,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getAllPackets(_ id: String, pages: Int, delay: Int) {
+	func getAllPacketsInternal(pages: Int, delay: Int) {
 		var newStyle	= false
 		
 		if let mainCharacteristic = mMainCharacteristic {
@@ -665,32 +667,30 @@ public class Device: NSObject, ObservableObject {
 		else { self.lambdaGetAllPacketsComplete?(id, false) }
 	}
 
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	func getAllPacketsAcknowledge(_ id: String, ack: Bool) {
+	public func getAllPackets(pages: Int, delay: Int) {
+		var newStyle	= false
+		
 		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getAllPacketsAcknowledge(ack)
+			if let softwareVersion = mSoftwareRevision {
+				if (softwareVersion.bluetoothGreaterThan("2.0.4")) {
+					log?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use new style")
+					newStyle	= true
+				}
+				else {
+					log?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use old style")
+				}
+			}
+			else {
+				log?.e ("Can't find the software version, i guess i will use the old style")
+			}
+
+			mainCharacteristic.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
 		}
-		else { self.lambdaGetAllPacketsAcknowledgeComplete?(id, false, ack) }
-	}
-	
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	func getNextPacket(_ id: String, single: Bool) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getNextPacket(single)
+		else {
+			DispatchQueue.main.async {
+				self.getAllPacketsComplete.send(false)
+			}
 		}
-		else { self.lambdaGetNextPacketComplete?(id, false, .missingDevice, true, "") }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -700,11 +700,47 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getPacketCount(_ id: String) {
+	func getAllPacketsAcknowledgeInternal(_ ack: Bool) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getAllPacketsAcknowledge(ack)
+		}
+		else { self.lambdaGetAllPacketsAcknowledgeComplete?(id, false, ack) }
+	}
+	
+	public func getAllPacketsAcknowledge(_ ack: Bool) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getAllPacketsAcknowledge(ack)
+		}
+		else {
+			DispatchQueue.main.async {
+				self.getAllPacketsAcknowledgeComplete.send((false, ack))
+			}
+		}
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func getPacketCountInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getPacketCount()
 		}
 		else { self.lambdaGetPacketCountComplete?(id, false, 0) }
+	}
+
+	public func getPacketCount() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.getPacketCount()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.getPacketCountComplete.send((false, 0))
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2094,20 +2130,25 @@ public class Device: NSObject, ObservableObject {
 			}
 		}
 		
+		mMainCharacteristic?.getPacketCountComplete = { successful, count in
+			self.lambdaGetPacketCountComplete?(self.id, successful, count)
+			DispatchQueue.main.async {
+				self.getPacketCountComplete.send((successful, count))
+			}
+		}
+		
 		mMainCharacteristic?.getAllPacketsComplete = { successful in
 			self.lambdaGetAllPacketsComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.getAllPacketsComplete.send(successful)
+			}
 		}
 		
 		mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in
 			self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, successful, ack)
-		}
-		
-		mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in
-			self.lambdaGetNextPacketComplete?(self.id, successful, error_code, caughtUp, packet)
-		}
-		
-		mMainCharacteristic?.getPacketCountComplete = { successful, count in
-			self.lambdaGetPacketCountComplete?(self.id, successful, count)
+			DispatchQueue.main.async {
+				self.getAllPacketsAcknowledgeComplete.send((successful, ack))
+			}
 		}
 		
 		mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }
