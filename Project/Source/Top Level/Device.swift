@@ -228,6 +228,9 @@ public class Device: NSObject, ObservableObject {
 	public let getSessionParamComplete = PassthroughSubject<(Bool, sessionParameterType), Never>()
 	public let resetSessionParamsComplete = PassthroughSubject<Bool, Never>()
 	public let acceptSessionParamsComplete = PassthroughSubject<Bool, Never>()
+	
+	public let readCanLogDiagnosticsComplete = PassthroughSubject<Bool, Never>()
+	public let updateCanLogDiagnosticsComplete = PassthroughSubject<Bool, Never>()
 
 	@Published public var hrZoneLEDBelow = hrZoneLEDValueType()
 	@Published public var hrZoneLEDWithin = hrZoneLEDValueType()
@@ -358,6 +361,8 @@ public class Device: NSObject, ObservableObject {
 	@Published public var bluetoothSoftwareRevision: String = "???"
 	@Published public var algorithmsSoftwareRevision: String = "???"
 	@Published public var sleepSoftwareRevision: String = "???"
+	
+	@Published public var canLogDiagnostics: Bool?
 	
 	@Published public var wornCheckResult = wornCheckResultType()
 
@@ -1047,11 +1052,23 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func readCanLogDiagnostics(_ id: String) {
+	func readCanLogDiagnosticsInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.readCanLogDiagnostics()
 		}
 		else { self.lambdaReadCanLogDiagnosticsComplete?(id, false, false) }
+	}
+	
+	public func readCanLogDiagnostics() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.readCanLogDiagnostics()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.canLogDiagnostics = nil
+				self.readCanLogDiagnosticsComplete.send(false)
+			}
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1061,11 +1078,22 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func updateCanLogDiagnostics(_ id: String, allow: Bool) {
+	func updateCanLogDiagnosticsInternal(_ allow: Bool) {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.updateCanLogDiagnostics(allow)
 		}
 		else { self.lambdaUpdateCanLogDiagnosticsComplete?(id, false) }
+	}
+		
+	public func updateCanLogDiagnostics(_ allow: Bool) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.updateCanLogDiagnostics(allow)
+		}
+		else {
+			DispatchQueue.main.async {
+				self.updateCanLogDiagnosticsComplete.send(false)
+			}
+		}
 	}
 		
 	//--------------------------------------------------------------------------------
@@ -2013,6 +2041,37 @@ public class Device: NSObject, ObservableObject {
 				self.resetSessionParamsComplete.send(successful)
 			}
 		}
+		
+		mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in
+			self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow)
+			DispatchQueue.main.async {
+				self.canLogDiagnostics = allow
+				self.readCanLogDiagnosticsComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in
+			self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.updateCanLogDiagnosticsComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.getAllPacketsComplete = { successful in
+			self.lambdaGetAllPacketsComplete?(self.id, successful)
+		}
+		
+		mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in
+			self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, successful, ack)
+		}
+		
+		mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in
+			self.lambdaGetNextPacketComplete?(self.id, successful, error_code, caughtUp, packet)
+		}
+		
+		mMainCharacteristic?.getPacketCountComplete = { successful, count in
+			self.lambdaGetPacketCountComplete?(self.id, successful, count)
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2145,17 +2204,11 @@ public class Device: NSObject, ObservableObject {
 					#endif
 					attachMainCharacteristicCallbacks()
 					mMainCharacteristic?.enterShipModeComplete = { successful in self.lambdaEnterShipModeComplete?(self.id, successful) }
-					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow) }
-					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
 					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
 					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
 					mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mMainCharacteristic?.getAllPacketsComplete = { successful in self.lambdaGetAllPacketsComplete?(self.id, successful) }
-					mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, successful, ack) }
-					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.lambdaGetNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
-					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.lambdaGetPacketCountComplete?(self.id, successful, count) }
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
@@ -2202,17 +2255,11 @@ public class Device: NSObject, ObservableObject {
 					#endif
 					attachMainCharacteristicCallbacks()
 					mMainCharacteristic?.enterShipModeComplete = { successful in self.lambdaEnterShipModeComplete?(self.id, successful) }
-					mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow) }
-					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
 					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
 					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
 					mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mMainCharacteristic?.getAllPacketsComplete = { successful in self.lambdaGetAllPacketsComplete?(self.id, successful) }
-					mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, successful, ack) }
-					mMainCharacteristic?.getNextPacketComplete = { successful, error_code, caughtUp, packet in self.lambdaGetNextPacketComplete?(self.id, successful, error_code, caughtUp, packet) }
-					mMainCharacteristic?.getPacketCountComplete = { successful, count in self.lambdaGetPacketCountComplete?(self.id, successful, count) }
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }

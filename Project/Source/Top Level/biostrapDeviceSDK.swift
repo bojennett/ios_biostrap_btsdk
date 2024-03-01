@@ -895,7 +895,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readCanLogDiagnostics(_ id: String) {
-		if let device = mConnectedDevices[id] { device.readCanLogDiagnostics(id) }
+		if let device = mConnectedDevices[id] { device.readCanLogDiagnosticsInternal() }
 		else { self.readCanLogDiagnosticsComplete?(id, false, false) }
 	}
 	
@@ -908,7 +908,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func updateCanLogDiagnostics(_ id: String, allow: Bool) {
-		if let device = mConnectedDevices[id] { device.updateCanLogDiagnostics(id, allow: allow) }
+		if let device = mConnectedDevices[id] { device.updateCanLogDiagnosticsInternal(allow) }
 		else { self.updateCanLogDiagnosticsComplete?(id, false) }
 	}
 		
