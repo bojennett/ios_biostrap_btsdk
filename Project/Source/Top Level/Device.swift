@@ -60,6 +60,21 @@ public class hrZoneRangeValueType: ObservableObject {
 	}
 }
 
+public class wornCheckResultType: ObservableObject {
+	@Published public var code: String = ""
+	@Published public var value: Int = 0
+	
+	public init() {
+		self.code = ""
+		self.value = 0
+	}
+	
+	public init(code: String, value: Int) {
+		self.code = code
+		self.value = value
+	}
+}
+
 public class Device: NSObject, ObservableObject {
 	
 	enum prefixes: String {
@@ -207,12 +222,23 @@ public class Device: NSObject, ObservableObject {
 	public let disableWornDetectComplete = PassthroughSubject<Bool, Never>()
 	public let enableWornDetectComplete = PassthroughSubject<Bool, Never>()
 
+	public let wornCheckResultComplete = PassthroughSubject<Bool, Never>()
+	
+	public let setSessionParamComplete = PassthroughSubject<(Bool, sessionParameterType), Never>()
+	public let getSessionParamComplete = PassthroughSubject<(Bool, sessionParameterType), Never>()
+	public let resetSessionParamsComplete = PassthroughSubject<Bool, Never>()
+	public let acceptSessionParamsComplete = PassthroughSubject<Bool, Never>()
+
 	@Published public var hrZoneLEDBelow = hrZoneLEDValueType()
 	@Published public var hrZoneLEDWithin = hrZoneLEDValueType()
 	@Published public var hrZoneLEDAbove = hrZoneLEDValueType()
 	@Published public var hrZoneRange = hrZoneRangeValueType()
 	
 	@Published public var buttonPresses = 0
+	
+	@Published public var ppgCapturePeriod: Int?
+	@Published public var ppgCaptureDuration: Int?
+	@Published public var tag: String?
 	
 	// MARK: Passthrough subjects (Notifications)
 	public let heartRateUpdated = PassthroughSubject<(Int, Int, [Double]), Never>()
@@ -332,6 +358,8 @@ public class Device: NSObject, ObservableObject {
 	@Published public var bluetoothSoftwareRevision: String = "???"
 	@Published public var algorithmsSoftwareRevision: String = "???"
 	@Published public var sleepSoftwareRevision: String = "???"
+	
+	@Published public var wornCheckResult = wornCheckResultType()
 
 	internal var mModelNumber					: disStringCharacteristic?
 	internal var mFirmwareVersion				: disFirmwareVersionCharacteristic?
@@ -1412,11 +1440,23 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func wornCheck(_ id: String) {
+	func wornCheckInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.wornCheck()
 		}
 		else { self.lambdaWornCheckComplete?(id, false, "Missing Characteristic", 0) }
+	}
+
+	public func wornCheck() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.wornCheck()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.wornCheckResult = wornCheckResultType(code: "Missing characteristic", value: 0)
+				self.wornCheckResultComplete.send(false)
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1552,7 +1592,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setSessionParam(_ parameter: sessionParameterType, value: Int) {
+	func setSessionParamInternal(_ parameter: sessionParameterType, value: Int) {
 		log?.v("\(self.id): \(parameter)")
 
 		if let mainCharacteristic = mMainCharacteristic {
@@ -1560,7 +1600,26 @@ public class Device: NSObject, ObservableObject {
 		}
 		else { self.lambdaSetSessionParamComplete?(self.id, false, parameter) }
 	}
-	
+
+	public func setSessionParam(_ parameter: sessionParameterType, value: Int) {
+		log?.v("\(self.id): \(parameter)")
+
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.setSessionParam(parameter, value: value)
+		}
+		else {
+			DispatchQueue.main.async {
+				switch parameter {
+				case .tag: self.tag = nil
+				case .ppgCapturePeriod: self.ppgCapturePeriod = nil
+				case .ppgCaptureDuration: self.ppgCaptureDuration = nil
+				default: break
+				}
+				self.setSessionParamComplete.send((false, parameter))
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1568,7 +1627,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getSessionParam(_ parameter: sessionParameterType) {
+	func getSessionParamInternal(_ parameter: sessionParameterType) {
 		log?.v("\(self.id): \(parameter)")
 
 		if let mainCharacteristic = mMainCharacteristic {
@@ -1577,20 +1636,24 @@ public class Device: NSObject, ObservableObject {
 		else { self.lambdaGetSessionParamComplete?(self.id, false, parameter, 0) }
 	}
 
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	func resetSessionParams() {
-		log?.v("\(self.id)")
+	public func getSessionParam(_ parameter: sessionParameterType) {
+		log?.v("\(self.id): \(parameter)")
 
 		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.resetSessionParams()
+			mainCharacteristic.getSessionParam(parameter)
 		}
-		else { self.lambdaResetSessionParamsComplete?(self.id, false) }
+		else {
+			DispatchQueue.main.async {
+				switch parameter {
+				case .tag: self.tag = nil
+				case .ppgCapturePeriod: self.ppgCapturePeriod = nil
+				case .ppgCaptureDuration: self.ppgCaptureDuration = nil
+				default: break
+				}
+				self.setSessionParamComplete.send((false, parameter))
+			}
+			self.getSessionParamComplete.send((false, parameter))
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1600,13 +1663,55 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func acceptSessionParams() {
+	func resetSessionParamsInternal() {
+		log?.v("\(self.id)")
+
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.resetSessionParams()
+		}
+		else { self.lambdaResetSessionParamsComplete?(self.id, false) }
+	}
+
+	public func resetSessionParams() {
+		log?.v("\(self.id)")
+
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.resetSessionParams()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.resetSessionParamsComplete.send(false)
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func acceptSessionParamsInternal() {
 		log?.v("\(self.id)")
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.acceptSessionParams()
 		}
 		else { self.lambdaAcceptSessionParamsComplete?(self.id, false) }
+	}
+	
+	public func acceptSessionParams() {
+		log?.v("\(self.id)")
+
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.acceptSessionParams()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.acceptSessionParamsComplete.send(false)
+			}
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1855,6 +1960,59 @@ public class Device: NSObject, ObservableObject {
 				self.buttonPresses = presses
 			}
 		}
+		
+		mMainCharacteristic?.wornCheckComplete = { successful, code, value in
+			self.lambdaWornCheckComplete?(self.id, successful, code, value )
+			DispatchQueue.main.async {
+				self.wornCheckResult = wornCheckResultType(code: code, value: value)
+				self.wornCheckResultComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.setSessionParamComplete = { successful, parameter in
+			log?.v ("setSessionParamComplete: \(successful), \(parameter)")
+			self.lambdaSetSessionParamComplete?(self.id, successful, parameter)
+			DispatchQueue.main.async {
+				self.setSessionParamComplete.send((successful, parameter))
+			}
+		}
+		
+		mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in
+			log?.v ("getSessionParamComplete: \(successful), \(parameter), \(value)")
+			self.lambdaGetSessionParamComplete?(self.id, successful, parameter, value)
+			DispatchQueue.main.async {
+				switch parameter {
+				case .tag:
+					var data = Data()
+					data.append((UInt8((value >> 0) & 0xff)))
+					data.append((UInt8((value >> 8) & 0xff)))
+					if let strValue = String(data: data, encoding: .utf8) {
+						self.tag = strValue
+					}
+					else {
+						self.tag = "'\(String(format:"0x%04X", value))' - Could not make string"
+					}
+				case .ppgCapturePeriod: self.ppgCapturePeriod = value
+				case .ppgCaptureDuration: self.ppgCaptureDuration = value
+				default: break
+				}
+				self.getSessionParamComplete.send((successful, parameter))
+			}
+		}
+		
+		mMainCharacteristic?.acceptSessionParamsComplete	= { successful in
+			self.lambdaAcceptSessionParamsComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.acceptSessionParamsComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.resetSessionParamsComplete	= { successful in
+			self.lambdaResetSessionParamsComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.resetSessionParamsComplete.send(successful)
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1991,7 +2149,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
 					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
-					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.lambdaWornCheckComplete?(self.id, successful, code, value )}
 					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
 					mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
@@ -2002,10 +2159,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.lambdaSetSessionParamComplete?(self.id, successful, parameter) }
-					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.lambdaGetSessionParamComplete?(self.id, successful, parameter, value) }
-					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.lambdaAcceptSessionParamsComplete?(self.id, successful) }
-					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.lambdaResetSessionParamsComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.lambdaManufacturingTestComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result) }
 					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.lambdaRecalibratePPGComplete?(self.id, successful) }
@@ -2053,7 +2206,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
 					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
-					mMainCharacteristic?.wornCheckComplete = { successful, code, value in self.lambdaWornCheckComplete?(self.id, successful, code, value )}
 					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
 					mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
@@ -2064,10 +2216,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
 					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-					mMainCharacteristic?.setSessionParamComplete = { successful, parameter in self.lambdaSetSessionParamComplete?(self.id, successful, parameter) }
-					mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in self.lambdaGetSessionParamComplete?(self.id, successful, parameter, value) }
-					mMainCharacteristic?.acceptSessionParamsComplete	= { successful in self.lambdaAcceptSessionParamsComplete?(self.id, successful) }
-					mMainCharacteristic?.resetSessionParamsComplete	= { successful in self.lambdaResetSessionParamsComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.lambdaManufacturingTestComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result) }
 					mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }

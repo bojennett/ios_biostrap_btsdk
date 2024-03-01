@@ -1209,7 +1209,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func wornCheck(_ id: String) {
-		if let device = mConnectedDevices[id] { device.wornCheck(id) }
+		if let device = mConnectedDevices[id] { device.wornCheckInternal() }
 		else { self.wornCheckComplete?(id, false, "No device", 0) }
 	}
 
@@ -1314,7 +1314,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setSessionParam(_ id: String, parameter: sessionParameterType, value: Int) {
-		if let device = mConnectedDevices[id] { device.setSessionParam(parameter, value: value) }
+		if let device = mConnectedDevices[id] { device.setSessionParamInternal(parameter, value: value) }
 		else { self.setSessionParamComplete?(id, false, parameter) }
 
 	}
@@ -1328,7 +1328,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getSessionParam(_ id: String, parameter: sessionParameterType) {
-		if let device = mConnectedDevices[id] { device.getSessionParam(parameter) }
+		if let device = mConnectedDevices[id] { device.getSessionParamInternal(parameter) }
 		else { self.getSessionParamComplete?(id, false, parameter, 0) }
 	}
 
@@ -1341,7 +1341,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func resetSessionParams(_ id: String) {
-		if let device = mConnectedDevices[id] { device.resetSessionParams() }
+		if let device = mConnectedDevices[id] { device.resetSessionParamsInternal() }
 		else { self.resetSessionParamsComplete?(id, false) }
 	}
 
@@ -1355,7 +1355,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func acceptSessionParams(_ id: String) {
-		if let device = mConnectedDevices[id] { device.acceptSessionParams() }
+		if let device = mConnectedDevices[id] { device.acceptSessionParamsInternal() }
 		else { self.acceptSessionParamsComplete?(id, false) }
 	}
 
