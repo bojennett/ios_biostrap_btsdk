@@ -778,7 +778,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func enterShipMode(_ id: String) {
-		if let device = mConnectedDevices[id] { device.enterShipMode(id) }
+		if let device = mConnectedDevices[id] { device.enterShipModeInternal() }
 		else { self.enterShipModeComplete?(id, false) }
 	}
 
@@ -1261,7 +1261,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func airplaneMode(_ id: String) {
-		if let device = mConnectedDevices[id] { device.airplaneMode(id) }
+		if let device = mConnectedDevices[id] { device.airplaneModeInternal() }
 		else { self.airplaneModeComplete?(id, false) }
 	}
 
@@ -1274,7 +1274,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func reset(_ id: String) {
-		if let device = mConnectedDevices[id] { device.reset(id) }
+		if let device = mConnectedDevices[id] { device.resetInternal() }
 		else { self.resetComplete?(id, false) }
 	}
 

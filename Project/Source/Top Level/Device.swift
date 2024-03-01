@@ -232,6 +232,10 @@ public class Device: NSObject, ObservableObject {
 	public let readCanLogDiagnosticsComplete = PassthroughSubject<Bool, Never>()
 	public let updateCanLogDiagnosticsComplete = PassthroughSubject<Bool, Never>()
 
+	public let enterShipModeComplete = PassthroughSubject<Bool, Never>()
+	public let resetComplete = PassthroughSubject<Bool, Never>()
+	public let airplaneModeComplete = PassthroughSubject<Bool, Never>()
+
 	@Published public var hrZoneLEDBelow = hrZoneLEDValueType()
 	@Published public var hrZoneLEDWithin = hrZoneLEDValueType()
 	@Published public var hrZoneLEDAbove = hrZoneLEDValueType()
@@ -263,6 +267,8 @@ public class Device: NSObject, ObservableObject {
 	var lambdaLEDComplete: ((_ id: String, _ successful: Bool)->())?
 	
 	var lambdaEnterShipModeComplete: ((_ id: String, _ successful: Bool)->())?
+	var lambdaResetComplete: ((_ id: String, _ successful: Bool)->())?
+	var lambdaAirplaneModeComplete: ((_ id: String, _ successful: Bool)->())?
 
 	var lamdaWriteSerialNumberComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaReadSerialNumberComplete: ((_ id: String, _ successful: Bool, _ partID: String)->())?
@@ -281,7 +287,6 @@ public class Device: NSObject, ObservableObject {
 	var lambdaAllowPPGComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaWornCheckComplete: ((_ id: String, _ successful: Bool, _ code: String, _ value: Int)->())?
 	var lambdaRawLoggingComplete: ((_ id: String, _ successful: Bool)->())?
-	var lambdaResetComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaEndSleepComplete: ((_ id: String, _ successful: Bool)->())?
 	
 	var lambdaDisableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
@@ -329,7 +334,6 @@ public class Device: NSObject, ObservableObject {
 	var lambdaPPGMetrics: ((_ id: String, _ successful: Bool, _ packet: String)->())?
 	var lambdaPPGFailed: ((_ id: String, _ code: Int)->())?
 	
-	var lambdaAirplaneModeComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaHeartRateUpdated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
 	var lambdaEndSleepStatus: ((_ id: String, _ hasSleep: Bool)->())?
 	var lambdaButtonClicked: ((_ id: String, _ presses: Int)->())?
@@ -838,11 +842,72 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func enterShipMode(_ id: String) {
+	func enterShipModeInternal() {
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.enterShipMode()
 		}
 		else { self.lambdaEnterShipModeComplete?(id, false) }
+	}
+
+	public func enterShipMode() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.enterShipMode()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.enterShipModeComplete.send(false)
+			}
+		}
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func resetInternal() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.reset()
+		}
+		else { self.lambdaResetComplete?(id, false) }
+	}
+	
+	public func reset() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.reset()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.resetComplete.send(false)
+			}
+		}
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func airplaneModeInternal() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.airplaneMode()
+		}
+		else { self.lambdaAirplaneModeComplete?(id, false) }
+	}
+
+	public func airplaneMode() {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.airplaneMode()
+		}
+		else {
+			DispatchQueue.main.async {
+				self.airplaneModeComplete.send(false)
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1558,34 +1623,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func airplaneMode(_ id: String) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.airplaneMode()
-		}
-		else { self.lambdaAirplaneModeComplete?(id, false) }
-	}
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	func reset(_ id: String) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.reset()
-		}
-		else { self.lambdaResetComplete?(id, false) }
-	}
-	
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
 	func updateFirmware(_ file: URL) {
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
 			do {
@@ -2072,6 +2109,34 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.getPacketCountComplete = { successful, count in
 			self.lambdaGetPacketCountComplete?(self.id, successful, count)
 		}
+		
+		mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }
+		mMainCharacteristic?.setUnpairedComplete		= { successful in self.lambdaSetUnpairedComplete?(self.id, successful) }
+		mMainCharacteristic?.getPairedComplete			= { successful, paired in self.lambdaGetPairedComplete?(self.id, successful, paired) }
+		mMainCharacteristic?.setPageThresholdComplete	= { successful in self.lambdaSetPageThresholdComplete?(self.id, successful) }
+		mMainCharacteristic?.getPageThresholdComplete	= { successful, threshold in self.lambdaGetPageThresholdComplete?(self.id, successful, threshold) }
+		mMainCharacteristic?.deletePageThresholdComplete	= { successful in self.lambdaDeletePageThresholdComplete?(self.id, successful) }
+		
+		mMainCharacteristic?.enterShipModeComplete = { successful in
+			self.lambdaEnterShipModeComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.enterShipModeComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.resetComplete = { successful in
+			self.lambdaResetComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.resetComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.airplaneModeComplete		= { successful in
+			self.lambdaAirplaneModeComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.airplaneModeComplete.send(successful)
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2203,10 +2268,8 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.type	= .alter
 					#endif
 					attachMainCharacteristicCallbacks()
-					mMainCharacteristic?.enterShipModeComplete = { successful in self.lambdaEnterShipModeComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
 					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
-					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
 					mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
@@ -2215,13 +2278,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.lambdaManufacturingTestComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result) }
 					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.lambdaRecalibratePPGComplete?(self.id, successful) }
-					mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }
-					mMainCharacteristic?.setUnpairedComplete		= { successful in self.lambdaSetUnpairedComplete?(self.id, successful) }
-					mMainCharacteristic?.getPairedComplete			= { successful, paired in self.lambdaGetPairedComplete?(self.id, successful, paired) }
-					mMainCharacteristic?.setPageThresholdComplete	= { successful in self.lambdaSetPageThresholdComplete?(self.id, successful) }
-					mMainCharacteristic?.getPageThresholdComplete	= { successful, threshold in self.lambdaGetPageThresholdComplete?(self.id, successful, threshold) }
-					mMainCharacteristic?.deletePageThresholdComplete	= { successful in self.lambdaDeletePageThresholdComplete?(self.id, successful) }
-					mMainCharacteristic?.airplaneModeComplete		= { successful in self.lambdaAirplaneModeComplete?(self.id, successful) }
 
 					mMainCharacteristic?.discoverDescriptors()
 					
@@ -2254,10 +2310,8 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.type	= .kairos
 					#endif
 					attachMainCharacteristicCallbacks()
-					mMainCharacteristic?.enterShipModeComplete = { successful in self.lambdaEnterShipModeComplete?(self.id, successful) }
 					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
 					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
-					mMainCharacteristic?.resetComplete = { successful in self.lambdaResetComplete?(self.id, successful) }
 					mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
 					mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
 					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
@@ -2265,13 +2319,6 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
 					mMainCharacteristic?.manufacturingTestComplete	= { successful in self.lambdaManufacturingTestComplete?(self.id, successful) }
 					mMainCharacteristic?.manufacturingTestResult	= { valid, result in self.lambdaManufacturingTestResult?(self.id, valid, result) }
-					mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }
-					mMainCharacteristic?.setUnpairedComplete		= { successful in self.lambdaSetUnpairedComplete?(self.id, successful) }
-					mMainCharacteristic?.getPairedComplete			= { successful, paired in self.lambdaGetPairedComplete?(self.id, successful, paired) }
-					mMainCharacteristic?.setPageThresholdComplete	= { successful in self.lambdaSetPageThresholdComplete?(self.id, successful) }
-					mMainCharacteristic?.getPageThresholdComplete	= { successful, threshold in self.lambdaGetPageThresholdComplete?(self.id, successful, threshold) }
-					mMainCharacteristic?.deletePageThresholdComplete	= { successful in self.lambdaDeletePageThresholdComplete?(self.id, successful) }
-					mMainCharacteristic?.airplaneModeComplete		= { successful in self.lambdaAirplaneModeComplete?(self.id, successful) }
 
 					mMainCharacteristic?.discoverDescriptors()
 
