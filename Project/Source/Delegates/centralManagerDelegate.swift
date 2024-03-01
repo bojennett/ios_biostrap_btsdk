@@ -336,7 +336,6 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						device.lambdaReadChargeCyclesComplete				= { id, successful, cycles in DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) } }
 						device.lambdaReadCanLogDiagnosticsComplete 		= { id, successful, allow in DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) } }
 						device.lambdaUpdateCanLogDiagnosticsComplete 		= { id, successful in DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) } }
-						device.lambdaAllowPPGComplete						= { id, successful in DispatchQueue.main.async { self.allowPPGComplete?(id, successful) } }
 						device.lambdaWornCheckComplete					= { id, successful, code, value in DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) } }
 						device.lambdaRawLoggingComplete					= { id, successful in DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) } }
 						device.lambdaGetRawLoggingStatusComplete 			= { id, successful, enabled in DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) } }
@@ -368,7 +367,6 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						device.lambdaAcceptSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) } }
 						device.lambdaManufacturingTestComplete			= { id, successful in DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) } }
 						device.lambdaManufacturingTestResult				= { id, valid, result in DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) } }
-						device.lambdaRecalibratePPGComplete				= { id, successful in DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) } }
 						device.lambdaChargingStatus					= { id, charging, on_charger, error in DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) } }
 						device.lambdaSetHRZoneColorComplete				= { id, successful, type in DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) } }
 						device.lambdaGetHRZoneColorComplete				= { id, successful, type, red, green, blue, on_ms, off_ms in DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) } }
@@ -442,7 +440,6 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						device.lambdaReadChargeCyclesComplete				= { id, successful, cycles in DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) } }
 						device.lambdaReadCanLogDiagnosticsComplete 		= { id, successful, allow in DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) } }
 						device.lambdaUpdateCanLogDiagnosticsComplete 		= { id, successful in DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) } }
-						device.lambdaAllowPPGComplete						= { id, successful in DispatchQueue.main.async { self.allowPPGComplete?(id, successful) } }
 						device.lambdaWornCheckComplete					= { id, successful, code, value in DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) } }
 						device.lambdaRawLoggingComplete					= { id, successful in DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) } }
 						device.lambdaGetRawLoggingStatusComplete 			= { id, successful, enabled in DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) } }
@@ -474,7 +471,6 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						device.lambdaAcceptSessionParamsComplete			= { id, successful in DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) } }
 						device.lambdaManufacturingTestComplete			= { id, successful in DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) } }
 						device.lambdaManufacturingTestResult				= { id, valid, result in DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) } }
-						device.lambdaRecalibratePPGComplete				= { id, successful in DispatchQueue.main.async { self.recalibratePPGComplete?(id, successful) } }
 						device.lambdaChargingStatus					= { id, charging, on_charger, error in DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) } }
 						device.lambdaSetHRZoneColorComplete				= { id, successful, type in DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) } }
 						device.lambdaGetHRZoneColorComplete				= { id, successful, type, red, green, blue, on_ms, off_ms in DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) } }

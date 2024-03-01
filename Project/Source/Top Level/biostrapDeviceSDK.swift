@@ -204,9 +204,6 @@ import CoreBluetooth
 	@objc public var deletePageThresholdComplete: ((_ id: String, _ successful: Bool)->())?
 
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
-	@objc public var recalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
-
-	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getRawLoggingStatusComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool)->())?
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var getWornOverrideStatusComplete: ((_ id: String, _ successful: Bool, _ overridden: Bool)->())?
@@ -1167,32 +1164,6 @@ import CoreBluetooth
 	//
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func recalibratePPG(_ id: String) {
-		if let device = mConnectedDevices[id] { device.recalibratePPG(id) }
-		else { self.recalibratePPGComplete?(id, false) }
-	}
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func allowPPG(_ id: String, allow: Bool) {
-		if let device = mConnectedDevices[id] { device.allowPPG(id, allow: allow) }
-		else { self.allowPPGComplete?(id, false) }
-	}
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func wornCheck(_ id: String) {
 		if let device = mConnectedDevices[id] { device.wornCheckInternal() }
 		else { self.wornCheckComplete?(id, false, "No device", 0) }
@@ -1207,7 +1178,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func rawLogging(_ id: String, enable: Bool) {
-		if let device = mConnectedDevices[id] { device.rawLogging(id, enable: enable) }
+		if let device = mConnectedDevices[id] { device.rawLoggingInternal(enable) }
 		else { self.rawLoggingComplete?(id, false) }
 	}
 

@@ -246,6 +246,8 @@ public class Device: NSObject, ObservableObject {
 	
 	public let manufacturingTestComplete = PassthroughSubject<Bool, Never>()
 
+	public let rawLoggingComplete = PassthroughSubject<Bool, Never>()
+
 	@Published public var hrZoneLEDBelow = hrZoneLEDValueType()
 	@Published public var hrZoneLEDWithin = hrZoneLEDValueType()
 	@Published public var hrZoneLEDAbove = hrZoneLEDValueType()
@@ -293,9 +295,9 @@ public class Device: NSObject, ObservableObject {
 	var lambdaReadCanLogDiagnosticsComplete: ((_ id: String, _ successful: Bool, _ allow: Bool)->())?
 	var lambdaUpdateCanLogDiagnosticsComplete: ((_ id: String, _ successful: Bool)->())?
 
-	var lambdaAllowPPGComplete: ((_ id: String, _ successful: Bool)->())?
-	var lambdaWornCheckComplete: ((_ id: String, _ successful: Bool, _ code: String, _ value: Int)->())?
 	var lambdaRawLoggingComplete: ((_ id: String, _ successful: Bool)->())?
+
+	var lambdaWornCheckComplete: ((_ id: String, _ successful: Bool, _ code: String, _ value: Int)->())?
 	var lambdaEndSleepComplete: ((_ id: String, _ successful: Bool)->())?
 	
 	var lambdaDisableWornDetectComplete: ((_ id: String, _ successful: Bool)->())?
@@ -326,8 +328,6 @@ public class Device: NSObject, ObservableObject {
 
 	var lambdaManufacturingTestComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaManufacturingTestResult: ((_ id: String, _ valid: Bool, _ result: String)->())?
-
-	var lambdaRecalibratePPGComplete: ((_ id: String, _ successful: Bool)->())?
 
 	var lambdaGetRawLoggingStatusComplete: ((_ id: String, _ successful: Bool, _ enabled: Bool)->())?
 	var lambdaGetWornOverrideStatusComplete: ((_ id: String, _ successful: Bool, _ overridden: Bool)->())?
@@ -1211,13 +1211,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func allowPPG(_ id: String, allow: Bool) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.allowPPG(allow)
-		}
-		else { self.lambdaAllowPPGComplete?(id, false) }
-	}
-
 	#if UNIVERSAL || ALTER
 	func alterManufacturingTestInternal(_ test: alterManufacturingTestType) {
 		if let mainCharacteristic = mMainCharacteristic {
@@ -1584,11 +1577,22 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func recalibratePPG(_ id: String) {
+	func rawLoggingInternal(_ enable: Bool) {
 		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.recalibratePPG()
+			mainCharacteristic.rawLogging(enable)
 		}
-		else { self.lambdaRecalibratePPGComplete?(id, false) }
+		else { self.lambdaRawLoggingComplete?(id, false) }
+	}
+
+	public func rawLogging(_ enable: Bool) {
+		if let mainCharacteristic = mMainCharacteristic {
+			mainCharacteristic.rawLogging(enable)
+		}
+		else {
+			DispatchQueue.main.async {
+				self.rawLoggingComplete.send(false)
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1615,20 +1619,6 @@ public class Device: NSObject, ObservableObject {
 				self.wornCheckResultComplete.send(false)
 			}
 		}
-	}
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	func rawLogging(_ id: String, enable: Bool) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.rawLogging(enable)
-		}
-		else { self.lambdaRawLoggingComplete?(id, false) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1879,7 +1869,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	private func attachMainCharacteristicCallbacks() {
+	private func attachMainCharacteristicLambdas() {
 		mMainCharacteristic?.writeEpochComplete = { successful in
 			self.lambdaWriteEpochComplete?(self.id, successful)
 			DispatchQueue.main.async { self.writeEpochComplete.send(successful) }
@@ -2029,13 +2019,6 @@ public class Device: NSObject, ObservableObject {
 			self.lambdaGetAskForButtonResponseComplete?(self.id, successful, enable)
 			DispatchQueue.main.async {
 				self.getAskForButtonResponseComplete.send((successful, enable))
-			}
-		}
-		
-		mMainCharacteristic?.recalibratePPGComplete		= { successful in
-			self.lambdaRecalibratePPGComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				
 			}
 		}
 		
@@ -2243,6 +2226,13 @@ public class Device: NSObject, ObservableObject {
 			}
 		}
 		
+		mMainCharacteristic?.rawLoggingComplete = { successful in
+			self.lambdaRawLoggingComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.rawLoggingComplete.send(successful)
+			}
+		}
+		
 		// MARK: Notifications
 		mMainCharacteristic?.manufacturingTestResult	= { valid, result in
 			self.lambdaManufacturingTestResult?(self.id, valid, result)
@@ -2250,6 +2240,12 @@ public class Device: NSObject, ObservableObject {
 				self.manufacturingTestResult.send((valid, result))
 			}
 		}
+		
+		mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
+		mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
+		mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
+		mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
+		mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2259,7 +2255,19 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	private func attachStreamingCharacteristicCallbacks() {
+	private func attachDataCharacteristicLambdas() {
+		mDataCharacteristic?.dataPackets = { sequence_number, packets in self.lambdaDataPackets?(self.id, sequence_number, packets) }
+		mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate) }
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	private func attachStreamingCharacteristicLambdas() {
 		mStreamingCharacteristic?.deviceWornStatus			= { isWorn in
 			self.lambdaWornStatus?(self.id, isWorn)
 			DispatchQueue.main.async {
@@ -2297,6 +2305,11 @@ public class Device: NSObject, ObservableObject {
 				self.manufacturingTestResult.send((valid, result))
 			}
 		}
+		
+		mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
+		mStreamingCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
+		mStreamingCharacteristic?.streamingPacket = { packet in self.lambdaStreamingPacket?(self.id, packet) }
+		mStreamingCharacteristic?.dataAvailable = { self.lambdaDataAvailable?(self.id) }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -2387,22 +2400,11 @@ public class Device: NSObject, ObservableObject {
 					#if UNIVERSAL
 					mMainCharacteristic?.type	= .alter
 					#endif
-					attachMainCharacteristicCallbacks()
-					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
-					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
-					mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
-					mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
-					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
-					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-					mMainCharacteristic?.recalibratePPGComplete		= { successful in self.lambdaRecalibratePPGComplete?(self.id, successful) }
-
+					attachMainCharacteristicLambdas()
 					mMainCharacteristic?.discoverDescriptors()
 					
 				case .alterDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
-					mDataCharacteristic?.dataPackets = { sequence_number, packets in self.lambdaDataPackets?(self.id, sequence_number, packets) }
-					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate) }
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .alterStrmCharacteristic:
@@ -2410,12 +2412,7 @@ public class Device: NSObject, ObservableObject {
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .alter
 					#endif
-					attachStreamingCharacteristicCallbacks()
-					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
-					mStreamingCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mStreamingCharacteristic?.streamingPacket = { packet in self.lambdaStreamingPacket?(self.id, packet) }
-					mStreamingCharacteristic?.dataAvailable = { self.lambdaDataAvailable?(self.id) }
-
+					attachStreamingCharacteristicLambdas()
 					mStreamingCharacteristic?.discoverDescriptors()
 
 				#endif
@@ -2426,21 +2423,11 @@ public class Device: NSObject, ObservableObject {
 					#if UNIVERSAL
 					mMainCharacteristic?.type	= .kairos
 					#endif
-					attachMainCharacteristicCallbacks()
-					mMainCharacteristic?.rawLoggingComplete = { successful in self.lambdaRawLoggingComplete?(self.id, successful) }
-					mMainCharacteristic?.allowPPGComplete = { successful in self.lambdaAllowPPGComplete?(self.id, successful)}
-					mMainCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
-					mMainCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
-					mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
-					mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-
+					attachMainCharacteristicLambdas()
 					mMainCharacteristic?.discoverDescriptors()
 
 				case .kairosDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
-					mDataCharacteristic?.dataPackets = { sequence_number, packets in self.lambdaDataPackets?(self.id, sequence_number, packets) }
-					mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate) }
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .kairosStrmCharacteristic:
@@ -2448,12 +2435,7 @@ public class Device: NSObject, ObservableObject {
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .kairos
 					#endif
-					attachStreamingCharacteristicCallbacks()
-					mStreamingCharacteristic?.ppgMetrics = { successful, packet in self.lambdaPPGMetrics?(self.id, successful, packet) }
-					mStreamingCharacteristic?.ppgFailed = { code in self.lambdaPPGFailed?(self.id, code) }
-					mStreamingCharacteristic?.streamingPacket = { packet in self.lambdaStreamingPacket?(self.id, packet) }
-					mStreamingCharacteristic?.dataAvailable = { self.lambdaDataAvailable?(self.id) }
-
+					attachStreamingCharacteristicLambdas()
 					mStreamingCharacteristic?.discoverDescriptors()
 
 				#endif
