@@ -1272,7 +1272,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func updateFirmware(_ id: String, file: URL) {
-		if let device = mConnectedDevices[id] { device.updateFirmware(file) }
+		if let device = mConnectedDevices[id] { device.updateFirmwareInternal(file) }
 		else { self.updateFirmwareFailed?(id, 10000, "No connected device to update") }
 
 	}
@@ -1286,7 +1286,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func cancelFirmwareUpdate(_ id: String) {
-		if let device = mConnectedDevices[id] { device.cancelFirmwareUpdate() }
+		if let device = mConnectedDevices[id] { device.cancelFirmwareUpdateInternal() }
 		else { self.updateFirmwareFailed?(id, 10000, "No connected device to update") }
 	}
 	

@@ -240,6 +240,11 @@ public class Device: NSObject, ObservableObject {
 	public let getAllPacketsComplete = PassthroughSubject<Bool, Never>()
 	public let getAllPacketsAcknowledgeComplete = PassthroughSubject<(Bool, Bool), Never>()
 
+	public let updateFirmwareStarted = PassthroughSubject<Void, Never>()
+	public let updateFirmwareFinished = PassthroughSubject<Void, Never>()
+	public let updateFirmwareProgress = PassthroughSubject<Float, Never>()
+	public let updateFirmwareFailed = PassthroughSubject<(Int, String), Never>()
+
 	@Published public var hrZoneLEDBelow = hrZoneLEDValueType()
 	@Published public var hrZoneLEDWithin = hrZoneLEDValueType()
 	@Published public var hrZoneLEDAbove = hrZoneLEDValueType()
@@ -1659,7 +1664,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func updateFirmware(_ file: URL) {
+	func updateFirmwareInternal(_ file: URL) {
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
 			do {
 				let contents = try Data(contentsOf: file)
@@ -1673,6 +1678,26 @@ public class Device: NSObject, ObservableObject {
 		else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No OTA RX characteristic to update") }
 	}
 
+	public func updateFirmware(_ file: URL) {
+		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
+			do {
+				let contents = try Data(contentsOf: file)
+				ambiqOTARXCharacteristic.start(contents)
+			}
+			catch {
+				log?.e ("Cannot open file")
+				DispatchQueue.main.async {
+					self.updateFirmwareFailed.send((10001, "Cannot parse file for update"))
+				}
+			}
+		}
+		else {
+			DispatchQueue.main.async {
+				self.updateFirmwareFailed.send((10001, "No OTA RX characteristic to update"))
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -1680,12 +1705,20 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func cancelFirmwareUpdate() {
+	func cancelFirmwareUpdateInternal() {
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic { ambiqOTARXCharacteristic.cancel() }
 		else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }		
 	}
 
-	
+	public func cancelFirmwareUpdate() {
+		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic { ambiqOTARXCharacteristic.cancel() }
+		else {
+			DispatchQueue.main.async {
+				self.updateFirmwareFailed.send((10001, "No characteristic to cancel"))
+			}
+		}
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -2394,10 +2427,33 @@ public class Device: NSObject, ObservableObject {
 					}
 					
 					mAmbiqOTARXCharacteristic = ambiqOTARXCharacteristic(peripheral, characteristic: characteristic)
-					mAmbiqOTARXCharacteristic?.started	= { self.lambdaUpdateFirmwareStarted?(self.id) }
-					mAmbiqOTARXCharacteristic?.finished = { self.lambdaUpdateFirmwareFinished?(self.id) }
-					mAmbiqOTARXCharacteristic?.failed	= { code, message in self.lambdaUpdateFirmwareFailed?(self.id, code, message) }
-					mAmbiqOTARXCharacteristic?.progress	= { percent in self.lambdaUpdateFirmwareProgress?(self.id, percent) }
+					mAmbiqOTARXCharacteristic?.started	= {
+						self.lambdaUpdateFirmwareStarted?(self.id)
+						DispatchQueue.main.async {
+							self.updateFirmwareStarted.send()
+						}
+					}
+					
+					mAmbiqOTARXCharacteristic?.finished = {
+						self.lambdaUpdateFirmwareFinished?(self.id)
+						DispatchQueue.main.async {
+							self.updateFirmwareFinished.send()
+						}
+					}
+					
+					mAmbiqOTARXCharacteristic?.failed	= { code, message in
+						self.lambdaUpdateFirmwareFailed?(self.id, code, message)
+						DispatchQueue.main.async {
+							self.updateFirmwareFailed.send((code, message))
+						}
+					}
+					
+					mAmbiqOTARXCharacteristic?.progress	= { percent in
+						self.lambdaUpdateFirmwareProgress?(self.id, percent)
+						DispatchQueue.main.async {
+							self.updateFirmwareProgress.send(percent)
+						}
+					}
 					
 				case .ambiqOTATXCharacteristic:
 					if let service = characteristic.service {
