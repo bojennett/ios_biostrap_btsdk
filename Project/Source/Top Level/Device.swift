@@ -278,6 +278,17 @@ public class Device: NSObject, ObservableObject {
 	public let manufacturingTestComplete = PassthroughSubject<Bool, Never>()
 
 	public let rawLoggingComplete = PassthroughSubject<Bool, Never>()
+	
+	@Published public var paired: Bool?
+	@Published public var advertisingPageThreshold: Int?
+	
+	public let getPairedComplete = PassthroughSubject<Bool, Never>()
+	public let setPairedComplete = PassthroughSubject<Bool, Never>()
+	public let setUnpairedComplete = PassthroughSubject<Bool, Never>()
+	
+	public let getPageThresholdComplete = PassthroughSubject<Bool, Never>()
+	public let setPageThresholdComplete = PassthroughSubject<Bool, Never>()
+	public let deletePageThresholdComplete = PassthroughSubject<Bool, Never>()
 
 	@Published public var hrZoneLEDBelow = hrZoneLEDValueType()
 	@Published public var hrZoneLEDWithin = hrZoneLEDValueType()
@@ -1541,9 +1552,16 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setPaired() {
+	func setPairedInternal() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPaired() }
 		else { self.lambdaSetPairedComplete?(self.id, false) }
+	}
+
+	public func setPaired() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPaired() }
+		else {
+			self.setPairedComplete.send(false)
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1553,9 +1571,16 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setUnpaired() {
+	func setUnpairedInternal() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setUnpaired() }
 		else { self.lambdaSetUnpairedComplete?(self.id, false) }
+	}
+	
+	public func setUnpaired() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setUnpaired() }
+		else {
+			self.setUnpairedComplete.send(false)
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1565,9 +1590,17 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getPaired() {
+	func getPairedInternal() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPaired() }
 		else { self.lambdaGetPairedComplete?(self.id, false, false) }
+	}
+	
+	public func getPaired() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPaired() }
+		else {
+			self.paired = nil
+			self.getPairedComplete.send(false)
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1577,9 +1610,16 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setPageThreshold(_ threshold: Int) {
+	func setPageThresholdInternal(_ threshold: Int) {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPageThreshold(threshold) }
 		else { self.lambdaSetPageThresholdComplete?(self.id, false) }
+	}
+	
+	public func setPageThreshold(_ threshold: Int) {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPageThreshold(threshold) }
+		else {
+			self.setPageThresholdComplete.send(false)
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1589,9 +1629,17 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getPageThreshold() {
+	func getPageThresholdInternal() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPageThreshold() }
 		else { self.lambdaGetPageThresholdComplete?(self.id, false, 1) }
+	}
+	
+	public func getPageThreshold() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPageThreshold() }
+		else {
+			self.advertisingPageThreshold = nil
+			self.getPageThresholdComplete.send(false)
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1601,9 +1649,16 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func deletePageThreshold() {
+	func deletePageThresholdInternal() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.deletePageThreshold() }
 		else { self.lambdaDeletePageThresholdComplete?(self.id, false) }
+	}
+
+	public func deletePageThreshold() {
+		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.deletePageThreshold() }
+		else {
+			self.deletePageThresholdComplete.send(false)
+		}
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2227,12 +2282,59 @@ public class Device: NSObject, ObservableObject {
 			}
 		}
 		
-		mMainCharacteristic?.setPairedComplete			= { successful in self.lambdaSetPairedComplete?(self.id, successful) }
-		mMainCharacteristic?.setUnpairedComplete		= { successful in self.lambdaSetUnpairedComplete?(self.id, successful) }
-		mMainCharacteristic?.getPairedComplete			= { successful, paired in self.lambdaGetPairedComplete?(self.id, successful, paired) }
-		mMainCharacteristic?.setPageThresholdComplete	= { successful in self.lambdaSetPageThresholdComplete?(self.id, successful) }
-		mMainCharacteristic?.getPageThresholdComplete	= { successful, threshold in self.lambdaGetPageThresholdComplete?(self.id, successful, threshold) }
-		mMainCharacteristic?.deletePageThresholdComplete	= { successful in self.lambdaDeletePageThresholdComplete?(self.id, successful) }
+		mMainCharacteristic?.setPairedComplete			= { successful in
+			self.lambdaSetPairedComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.setPairedComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.setUnpairedComplete		= { successful in
+			self.lambdaSetUnpairedComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.setUnpairedComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.getPairedComplete			= { successful, paired in
+			self.lambdaGetPairedComplete?(self.id, successful, paired)
+			DispatchQueue.main.async {
+				if successful {
+					self.paired = paired
+				}
+				else {
+					self.paired = nil
+				}
+				self.getPairedComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.setPageThresholdComplete	= { successful in
+			self.lambdaSetPageThresholdComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.setPageThresholdComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.getPageThresholdComplete	= { successful, threshold in
+			self.lambdaGetPageThresholdComplete?(self.id, successful, threshold)
+			DispatchQueue.main.async {
+				if successful {
+					self.advertisingPageThreshold = threshold
+				}
+				else {
+					self.advertisingPageThreshold = nil
+				}
+				self.getPageThresholdComplete.send(successful)
+			}
+		}
+		
+		mMainCharacteristic?.deletePageThresholdComplete	= { successful in
+			self.lambdaDeletePageThresholdComplete?(self.id, successful)
+			DispatchQueue.main.async {
+				self.deletePageThresholdComplete.send(successful)
+			}
+		}
 		
 		mMainCharacteristic?.enterShipModeComplete = { successful in
 			self.lambdaEnterShipModeComplete?(self.id, successful)

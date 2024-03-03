@@ -1087,7 +1087,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setPaired(_ id: String) {
-		if let device = mConnectedDevices[id] { device.setPaired() }
+		if let device = mConnectedDevices[id] { device.setPairedInternal() }
 		else { self.setPairedComplete?(id, false) }
 	}
 	
@@ -1100,7 +1100,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setUnpaired(_ id: String) {
-		if let device = mConnectedDevices[id] { device.setUnpaired() }
+		if let device = mConnectedDevices[id] { device.setUnpairedInternal() }
 		else { self.setUnpairedComplete?(id, false) }
 	}
 	
@@ -1113,7 +1113,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPaired(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getPaired() }
+		if let device = mConnectedDevices[id] { device.getPairedInternal() }
 		else { self.getPairedComplete?(id, false, false) }
 	}
 	
@@ -1126,7 +1126,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setPageThreshold(_ id: String, threshold: Int) {
-		if let device = mConnectedDevices[id] { device.setPageThreshold(threshold) }
+		if let device = mConnectedDevices[id] { device.setPageThresholdInternal(threshold) }
 		else { self.setPageThresholdComplete?(id, false) }
 	}
 	
@@ -1139,7 +1139,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPageThreshold(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getPageThreshold() }
+		if let device = mConnectedDevices[id] { device.getPageThresholdInternal() }
 		else { self.getPageThresholdComplete?(id, false, 1) }
 	}
 	
@@ -1152,7 +1152,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func deletePageThreshold(_ id: String) {
-		if let device = mConnectedDevices[id] { device.deletePageThreshold() }
+		if let device = mConnectedDevices[id] { device.deletePageThresholdInternal() }
 		else { self.deletePageThresholdComplete?(id, false) }
 	}
 
