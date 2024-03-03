@@ -311,6 +311,10 @@ public class Device: NSObject, ObservableObject {
 	public let ppgFailed = PassthroughSubject<Int, Never>()
 	public let streamingPacket = PassthroughSubject<String, Never>()
 
+	public let dataPackets = PassthroughSubject<(Int, String), Never>()
+	public let dataComplete = PassthroughSubject<(Int, Int, Int, Int, Bool), Never>()
+	public let dataFailure = PassthroughSubject<Void, Never>()
+
 	// MARK: Lambda Completions
 	var lambdaWriteEpochComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaReadEpochComplete: ((_ id: String, _ successful: Bool, _ value: Int)->())?
@@ -2393,8 +2397,20 @@ public class Device: NSObject, ObservableObject {
 			}
 		}
 		
-		mMainCharacteristic?.dataPackets = { packets in self.lambdaDataPackets?(self.id, -1, packets) }
-		mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false) }
+		mMainCharacteristic?.dataPackets = { packets in
+			self.lambdaDataPackets?(self.id, -1, packets)
+			DispatchQueue.main.async {
+				self.dataPackets.send((-1, packets))
+			}
+		}
+		
+		mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in
+			self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false)
+			DispatchQueue.main.async {
+				self.dataComplete.send((bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false))
+			}
+		}
+		
 		mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
 	}
 
@@ -2406,8 +2422,19 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	private func attachDataCharacteristicLambdas() {
-		mDataCharacteristic?.dataPackets = { sequence_number, packets in self.lambdaDataPackets?(self.id, sequence_number, packets) }
-		mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate) }
+		mDataCharacteristic?.dataPackets = { sequence_number, packets in
+			self.lambdaDataPackets?(self.id, sequence_number, packets)
+			DispatchQueue.main.async {
+				self.dataPackets.send((sequence_number, packets))
+			}
+		}
+		
+		mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
+			self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate)
+			DispatchQueue.main.async {
+				self.dataComplete.send((bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate))
+			}
+		}
 	}
 
 	//--------------------------------------------------------------------------------
