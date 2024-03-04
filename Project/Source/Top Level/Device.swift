@@ -9,14 +9,14 @@ import Foundation
 import CoreBluetooth
 import Combine
 
-public enum completionStatus {
+public enum DeviceCommandCompletionStatus {
 	case successful
 	case not_configured
 	case device_error
 	
 	public var title: String {
 		switch self {
-		case .successful: return "Success"
+		case .successful: return ""
 		case .not_configured: return "Not configured"
 		case .device_error: return "Device returned error"
 		}
@@ -226,64 +226,71 @@ public class Device: NSObject, ObservableObject {
 	@Published public var discovery_type: biostrapDeviceSDK.biostrapDiscoveryType
 	@Published public var epoch: Int?
 	
+	@Published public var advertisingInterval: Int?
+	@Published public var chargeCycles: Float?
+	@Published public var advertiseAsHRM: Bool?
+	@Published public var rawLogging: Bool?
+	@Published public var wornOverridden: Bool?
+	@Published public var buttonResponseEnabled: Bool?
+	
 	var creation_epoch				: TimeInterval
 	
 	// MARK: Passthrough Subjects (Completions)
-	public let readEpochComplete = PassthroughSubject<completionStatus, Never>()
-	public let writeEpochComplete = PassthroughSubject<completionStatus, Never>()
+	public let readEpochComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let writeEpochComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
 	public let startManualComplete = PassthroughSubject<Bool, Never>()
 	public let stopManualComplete = PassthroughSubject<Bool, Never>()
 	
-	public let ledComplete = PassthroughSubject<completionStatus, Never>()
+	public let ledComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 	
-	public let getRawLoggingStatusComplete = PassthroughSubject<(Bool, Bool), Never>()
-	public let getWornOverrideStatusComplete = PassthroughSubject<(Bool, Bool), Never>()
+	public let getRawLoggingStatusComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let getWornOverrideStatusComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 	
-	public let writeSerialNumberComplete = PassthroughSubject<Bool, Never>()
-	public let readSerialNumberComplete = PassthroughSubject<(Bool, String), Never>()
-	public let deleteSerialNumberComplete = PassthroughSubject<Bool, Never>()
+	public let writeSerialNumberComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let readSerialNumberComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let deleteSerialNumberComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 	
-	public let writeAdvIntervalComplete = PassthroughSubject<Bool, Never>()
-	public let readAdvIntervalComplete = PassthroughSubject<(Bool, Int), Never>()
-	public let deleteAdvIntervalComplete = PassthroughSubject<Bool, Never>()
+	public let writeAdvIntervalComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let readAdvIntervalComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let deleteAdvIntervalComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 	
-	public let clearChargeCyclesComplete = PassthroughSubject<Bool, Never>()
-	public let readChargeCyclesComplete = PassthroughSubject<(Bool, Float), Never>()
+	public let clearChargeCyclesComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let readChargeCyclesComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
-	public let setAdvertiseAsHRMComplete = PassthroughSubject<(Bool, Bool), Never>()
-	public let getAdvertiseAsHRMComplete = PassthroughSubject<(Bool, Bool), Never>()
+	public let setAdvertiseAsHRMComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let getAdvertiseAsHRMComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
 	public let setButtonCommandComplete = PassthroughSubject<(Bool, buttonTapType, buttonCommandType), Never>()
 	public let getButtonCommandComplete = PassthroughSubject<(Bool, buttonTapType, buttonCommandType), Never>()
 	
-	public let setAskForButtonResponseComplete = PassthroughSubject<(Bool, Bool), Never>()
-	public let getAskForButtonResponseComplete = PassthroughSubject<(Bool, Bool), Never>()
+	public let setAskForButtonResponseComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let getAskForButtonResponseComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 	
-	public let setHRZoneColorComplete = PassthroughSubject<(Bool, hrZoneRangeType), Never>()
-	public let getHRZoneColorComplete = PassthroughSubject<(Bool, hrZoneRangeType), Never>()
-	public let setHRZoneRangeComplete = PassthroughSubject<Bool, Never>()
-	public let getHRZoneRangeComplete = PassthroughSubject<Bool, Never>()
+	public let setHRZoneColorComplete = PassthroughSubject<(DeviceCommandCompletionStatus, hrZoneRangeType), Never>()
+	public let getHRZoneColorComplete = PassthroughSubject<(DeviceCommandCompletionStatus, hrZoneRangeType), Never>()
+	public let setHRZoneRangeComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let getHRZoneRangeComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 	public let getPPGAlgorithmComplete = PassthroughSubject<(Bool, ppgAlgorithmConfiguration, eventType), Never>()
 	
-	public let endSleepComplete = PassthroughSubject<Bool, Never>()
+	public let endSleepComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
-	public let disableWornDetectComplete = PassthroughSubject<completionStatus, Never>()
-	public let enableWornDetectComplete = PassthroughSubject<completionStatus, Never>()
+	public let disableWornDetectComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let enableWornDetectComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
-	public let wornCheckResultComplete = PassthroughSubject<Bool, Never>()
+	public let wornCheckResultComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 	
-	public let setSessionParamComplete = PassthroughSubject<(Bool, sessionParameterType), Never>()
-	public let getSessionParamComplete = PassthroughSubject<(Bool, sessionParameterType), Never>()
-	public let resetSessionParamsComplete = PassthroughSubject<Bool, Never>()
-	public let acceptSessionParamsComplete = PassthroughSubject<Bool, Never>()
+	public let setSessionParamComplete = PassthroughSubject<(DeviceCommandCompletionStatus, sessionParameterType), Never>()
+	public let getSessionParamComplete = PassthroughSubject<(DeviceCommandCompletionStatus, sessionParameterType), Never>()
+	public let resetSessionParamsComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let acceptSessionParamsComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 	
-	public let readCanLogDiagnosticsComplete = PassthroughSubject<Bool, Never>()
-	public let updateCanLogDiagnosticsComplete = PassthroughSubject<Bool, Never>()
+	public let readCanLogDiagnosticsComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let updateCanLogDiagnosticsComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
-	public let enterShipModeComplete = PassthroughSubject<Bool, Never>()
-	public let resetComplete = PassthroughSubject<Bool, Never>()
-	public let airplaneModeComplete = PassthroughSubject<Bool, Never>()
+	public let enterShipModeComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let resetComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let airplaneModeComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
 	public let getPacketCountComplete = PassthroughSubject<(Bool, Int), Never>()
 	public let getAllPacketsComplete = PassthroughSubject<Bool, Never>()
@@ -301,9 +308,9 @@ public class Device: NSObject, ObservableObject {
 	@Published public var paired: Bool?
 	@Published public var advertisingPageThreshold: Int?
 	
-	public let getPairedComplete = PassthroughSubject<Bool, Never>()
-	public let setPairedComplete = PassthroughSubject<Bool, Never>()
-	public let setUnpairedComplete = PassthroughSubject<Bool, Never>()
+	public let getPairedComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let setPairedComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+	public let setUnpairedComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 	
 	public let getPageThresholdComplete = PassthroughSubject<Bool, Never>()
 	public let setPageThresholdComplete = PassthroughSubject<Bool, Never>()
@@ -713,7 +720,7 @@ public class Device: NSObject, ObservableObject {
 			mainCharacteristic.endSleep()
 		}
 		else {
-			DispatchQueue.main.async { self.endSleepComplete.send(false) }
+			DispatchQueue.main.async { self.endSleepComplete.send(.not_configured) }
 		}
 	}
 
@@ -971,7 +978,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.enterShipModeComplete.send(false)
+				self.enterShipModeComplete.send(.not_configured)
 			}
 		}
 	}
@@ -996,7 +1003,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.resetComplete.send(false)
+				self.resetComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1021,7 +1028,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.airplaneModeComplete.send(false)
+				self.airplaneModeComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1046,7 +1053,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.writeSerialNumberComplete.send(false)
+				self.writeSerialNumberComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1071,7 +1078,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.readSerialNumberComplete.send((false, ""))
+				self.readSerialNumberComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1096,7 +1103,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.deleteSerialNumberComplete.send(false)
+				self.deleteSerialNumberComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1121,7 +1128,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.writeAdvIntervalComplete.send(false)
+				self.writeAdvIntervalComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1146,7 +1153,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.readAdvIntervalComplete.send((false, 0))
+				self.readAdvIntervalComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1171,7 +1178,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.deleteAdvIntervalComplete.send(false)
+				self.deleteAdvIntervalComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1196,7 +1203,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.clearChargeCyclesComplete.send(false)
+				self.clearChargeCyclesComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1221,7 +1228,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.readChargeCyclesComplete.send((false, 0.0))
+				self.readChargeCyclesComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1247,7 +1254,7 @@ public class Device: NSObject, ObservableObject {
 		else {
 			DispatchQueue.main.async {
 				self.canLogDiagnostics = nil
-				self.readCanLogDiagnosticsComplete.send(false)
+				self.readCanLogDiagnosticsComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1272,7 +1279,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.updateCanLogDiagnosticsComplete.send(false)
+				self.updateCanLogDiagnosticsComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1340,7 +1347,7 @@ public class Device: NSObject, ObservableObject {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAskForButtonResponse(enable) }
 		else {
 			DispatchQueue.main.async {
-				self.setAskForButtonResponseComplete.send((false, enable))
+				self.setAskForButtonResponseComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1361,7 +1368,7 @@ public class Device: NSObject, ObservableObject {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAskForButtonResponse() }
 		else {
 			DispatchQueue.main.async {
-				self.getAskForButtonResponseComplete.send((false, false))
+				self.getAskForButtonResponseComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1386,7 +1393,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.setHRZoneColorComplete.send((false, type))
+				self.setHRZoneColorComplete.send((.not_configured, type))
 			}
 		}
 	}
@@ -1411,7 +1418,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.getHRZoneColorComplete.send((false, type))
+				self.getHRZoneColorComplete.send((.not_configured, type))
 			}
 		}
 	}
@@ -1436,7 +1443,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.setHRZoneRangeComplete.send(false)
+				self.setHRZoneRangeComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1461,7 +1468,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.getHRZoneRangeComplete.send(false)
+				self.getHRZoneRangeComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1503,7 +1510,8 @@ public class Device: NSObject, ObservableObject {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAdvertiseAsHRM(asHRM) }
 		else {
 			DispatchQueue.main.async {
-				self.setAdvertiseAsHRMComplete.send((false, false))
+				self.advertiseAsHRM = nil
+				self.setAdvertiseAsHRMComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1524,7 +1532,7 @@ public class Device: NSObject, ObservableObject {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAdvertiseAsHRM() }
 		else {
 			DispatchQueue.main.async {
-				self.getAdvertiseAsHRMComplete.send((false, false))
+				self.getAdvertiseAsHRMComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1586,7 +1594,7 @@ public class Device: NSObject, ObservableObject {
 	public func setPaired() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPaired() }
 		else {
-			self.setPairedComplete.send(false)
+			self.setPairedComplete.send(.not_configured)
 		}
 	}
 
@@ -1605,7 +1613,7 @@ public class Device: NSObject, ObservableObject {
 	public func setUnpaired() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setUnpaired() }
 		else {
-			self.setUnpairedComplete.send(false)
+			self.setUnpairedComplete.send(.not_configured)
 		}
 	}
 	
@@ -1625,7 +1633,7 @@ public class Device: NSObject, ObservableObject {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPaired() }
 		else {
 			self.paired = nil
-			self.getPairedComplete.send(false)
+			self.getPairedComplete.send(.not_configured)
 		}
 	}
 	
@@ -1733,7 +1741,7 @@ public class Device: NSObject, ObservableObject {
 		else {
 			DispatchQueue.main.async {
 				self.wornCheckResult = wornCheckResultType(code: "Missing characteristic", value: 0)
-				self.wornCheckResultComplete.send(false)
+				self.wornCheckResultComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1758,7 +1766,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.getRawLoggingStatusComplete.send((false, false))
+				self.getRawLoggingStatusComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1783,7 +1791,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.getWornOverrideStatusComplete.send((false, false))
+				self.getWornOverrideStatusComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1880,7 +1888,7 @@ public class Device: NSObject, ObservableObject {
 				case .ppgCaptureDuration: self.ppgCaptureDuration = nil
 				default: break
 				}
-				self.setSessionParamComplete.send((false, parameter))
+				self.setSessionParamComplete.send((.not_configured, parameter))
 			}
 		}
 	}
@@ -1915,9 +1923,8 @@ public class Device: NSObject, ObservableObject {
 				case .ppgCaptureDuration: self.ppgCaptureDuration = nil
 				default: break
 				}
-				self.setSessionParamComplete.send((false, parameter))
+				self.setSessionParamComplete.send((.not_configured, parameter))
 			}
-			self.getSessionParamComplete.send((false, parameter))
 		}
 	}
 
@@ -1945,7 +1952,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.resetSessionParamsComplete.send(false)
+				self.resetSessionParamsComplete.send(.not_configured)
 			}
 		}
 	}
@@ -1974,7 +1981,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.acceptSessionParamsComplete.send(false)
+				self.acceptSessionParamsComplete.send(.not_configured)
 			}
 		}
 	}
@@ -2036,83 +2043,112 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in
 			self.lambdaGetRawLoggingStatusComplete?(self.id, successful, enabled)
 			DispatchQueue.main.async {
-				self.getRawLoggingStatusComplete.send((successful, enabled))
+				if successful {
+					self.rawLogging = enabled
+				}
+				else {
+					self.rawLogging = nil
+				}
+				self.getRawLoggingStatusComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in
 			self.lambdaGetWornOverrideStatusComplete?(self.id, successful, overridden)
 			DispatchQueue.main.async {
-				self.getWornOverrideStatusComplete.send((successful, overridden))
+				if successful {
+					self.wornOverridden = overridden
+				}
+				else {
+					self.wornOverridden = nil
+				}
+				self.getWornOverrideStatusComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.writeSerialNumberComplete = { successful in
 			self.lamdaWriteSerialNumberComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.writeSerialNumberComplete.send(successful)
+				self.writeSerialNumberComplete.send(successful ? .successful : .device_error)
 			}
 		}
 
 		mMainCharacteristic?.readSerialNumberComplete = { successful, partID in
 			self.lambdaReadSerialNumberComplete?(self.id, successful, partID)
 			DispatchQueue.main.async {
-				self.readSerialNumberComplete.send((successful, partID))
+				if successful { self.serialNumber = partID }
+				self.readSerialNumberComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.deleteSerialNumberComplete = { successful in
 			self.lambdaDeleteSerialNumberComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.deleteSerialNumberComplete.send(successful)
+				self.deleteSerialNumberComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.writeAdvIntervalComplete = { successful in
 			self.lambdaWriteAdvIntervalComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.writeAdvIntervalComplete.send(successful)
+				self.writeAdvIntervalComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.readAdvIntervalComplete = { successful, seconds in
 			self.lambdaReadAdvIntervalComplete?(self.id, successful, seconds)
 			DispatchQueue.main.async {
-				self.readAdvIntervalComplete.send((successful, seconds))
+				self.advertisingInterval = seconds
+				self.readAdvIntervalComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.deleteAdvIntervalComplete = { successful in
 			self.lambdaDeleteAdvIntervalComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.deleteAdvIntervalComplete.send(successful)
+				if successful { self.advertisingInterval = nil }
+				self.deleteAdvIntervalComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.clearChargeCyclesComplete = { successful in
 			self.lambdaClearChargeCyclesComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.clearChargeCyclesComplete.send(successful)
+				if successful { self.chargeCycles = nil }
+				self.clearChargeCyclesComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.readChargeCyclesComplete = { successful, cycles in
 			self.lambdaReadChargeCyclesComplete?(self.id, successful, cycles)
 			DispatchQueue.main.async {
-				self.readChargeCyclesComplete.send((successful, cycles))
+				self.chargeCycles = cycles
+				self.readChargeCyclesComplete.send(successful ? .successful : .device_error)
 			}
 		}
 
 		mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in
 			self.lambdaSetAdvertiseAsHRMComplete?(self.id, successful, asHRM)
 			DispatchQueue.main.async {
-				self.setAdvertiseAsHRMComplete.send((successful, asHRM))
+				if successful {
+					self.advertiseAsHRM = asHRM
+				}
+				else {
+					self.advertiseAsHRM = nil
+				}
+				self.setAdvertiseAsHRMComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in
 			self.lambdaGetAdvertiseAsHRMComplete?(self.id, successful, asHRM)
 			DispatchQueue.main.async {
-				self.getAdvertiseAsHRMComplete.send((successful, asHRM))
+				if successful {
+					self.advertiseAsHRM = asHRM
+				}
+				else {
+					self.advertiseAsHRM = nil
+				}
+				self.getAdvertiseAsHRMComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in
@@ -2131,21 +2167,33 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.setAskForButtonResponseComplete = { successful, enable in
 			self.lambdaSetAskForButtonResponseComplete?(self.id, successful, enable)
 			DispatchQueue.main.async {
-				self.setAskForButtonResponseComplete.send((successful, enable))
+				if successful {
+					self.buttonResponseEnabled = enable
+				}
+				else {
+					self.buttonResponseEnabled = false
+				}
+				self.setAskForButtonResponseComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.getAskForButtonResponseComplete = { successful, enable in
 			self.lambdaGetAskForButtonResponseComplete?(self.id, successful, enable)
 			DispatchQueue.main.async {
-				self.getAskForButtonResponseComplete.send((successful, enable))
+				if successful {
+					self.buttonResponseEnabled = enable
+				}
+				else {
+					self.buttonResponseEnabled = false
+				}
+				self.getAskForButtonResponseComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.setHRZoneColorComplete		= { successful, type in
 			self.lambdaSetHRZoneColorComplete?(self.id, successful, type)
 			DispatchQueue.main.async {
-				self.setHRZoneColorComplete.send((successful, type))
+				self.setHRZoneColorComplete.send((successful ? .successful : .device_error, type))
 			}
 		}
 		
@@ -2158,14 +2206,14 @@ public class Device: NSObject, ObservableObject {
 				case .above: self.hrZoneLEDAbove = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
 				default: break
 				}
-				self.getHRZoneColorComplete.send((successful, type))
+				self.getHRZoneColorComplete.send((successful ? .successful : .device_error, type))
 			}
 		}
 		
 		mMainCharacteristic?.setHRZoneRangeComplete		= { successful in
 			self.lambdaSetHRZoneRangeComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.setHRZoneRangeComplete.send(successful)
+				self.setHRZoneRangeComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
@@ -2173,10 +2221,9 @@ public class Device: NSObject, ObservableObject {
 			self.lambdaGetHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value)
 			DispatchQueue.main.async {
 				if successful {
-					log?.v ("\(self.id): getHRZoneRangeComplete - Successful: \(enabled) \(high_value), \(low_value)")
 					self.hrZoneRange = hrZoneRangeValueType(enabled: enabled, lower: low_value, upper: high_value)
 				}
-				self.getHRZoneRangeComplete.send(successful)
+				self.getHRZoneRangeComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
@@ -2190,7 +2237,7 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.endSleepComplete = { successful in
 			self.lambdaEndSleepComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.endSleepComplete.send(successful)
+				self.endSleepComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
@@ -2226,7 +2273,7 @@ public class Device: NSObject, ObservableObject {
 			self.lambdaWornCheckComplete?(self.id, successful, code, value )
 			DispatchQueue.main.async {
 				self.wornCheckResult = wornCheckResultType(code: code, value: value)
-				self.wornCheckResultComplete.send(successful)
+				self.wornCheckResultComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
@@ -2234,7 +2281,7 @@ public class Device: NSObject, ObservableObject {
 			log?.v ("setSessionParamComplete: \(successful), \(parameter)")
 			self.lambdaSetSessionParamComplete?(self.id, successful, parameter)
 			DispatchQueue.main.async {
-				self.setSessionParamComplete.send((successful, parameter))
+				self.setSessionParamComplete.send((successful ? .successful : .device_error, parameter))
 			}
 		}
 		
@@ -2257,21 +2304,21 @@ public class Device: NSObject, ObservableObject {
 				case .ppgCaptureDuration: self.ppgCaptureDuration = value
 				default: break
 				}
-				self.getSessionParamComplete.send((successful, parameter))
+				self.getSessionParamComplete.send((successful ? .successful : .device_error, parameter))
 			}
 		}
 		
 		mMainCharacteristic?.acceptSessionParamsComplete	= { successful in
 			self.lambdaAcceptSessionParamsComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.acceptSessionParamsComplete.send(successful)
+				self.acceptSessionParamsComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.resetSessionParamsComplete	= { successful in
 			self.lambdaResetSessionParamsComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.resetSessionParamsComplete.send(successful)
+				self.resetSessionParamsComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
@@ -2279,14 +2326,14 @@ public class Device: NSObject, ObservableObject {
 			self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow)
 			DispatchQueue.main.async {
 				self.canLogDiagnostics = allow
-				self.readCanLogDiagnosticsComplete.send(successful)
+				self.readCanLogDiagnosticsComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in
 			self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.updateCanLogDiagnosticsComplete.send(successful)
+				self.updateCanLogDiagnosticsComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
@@ -2314,14 +2361,14 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.setPairedComplete			= { successful in
 			self.lambdaSetPairedComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.setPairedComplete.send(successful)
+				self.setPairedComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.setUnpairedComplete		= { successful in
 			self.lambdaSetUnpairedComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.setUnpairedComplete.send(successful)
+				self.setUnpairedComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
@@ -2334,7 +2381,7 @@ public class Device: NSObject, ObservableObject {
 				else {
 					self.paired = nil
 				}
-				self.getPairedComplete.send(successful)
+				self.getPairedComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
@@ -2368,21 +2415,21 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.enterShipModeComplete = { successful in
 			self.lambdaEnterShipModeComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.enterShipModeComplete.send(successful)
+				self.enterShipModeComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.resetComplete = { successful in
 			self.lambdaResetComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.resetComplete.send(successful)
+				self.resetComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.airplaneModeComplete		= { successful in
 			self.lambdaAirplaneModeComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.airplaneModeComplete.send(successful)
+				self.airplaneModeComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
