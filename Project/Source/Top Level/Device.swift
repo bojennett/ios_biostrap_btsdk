@@ -77,7 +77,7 @@ public class hrZoneRangeValueType: ObservableObject {
 	}
 }
 
-public class wornCheckResultType: ObservableObject {
+public class DeviceWornCheckResultType: ObservableObject {
 	@Published public var code: String = ""
 	@Published public var value: Int = 0
 	
@@ -228,23 +228,24 @@ public class Device: NSObject, ObservableObject {
 	@Published public var discovery_type: biostrapDeviceSDK.biostrapDiscoveryType
 	@Published public var epoch: Int?
 	
-	@Published public var batteryValid: Bool = false
-	@Published public var batteryLevel: Int = 0
-	@Published public var wornStatus: String = "Not worn"
-	@Published public var chargingStatus: String = "Not charging"
+	@Published public var batteryLevel: Int?
+	@Published public var worn: Bool?
+	@Published public var charging: Bool?
+	@Published public var on_charger: Bool?
+	@Published public var charge_error: Bool?
 
-	@Published public var modelNumber: String = "???"
-	@Published public var firmwareRevision: String = "???"
-	@Published public var hardwareRevision: String = "???"
-	@Published public var manufacturerName: String = "???"
-	@Published public var serialNumber: String = "???"
-	@Published public var bluetoothSoftwareRevision: String = "???"
-	@Published public var algorithmsSoftwareRevision: String = "???"
-	@Published public var sleepSoftwareRevision: String = "???"
+	@Published public var modelNumber: String?
+	@Published public var firmwareRevision: String?
+	@Published public var hardwareRevision: String?
+	@Published public var manufacturerName: String?
+	@Published public var serialNumber: String?
+	@Published public var bluetoothSoftwareRevision: String?
+	@Published public var algorithmsSoftwareRevision: String?
+	@Published public var sleepSoftwareRevision: String?
 	
 	@Published public var canLogDiagnostics: Bool?
 	
-	@Published public var wornCheckResult = wornCheckResultType()
+	@Published public var wornCheckResult: DeviceWornCheckResultType?
 
 	@Published public var advertisingInterval: Int?
 	@Published public var chargeCycles: Float?
@@ -258,12 +259,12 @@ public class Device: NSObject, ObservableObject {
 	@Published public var tripleButtonPressAction: buttonCommandType?
 	@Published public var longButtonPressAction: buttonCommandType?
 
-	@Published public var hrZoneLEDBelow = hrZoneLEDValueType()
-	@Published public var hrZoneLEDWithin = hrZoneLEDValueType()
-	@Published public var hrZoneLEDAbove = hrZoneLEDValueType()
-	@Published public var hrZoneRange = hrZoneRangeValueType()
+	@Published public var hrZoneLEDBelow: hrZoneLEDValueType?
+	@Published public var hrZoneLEDWithin: hrZoneLEDValueType?
+	@Published public var hrZoneLEDAbove: hrZoneLEDValueType?
+	@Published public var hrZoneRange: hrZoneRangeValueType?
 	
-	@Published public var buttonPresses = 0
+	@Published public var buttonPresses: Int?
 
 	@Published public var paired: Bool?
 	@Published public var advertisingPageThreshold: Int?
@@ -1746,7 +1747,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		else {
 			DispatchQueue.main.async {
-				self.wornCheckResult = wornCheckResultType(code: "Missing characteristic", value: 0)
+				self.wornCheckResult = DeviceWornCheckResultType(code: "Not Configured", value: 0)
 				self.wornCheckResultComplete.send(.not_configured)
 			}
 		}
@@ -2016,18 +2017,16 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.deviceWornStatus = { isWorn in
 			self.lambdaWornStatus?(self.id, isWorn)
 			DispatchQueue.main.async {
-				if (isWorn) { self.wornStatus = "Worn" }
-				else { self.wornStatus = "Not Worn" }
+				self.worn = isWorn
 			}
 		}
 		
 		mMainCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
 			self.lambdaChargingStatus?(self.id, charging, on_charger, error)
 			DispatchQueue.main.async {
-				if (charging) { self.chargingStatus	= "Charging" }
-				else if (on_charger) { self.chargingStatus = "On Charger" }
-				else if (error) { self.chargingStatus = "Charging Error" }
-				else { self.chargingStatus = "Not Charging" }
+				self.charging = charging
+				self.on_charger = on_charger
+				self.charge_error = error
 			}
 		}
 
@@ -2292,7 +2291,7 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.wornCheckComplete = { successful, code, value in
 			self.lambdaWornCheckComplete?(self.id, successful, code, value )
 			DispatchQueue.main.async {
-				self.wornCheckResult = wornCheckResultType(code: code, value: value)
+				self.wornCheckResult = DeviceWornCheckResultType(code: code, value: value)
 				self.wornCheckResultComplete.send(successful ? .successful : .device_error)
 			}
 		}
@@ -2540,17 +2539,15 @@ public class Device: NSObject, ObservableObject {
 		mStreamingCharacteristic?.deviceWornStatus			= { isWorn in
 			self.lambdaWornStatus?(self.id, isWorn)
 			DispatchQueue.main.async {
-				if (isWorn) { self.wornStatus = "Worn" }
-				else { self.wornStatus = "Not Worn" }
+				self.worn = isWorn
 			}
 		}
 		mStreamingCharacteristic?.deviceChargingStatus		= { charging, on_charger, error in
 			self.lambdaChargingStatus?(self.id, charging, on_charger, error)
 			DispatchQueue.main.async {
-				if (charging) { self.chargingStatus	= "Charging" }
-				else if (on_charger) { self.chargingStatus = "On Charger" }
-				else if (error) { self.chargingStatus = "Charging Error" }
-				else { self.chargingStatus = "Not Charging" }
+				self.charging = charging
+				self.on_charger = on_charger
+				self.charge_error = error
 			}
 		}
 		
@@ -2650,7 +2647,6 @@ public class Device: NSObject, ObservableObject {
 					mBatteryLevelCharacteristic?.updated	= { id, percentage in
 						self.lambdaBatteryLevelUpdated?(id, percentage)
 						DispatchQueue.main.async {
-							self.batteryValid = true
 							self.batteryLevel = percentage
 						}
 					}
