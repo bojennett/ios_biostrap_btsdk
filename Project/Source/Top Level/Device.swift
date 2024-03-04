@@ -9,6 +9,24 @@ import Foundation
 import CoreBluetooth
 import Combine
 
+public enum completionStatus {
+	case successful
+	case not_configured
+	case device_error
+	
+	public var title: String {
+		switch self {
+		case .successful: return "Success"
+		case .not_configured: return "Not configured"
+		case .device_error: return "Device returned error"
+		}
+	}
+	
+	public var successful: Bool {
+		return self == .successful
+	}
+}
+
 public class hrZoneLEDValueType: ObservableObject {
 	@Published public var red: Bool
 	@Published public var green: Bool
@@ -206,17 +224,18 @@ public class Device: NSObject, ObservableObject {
 	@Published public var name: String
 	@Published public var id: String
 	@Published public var discovery_type: biostrapDeviceSDK.biostrapDiscoveryType
+	@Published public var epoch: Int?
 	
-	var epoch				: TimeInterval
+	var creation_epoch				: TimeInterval
 	
 	// MARK: Passthrough Subjects (Completions)
-	public let readEpochComplete = PassthroughSubject<(Bool, Int), Never>()
-	public let writeEpochComplete = PassthroughSubject<Bool, Never>()
+	public let readEpochComplete = PassthroughSubject<completionStatus, Never>()
+	public let writeEpochComplete = PassthroughSubject<completionStatus, Never>()
 
 	public let startManualComplete = PassthroughSubject<Bool, Never>()
 	public let stopManualComplete = PassthroughSubject<Bool, Never>()
 	
-	public let ledComplete = PassthroughSubject<Bool, Never>()
+	public let ledComplete = PassthroughSubject<completionStatus, Never>()
 	
 	public let getRawLoggingStatusComplete = PassthroughSubject<(Bool, Bool), Never>()
 	public let getWornOverrideStatusComplete = PassthroughSubject<(Bool, Bool), Never>()
@@ -249,8 +268,8 @@ public class Device: NSObject, ObservableObject {
 	
 	public let endSleepComplete = PassthroughSubject<Bool, Never>()
 
-	public let disableWornDetectComplete = PassthroughSubject<Bool, Never>()
-	public let enableWornDetectComplete = PassthroughSubject<Bool, Never>()
+	public let disableWornDetectComplete = PassthroughSubject<completionStatus, Never>()
+	public let enableWornDetectComplete = PassthroughSubject<completionStatus, Never>()
 
 	public let wornCheckResultComplete = PassthroughSubject<Bool, Never>()
 	
@@ -509,7 +528,7 @@ public class Device: NSObject, ObservableObject {
 		
 		self.name							= "UNKNOWN"
 		self.id								= "UNKNOWN"
-		self.epoch							= TimeInterval(0)
+		self.creation_epoch = TimeInterval(0)
 		self.mDISCharacteristicCount		= 0
 		self.mDISCharacteristicsDiscovered	= false
 		self.discovery_type					= .unknown
@@ -644,7 +663,7 @@ public class Device: NSObject, ObservableObject {
 			mainCharacteristic.writeEpoch(newEpoch)
 		}
 		else {
-			DispatchQueue.main.async { self.writeEpochComplete.send(false) }
+			DispatchQueue.main.async { self.writeEpochComplete.send(.not_configured) }
 		}
 	}
 
@@ -668,7 +687,10 @@ public class Device: NSObject, ObservableObject {
 			mainCharacteristic.readEpoch()
 		}
 		else {
-			DispatchQueue.main.async { self.readEpochComplete.send((false, 0)) }
+			DispatchQueue.main.async {
+				self.epoch = nil
+				self.readEpochComplete.send(.not_configured)
+			}
 		}
 	}
 
@@ -820,7 +842,7 @@ public class Device: NSObject, ObservableObject {
 			mainCharacteristic.disableWornDetect()
 		}
 		else {
-			DispatchQueue.main.async { self.disableWornDetectComplete.send(false) }
+			DispatchQueue.main.async { self.disableWornDetectComplete.send(.not_configured) }
 		}
 	}
 
@@ -843,7 +865,7 @@ public class Device: NSObject, ObservableObject {
 			mainCharacteristic.enableWornDetect()
 		}
 		else {
-			DispatchQueue.main.async { self.enableWornDetectComplete.send(false) }
+			DispatchQueue.main.async { self.enableWornDetectComplete.send(.not_configured) }
 		}
 	}
 
@@ -906,7 +928,7 @@ public class Device: NSObject, ObservableObject {
 			mainCharacteristic.alterLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
 		}
 		else {
-			DispatchQueue.main.async { self.ledComplete.send(false) }
+			DispatchQueue.main.async { self.ledComplete.send(.not_configured) }
 		}
 	}
 	#endif
@@ -924,7 +946,7 @@ public class Device: NSObject, ObservableObject {
 			mainCharacteristic.kairosLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
 		}
 		else {
-			DispatchQueue.main.async { self.ledComplete.send(false) }
+			DispatchQueue.main.async { self.ledComplete.send(.not_configured) }
 		}
 	}
 	#endif
@@ -1967,12 +1989,15 @@ public class Device: NSObject, ObservableObject {
 	private func attachMainCharacteristicLambdas() {
 		mMainCharacteristic?.writeEpochComplete = { successful in
 			self.lambdaWriteEpochComplete?(self.id, successful)
-			DispatchQueue.main.async { self.writeEpochComplete.send(successful) }
+			DispatchQueue.main.async { self.writeEpochComplete.send(successful ? .successful : .device_error) }
 		}
 		
 		mMainCharacteristic?.readEpochComplete = { successful, value in
 			self.lambdaReadEpochComplete?(self.id, successful,  value)
-			DispatchQueue.main.async { self.readEpochComplete.send((successful, value)) }
+			DispatchQueue.main.async {
+				self.epoch = value
+				self.readEpochComplete.send(successful ? .successful : .device_error)
+			}
 		}
 		
 		mMainCharacteristic?.deviceWornStatus = { isWorn in
@@ -2005,7 +2030,7 @@ public class Device: NSObject, ObservableObject {
 		
 		mMainCharacteristic?.ledComplete = { successful in
 			self.lambdaLEDComplete?(self.id, successful)
-			DispatchQueue.main.async { self.ledComplete.send(successful) }
+			DispatchQueue.main.async { self.ledComplete.send(successful ? .successful : .device_error) }
 		}
 		
 		mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in
@@ -2179,14 +2204,14 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.disableWornDetectComplete = { successful in
 			self.lambdaDisableWornDetectComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.disableWornDetectComplete.send(successful)
+				self.disableWornDetectComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		
 		mMainCharacteristic?.enableWornDetectComplete = { successful in
 			self.lambdaEnableWornDetectComplete?(self.id, successful)
 			DispatchQueue.main.async {
-				self.enableWornDetectComplete.send(successful)
+				self.enableWornDetectComplete.send(successful ? .successful : .device_error)
 			}
 		}
 		

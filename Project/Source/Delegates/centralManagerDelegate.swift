@@ -312,7 +312,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, discoveryType: discovery_type)
 #endif
 						
-						device.epoch					= Date().timeIntervalSince1970
+						device.creation_epoch = Date().timeIntervalSince1970
 						
 						device.lambdaBatteryLevelUpdated					= { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
 						device.lambdaHeartRateUpdated						= { id, epoch, hr, rr in DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) } }
@@ -416,7 +416,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, discoveryType: discovery_type)
 #endif
 						
-						device.epoch					= Date().timeIntervalSince1970
+						device.creation_epoch = Date().timeIntervalSince1970
 						
 						device.lambdaBatteryLevelUpdated					= { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
 						device.lambdaHeartRateUpdated						= { id, epoch, hr, rr in DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) } }
@@ -524,7 +524,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						if (peripheral == devicePeripheral) {
 							devicePeripheral.delegate = self
 							device.peripheral	= devicePeripheral
-							device.epoch		= Date().timeIntervalSince1970
+							device.creation_epoch = Date().timeIntervalSince1970
 							device.connectionState = .configuring
 							mDiscoveredDevices.removeValue(forKey: peripheral.prettyID)
 							mConnectedDevices[peripheral.prettyID] = device

@@ -241,7 +241,7 @@ import CoreBluetooth
 		
 		for key in keys {
 			if let device = devices[key] {
-				devDictionary[device.epoch]	= device
+				devDictionary[device.creation_epoch]	= device
 			}
 		}
 
