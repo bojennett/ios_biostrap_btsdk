@@ -171,12 +171,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mSendFrame(data: Data) {
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			peripheral.writeValue(data, for: characteristic, type: .withoutResponse)
-		}
-		else {
-			log?.e("Data write not successful: \(data.hexString)")
-		}
+		pCommandQ?.write(pCharacteristic, data: data, type: .withoutResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -184,7 +179,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 	// Constructor
 	//
 	//--------------------------------------------------------------------------------
-	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic) {
+	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
 		mState			= .IDLE
 		mDataIndex		= 0
 		mFrameIndex		= 0
@@ -192,7 +187,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 		mHeaderPackets	= [Data]()
 		mDataPackets	= [[Data]]()
 
-		super.init (peripheral, characteristic: characteristic)
+		super.init (peripheral, characteristic: characteristic, commandQ: commandQ)
 
 		pConfigured		= true
 	}

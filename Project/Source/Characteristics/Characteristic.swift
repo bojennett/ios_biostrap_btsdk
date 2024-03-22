@@ -32,6 +32,7 @@ class Characteristic {
 	internal var pID				: String				= "UNKNOWN"
 	internal var pConfigured		: Bool					= false
 	internal var pDiscovered		: Bool					= false
+	internal var pCommandQ: CommandQ?
 
 	// MARK: Public Variables
 	var configured: Bool {
@@ -372,12 +373,13 @@ class Characteristic {
 	// Constructor
 	//
 	//--------------------------------------------------------------------------------
-	init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic) {
+	init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
 		pID				= peripheral.prettyID
 		pPeripheral		= peripheral
 		pCharacteristic	= characteristic
 		pConfigured		= false
 		pDiscovered		= false
+		pCommandQ = commandQ
 	}
 	
 	//--------------------------------------------------------------------------------

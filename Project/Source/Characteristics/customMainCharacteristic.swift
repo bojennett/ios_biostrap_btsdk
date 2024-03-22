@@ -207,7 +207,7 @@ class customMainCharacteristic: Characteristic {
 	// Constructor
 	//
 	//--------------------------------------------------------------------------------
-	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic) {
+	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
 		mCRCIgnoreTest	= testStruct(name: "CRC Ignore", enable: false, limit: 3)
 		mCRCFailTest	= testStruct(name: "CRC Fail", enable: false, limit: 3)
 		
@@ -215,8 +215,8 @@ class customMainCharacteristic: Characteristic {
 		mExpectedSequenceNumber	= 0
 		mCRCFailCount			= 0
 
-		super.init(peripheral, characteristic: characteristic)
-		
+		super.init (peripheral, characteristic: characteristic, commandQ: commandQ)
+
 		mDataPackets = [biostrapDataPacket]()
 		
 	}
@@ -231,13 +231,10 @@ class customMainCharacteristic: Characteristic {
 	func writeEpoch(_ newEpoch: Int) {
 		log?.v("\(pID): \(newEpoch)")
 
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.writeEpoch.rawValue)
-			data.append(newEpoch.leData32)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.writeEpochComplete?(false) }
+		var data = Data()
+		data.append(commands.writeEpoch.rawValue)
+		data.append(newEpoch.leData32)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -250,13 +247,9 @@ class customMainCharacteristic: Characteristic {
 	func readEpoch() {
 		log?.v("\(pID)")
 
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.readEpoch.rawValue)
-
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.readEpochComplete?(false, 0) }
+		var data = Data()
+		data.append(commands.readEpoch.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -269,13 +262,9 @@ class customMainCharacteristic: Characteristic {
 	func endSleep() {
 		log?.v("\(pID)")
 
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.endSleep.rawValue)
-
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.endSleepComplete?(false) }
+		var data = Data()
+		data.append(commands.endSleep.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -286,14 +275,10 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mSimpleCommand(_ command: commands) -> Bool {
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(command.rawValue)
-			
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-			return (true)
-		}
-		else { return false }
+		var data = Data()
+		data.append(command.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		return (true)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -306,14 +291,10 @@ class customMainCharacteristic: Characteristic {
 	func getNextPacket(_ single: Bool) {
 		log?.v("\(pID): Single? \(single)")
 
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getNextPacket.rawValue)
-			data.append(single ? 0x01 : 0x00)
-
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getNextPacketComplete?(false, .missingDevice, true, "") }
+		var data = Data()
+		data.append(commands.getNextPacket.rawValue)
+		data.append(single ? 0x01 : 0x00)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -328,18 +309,15 @@ class customMainCharacteristic: Characteristic {
 
 		self.pFailedDecodeCount	= 0
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getAllPackets.rawValue)
+		var data = Data()
+		data.append(commands.getAllPackets.rawValue)
 			
-			if (newStyle) {
-				data.append(contentsOf: pages.leData16)
-				data.append(contentsOf: delay.leData16)
-			}
-
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
+		if (newStyle) {
+			data.append(contentsOf: pages.leData16)
+			data.append(contentsOf: delay.leData16)
 		}
-		else { self.getAllPacketsComplete?(false) }
+
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -352,14 +330,10 @@ class customMainCharacteristic: Characteristic {
 	func getAllPacketsAcknowledge(_ ack: Bool) {
 		log?.v("\(pID): Ack: \(ack)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getAllPacketsAcknowledge.rawValue)
-			data.append(ack ? 0x01 : 0x00)
-			
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getAllPacketsAcknowledgeComplete?(false, ack) }
+		var data = Data()
+		data.append(commands.getAllPacketsAcknowledge.rawValue)
+		data.append(ack ? 0x01 : 0x00)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -411,14 +385,10 @@ class customMainCharacteristic: Characteristic {
 	func startManual(_ algorithms: ppgAlgorithmConfiguration) {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.startManual.rawValue)
-			data.append(algorithms.commandByte)
-
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.startManualComplete?(false) }
+		var data = Data()
+		data.append(commands.startManual.rawValue)
+		data.append(algorithms.commandByte)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -445,18 +415,15 @@ class customMainCharacteristic: Characteristic {
 	func alterLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		log?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.led.rawValue)
-			data.append(red ? 0x01 : 0x00)		// Red
-			data.append(green ? 0x01 : 0x00)	// Green
-			data.append(blue ? 0x01 : 0x00)		// Blue
-			data.append(blink ? 0x01 : 0x00)	// Blink
-			data.append(UInt8(seconds & 0xff))	// Seconds
+		var data = Data()
+		data.append(commands.led.rawValue)
+		data.append(red ? 0x01 : 0x00)		// Red
+		data.append(green ? 0x01 : 0x00)	// Green
+		data.append(blue ? 0x01 : 0x00)		// Blue
+		data.append(blink ? 0x01 : 0x00)	// Blink
+		data.append(UInt8(seconds & 0xff))	// Seconds
 
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.ledComplete?(false) }
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	#endif
 
@@ -471,18 +438,15 @@ class customMainCharacteristic: Characteristic {
 	func kairosLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		log?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.led.rawValue)
-			data.append(red ? 0x01 : 0x00)		// Red
-			data.append(green ? 0x01 : 0x00)	// Green
-			data.append(blue ? 0x01 : 0x00)		// Blue
-			data.append(blink ? 0x01 : 0x00)	// Blink
-			data.append(UInt8(seconds & 0xff))	// Seconds
-			
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.ledComplete?(false) }
+		var data = Data()
+		data.append(commands.led.rawValue)
+		data.append(red ? 0x01 : 0x00)		// Red
+		data.append(green ? 0x01 : 0x00)	// Green
+		data.append(blue ? 0x01 : 0x00)		// Blue
+		data.append(blink ? 0x01 : 0x00)	// Blink
+		data.append(UInt8(seconds & 0xff))	// Seconds
+		
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	#endif
 
@@ -496,12 +460,9 @@ class customMainCharacteristic: Characteristic {
 	func enterShipMode() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.enterShipMode.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.enterShipModeComplete?(false) }
+		var data = Data()
+		data.append(commands.enterShipMode.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -514,17 +475,12 @@ class customMainCharacteristic: Characteristic {
 	func writeSerialNumber(_ partID: String) {
 		log?.v("\(pID): \(partID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setDeviceParam.rawValue)
-			data.append(deviceParameterType.serialNumber.rawValue)
-			data.append(contentsOf: [UInt8](partID.utf8))
-			
-			log?.v ("\(data.hexString)")
-
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.writeSerialNumberComplete?(false) }
+		var data = Data()
+		data.append(commands.setDeviceParam.rawValue)
+		data.append(deviceParameterType.serialNumber.rawValue)
+		data.append(contentsOf: [UInt8](partID.utf8))
+		
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -537,13 +493,10 @@ class customMainCharacteristic: Characteristic {
 	func readSerialNumber() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getDeviceParam.rawValue)
-			data.append(deviceParameterType.serialNumber.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.readSerialNumberComplete?(false, "") }
+		var data = Data()
+		data.append(commands.getDeviceParam.rawValue)
+		data.append(deviceParameterType.serialNumber.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -556,13 +509,10 @@ class customMainCharacteristic: Characteristic {
 	func deleteSerialNumber() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.delDeviceParam.rawValue)
-			data.append(deviceParameterType.serialNumber.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.deleteSerialNumberComplete?(false) }
+		var data = Data()
+		data.append(commands.delDeviceParam.rawValue)
+		data.append(deviceParameterType.serialNumber.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -575,17 +525,14 @@ class customMainCharacteristic: Characteristic {
 	func writeAdvInterval(_ seconds: Int) {
 		log?.v("\(pID): \(seconds)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setDeviceParam.rawValue)
-			data.append(deviceParameterType.advertisingInterval.rawValue)
-			data.append(contentsOf: seconds.leData32)
-			
-			log?.v ("\(data.hexString)")
+		var data = Data()
+		data.append(commands.setDeviceParam.rawValue)
+		data.append(deviceParameterType.advertisingInterval.rawValue)
+		data.append(contentsOf: seconds.leData32)
+		
+		log?.v ("\(data.hexString)")
 
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.writeAdvIntervalComplete?(false) }
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -598,13 +545,10 @@ class customMainCharacteristic: Characteristic {
 	func readAdvInterval() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getDeviceParam.rawValue)
-			data.append(deviceParameterType.advertisingInterval.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.readAdvIntervalComplete?(false, 0) }
+		var data = Data()
+		data.append(commands.getDeviceParam.rawValue)
+		data.append(deviceParameterType.advertisingInterval.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -617,13 +561,10 @@ class customMainCharacteristic: Characteristic {
 	func deleteAdvInterval() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.delDeviceParam.rawValue)
-			data.append(deviceParameterType.advertisingInterval.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.deleteAdvIntervalComplete?(false) }
+		var data = Data()
+		data.append(commands.delDeviceParam.rawValue)
+		data.append(deviceParameterType.advertisingInterval.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -636,13 +577,10 @@ class customMainCharacteristic: Characteristic {
 	func clearChargeCycles() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setDeviceParam.rawValue)
-			data.append(deviceParameterType.chargeCycle.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.clearChargeCyclesComplete?(false) }
+		var data = Data()
+		data.append(commands.setDeviceParam.rawValue)
+		data.append(deviceParameterType.chargeCycle.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -655,13 +593,10 @@ class customMainCharacteristic: Characteristic {
 	func readChargeCycles() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getDeviceParam.rawValue)
-			data.append(deviceParameterType.chargeCycle.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.readChargeCyclesComplete?(false, 0.0) }
+		var data = Data()
+		data.append(commands.getDeviceParam.rawValue)
+		data.append(deviceParameterType.chargeCycle.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -674,13 +609,10 @@ class customMainCharacteristic: Characteristic {
 	func readCanLogDiagnostics() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getDeviceParam.rawValue)
-			data.append(deviceParameterType.canLogDiagnostics.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.readCanLogDiagnosticsComplete?(false, false) }
+		var data = Data()
+		data.append(commands.getDeviceParam.rawValue)
+		data.append(deviceParameterType.canLogDiagnostics.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -693,17 +625,12 @@ class customMainCharacteristic: Characteristic {
 	func updateCanLogDiagnostics(_ allow: Bool) {
 		log?.v("\(pID): Allow Diagnostics? \(allow)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setDeviceParam.rawValue)
-			data.append(deviceParameterType.canLogDiagnostics.rawValue)
-			data.append(allow ? 0x01 : 0x00)
-			
-			log?.v ("\(data.hexString)")
-
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.updateCanLogDiagnosticsComplete?(false) }
+		var data = Data()
+		data.append(commands.setDeviceParam.rawValue)
+		data.append(deviceParameterType.canLogDiagnostics.rawValue)
+		data.append(allow ? 0x01 : 0x00)
+		
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -716,13 +643,10 @@ class customMainCharacteristic: Characteristic {
 	func allowPPG(_ allow: Bool) {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.allowPPG.rawValue)
-			data.append(allow ? 0x01 : 0x00)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.allowPPGComplete?(false) }
+		var data = Data()
+		data.append(commands.allowPPG.rawValue)
+		data.append(allow ? 0x01 : 0x00)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -735,12 +659,9 @@ class customMainCharacteristic: Characteristic {
 	func wornCheck() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.wornCheck.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.wornCheckComplete?(false, "No device", 0) }
+		var data = Data()
+		data.append(commands.wornCheck.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -753,13 +674,10 @@ class customMainCharacteristic: Characteristic {
 	func rawLogging(_ enable: Bool) {
 		log?.v("\(pID): \(enable)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.logRaw.rawValue)
-			data.append(enable ? 0x01 : 0x00)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.rawLoggingComplete?(false) }
+		var data = Data()
+		data.append(commands.logRaw.rawValue)
+		data.append(enable ? 0x01 : 0x00)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -772,12 +690,9 @@ class customMainCharacteristic: Characteristic {
 	func getRawLoggingStatus() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getRawLoggingStatus.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getRawLoggingStatusComplete?(false, false) }
+		var data = Data()
+		data.append(commands.getRawLoggingStatus.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -790,12 +705,9 @@ class customMainCharacteristic: Characteristic {
 	func getWornOverrideStatus() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getWornOverrideStatus.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getWornOverrideStatusComplete?(false, false) }
+		var data = Data()
+		data.append(commands.getWornOverrideStatus.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -834,14 +746,11 @@ class customMainCharacteristic: Characteristic {
 	func setSessionParam(_ parameter: sessionParameterType, value: Int) {
 		log?.v("\(pID): \(parameter) - \(value)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setSessionParam.rawValue)
-			data.append(parameter.rawValue)
-			data.append(value.leData32)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.setSessionParamComplete?(false, parameter) }
+		var data = Data()
+		data.append(commands.setSessionParam.rawValue)
+		data.append(parameter.rawValue)
+		data.append(value.leData32)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -854,13 +763,10 @@ class customMainCharacteristic: Characteristic {
 	func getSessionParam(_ parameter: sessionParameterType) {
 		log?.v("\(pID): \(parameter)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getSessionParam.rawValue)
-			data.append(parameter.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getSessionParamComplete?(false, parameter, 0) }
+		var data = Data()
+		data.append(commands.getSessionParam.rawValue)
+		data.append(parameter.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -873,13 +779,10 @@ class customMainCharacteristic: Characteristic {
 	func resetSessionParams() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setSessionParam.rawValue)
-			data.append(sessionParameterType.reset.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.resetSessionParamsComplete?(false) }
+		var data = Data()
+		data.append(commands.setSessionParam.rawValue)
+		data.append(sessionParameterType.reset.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -892,13 +795,10 @@ class customMainCharacteristic: Characteristic {
 	func acceptSessionParams() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setSessionParam.rawValue)
-			data.append(sessionParameterType.accept.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.acceptSessionParamsComplete?(false) }
+		var data = Data()
+		data.append(commands.setSessionParam.rawValue)
+		data.append(sessionParameterType.accept.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -912,13 +812,10 @@ class customMainCharacteristic: Characteristic {
 	func alterManufacturingTest(_ test: alterManufacturingTestType) {
 		log?.v("\(pID): \(test.title)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.manufacturingTest.rawValue)
-			data.append(test.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.manufacturingTestComplete?(false) }
+		var data = Data()
+		data.append(commands.manufacturingTest.rawValue)
+		data.append(test.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	#endif
 
@@ -926,13 +823,10 @@ class customMainCharacteristic: Characteristic {
 	func kairosManufacturingTest(_ test: kairosManufacturingTestType) {
 		log?.v("\(pID): \(test.title)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.manufacturingTest.rawValue)
-			data.append(test.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.manufacturingTestComplete?(false) }
+		var data = Data()
+		data.append(commands.manufacturingTest.rawValue)
+		data.append(test.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	#endif
 		
@@ -946,13 +840,10 @@ class customMainCharacteristic: Characteristic {
 	func setAskForButtonResponse(_ enable: Bool) {
 		log?.v("\(pID): Enabled = \(enable)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setAskForButtonResponse.rawValue)
-			data.append(enable ? 0x01 : 0x00)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.setAskForButtonResponseComplete?(false, enable) }
+		var data = Data()
+		data.append(commands.setAskForButtonResponse.rawValue)
+		data.append(enable ? 0x01 : 0x00)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -965,12 +856,9 @@ class customMainCharacteristic: Characteristic {
 	func getAskForButtonResponse() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getAskForButtonResponse.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getAskForButtonResponseComplete?(false, false) }
+		var data = Data()
+		data.append(commands.getAskForButtonResponse.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -983,20 +871,17 @@ class customMainCharacteristic: Characteristic {
 	func setHRZoneColor(_ type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
 		log?.v("\(pID): \(type.title) -> R \(red), G \(green), B \(blue).  On: \(on_milliseconds), Off: \(off_milliseconds)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setHRZoneColor.rawValue)
-			data.append(type.rawValue)
-			data.append(red ? 0x01 : 0x00)
-			data.append(green ? 0x01 : 0x00)
-			data.append(blue ? 0x01 : 0x00)
-			data.append(UInt8((on_milliseconds >> 0) & 0xff))
-			data.append(UInt8((on_milliseconds >> 8) & 0xff))
-			data.append(UInt8((off_milliseconds >> 0) & 0xff))
-			data.append(UInt8((off_milliseconds >> 8) & 0xff))
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.setHRZoneColorComplete?(false, type) }
+		var data = Data()
+		data.append(commands.setHRZoneColor.rawValue)
+		data.append(type.rawValue)
+		data.append(red ? 0x01 : 0x00)
+		data.append(green ? 0x01 : 0x00)
+		data.append(blue ? 0x01 : 0x00)
+		data.append(UInt8((on_milliseconds >> 0) & 0xff))
+		data.append(UInt8((on_milliseconds >> 8) & 0xff))
+		data.append(UInt8((off_milliseconds >> 0) & 0xff))
+		data.append(UInt8((off_milliseconds >> 8) & 0xff))
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1009,13 +894,10 @@ class customMainCharacteristic: Characteristic {
 	func getHRZoneColor(_ type: hrZoneRangeType) {
 		log?.v("\(pID): \(type.title)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getHRZoneColor.rawValue)
-			data.append(type.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getHRZoneColorComplete?(false, type, false, false, false, 0, 0) }
+		var data = Data()
+		data.append(commands.getHRZoneColor.rawValue)
+		data.append(type.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1028,15 +910,12 @@ class customMainCharacteristic: Characteristic {
 	func setHRZoneRange(_ enabled: Bool, high_value: Int, low_value: Int) {
 		log?.v("\(pID): Enabled: \(enabled) -> High Value: \(high_value), Low Value: \(low_value)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setHRZoneRange.rawValue)
-			data.append(enabled ? 0x01 : 0x00)
-			data.append(UInt8(high_value))
-			data.append(UInt8(low_value))
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.setHRZoneRangeComplete?(false) }
+		var data = Data()
+		data.append(commands.setHRZoneRange.rawValue)
+		data.append(enabled ? 0x01 : 0x00)
+		data.append(UInt8(high_value))
+		data.append(UInt8(low_value))
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1049,12 +928,9 @@ class customMainCharacteristic: Characteristic {
 	func getHRZoneRange() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getHRZoneRange.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getHRZoneRangeComplete?(false, false, 0, 0) }
+		var data = Data()
+		data.append(commands.getHRZoneRange.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1067,12 +943,9 @@ class customMainCharacteristic: Characteristic {
 	func getPPGAlgorithm() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getPPGAlgorithm.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getPPGAlgorithmComplete?(false, ppgAlgorithmConfiguration(), eventType.unknown) }
+		var data = Data()
+		data.append(commands.getPPGAlgorithm.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1085,13 +958,10 @@ class customMainCharacteristic: Characteristic {
 	func setAdvertiseAsHRM(_ asHRM: Bool) {
 		log?.v("\(pID): As HRM? (\(asHRM)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setAdvertiseAsHRM.rawValue)
-			data.append(asHRM ? 0x01 : 0x00)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.setAdvertiseAsHRMComplete?(false, false) }
+		var data = Data()
+		data.append(commands.setAdvertiseAsHRM.rawValue)
+		data.append(asHRM ? 0x01 : 0x00)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1104,12 +974,9 @@ class customMainCharacteristic: Characteristic {
 	func getAdvertiseAsHRM() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getAdvertiseAsHRM.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getAdvertiseAsHRMComplete?(false, false) }
+		var data = Data()
+		data.append(commands.getAdvertiseAsHRM.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1122,14 +989,11 @@ class customMainCharacteristic: Characteristic {
 	func setButtonCommand(_ tap: buttonTapType, command: buttonCommandType) {
 		log?.v("\(pID): \(tap.title) -> \(command.title)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setButtonCommand.rawValue)
-			data.append(tap.rawValue)
-			data.append(command.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.setButtonCommandComplete?(false, tap, command) }
+		var data = Data()
+		data.append(commands.setButtonCommand.rawValue)
+		data.append(tap.rawValue)
+		data.append(command.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1142,13 +1006,10 @@ class customMainCharacteristic: Characteristic {
 	func getButtonCommand(_ tap: buttonTapType) {
 		log?.v("\(pID): \(tap.title)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getButtonCommand.rawValue)
-			data.append(tap.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getButtonCommandComplete?(false, tap, .unknown) }
+		var data = Data()
+		data.append(commands.getButtonCommand.rawValue)
+		data.append(tap.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1161,14 +1022,11 @@ class customMainCharacteristic: Characteristic {
 	func setPaired() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setDeviceParam.rawValue)
-			data.append(deviceParameterType.paired.rawValue)
-			data.append(0x01)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.setPairedComplete?(false) }
+		var data = Data()
+		data.append(commands.setDeviceParam.rawValue)
+		data.append(deviceParameterType.paired.rawValue)
+		data.append(0x01)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1181,13 +1039,10 @@ class customMainCharacteristic: Characteristic {
 	func setUnpaired() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.delDeviceParam.rawValue)
-			data.append(deviceParameterType.paired.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.setUnpairedComplete?(false) }
+		var data = Data()
+		data.append(commands.delDeviceParam.rawValue)
+		data.append(deviceParameterType.paired.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 
@@ -1201,13 +1056,10 @@ class customMainCharacteristic: Characteristic {
 	func getPaired() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getDeviceParam.rawValue)
-			data.append(deviceParameterType.paired.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getPairedComplete?(false, false) }
+		var data = Data()
+		data.append(commands.getDeviceParam.rawValue)
+		data.append(deviceParameterType.paired.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1220,14 +1072,11 @@ class customMainCharacteristic: Characteristic {
 	func setPageThreshold(_ threshold: Int) {
 		log?.v("\(pID): \(threshold)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.setDeviceParam.rawValue)
-			data.append(deviceParameterType.pageThreshold.rawValue)
-			data.append(UInt8(threshold))
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.setPageThresholdComplete?(false) }
+		var data = Data()
+		data.append(commands.setDeviceParam.rawValue)
+		data.append(deviceParameterType.pageThreshold.rawValue)
+		data.append(UInt8(threshold))
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1240,13 +1089,10 @@ class customMainCharacteristic: Characteristic {
 	func getPageThreshold() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.getDeviceParam.rawValue)
-			data.append(deviceParameterType.pageThreshold.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.getPageThresholdComplete?(false, 1) }
+		var data = Data()
+		data.append(commands.getDeviceParam.rawValue)
+		data.append(deviceParameterType.pageThreshold.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	
@@ -1260,13 +1106,10 @@ class customMainCharacteristic: Characteristic {
 	func deletePageThreshold() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.delDeviceParam.rawValue)
-			data.append(deviceParameterType.pageThreshold.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.deletePageThresholdComplete?(false) }
+		var data = Data()
+		data.append(commands.delDeviceParam.rawValue)
+		data.append(deviceParameterType.pageThreshold.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1279,13 +1122,9 @@ class customMainCharacteristic: Characteristic {
 	func recalibratePPG() {
 		log?.v("\(pID)")
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.recalibratePPG.rawValue)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else { self.recalibratePPGComplete?(false) }
-
+		var data = Data()
+		data.append(commands.recalibratePPG.rawValue)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1304,15 +1143,10 @@ class customMainCharacteristic: Characteristic {
 		}
 		else { mCRCFailCount	= 0 }
 		
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			var data = Data()
-			data.append(commands.validateCRC.rawValue)
-			data.append(mCRCOK ? 0x01 : 0x00)
-			peripheral.writeValue(data, for: characteristic, type: .withResponse)
-		}
-		else {
-			log?.e ("\(pID): I can't run the validate CRC command.  I don't know what to do here")
-		}
+		var data = Data()
+		data.append(commands.validateCRC.rawValue)
+		data.append(mCRCOK ? 0x01 : 0x00)
+		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 		
 		mCRCOK				= true
 	}
@@ -1684,6 +1518,8 @@ class customMainCharacteristic: Characteristic {
 				else {
 					log?.e ("\(pID): Incorrect length for completion: \(data.hexString)")
 				}
+				
+				pCommandQ?.remove() // These were updates from a write, so queue can now move on
 				
 			case .dataPacket:
 				if (data.count > 3) {	// Accounts for header byte and sequence number

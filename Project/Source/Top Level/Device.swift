@@ -150,7 +150,7 @@ public class Device: NSObject, ObservableObject {
 	@Published public var hrZoneLEDAbove: hrZoneLEDValueType?
 	@Published public var hrZoneRange: hrZoneRangeValueType?
 	
-	@Published public var buttonPresses: Int?
+	@Published public var buttonTaps: Int?
 
 	@Published public var paired: Bool?
 	@Published public var advertisingPageThreshold: Int?
@@ -349,6 +349,8 @@ public class Device: NSObject, ObservableObject {
 	var lambdaUpdateFirmwareProgress: ((_ id: String, _ percentage: Float)->())?
 	var lambdaUpdateFirmwareFailed: ((_ id: String, _ code: Int, _ message: String)->())?
 
+	internal var commandQ: CommandQ?
+	
 	internal var mModelNumber					: disStringCharacteristic?
 	internal var mFirmwareVersion				: disFirmwareVersionCharacteristic?
 	internal var mSoftwareRevision				: disSoftwareRevisionCharacteristic?
@@ -447,6 +449,7 @@ public class Device: NSObject, ObservableObject {
 		self.peripheral	= peripheral
 		self.type		= type
 		self.discovery_type = discoveryType
+		self.commandQ = CommandQ(peripheral)
 	}
 	#endif
 
@@ -457,6 +460,7 @@ public class Device: NSObject, ObservableObject {
 		self.id			= id
 		self.peripheral	= peripheral
 		self.discovery_type = discoveryType
+		self.commandQ = CommandQ(peripheral)
 	}
 	
 	#if UNIVERSAL || ALTER
@@ -2170,7 +2174,7 @@ public class Device: NSObject, ObservableObject {
 		mMainCharacteristic?.buttonClicked = { presses in
 			self.lambdaButtonClicked?(self.id, presses)
 			DispatchQueue.main.async {
-				self.buttonPresses = presses
+				self.buttonTaps = presses
 			}
 		}
 		
@@ -2447,7 +2451,7 @@ public class Device: NSObject, ObservableObject {
 		mStreamingCharacteristic?.buttonClicked = { presses in
 			self.lambdaButtonClicked?(self.id, presses)
 			DispatchQueue.main.async {
-				self.buttonPresses = presses
+				self.buttonTaps = presses
 			}
 		}
 		
@@ -2496,40 +2500,40 @@ public class Device: NSObject, ObservableObject {
 				case .model_number_string:
 					mDISCharacteristicsDiscovered	= true
 					mDISCharacteristicCount = mDISCharacteristicCount + 1
-					mModelNumber = disStringCharacteristic(peripheral, characteristic: characteristic)
+					mModelNumber = disStringCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mModelNumber?.read()
 				case .hardware_revision_string:
 					mDISCharacteristicsDiscovered	= true
 					mDISCharacteristicCount = mDISCharacteristicCount + 1
-					mHardwareRevision = disStringCharacteristic(peripheral, characteristic: characteristic)
+					mHardwareRevision = disStringCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mHardwareRevision?.read()
 				case .firmware_revision_string:
 					mDISCharacteristicsDiscovered	= true
 					mDISCharacteristicCount = mDISCharacteristicCount + 1
-					mFirmwareVersion = disFirmwareVersionCharacteristic(peripheral, characteristic: characteristic)
+					mFirmwareVersion = disFirmwareVersionCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mFirmwareVersion?.read()
 				case .software_revision_string:
 					mDISCharacteristicsDiscovered	= true
 					mDISCharacteristicCount = mDISCharacteristicCount + 1
 					#if UNIVERSAL
-					mSoftwareRevision = disSoftwareRevisionCharacteristic(peripheral, characteristic: characteristic, type: type)
+					mSoftwareRevision = disSoftwareRevisionCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ, type: type)
 					#else
-					mSoftwareRevision = disSoftwareRevisionCharacteristic(peripheral, characteristic: characteristic)
+					mSoftwareRevision = disSoftwareRevisionCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					#endif
 					mSoftwareRevision?.read()
 				case .manufacturer_name_string:
 					mDISCharacteristicsDiscovered	= true
 					mDISCharacteristicCount = mDISCharacteristicCount + 1
-					mManufacturerName = disStringCharacteristic(peripheral, characteristic: characteristic)
+					mManufacturerName = disStringCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mManufacturerName?.read()
 				case .serial_number_string:
 					mDISCharacteristicsDiscovered	= true
 					mDISCharacteristicCount = mDISCharacteristicCount + 1
-					mSerialNumber = disStringCharacteristic(peripheral, characteristic: characteristic)
+					mSerialNumber = disStringCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mSerialNumber?.read()
 				case .battery_level:
 					log?.v ("\(self.id) '\(testCharacteristic.title)' - read it and enable notifications")
-					mBatteryLevelCharacteristic	= batteryLevelCharacteristic(peripheral, characteristic: characteristic)
+					mBatteryLevelCharacteristic	= batteryLevelCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mBatteryLevelCharacteristic?.updated	= { id, percentage in
 						self.lambdaBatteryLevelUpdated?(id, percentage)
 						DispatchQueue.main.async {
@@ -2540,7 +2544,7 @@ public class Device: NSObject, ObservableObject {
 					mBatteryLevelCharacteristic?.discoverDescriptors()
 				case .heart_rate_measurement:
 					log?.v ("\(self.id) '\(testCharacteristic.title)' - and enable notifications")
-					mHeartRateMeasurementCharacteristic	= heartRateMeasurementCharacteristic(peripheral, characteristic: characteristic)
+					mHeartRateMeasurementCharacteristic	= heartRateMeasurementCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mHeartRateMeasurementCharacteristic?.updated	= { id, epoch, hr, rr in
 						self.lambdaHeartRateUpdated?(id, epoch, hr, rr)
 						DispatchQueue.main.async {
@@ -2550,7 +2554,7 @@ public class Device: NSObject, ObservableObject {
 					mHeartRateMeasurementCharacteristic?.discoverDescriptors()
 				case .body_sensor_location:
 					log?.v ("\(self.id) '\(testCharacteristic.title)' - read it")
-					peripheral.readValue(for: characteristic)
+					commandQ?.read(characteristic)
 				default:
 					if let service = characteristic.service {
 						log?.e ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)' - do not know what to do")
@@ -2565,7 +2569,7 @@ public class Device: NSObject, ObservableObject {
 					
 				#if UNIVERSAL || ALTER
 				case .alterMainCharacteristic:
-					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic)
+					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mMainCharacteristic?.type	= .alter
 					#endif
@@ -2573,11 +2577,11 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.discoverDescriptors()
 					
 				case .alterDataCharacteristic:
-					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
+					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .alterStrmCharacteristic:
-					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
+					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .alter
 					#endif
@@ -2588,7 +2592,7 @@ public class Device: NSObject, ObservableObject {
 
 				#if UNIVERSAL || KAIROS
 				case .kairosMainCharacteristic:
-					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic)
+					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mMainCharacteristic?.type	= .kairos
 					#endif
@@ -2596,11 +2600,11 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.discoverDescriptors()
 
 				case .kairosDataCharacteristic:
-					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic)
+					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .kairosStrmCharacteristic:
-					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic)
+					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .kairos
 					#endif
@@ -2617,7 +2621,7 @@ public class Device: NSObject, ObservableObject {
 						log?.v ("\(self.id) for nil service - '\(testCharacteristic.title)'")
 					}
 					
-					mAmbiqOTARXCharacteristic = ambiqOTARXCharacteristic(peripheral, characteristic: characteristic)
+					mAmbiqOTARXCharacteristic = ambiqOTARXCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mAmbiqOTARXCharacteristic?.started	= {
 						self.lambdaUpdateFirmwareStarted?(self.id)
 						DispatchQueue.main.async {
@@ -2654,7 +2658,7 @@ public class Device: NSObject, ObservableObject {
 						log?.v ("\(self.id) for nil service - '\(testCharacteristic.title)'")
 					}
 					
-					mAmbiqOTATXCharacteristic = ambiqOTATXCharacteristic(peripheral, characteristic: characteristic)
+					mAmbiqOTATXCharacteristic = ambiqOTATXCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mAmbiqOTATXCharacteristic?.discoverDescriptors()
 				
 				}

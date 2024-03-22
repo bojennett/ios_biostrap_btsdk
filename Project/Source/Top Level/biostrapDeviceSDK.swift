@@ -120,8 +120,6 @@ import CoreBluetooth
 	@objc public var updateCanLogDiagnosticsComplete: ((_ id: String, _ successful: Bool)->())?
 
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
-	@objc public var allowPPGComplete: ((_ id: String, _ successful: Bool)->())?
-	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var wornCheckComplete: ((_ id: String, _ successful: Bool, _ code: String, _ value: Int)->())?
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var rawLoggingComplete: ((_ id: String, _ successful: Bool)->())?

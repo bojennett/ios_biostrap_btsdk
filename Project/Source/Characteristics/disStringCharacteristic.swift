@@ -17,8 +17,8 @@ class disStringCharacteristic: Characteristic {
 	// Constructor
 	//
 	//--------------------------------------------------------------------------------
-	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic) {
-		super.init(peripheral, characteristic: characteristic)
+	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		super.init (peripheral, characteristic: characteristic, commandQ: commandQ)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -29,9 +29,7 @@ class disStringCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	override func read() {
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			peripheral.readValue(for: characteristic)
-		}
+		pCommandQ?.read(pCharacteristic)
 	}
 	
 	//--------------------------------------------------------------------------------
