@@ -86,7 +86,6 @@ class ambiqOTARXCharacteristic: Characteristic {
 	var progress	: ((_ percentage: Float)->())?
 	
 	internal static let DATA_BLOCK_SIZE		= 512
-	internal static let BLUETOOTH_MTU_SIZE	= 20
 	internal static let CRC_SIZE			= 4
 	internal static let HEADER_SIZE			= 3
 	internal static let FILE_HEADER_BLOCK	= 48
@@ -147,10 +146,18 @@ class ambiqOTARXCharacteristic: Characteristic {
 		
 		var packets = [Data]()
 		
+		var deviceMTU = 20
+		
+		if let peripheral = pPeripheral {
+			deviceMTU = peripheral.maximumWriteValueLength(for: .withoutResponse)
+		}
+
+		var mtu = deviceMTU > 200 ? 200 : deviceMTU
+		
 		while (index < data.count) {
 			var frameLength: Int
-			if (data.count - index > ambiqOTARXCharacteristic.BLUETOOTH_MTU_SIZE) {
-				frameLength	= ambiqOTARXCharacteristic.BLUETOOTH_MTU_SIZE
+			if (data.count - index > mtu) {
+				frameLength	= mtu
 			}
 			else {
 				frameLength	= data.count - index
