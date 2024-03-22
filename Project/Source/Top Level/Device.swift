@@ -107,6 +107,7 @@ public class Device: NSObject, ObservableObject {
 	#endif
 	
 	var peripheral			: CBPeripheral?
+	var centralManager		: CBCentralManager?
 	
 	// MARK: Publishee properties
 	@Published public var name: String
@@ -253,6 +254,8 @@ public class Device: NSObject, ObservableObject {
 	public let dataFailure = PassthroughSubject<Void, Never>()
 
 	// MARK: Lambda Completions
+	var lambdaConfigured: ((_ id: String)->())?
+	
 	var lambdaWriteEpochComplete: ((_ id: String, _ successful: Bool)->())?
 	var lambdaReadEpochComplete: ((_ id: String, _ successful: Bool, _ value: Int)->())?
 
@@ -427,7 +430,8 @@ public class Device: NSObject, ObservableObject {
 
 	override public init() {
 		self.connectionState = .disconnected
-		
+		self.creation_epoch = Date().timeIntervalSince1970
+
 		self.name							= "UNKNOWN"
 		self.id								= "UNKNOWN"
 		self.creation_epoch = TimeInterval(0)
@@ -441,27 +445,29 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	#if UNIVERSAL
-	convenience public init(_ name: String, id: String, peripheral: CBPeripheral?, type: biostrapDeviceSDK.biostrapDeviceType, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
+	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, type: biostrapDeviceSDK.biostrapDeviceType, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
 		self.name		= name
 		self.id			= id
 		self.peripheral	= peripheral
+		self.centralManager = centralManager
 		self.type		= type
 		self.discovery_type = discoveryType
 		self.commandQ = CommandQ(peripheral)
 	}
-	#endif
-
-	convenience public init(_ name: String, id: String, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
+	#else
+	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
 		self.name		= name
 		self.id			= id
 		self.peripheral	= peripheral
+		self.centralManager = centralManager
 		self.discovery_type = discoveryType
 		self.commandQ = CommandQ(peripheral)
 	}
+	#endif
 	
 	#if UNIVERSAL || ALTER
 	private var mAlterConfigured: Bool {
@@ -2484,6 +2490,35 @@ public class Device: NSObject, ObservableObject {
 		}
 		
 		mStreamingCharacteristic?.dataAvailable = { self.lambdaDataAvailable?(self.id) }
+	}
+	
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	func didConnect() -> Bool {
+		if let peripheral {
+			if connectionState == .connecting {
+				peripheral.delegate = self
+				creation_epoch = Date().timeIntervalSince1970
+				connectionState = .configuring
+				peripheral.discoverServices(nil)
+			}
+			else {
+				log?.e ("\(peripheral.prettyID): Connected to a device that isn't requesting connection.  Weird!  Disconnect")
+				return false
+			}
+		}
+		else {
+			log?.e ("No peripheral")
+			return false
+		}
+		
+		return true
 	}
 	
 	//--------------------------------------------------------------------------------

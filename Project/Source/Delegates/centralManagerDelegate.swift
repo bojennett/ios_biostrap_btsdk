@@ -126,6 +126,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	internal func setupCallbacks(_ device: Device) {
+		device.lambdaConfigured = { id in self.connected?(id) } // Device already puts this on the main thread due to peripheral delegate
 		device.lambdaBatteryLevelUpdated = { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
 		device.lambdaHeartRateUpdated = { id, epoch, hr, rr in DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) } }
 		device.lambdaWriteEpochComplete = { id, successful in DispatchQueue.main.async { self.writeEpochComplete?(id, successful) } }
@@ -390,12 +391,11 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					}
 					else {
 #if UNIVERSAL
-						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, type: .alter, discoveryType: discovery_type)
+						let device = Device(deviceName, id: peripheral.prettyID, centralManager: mCentralManager, peripheral: peripheral, type: .alter, discoveryType: discovery_type)
 #else
-						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, discoveryType: discovery_type)
+						let device = Device(deviceName, id: peripheral.prettyID, centralManager: mCentralManager, peripheral: peripheral, discoveryType: discovery_type)
 #endif
 						
-						device.creation_epoch = Date().timeIntervalSince1970
 						setupCallbacks(device)
 						
 						if valid {
@@ -421,12 +421,11 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					}
 					else {
 #if UNIVERSAL
-						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, type: .kairos, discoveryType: discovery_type)
+						let device = Device(deviceName, id: peripheral.prettyID, centralManager: mCentralManager, peripheral: peripheral, type: .kairos, discoveryType: discovery_type)
 #else
-						let device = Device(deviceName, id: peripheral.prettyID, peripheral: peripheral, discoveryType: discovery_type)
+						let device = Device(deviceName, id: peripheral.prettyID, centralManager: mCentralManager, peripheral: peripheral, discoveryType: discovery_type)
 #endif
 						
-						device.creation_epoch = Date().timeIntervalSince1970
 						setupCallbacks(device)
 						
 						if valid {
@@ -456,29 +455,11 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		
 		DispatchQueue.main.async { [self] in
 			if let device = mDiscoveredDevices[peripheral.prettyID] {
-				if device.connectionState == .connecting {
-					if let devicePeripheral = device.peripheral {
-						if (peripheral == devicePeripheral) {
-							devicePeripheral.delegate = self
-							device.peripheral	= devicePeripheral
-							device.creation_epoch = Date().timeIntervalSince1970
-							device.connectionState = .configuring
-							mDiscoveredDevices.removeValue(forKey: peripheral.prettyID)
-							mConnectedDevices[peripheral.prettyID] = device
-							devicePeripheral.discoverServices(nil)
-						}
-						else {
-							log?.e ("\(peripheral.prettyID): didConnect - Connected to a devcie that is in my list, exists, but isn't the same?  Weird!  Disconnect")
-							mCentralManager?.cancelPeripheralConnection(peripheral)
-						}
-					}
-					else {
-						log?.e ("\(peripheral.prettyID): didConnect - Connected to a device that is in my list, but is not valid.  Weird!  Disconnect")
-						mCentralManager?.cancelPeripheralConnection(peripheral)
-					}
+				if device.didConnect() {
+					mDiscoveredDevices.removeValue(forKey: peripheral.prettyID)
+					mConnectedDevices[peripheral.prettyID] = device
 				}
 				else {
-					log?.e ("\(peripheral.prettyID): didConnect - Connected to a device that isn't requesting connection.  Weird!  Disconnect")
 					mCentralManager?.cancelPeripheralConnection(peripheral)
 				}
 			}

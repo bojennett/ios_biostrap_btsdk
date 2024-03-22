@@ -1,14 +1,35 @@
 //
-//  peripheralDelegate.swift
+//  devicePeripheralDelegate.swift
 //  biostrapDeviceSDK
 //
-//  Created by Joseph A. Bennett on 4/2/21.
+//  Created by Joseph Bennett on 3/22/24.
 //
 
 import Foundation
 import CoreBluetooth
 
-extension biostrapDeviceSDK: CBPeripheralDelegate {
+extension Device: CBPeripheralDelegate {
+	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	// Not part of the delgate, but used by all the delegates
+	//
+	//--------------------------------------------------------------------------------
+	internal func checkConfigured() {
+		if (configured) {
+			if connectionState == .configuring {
+				connectionState = .connected
+				if let peripheral {
+					lambdaConfigured?(peripheral.prettyID)
+				}
+				else {
+					log?.e ("Do not have a peripheral, why am I signaling configured?")
+				}
+			}
+		}
+	}
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -29,9 +50,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) {
-		if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
-			device.isReady()
-		}
+		isReady()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -45,7 +64,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 		DispatchQueue.main.async {
 			if let error = error {
 				log?.e ("\(peripheral.prettyID): didDiscoverServices: Error: \(error.localizedDescription).  Disconnecting")
-				self.mCentralManager?.cancelPeripheralConnection(peripheral)
+				self.centralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 			
@@ -72,7 +91,7 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 		for service in invalidatedServices {
 			log?.v ("\(service.prettyID)")
 		}
-		mCentralManager?.cancelPeripheralConnection(peripheral)
+		centralManager?.cancelPeripheralConnection(peripheral)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -130,22 +149,14 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 		DispatchQueue.main.async {
 			if let error = error {
 				log?.e ("\(peripheral.prettyID): didDiscoverCharacteristics for service: \(service.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
-				self.mCentralManager?.cancelPeripheralConnection(peripheral)
+				self.centralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 			
 			if let characteristics = service.characteristics {
 				for characteristic in characteristics {
-					if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
-						device.didDiscoverCharacteristic(characteristic)
-						
-						if (device.configured) {
-							if device.connectionState == .configuring {
-								device.connectionState = .connected
-								self.connected?(peripheral.prettyID)
-							}
-						}
-					}
+					self.didDiscoverCharacteristic(characteristic)
+					self.checkConfigured()
 				}
 			}
 		}
@@ -177,19 +188,8 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 				//return
 			}
 	
-			if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
-				device.didUpdateValue(characteristic)
-				
-				if (device.configured) {
-					if device.connectionState == .configuring {
-						device.connectionState = .connected
-						self.connected?(peripheral.prettyID)
-					}
-				}
-			}
-			else {
-				log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - No connected device found...")
-			}
+			self.didUpdateValue(characteristic)
+			self.checkConfigured()
 		}
 	}
 	
@@ -206,15 +206,13 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 		DispatchQueue.main.async {
 			if let error = error {
 				log?.e ("\(peripheral.prettyID): didDiscoverDescriptors for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Skipping")
-				self.mCentralManager?.cancelPeripheralConnection(peripheral)
+				self.centralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 			
 			if let descriptors = characteristic.descriptors {
 				for descriptor in descriptors {
-					if let device = self.mConnectedDevices[peripheral.prettyID] {
-						device.didDiscoverDescriptor(descriptor, forCharacteristic: characteristic)
-					}
+					self.didDiscoverDescriptor(descriptor, forCharacteristic: characteristic)
 				}
 			}
 			else {
@@ -246,20 +244,12 @@ extension biostrapDeviceSDK: CBPeripheralDelegate {
 		DispatchQueue.main.async {
 			if let error = error {
 				log?.e ("\(peripheral.prettyID): didUpdateNotificationState for characteristic: \(characteristic.prettyID) - Error: '\(error.localizedDescription)'  Skipping")
-				self.mCentralManager?.cancelPeripheralConnection(peripheral)
+				self.centralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 
-			if let device = self.mConnectedDevices[peripheral.prettyID], (device.peripheral == peripheral) {
-				device.didUpdateNotificationState(characteristic)
-				
-				if (device.configured) {
-					if device.connectionState == .configuring {
-						device.connectionState = .connected
-						self.connected?(peripheral.prettyID)
-					}
-				}
-			}
+			self.didUpdateNotificationState(characteristic)
+			self.checkConfigured()
 		}
 	}
 	
