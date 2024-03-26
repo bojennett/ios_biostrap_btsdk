@@ -902,16 +902,16 @@ import CoreBluetooth
 	#if ALTER
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: alterManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.alterManufacturingTestInternal(id, test: test) }
-		else { self.lambdaManufacturingTestComplete?(id, false) }
+		if let device = mConnectedDevices[id] { device.alterManufacturingTestInternal(test) }
+		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
 
 	#if KAIROS
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: kairosManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.kairosManufacturingTestInternal(id, test: test) }
-		else { self.lambdaManufacturingTestComplete?(id, false) }
+		if let device = mConnectedDevices[id] { device.kairosManufacturingTestInternal(test) }
+		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
 

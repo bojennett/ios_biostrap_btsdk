@@ -30,8 +30,8 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 		self.type	= type
 	}
 	#else
-	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic) {
-		super.init(peripheral, characteristic: characteristic)
+	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		super.init(peripheral, characteristic: characteristic, commandQ: commandQ)
 	}
 	#endif
 	

@@ -92,20 +92,20 @@ class customStreamingCharacteristic: Characteristic {
 					do {
 						let jsonData = try JSONEncoder().encode(testResult)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.lambdaManufacturingTestResult?(true, jsonString)
+							self.manufacturingTestResult?(true, jsonString)
 						}
 						else {
 							log?.e ("\(pID): Result jsonString Failed")
-							self.lambdaManufacturingTestResult?(false, "")
+							self.manufacturingTestResult?(false, "")
 						}
 					}
 					catch {
 						log?.e ("\(pID): Result jsonData Failed")
-						self.lambdaManufacturingTestResult?(false, "")
+						self.manufacturingTestResult?(false, "")
 					}
 				}
 				else {
-					self.lambdaManufacturingTestResult?(false, "")
+					self.manufacturingTestResult?(false, "")
 				}
 				#endif
 				
@@ -115,16 +115,16 @@ class customStreamingCharacteristic: Characteristic {
 					do {
 						let jsonData = try JSONEncoder().encode(testResult)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.lambdaManufacturingTestResult?(true, jsonString)
+							self.manufacturingTestResult?(true, jsonString)
 						}
 						else {
 							log?.e ("\(pID): Result jsonString Failed")
-							self.lambdaManufacturingTestResult?(false, "")
+							self.manufacturingTestResult?(false, "")
 						}
 					}
 					catch {
 						log?.e ("\(pID): Result jsonData Failed")
-						self.lambdaManufacturingTestResult?(false, "")
+						self.manufacturingTestResult?(false, "")
 					}
 				}
 				else {

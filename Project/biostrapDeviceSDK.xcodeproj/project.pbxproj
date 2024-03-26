@@ -161,11 +161,8 @@
 		3BF807EB27A201E600595493 /* ambiqOTATXCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807E827A201AD00595493 /* ambiqOTATXCharacteristic.swift */; };
 		3BF807EE27A2057700595493 /* CrcCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF807EC27A2057400595493 /* CrcCalculator.swift */; };
 		3BF8082327A452A200595493 /* CoreBluetoothExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF8082227A452A200595493 /* CoreBluetoothExtensions.swift */; };
-		3BF8087F27A8B2C900595493 /* Pods_universalBTSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5D3047CFC230344A0899B985 /* Pods_universalBTSDK.framework */; };
 		3BFF754328F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */; };
 		3BFF755C28FA18EF0039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */; };
-		7AACE618958EB04B2B192263 /* Pods_kairosBTSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E19B9CA4876F3DF0C3F8CB0A /* Pods_kairosBTSDK.framework */; };
-		FD0C8ED65BB13C499CDB4D0D /* Pods_alterBTSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BE280FA7730CB8C2C3365E4 /* Pods_alterBTSDK.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -225,15 +222,6 @@
 		3BF807EC27A2057400595493 /* CrcCalculator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CrcCalculator.swift; sourceTree = "<group>"; };
 		3BF8082227A452A200595493 /* CoreBluetoothExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreBluetoothExtensions.swift; sourceTree = "<group>"; };
 		3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = disSoftwareRevisionCharacteristic.swift; sourceTree = "<group>"; };
-		3F02CAB4F3370EA209CE30A6 /* Pods-kairosBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kairosBTSDK.release.xcconfig"; path = "Target Support Files/Pods-kairosBTSDK/Pods-kairosBTSDK.release.xcconfig"; sourceTree = "<group>"; };
-		5D3047CFC230344A0899B985 /* Pods_universalBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_universalBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		634D4864B70F71EA807CD30C /* Pods-alterBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-alterBTSDK.release.xcconfig"; path = "Target Support Files/Pods-alterBTSDK/Pods-alterBTSDK.release.xcconfig"; sourceTree = "<group>"; };
-		9BE280FA7730CB8C2C3365E4 /* Pods_alterBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_alterBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		AD7D189D7BA1B2AD11D01279 /* Pods_livotalBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_livotalBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		C46DF70A7FBAE85EEDD8765B /* Pods-universalBTSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-universalBTSDK.release.xcconfig"; path = "Target Support Files/Pods-universalBTSDK/Pods-universalBTSDK.release.xcconfig"; sourceTree = "<group>"; };
-		C6EA11A92216F631E77E2B1D /* Pods_ethosBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ethosBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D9B1C0E290FDE3878F05B5A5 /* Pods-universalBTSDK.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-universalBTSDK.debug.xcconfig"; path = "Target Support Files/Pods-universalBTSDK/Pods-universalBTSDK.debug.xcconfig"; sourceTree = "<group>"; };
-		E19B9CA4876F3DF0C3F8CB0A /* Pods_kairosBTSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_kairosBTSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -241,7 +229,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FD0C8ED65BB13C499CDB4D0D /* Pods_alterBTSDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,7 +236,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7AACE618958EB04B2B192263 /* Pods_kairosBTSDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,25 +243,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3BF8087F27A8B2C900595493 /* Pods_universalBTSDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		36E9BC37939C351783CCD2E1 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				5D3047CFC230344A0899B985 /* Pods_universalBTSDK.framework */,
-				C6EA11A92216F631E77E2B1D /* Pods_ethosBTSDK.framework */,
-				AD7D189D7BA1B2AD11D01279 /* Pods_livotalBTSDK.framework */,
-				9BE280FA7730CB8C2C3365E4 /* Pods_alterBTSDK.framework */,
-				E19B9CA4876F3DF0C3F8CB0A /* Pods_kairosBTSDK.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		3B14E9C328EB9229000E85F2 /* Enumerations */ = {
 			isa = PBXGroup;
 			children = (
@@ -378,8 +351,6 @@
 			children = (
 				3BD01F852615358B0014CEF0 /* Source */,
 				3BD01F842615358B0014CEF0 /* Products */,
-				9311A5DF13A2403716E39C1C /* Pods */,
-				36E9BC37939C351783CCD2E1 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -436,18 +407,6 @@
 			path = "Top Level";
 			sourceTree = "<group>";
 		};
-		9311A5DF13A2403716E39C1C /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				C46DF70A7FBAE85EEDD8765B /* Pods-universalBTSDK.release.xcconfig */,
-				D9B1C0E290FDE3878F05B5A5 /* Pods-universalBTSDK.debug.xcconfig */,
-				634D4864B70F71EA807CD30C /* Pods-alterBTSDK.release.xcconfig */,
-				3F02CAB4F3370EA209CE30A6 /* Pods-kairosBTSDK.release.xcconfig */,
-			);
-			name = Pods;
-			path = ../Pods;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -479,7 +438,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3B2602C82890541E00D5CAAA /* Build configuration list for PBXNativeTarget "alterBTSDK" */;
 			buildPhases = (
-				3B2602A72890541E00D5CAAA /* [CP] Check Pods Manifest.lock */,
 				3B2602A82890541E00D5CAAA /* Headers */,
 				3B2602A92890541E00D5CAAA /* Sources */,
 				3B2602C62890541E00D5CAAA /* Frameworks */,
@@ -498,7 +456,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3BC00BAE2981BD36009F67CB /* Build configuration list for PBXNativeTarget "kairosBTSDK" */;
 			buildPhases = (
-				3FA3247EBDD070F826DCC428 /* [CP] Check Pods Manifest.lock */,
 				3BC00B892981BD36009F67CB /* Headers */,
 				3BC00B8A2981BD36009F67CB /* Sources */,
 				3BC00BAC2981BD36009F67CB /* Frameworks */,
@@ -517,7 +474,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3BF807D827A1AFA000595493 /* Build configuration list for PBXNativeTarget "universalBTSDK" */;
 			buildPhases = (
-				3BF807BE27A1AFA000595493 /* [CP] Check Pods Manifest.lock */,
 				3BF807BF27A1AFA000595493 /* Headers */,
 				3BF807C127A1AFA000595493 /* Sources */,
 				3BF807D527A1AFA000595493 /* Frameworks */,
@@ -583,75 +539,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		3B2602A72890541E00D5CAAA /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-alterBTSDK-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		3BF807BE27A1AFA000595493 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-universalBTSDK-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		3FA3247EBDD070F826DCC428 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-kairosBTSDK-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3B2602A92890541E00D5CAAA /* Sources */ = {
@@ -836,15 +723,15 @@
 /* Begin XCBuildConfiguration section */
 		3B2602C92890541E00D5CAAA /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 634D4864B70F71EA807CD30C /* Pods-alterBTSDK.release.xcconfig */;
 			buildSettings = {
 				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				BITCODE_GENERATION_MODE = bitcode;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = $CURRENT_PROJECT_VERSION;
+				CURRENT_PROJECT_VERSION = "$CURRENT_PROJECT_VERSION";
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -860,7 +747,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = $MARKETING_VERSION;
+				MARKETING_VERSION = "$MARKETING_VERSION";
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "-D ALTER";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.alterBTSDK;
@@ -876,15 +763,15 @@
 		};
 		3BC00BAF2981BD36009F67CB /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3F02CAB4F3370EA209CE30A6 /* Pods-kairosBTSDK.release.xcconfig */;
 			buildSettings = {
 				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				BITCODE_GENERATION_MODE = bitcode;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = $CURRENT_PROJECT_VERSION;
+				CURRENT_PROJECT_VERSION = "$CURRENT_PROJECT_VERSION";
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -900,7 +787,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = $MARKETING_VERSION;
+				MARKETING_VERSION = "$MARKETING_VERSION";
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "-D KAIROS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.kairosBTSDK;
@@ -978,14 +865,13 @@
 		};
 		3BF807D927A1AFA000595493 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C46DF70A7FBAE85EEDD8765B /* Pods-universalBTSDK.release.xcconfig */;
 			buildSettings = {
 				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				BITCODE_GENERATION_MODE = bitcode;
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = $CURRENT_PROJECT_VERSION;
+				CURRENT_PROJECT_VERSION = "$CURRENT_PROJECT_VERSION";
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = 37QQ5QEDQ9;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -999,7 +885,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = $MARKETING_VERSION;
+				MARKETING_VERSION = "$MARKETING_VERSION";
 				OTHER_SWIFT_FLAGS = "$(inherited) -D UNIVERSAL";
 				PRODUCT_BUNDLE_IDENTIFIER = com.biostrap.universalBTSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
