@@ -161,8 +161,6 @@ public class Device: NSObject, ObservableObject {
 	@Published public var tag: String?
 	
 	@Published public var ppgMetrics: ppgMetricsType?
-
-	var creation_epoch: TimeInterval
 	
 	// MARK: Passthrough Subjects (Completions)
 	public let readEpochComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
@@ -430,11 +428,9 @@ public class Device: NSObject, ObservableObject {
 
 	override public init() {
 		self.connectionState = .disconnected
-		self.creation_epoch = Date().timeIntervalSince1970
 
 		self.name							= "UNKNOWN"
 		self.id								= "UNKNOWN"
-		self.creation_epoch = TimeInterval(0)
 		self.mDISCharacteristicCount		= 0
 		self.mDISCharacteristicsDiscovered	= false
 		self.discovery_type					= .unknown
@@ -2486,7 +2482,6 @@ public class Device: NSObject, ObservableObject {
 		if let peripheral {
 			if connectionState == .connecting {
 				peripheral.delegate = self
-				creation_epoch = Date().timeIntervalSince1970
 				connectionState = .configuring
 				peripheral.discoverServices(nil)
 			}

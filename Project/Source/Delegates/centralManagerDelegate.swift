@@ -21,9 +21,9 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		
 		DispatchQueue.main.async {
 			if (central.state != .poweredOn) {
-				self.mDiscoveredDevices.removeAll()
+				self.discoveredDevices.removeAll()
 				
-				for (id, _) in self.mConnectedDevices { self.mProcessDisconnection(id) }
+				for device in self.connectedDevices { self.mProcessDisconnection(device.id) }
 				
 				//self.mConnectedDevices?.removeAll()
 				self.bluetoothReady?(false)
@@ -375,7 +375,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		}
 		
 		DispatchQueue.main.async { [self] in
-			if let _ = self.mConnectedDevices[peripheral.prettyID] {
+			if let _ = self.connectedDevices.first(where: { $0.id == peripheral.prettyID }) {
 				log?.e ("\(peripheral.prettyID): didDiscover: Discovered a device that is in my connected list.  Don't expect this...  Ignore")
 			}
 							
@@ -383,7 +383,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 #if UNIVERSAL || ALTER
 				if (thisUUID == Device.services.alter.UUID) {
 					
-					if let device = self.mDiscoveredDevices[peripheral.prettyID] {
+					if let device = self.discoveredDevices.first(where: { $0.id == peripheral.prettyID }) {
 						if valid { discovered?(peripheral.prettyID, device) }
 						else {
 							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
@@ -399,7 +399,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						setupCallbacks(device)
 						
 						if valid {
-							self.mDiscoveredDevices[peripheral.prettyID] = device
+							self.discoveredDevices.append(device)
 							discovered?(peripheral.prettyID, device)
 						}
 						else {
@@ -413,7 +413,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 #if UNIVERSAL || KAIROS
 				if (thisUUID == Device.services.kairos.UUID) {
 					
-					if let device = mDiscoveredDevices[peripheral.prettyID] {
+					if let device = self.discoveredDevices.first(where: { $0.id == peripheral.prettyID }) {
 						if valid { discovered?(peripheral.prettyID, device) }
 						else {
 							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
@@ -429,7 +429,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						setupCallbacks(device)
 						
 						if valid {
-							self.mDiscoveredDevices[peripheral.prettyID] = device
+							self.discoveredDevices.append(device)
 							discovered?(peripheral.prettyID, device)
 						}
 						else {
@@ -454,10 +454,12 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		log?.v("\(peripheral.prettyID): didConnect")
 		
 		DispatchQueue.main.async { [self] in
-			if let device = mDiscoveredDevices[peripheral.prettyID] {
+			if let device = discoveredDevices.first(where: { $0.id == peripheral.prettyID }) {
 				if device.didConnect() {
-					mDiscoveredDevices.removeValue(forKey: peripheral.prettyID)
-					mConnectedDevices[peripheral.prettyID] = device
+					discoveredDevices.removeAll(where: { $0.id == peripheral.prettyID })
+					if connectedDevices.first(where: { $0.id == peripheral.prettyID }) == nil {
+						connectedDevices.append(device)
+					}
 				}
 				else {
 					mCentralManager?.cancelPeripheralConnection(peripheral)
@@ -479,10 +481,10 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//--------------------------------------------------------------------------------
 	internal func mProcessDisconnection(_ id: String) {
 		DispatchQueue.main.async {
-			if let device = self.mDiscoveredDevices[id] {
+			if let device = self.discoveredDevices.first(where: { $0.id == id }) {
 				if device.connectionState == .connecting {
 					device.connectionState = .disconnected
-					self.mDiscoveredDevices.removeValue(forKey: id)
+					self.discoveredDevices.removeAll(where: { $0.id == id })
 				}
 				else {
 					log?.e ("\(id): Disconnected from a discovered device that isn't requesting connection.  Weird!")
@@ -491,11 +493,11 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 				self.disconnected?(id)
 				return
 			}
-
-			if let device = self.mConnectedDevices[id] {
+			
+			if let device = self.connectedDevices.first(where: { $0.id == id }) {
 				if device.connectionState == .configuring || device.connectionState == .connected {
 					device.connectionState = .disconnected
-					self.mConnectedDevices.removeValue(forKey: id)
+					self.connectedDevices.removeAll(where: { $0.id == id })
 				}
 				else {
 					log?.e ("\(id): Disconnected from a connected device that isn't discovering services or fully connected.  Weird!")

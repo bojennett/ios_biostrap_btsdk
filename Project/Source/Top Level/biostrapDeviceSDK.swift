@@ -7,8 +7,9 @@
 
 import Foundation
 import CoreBluetooth
+import Combine
 
-@objc public class biostrapDeviceSDK: NSObject {
+@objc public class biostrapDeviceSDK: NSObject, ObservableObject {
 	
 	var dataPacketsOnBackgroundThread	= false
 	
@@ -225,51 +226,6 @@ import CoreBluetooth
 	@objc public var heartRate: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
 	@objc public var airplaneModeComplete: ((_ id: String, _ successful: Bool)->())?
-
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	internal func mGetDevicesSortedByTime(_ devices: [ String : Device]) -> [ Device ] {
-		var list			= [ Device ]()
-		var devDictionary	= [ TimeInterval : Device ]()
-
-		let keys			= Array(devices.keys)
-		
-		for key in keys {
-			if let device = devices[key] {
-				devDictionary[device.creation_epoch]	= device
-			}
-		}
-
-		let timeKeys	= Array(devDictionary.keys).sorted()
-		for timeKey in timeKeys {
-			if let device = devDictionary[timeKey] {
-				list.append(device)
-			}
-		}
-		
-		return (list)
-	}
-	
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	@objc public var connectedDevices: [ Device ] {
-		return (mGetDevicesSortedByTime(mConnectedDevices))
-	}
-	
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	@objc public var discoveredDevices: [ Device ] {
-		return (mGetDevicesSortedByTime(mDiscoveredDevices))
-	}
 	
 	//--------------------------------------------------------------------------------
 	//
@@ -284,11 +240,11 @@ import CoreBluetooth
 	}
 		
 	// Internal vars
-	internal var mCentralManager	: CBCentralManager?
-	internal var mDiscoveredDevices	= [ String : Device ]()
-	internal var mConnectedDevices	= [ String : Device ]()
+	internal var mCentralManager : CBCentralManager?
+	@objc @Published public internal(set) var discoveredDevices = [ Device ]()
+	@objc @Published public internal(set) var connectedDevices = [ Device ]()
 	internal lazy var mPairedDeviceNames	= [ String: String ]()
-	internal var mLicensed			: Bool = false
+	internal var mLicensed : Bool = false
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -328,8 +284,8 @@ import CoreBluetooth
 		let backgroundQueue	= DispatchQueue.global(qos: DispatchQoS.QoSClass.background)
 		mCentralManager		= CBCentralManager(delegate: self, queue: backgroundQueue, options: [CBCentralManagerOptionRestoreIdentifierKey: Bundle.main.bundleIdentifier ?? ""])
 		
-		mDiscoveredDevices	= [ String : Device ]()
-		mConnectedDevices	= [ String : Device ]()
+		discoveredDevices	= [ Device ]()
+		connectedDevices	= [ Device ]()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -449,7 +405,7 @@ import CoreBluetooth
 			log?.v ("Checking for previously connected peripherals (due to crash).  Didn't find any")
 		}
 		
-		mDiscoveredDevices.removeAll()
+		discoveredDevices.removeAll()
 		
 		if (mCentralManager?.state == .poweredOn) {
 			let services	= Device.scan_services
@@ -480,7 +436,7 @@ import CoreBluetooth
 		log?.v("")
 		
 		mCentralManager?.stopScan()
-		mDiscoveredDevices.removeAll()
+		discoveredDevices.removeAll()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -493,7 +449,7 @@ import CoreBluetooth
 	@objc public func connect(_ id: String) {
 		log?.v("\(id)")
 		
-		if let device = mDiscoveredDevices[id] {
+		if let device = discoveredDevices.first(where: { $0.id == id }) {
 			if let peripheral = device.peripheral {
 				device.connectionState = .connecting
 				mCentralManager?.connect(peripheral, options: nil)
@@ -517,16 +473,14 @@ import CoreBluetooth
 	@objc public func disconnect(_ id: String) {
 		log?.v("\(id)")
 		
-		if let device = mDiscoveredDevices[id] {
-			if let peripheral = device.peripheral {
-				log?.v("Found \(id) in discovered list -> trying to disconnect")
-				mDiscoveredDevices.removeValue(forKey: id)
-				mCentralManager?.cancelPeripheralConnection(peripheral)
-				return
-			}
+		if let device = discoveredDevices.first(where: { $0.id == id }), let peripheral = device.peripheral {
+			log?.v("Found \(id) in discovered list -> trying to disconnect")
+			discoveredDevices.removeAll { $0.id == id }
+			mCentralManager?.cancelPeripheralConnection(peripheral)
+			return
 		}
 		
-		if let device = mConnectedDevices[id] {
+		if let device = connectedDevices.first(where: { $0.id == id }) {
 			if let peripheral = device.peripheral {
 				log?.v("Found \(id) in connected list -> trying to disconnect")
 				mCentralManager?.cancelPeripheralConnection(peripheral)
@@ -576,7 +530,7 @@ import CoreBluetooth
 	@objc public func writeEpoch(_ id: String, newEpoch: Int) {
 		log?.v("\(id): \(newEpoch)")
 		
-		if let device = mConnectedDevices[id] { device.writeEpochInternal(newEpoch) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.writeEpochInternal(newEpoch) }
 		else { self.writeEpochComplete?(id, false) }
 	}
 
@@ -591,7 +545,7 @@ import CoreBluetooth
 	@objc public func readEpoch(_ id: String) {
 		log?.v("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.readEpochInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.readEpochInternal() }
 		else { self.readEpochComplete?(id, false, 0) }
 	}
 
@@ -606,7 +560,7 @@ import CoreBluetooth
 	@objc public func endSleep(_ id: String) {
 		log?.v("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.endSleepInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.endSleepInternal() }
 		else { self.endSleepComplete?(id, false) }
 	}
 	
@@ -619,7 +573,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAllPackets(_ id: String, pages: Int, delay: Int) {
-		if let device = mConnectedDevices[id] { device.getAllPackets(pages: pages, delay: delay) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getAllPackets(pages: pages, delay: delay) }
 		else { self.getAllPacketsComplete?(id, false) }
 	}
 
@@ -632,7 +586,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAllPacketsAcknowledge(_ id: String, ack: Bool) {
-		if let device = mConnectedDevices[id] { device.getAllPacketsAcknowledgeInternal(ack) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getAllPacketsAcknowledgeInternal(ack) }
 		else { self.getAllPacketsAcknowledgeComplete?(id, false, ack) }
 	}
 	
@@ -647,7 +601,7 @@ import CoreBluetooth
 	@objc public func getPacketCount(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.getPacketCountInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPacketCountInternal() }
 		else { self.getPacketCountComplete?(id, false, 0) }
 	}
 
@@ -662,7 +616,7 @@ import CoreBluetooth
 	@objc public func disableWornDetect(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.disableWornDetectInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.disableWornDetectInternal() }
 		else { self.disableWornDetectComplete?(id, false) }
 	}
 
@@ -677,7 +631,7 @@ import CoreBluetooth
 	@objc public func enableWornDetect(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.enableWornDetectInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.enableWornDetectInternal() }
 		else { self.enableWornDetectComplete?(id, false) }
 	}
 
@@ -692,7 +646,7 @@ import CoreBluetooth
 	@objc public func startManual(_ id: String, algorithms: ppgAlgorithmConfiguration) {
 		log?.v ("\(id): Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
 		
-		if let device = mConnectedDevices[id] { device.startManual(algorithms) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.startManual(algorithms) }
 		else { self.startManualComplete?(id, false) }
 	}
 
@@ -707,7 +661,7 @@ import CoreBluetooth
 	@objc public func stopManual(_ id: String) {
 		log?.v ("\(id)")
 		
-		if let device = mConnectedDevices[id] { device.stopManual() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.stopManual() }
 		else { self.stopManualComplete?(id, false) }
 	}
 
@@ -720,7 +674,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func userLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.userLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.userLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	
@@ -733,7 +687,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func enterShipMode(_ id: String) {
-		if let device = mConnectedDevices[id] { device.enterShipModeInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.enterShipModeInternal() }
 		else { self.enterShipModeComplete?(id, false) }
 	}
 
@@ -746,7 +700,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func writeSerialNumber(_ id: String, partID: String) {
-		if let device = mConnectedDevices[id] { device.writeSerialNumberInternal(partID) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.writeSerialNumberInternal(partID) }
 		else { self.writeSerialNumberComplete?(id, false) }
 	}
 
@@ -759,7 +713,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readSerialNumber(_ id: String) {
-		if let device = mConnectedDevices[id] { device.readSerialNumberInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.readSerialNumberInternal() }
 		else { self.readSerialNumberComplete?(id, false, "") }
 	}
 
@@ -772,7 +726,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func deleteSerialNumber(_ id: String) {
-		if let device = mConnectedDevices[id] { device.deleteSerialNumberInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.deleteSerialNumberInternal() }
 		else { self.deleteSerialNumberComplete?(id, false) }
 	}
 
@@ -785,7 +739,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func writeAdvInterval(_ id: String, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.writeAdvIntervalInternal(seconds) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.writeAdvIntervalInternal(seconds) }
 		else { self.writeAdvIntervalComplete?(id, false) }
 	}
 
@@ -798,7 +752,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readAdvInterval(_ id: String) {
-		if let device = mConnectedDevices[id] { device.readAdvIntervalInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.readAdvIntervalInternal() }
 		else { self.readAdvIntervalComplete?(id, false, 0) }
 	}
 
@@ -811,7 +765,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func deleteAdvInterval(_ id: String) {
-		if let device = mConnectedDevices[id] { device.deleteAdvIntervalInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.deleteAdvIntervalInternal() }
 		else { self.deleteAdvIntervalComplete?(id, false) }
 	}
 
@@ -824,7 +778,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func clearChargeCycles(_ id: String) {
-		if let device = mConnectedDevices[id] { device.clearChargeCyclesInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.clearChargeCyclesInternal() }
 		else { self.clearChargeCyclesComplete?(id, false) }
 	}
 
@@ -837,7 +791,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readChargeCycles(_ id: String) {
-		if let device = mConnectedDevices[id] { device.readChargeCyclesInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.readChargeCyclesInternal() }
 		else { self.readChargeCyclesComplete?(id, false, 0) }
 	}
 
@@ -850,7 +804,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readCanLogDiagnostics(_ id: String) {
-		if let device = mConnectedDevices[id] { device.readCanLogDiagnosticsInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.readCanLogDiagnosticsInternal() }
 		else { self.readCanLogDiagnosticsComplete?(id, false, false) }
 	}
 	
@@ -863,7 +817,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func updateCanLogDiagnostics(_ id: String, allow: Bool) {
-		if let device = mConnectedDevices[id] { device.updateCanLogDiagnosticsInternal(allow) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.updateCanLogDiagnosticsInternal(allow) }
 		else { self.updateCanLogDiagnosticsComplete?(id, false) }
 	}
 		
@@ -877,7 +831,7 @@ import CoreBluetooth
 	#if ALTER
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: alterManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.alterManufacturingTestInternal(test) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.alterManufacturingTestInternal(test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
@@ -885,7 +839,7 @@ import CoreBluetooth
 	#if KAIROS
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: kairosManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.kairosManufacturingTestInternal(test) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.kairosManufacturingTestInternal(test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
@@ -893,13 +847,13 @@ import CoreBluetooth
 	#if UNIVERSAL
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func alterManufacturingTest(_ id: String, test: alterManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.alterManufacturingTestInternal(test) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.alterManufacturingTestInternal(test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func kairosManufacturingTest(_ id: String, test: kairosManufacturingTestType) {
-		if let device = mConnectedDevices[id] { device.kairosManufacturingTestInternal(test) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.kairosManufacturingTestInternal(test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
@@ -913,7 +867,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setAskForButtonResponse(_ id: String, enable: Bool) {
-		if let device = mConnectedDevices[id] { device.setAskForButtonResponseInternal(enable) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setAskForButtonResponseInternal(enable) }
 		else { self.setAskForButtonResponseComplete?(id, false, enable) }
 	}
 	
@@ -926,7 +880,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAskForButtonResponse(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getAskForButtonResponseInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getAskForButtonResponseInternal() }
 		else { self.getAskForButtonResponseComplete?(id, false, false) }
 	}
 
@@ -939,7 +893,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setHRZoneColor(_ id: String, type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
-		if let device = mConnectedDevices[id] {
+		if let device = connectedDevices.first(where: { $0.id == id }) {
 			device.setHRZoneColorInternal(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
 		}
 		else { self.setHRZoneColorComplete?(id, false, type) }
@@ -954,7 +908,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getHRZoneColor(_ id: String, type: hrZoneRangeType) {
-		if let device = mConnectedDevices[id] { device.getHRZoneColorInternal(type) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getHRZoneColorInternal(type) }
 		else { self.getHRZoneColorComplete?(id, false, type, false, false, false, 0, 0) }
 	}
 	
@@ -967,7 +921,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setHRZoneRange(_ id: String, enabled: Bool, high_value: Int, low_value: Int) {
-		if let device = mConnectedDevices[id] {
+		if let device = connectedDevices.first(where: { $0.id == id }) {
 			device.setHRZoneRangeInternal(enabled, high_value: high_value, low_value: low_value)
 		}
 		else { self.setHRZoneRangeComplete?(id, false) }
@@ -982,7 +936,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getHRZoneRange(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getHRZoneRangeInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getHRZoneRangeInternal() }
 		else { self.getHRZoneRangeComplete?(id, false, false, 0, 0) }
 	}
 	
@@ -995,7 +949,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPPGAlgorithm(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getPPGAlgorithmInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPPGAlgorithmInternal() }
 		else { self.getPPGAlgorithmComplete?(id, false, ppgAlgorithmConfiguration(), eventType.unknown) }
 	}
 	
@@ -1008,7 +962,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setAdvertiseAsHRM(_ id: String, asHRM: Bool) {
-		if let device = mConnectedDevices[id] { device.setAdvertiseAsHRMInternal(asHRM) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setAdvertiseAsHRMInternal(asHRM) }
 		else { self.setAdvertiseAsHRMComplete?(id, false, false) }
 	}
 	
@@ -1021,7 +975,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAdvertiseAsHRM(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getAdvertiseAsHRMInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getAdvertiseAsHRMInternal() }
 		else { self.getAdvertiseAsHRMComplete?(id, false, false) }
 	}
 
@@ -1034,7 +988,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setButtonCommand(_ id: String, tap: buttonTapType, command: buttonCommandType) {
-		if let device = mConnectedDevices[id] { device.setButtonCommandInternal(tap, command: command) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setButtonCommandInternal(tap, command: command) }
 		else { self.setButtonCommandComplete?(id, false, tap, command) }
 	}
 	
@@ -1047,7 +1001,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getButtonCommand(_ id: String, tap: buttonTapType) {
-		if let device = mConnectedDevices[id] { device.getButtonCommandInternal(tap) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getButtonCommandInternal(tap) }
 		else { self.getButtonCommandComplete?(id, false, tap, .unknown) }
 	}
 	
@@ -1060,7 +1014,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setPaired(_ id: String) {
-		if let device = mConnectedDevices[id] { device.setPairedInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setPairedInternal() }
 		else { self.setPairedComplete?(id, false) }
 	}
 	
@@ -1073,7 +1027,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setUnpaired(_ id: String) {
-		if let device = mConnectedDevices[id] { device.setUnpairedInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setUnpairedInternal() }
 		else { self.setUnpairedComplete?(id, false) }
 	}
 	
@@ -1086,7 +1040,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPaired(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getPairedInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPairedInternal() }
 		else { self.getPairedComplete?(id, false, false) }
 	}
 	
@@ -1099,7 +1053,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setPageThreshold(_ id: String, threshold: Int) {
-		if let device = mConnectedDevices[id] { device.setPageThresholdInternal(threshold) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setPageThresholdInternal(threshold) }
 		else { self.setPageThresholdComplete?(id, false) }
 	}
 	
@@ -1112,7 +1066,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPageThreshold(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getPageThresholdInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPageThresholdInternal() }
 		else { self.getPageThresholdComplete?(id, false, 1) }
 	}
 	
@@ -1125,7 +1079,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func deletePageThreshold(_ id: String) {
-		if let device = mConnectedDevices[id] { device.deletePageThresholdInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.deletePageThresholdInternal() }
 		else { self.deletePageThresholdComplete?(id, false) }
 	}
 
@@ -1138,7 +1092,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func wornCheck(_ id: String) {
-		if let device = mConnectedDevices[id] { device.wornCheckInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.wornCheckInternal() }
 		else { self.wornCheckComplete?(id, false, "No device", 0) }
 	}
 
@@ -1151,7 +1105,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func rawLogging(_ id: String, enable: Bool) {
-		if let device = mConnectedDevices[id] { device.rawLoggingInternal(enable) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.rawLoggingInternal(enable) }
 		else { self.rawLoggingComplete?(id, false) }
 	}
 
@@ -1164,7 +1118,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getRawLoggingStatus(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getRawLoggingStatusInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getRawLoggingStatusInternal() }
 		else { self.getRawLoggingStatusComplete?(id, false, false) }
 	}
 
@@ -1177,7 +1131,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getWornOverrideStatus(_ id: String) {
-		if let device = mConnectedDevices[id] { device.getWornOverrideStatusInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getWornOverrideStatusInternal() }
 		else { self.getWornOverrideStatusComplete?(id, false, false) }
 	}
 
@@ -1190,7 +1144,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func airplaneMode(_ id: String) {
-		if let device = mConnectedDevices[id] { device.airplaneModeInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.airplaneModeInternal() }
 		else { self.airplaneModeComplete?(id, false) }
 	}
 
@@ -1203,7 +1157,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func reset(_ id: String) {
-		if let device = mConnectedDevices[id] { device.resetInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.resetInternal() }
 		else { self.resetComplete?(id, false) }
 	}
 
@@ -1216,7 +1170,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func updateFirmware(_ id: String, file: URL) {
-		if let device = mConnectedDevices[id] { device.updateFirmwareInternal(file) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.updateFirmwareInternal(file) }
 		else { self.updateFirmwareFailed?(id, 10000, "No connected device to update") }
 
 	}
@@ -1230,7 +1184,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func cancelFirmwareUpdate(_ id: String) {
-		if let device = mConnectedDevices[id] { device.cancelFirmwareUpdateInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.cancelFirmwareUpdateInternal() }
 		else { self.updateFirmwareFailed?(id, 10000, "No connected device to update") }
 	}
 	
@@ -1243,7 +1197,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setSessionParam(_ id: String, parameter: sessionParameterType, value: Int) {
-		if let device = mConnectedDevices[id] { device.setSessionParamInternal(parameter, value: value) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setSessionParamInternal(parameter, value: value) }
 		else { self.setSessionParamComplete?(id, false, parameter) }
 
 	}
@@ -1257,7 +1211,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getSessionParam(_ id: String, parameter: sessionParameterType) {
-		if let device = mConnectedDevices[id] { device.getSessionParamInternal(parameter) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getSessionParamInternal(parameter) }
 		else { self.getSessionParamComplete?(id, false, parameter, 0) }
 	}
 
@@ -1270,7 +1224,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func resetSessionParams(_ id: String) {
-		if let device = mConnectedDevices[id] { device.resetSessionParamsInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.resetSessionParamsInternal() }
 		else { self.resetSessionParamsComplete?(id, false) }
 	}
 
@@ -1284,7 +1238,7 @@ import CoreBluetooth
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func acceptSessionParams(_ id: String) {
-		if let device = mConnectedDevices[id] { device.acceptSessionParamsInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.acceptSessionParamsInternal() }
 		else { self.acceptSessionParamsComplete?(id, false) }
 	}
 
