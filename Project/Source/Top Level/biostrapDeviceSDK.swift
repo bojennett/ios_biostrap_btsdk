@@ -718,37 +718,12 @@ import CoreBluetooth
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if UNIVERSAL
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func alterLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.alterLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+	@objc public func userLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+		if let device = mConnectedDevices[id] { device.userLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func kairosLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.kairosLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
-		else { self.ledComplete?(id, false) }
-	}
-	#endif
-
-	#if ALTER
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.alterLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
-		else { self.ledComplete?(id, false) }
-	}
-	#endif
-
-	#if KAIROS
-	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
-	@objc public func led(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = mConnectedDevices[id] { device.kairosLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
-		else { self.ledComplete?(id, false) }
-	}
-	#endif
-
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------

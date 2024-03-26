@@ -825,35 +825,17 @@ public class Device: NSObject, ObservableObject {
 		}
 	}
 
-	#if UNIVERSAL || ALTER
-	func alterLEDInternal(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+	#if UNIVERSAL || ALTER || KAIROS
+	func userLEDInternal(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.alterLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
+			mainCharacteristic.userLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
 		}
 		else { self.lambdaLEDComplete?(id, false) }
 	}
 	
-	public func alterLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+	public func userLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.alterLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
-		}
-		else {
-			DispatchQueue.main.async { self.ledComplete.send(.not_configured) }
-		}
-	}
-	#endif
-
-	#if UNIVERSAL || KAIROS
-	func kairosLEDInternal(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.kairosLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
-		}
-		else { self.lambdaLEDComplete?(id, false) }
-	}
-	
-	public func kairosLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.kairosLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
+			mainCharacteristic.userLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
 		}
 		else {
 			DispatchQueue.main.async { self.ledComplete.send(.not_configured) }

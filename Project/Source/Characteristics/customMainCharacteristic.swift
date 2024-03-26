@@ -411,8 +411,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || ALTER
-	func alterLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+	func userLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
 		log?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
 		
 		var data = Data()
@@ -425,30 +424,6 @@ class customMainCharacteristic: Characteristic {
 
 		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
-	#endif
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	#if UNIVERSAL || KAIROS
-	func kairosLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		log?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
-		
-		var data = Data()
-		data.append(commands.led.rawValue)
-		data.append(red ? 0x01 : 0x00)		// Red
-		data.append(green ? 0x01 : 0x00)	// Green
-		data.append(blue ? 0x01 : 0x00)		// Blue
-		data.append(blink ? 0x01 : 0x00)	// Blink
-		data.append(UInt8(seconds & 0xff))	// Seconds
-		
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
-	}
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
