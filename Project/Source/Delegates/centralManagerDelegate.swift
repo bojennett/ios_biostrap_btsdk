@@ -25,11 +25,12 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 				
 				for device in self.connectedDevices { self.mProcessDisconnection(device.id) }
 				
-				//self.mConnectedDevices?.removeAll()
 				self.bluetoothReady?(false)
+				self.bluetoothAvailable = false
 			}
 			else {
 				self.bluetoothReady?(true)
+				self.bluetoothAvailable = true
 			}
 		}
 	}
@@ -126,7 +127,38 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	internal func setupCallbacks(_ device: Device) {
-		device.lambdaConfigured = { id in self.connected?(id) } // Device already puts this on the main thread due to peripheral delegate
+		device.lambdaConfigured = { id in  // Device already puts this on the main thread due to peripheral delegate
+			if let discoveredDevice = self.discoveredDevices.first(where: { $0.id == id }) {
+				self.discoveredDevices.removeAll(where: { $0.id == id })
+				if self.connectedDevices.first(where: { $0.id == id }) == nil {
+					self.connectedDevices.append(discoveredDevice)
+					self.connected?(id)
+				}
+				else {
+					log?.e ("Device was already in the connected list when i received 'configured' callback.  Weird.")
+				}
+			}
+			else if let unnamedDevice = self.discoveredDevices.first(where: { $0.id == id }) {
+				self.discoveredDevices.removeAll(where: { $0.id == id })
+				if self.connectedDevices.first(where: { $0.id == id }) == nil {
+					self.connectedDevices.append(unnamedDevice)
+					self.connected?(id)
+				}
+				else {
+					log?.e ("Device was already in the connected list when i received 'configured' callback.  Weird.")
+				}
+			}
+			else {
+				if let peripheral = device.peripheral {
+					log?.e ("Received a configured callback, but my device is not in my discovered or unnamed list.  Very bizarre.  disconnect this")
+					self.mCentralManager?.cancelPeripheralConnection(peripheral)
+				}
+				else {
+					log?.e ("Received a configured callback, but my device is not in my discovered or unnamed list.  Very bizarre.  And don't have a peripheral to even disconnect.  What?!?!?")
+				}
+			}
+		}
+		
 		device.lambdaBatteryLevelUpdated = { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
 		device.lambdaHeartRateUpdated = { id, epoch, hr, rr in DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) } }
 		device.lambdaWriteEpochComplete = { id, successful in DispatchQueue.main.async { self.writeEpochComplete?(id, successful) } }
@@ -386,7 +418,9 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					if let device = self.discoveredDevices.first(where: { $0.id == peripheral.prettyID }) {
 						if valid { discovered?(peripheral.prettyID, device) }
 						else {
-							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+							if valid_type_but_no_name {
+								log?.v ("\(peripheral.prettyID): didDiscover: Had already found this device, but it now has no name.  Strange...  Don't say it now has no name, though")
+							}
 						}
 					}
 					else {
@@ -399,11 +433,18 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						setupCallbacks(device)
 						
 						if valid {
+							if let _ = self.unnamedDevices.first(where: { $0.id == peripheral.prettyID }) {
+								log?.v ("\(peripheral.prettyID): didDiscover: Discovered a device that was unnamed but now has a name.  Update as named, and remove unnamed version")
+								self.unnamedDevices.removeAll(where: { $0.id == peripheral.prettyID })
+							}
 							self.discoveredDevices.append(device)
 							discovered?(peripheral.prettyID, device)
 						}
 						else {
-							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+							if valid_type_but_no_name {
+								if self.unnamedDevices.first(where: { $0.id == peripheral.prettyID }) == nil { self.unnamedDevices.append(device) }
+								self.discoveredUnnamed?(peripheral.prettyID, device)
+							}
 						}
 					}
 					
@@ -416,7 +457,9 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					if let device = self.discoveredDevices.first(where: { $0.id == peripheral.prettyID }) {
 						if valid { discovered?(peripheral.prettyID, device) }
 						else {
-							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+							if valid_type_but_no_name {
+								log?.v ("\(peripheral.prettyID): didDiscover: Had already found this device, but it now has no name.  Strange...  Don't say it now has no name, though")
+							}
 						}
 					}
 					else {
@@ -429,11 +472,18 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						setupCallbacks(device)
 						
 						if valid {
+							if let _ = self.unnamedDevices.first(where: { $0.id == peripheral.prettyID }) {
+								log?.v ("\(peripheral.prettyID): didDiscover: Discovered a device that was unnamed but now has a name.  Update as named, and remove unnamed version")
+								self.unnamedDevices.removeAll(where: { $0.id == peripheral.prettyID })
+							}
 							self.discoveredDevices.append(device)
 							discovered?(peripheral.prettyID, device)
 						}
 						else {
-							if valid_type_but_no_name { self.discoveredUnnamed?(peripheral.prettyID, device) }
+							if valid_type_but_no_name {
+								if self.unnamedDevices.first(where: { $0.id == peripheral.prettyID }) == nil { self.unnamedDevices.append(device) }
+								self.discoveredUnnamed?(peripheral.prettyID, device)
+							}
 						}
 					}
 				}
@@ -456,10 +506,12 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		DispatchQueue.main.async { [self] in
 			if let device = discoveredDevices.first(where: { $0.id == peripheral.prettyID }) {
 				if device.didConnect() {
+					/*
 					discoveredDevices.removeAll(where: { $0.id == peripheral.prettyID })
 					if connectedDevices.first(where: { $0.id == peripheral.prettyID }) == nil {
 						connectedDevices.append(device)
 					}
+					 */
 				}
 				else {
 					mCentralManager?.cancelPeripheralConnection(peripheral)

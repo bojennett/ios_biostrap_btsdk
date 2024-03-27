@@ -62,6 +62,12 @@ import Combine
 	}
 	#endif
 	
+	// Observable Objects / Passthroughs
+	@objc @Published public internal(set) var bluetoothAvailable: Bool = false
+	@objc @Published public internal(set) var discoveredDevices = [ Device ]()
+	@objc @Published public internal(set) var unnamedDevices = [ Device ]()
+	@objc @Published public internal(set) var connectedDevices = [ Device ]()
+	
 	// Lambdas
 	@objc public var logV: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
 	@objc public var logD: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
@@ -69,11 +75,15 @@ import Combine
 	@objc public var logW: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
 	@objc public var logE: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
 	
+	@available(*, deprecated, message: "Use the published bluetoothAvailable property.  This will be removed in a future version of the SDK")
 	@objc public var bluetoothReady: ((_ isOn: Bool)->())?
+	@available(*, deprecated, message: "Use the published discoverdDevices property.  This will be removed in a future version of the SDK")
 	@objc public var discovered: ((_ id: String, _ device: Device)->())?
+	@available(*, deprecated, message: "Use the published unnamedDevices property.  This will be removed in a future version of the SDK")
 	@objc public var discoveredUnnamed: ((_ id: String, _ device: Device)->())?
-	
+	@available(*, deprecated, message: "Use the published connectedDevices property.  This will be removed in a future version of the SDK")
 	@objc public var connected: ((_ id: String)->())?
+	
 	@objc public var disconnected: ((_ id: String)->())?
 	
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
@@ -241,8 +251,6 @@ import Combine
 		
 	// Internal vars
 	internal var mCentralManager : CBCentralManager?
-	@objc @Published public internal(set) var discoveredDevices = [ Device ]()
-	@objc @Published public internal(set) var connectedDevices = [ Device ]()
 	internal lazy var mPairedDeviceNames	= [ String: String ]()
 	internal var mLicensed : Bool = false
 
