@@ -22,7 +22,8 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		DispatchQueue.main.async {
 			if (central.state != .poweredOn) {
 				self.discoveredDevices.removeAll()
-				
+				self.unnamedDevices.removeAll()
+
 				for device in self.connectedDevices { self.mProcessDisconnection(device.id) }
 				
 				self.bluetoothReady?(false)
@@ -139,7 +140,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 				}
 			}
 			else if let unnamedDevice = self.discoveredDevices.first(where: { $0.id == id }) {
-				self.discoveredDevices.removeAll(where: { $0.id == id })
+				self.unnamedDevices.removeAll(where: { $0.id == id })
 				if self.connectedDevices.first(where: { $0.id == id }) == nil {
 					self.connectedDevices.append(unnamedDevice)
 					self.connected?(id)
@@ -505,20 +506,19 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		
 		DispatchQueue.main.async { [self] in
 			if let device = discoveredDevices.first(where: { $0.id == peripheral.prettyID }) {
-				if device.didConnect() {
-					/*
-					discoveredDevices.removeAll(where: { $0.id == peripheral.prettyID })
-					if connectedDevices.first(where: { $0.id == peripheral.prettyID }) == nil {
-						connectedDevices.append(device)
-					}
-					 */
+				if !device.didConnect() {
+					log?.e ("Can't finish the didConnect for a device in my discovered list - disconnecting")
+					mCentralManager?.cancelPeripheralConnection(peripheral)
 				}
-				else {
+			}
+			else if let device = unnamedDevices.first(where: { $0.id == peripheral.prettyID }) {
+				if !device.didConnect() {
+					log?.e ("Can't finish the didConnect for a device in my unnamed list - disconnecting")
 					mCentralManager?.cancelPeripheralConnection(peripheral)
 				}
 			}
 			else {
-				log?.e ("\(peripheral.prettyID): didConnect - Connected to a device not in my discovered list.  Disconnect")
+				log?.e ("\(peripheral.prettyID): didConnect - Connected to a device not in my discovered or unnamed list.  Disconnect")
 				mCentralManager?.cancelPeripheralConnection(peripheral)
 			}
 		}
@@ -533,6 +533,19 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//--------------------------------------------------------------------------------
 	internal func mProcessDisconnection(_ id: String) {
 		DispatchQueue.main.async {
+			if let device = self.unnamedDevices.first(where: { $0.id == id }) {
+				if device.connectionState == .connecting {
+					device.connectionState = .disconnected
+					self.unnamedDevices.removeAll(where: { $0.id == id })
+				}
+				else {
+					log?.e ("\(id): Disconnected from a discovered device that isn't requesting connection.  Weird!")
+				}
+				
+				self.disconnected?(id)
+				return
+			}
+			
 			if let device = self.discoveredDevices.first(where: { $0.id == id }) {
 				if device.connectionState == .connecting {
 					device.connectionState = .disconnected
@@ -547,7 +560,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 			}
 			
 			if let device = self.connectedDevices.first(where: { $0.id == id }) {
-				if device.connectionState == .configuring || device.connectionState == .connected {
+				if device.connectionState == .configuring || device.connectionState == .configured {
 					device.connectionState = .disconnected
 					self.connectedDevices.removeAll(where: { $0.id == id })
 				}

@@ -9,28 +9,7 @@ import Foundation
 import CoreBluetooth
 
 extension Device: CBPeripheralDelegate {
-	
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	// Not part of the delgate, but used by all the delegates
-	//
-	//--------------------------------------------------------------------------------
-	internal func checkConfigured() {
-		if (configured) {
-			if connectionState == .configuring {
-				connectionState = .connected
-				if let peripheral {
-					lambdaConfigured?(peripheral.prettyID)
-				}
-				else {
-					log?.e ("Do not have a peripheral, why am I signaling configured?")
-				}
-			}
-		}
-	}
-	
+		
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------

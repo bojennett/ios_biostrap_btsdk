@@ -418,6 +418,7 @@ import Combine
 		}
 		
 		discoveredDevices.removeAll()
+		unnamedDevices.removeAll()
 		
 		if (mCentralManager?.state == .poweredOn) {
 			let services	= Device.scan_services
@@ -458,6 +459,7 @@ import Combine
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Use the device object's connect function directly.  This will be removed in a future version of the SDK")
 	@objc public func connect(_ id: String) {
 		log?.v("\(id)")
 		
@@ -482,12 +484,20 @@ import Combine
 	//
 	//
 	//--------------------------------------------------------------------------------
+	@available(*, deprecated, message: "Use the device object's connect function directly.  This will be removed in a future version of the SDK")
 	@objc public func disconnect(_ id: String) {
 		log?.v("\(id)")
 		
 		if let device = discoveredDevices.first(where: { $0.id == id }), let peripheral = device.peripheral {
 			log?.v("Found \(id) in discovered list -> trying to disconnect")
 			discoveredDevices.removeAll { $0.id == id }
+			mCentralManager?.cancelPeripheralConnection(peripheral)
+			return
+		}
+		
+		if let device = unnamedDevices.first(where: { $0.id == id }), let peripheral = device.peripheral {
+			log?.v("Found \(id) in unnamed list -> trying to disconnect")
+			unnamedDevices.removeAll { $0.id == id }
 			mCentralManager?.cancelPeripheralConnection(peripheral)
 			return
 		}

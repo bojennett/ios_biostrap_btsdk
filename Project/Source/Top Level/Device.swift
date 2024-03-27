@@ -97,7 +97,7 @@ public class Device: NSObject, ObservableObject {
 		case disconnected
 		case connecting
 		case configuring
-		case connected
+		case configured
 	}
 	
 	@Published public var connectionState : ConnectionState = .disconnected
@@ -466,7 +466,7 @@ public class Device: NSObject, ObservableObject {
 	#endif
 	
 	#if UNIVERSAL || ALTER
-	private var mAlterConfigured: Bool {
+	internal var mAlterConfigured: Bool {
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 			
 			if let dataCharacteristic = mDataCharacteristic, let strmCharacteristic = mStreamingCharacteristic {
@@ -497,7 +497,7 @@ public class Device: NSObject, ObservableObject {
 	#endif
 
 	#if UNIVERSAL || KAIROS
-	private var mKairosConfigured: Bool {
+	internal var mKairosConfigured: Bool {
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let batteryCharacteristic = mBatteryLevelCharacteristic {
 			
 			if let dataCharacteristic = mDataCharacteristic, let strmCharacteristic = mStreamingCharacteristic {
@@ -527,26 +527,92 @@ public class Device: NSObject, ObservableObject {
 	}
 	#endif
 
-	var configured: Bool {
+	//--------------------------------------------------------------------------------
+	// Function Name: checkConfigured
+	//--------------------------------------------------------------------------------
+	//
+	// See if everything has been configured
+	//
+	//--------------------------------------------------------------------------------
+	internal func checkConfigured() {
 		if let firmwareVesion = mFirmwareVersion, let customCharacteristic = mMainCharacteristic {
 			customCharacteristic.firmwareVersion = firmwareVesion.value
 		}
 		
+		// If i was already configured, i don't need to tell the app this again
+		if (connectionState == .configured) { return }
+		
+		var configured: Bool = false
+		
 		#if UNIVERSAL
 		switch type {
-		case .alter		: return mAlterConfigured
-		case .kairos	: return mKairosConfigured
-		case .unknown	: return false
+		case .alter		: configured = mAlterConfigured
+		case .kairos	: configured = mKairosConfigured
+		case .unknown	: break
 		}
 		#endif
 				
 		#if ALTER
-		return mAlterConfigured
+		configured = mAlterConfigured
 		#endif
 		
 		#if KAIROS
-		return mKairosConfigured
+		configured = mKairosConfigured
 		#endif
+
+		if (configured) {
+			connectionState = .configured
+			if let peripheral {
+				lambdaConfigured?(peripheral.prettyID)
+			}
+			else {
+				log?.e ("Do not have a peripheral, why am I signaling configured?")
+			}
+		}
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: connect
+	//--------------------------------------------------------------------------------
+	//
+	// Connect the device
+	//
+	//--------------------------------------------------------------------------------
+	public func connect() {
+		if connectionState == .disconnected {
+			connectionState = .connecting
+			
+			if let centralManager, let peripheral {
+				centralManager.connect(peripheral, options: nil)
+			}
+			else {
+				log?.e ("Either do not have a central manager or a peripheral")
+			}
+		}
+		else {
+			log?.e ("Device is not in a disconnected state")
+		}
+	}
+	
+	//--------------------------------------------------------------------------------
+	// Function Name: connect
+	//--------------------------------------------------------------------------------
+	//
+	// Connect the device
+	//
+	//--------------------------------------------------------------------------------
+	public func disconnect() {
+		if connectionState != .disconnected {
+			if let centralManager, let peripheral {
+				centralManager.cancelPeripheralConnection(peripheral)
+			}
+			else {
+				log?.e ("Either do not have a central manager or a peripheral")
+			}
+		}
+		else {
+			log?.e ("Device is not in a connecting or connected state")
+		}
 	}
 	
 	//--------------------------------------------------------------------------------
