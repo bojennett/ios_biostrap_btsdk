@@ -2899,5 +2899,12 @@ public class Device: NSObject, ObservableObject {
 	func isReady() {
 		mAmbiqOTARXCharacteristic?.isReady()
 	}
+}
 
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+extension Device {
+	static func ==(lhs: Device, rhs: Device) -> Bool {
+		return lhs.id == rhs.id
+	}
 }

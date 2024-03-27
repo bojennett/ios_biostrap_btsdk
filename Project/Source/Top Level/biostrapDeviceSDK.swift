@@ -375,7 +375,11 @@ import Combine
 	//
 	//
 	//--------------------------------------------------------------------------------
-	@objc public func startScan(inBackground: Bool = false, forPaired: Bool = true, forUnpaired: Bool = true, forLegacy: Bool = true) -> Bool {
+	@objc public func startScan() -> Bool {
+		return startScanWithParameters(inBackground: true, forPaired: true, forUnpaired: true, forLegacy: true)
+	}
+
+	@objc public func startScanWithParameters(inBackground: Bool, forPaired: Bool, forUnpaired: Bool, forLegacy: Bool) -> Bool {
 		scanInBackground = inBackground
 		scanForPaired = forPaired
 		scanForUnpaired = forUnpaired
@@ -388,7 +392,7 @@ import Combine
 		}
 		#endif
 		
-		log?.v("")
+		log?.v("InBackground: \(inBackground), forPaired: \(forPaired), forUnpaired: \(forUnpaired), forLegacy: \(forLegacy)")
 		
 		// See if there were any connected peripherals (which could happen due to a previous instance crash), and disconnect them
 		let peripherals = mCentralManager?.retrieveConnectedPeripherals(withServices: Device.scan_services)
