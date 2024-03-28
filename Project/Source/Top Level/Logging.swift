@@ -6,39 +6,37 @@
 //
 
 import Foundation
+import Combine
+
+public enum LogLevel {
+	case verbose
+	case debug
+	case info
+	case warning
+	case error
+}
 
 class Logging {
-	
-	public enum LEVEL {
-		case verbose
-		case debug
-		case info
-		case warning
-		case error
+		
+	let log = PassthroughSubject<(LogLevel, String, String, String, Int), Never>()
+
+	func v(_ value: String?, _ file: String = #file, _ function: String = #function, _ line: Int = #line) {
+		self.log.send((LogLevel.verbose, "\(value ?? "")", file, function, line))
 	}
 	
-	// Logging
-	public var log: ((_ level: LEVEL, _ message: String?, _ file: String, _ function: String, _ line: Int)->())?
-	
-	var prefix			: String	= ""
-	
-	public func v(_ value: String?, _ file: String = #file, _ function: String = #function, _ line: Int = #line) {
-		self.log?(.verbose, "\(prefix) \(value!)", file, function, line)
+	func d(_ value: String?, _ file: String = #file, _ function: String = #function, _ line: Int = #line) {
+		self.log.send((LogLevel.debug, "\(value ?? "")", file, function, line))
 	}
 	
-	public func d(_ value: String?, _ file: String = #file, _ function: String = #function, _ line: Int = #line) {
-		self.log?(.debug, "\(prefix) \(value!)", file, function, line)
-	}
-	
-	public func i(_ value: String?, _ file: String = #file, _ function: String = #function, _ line: Int = #line) {
-		self.log?(.info, "\(prefix) \(value!)", file, function, line)
+	func i(_ value: String?, _ file: String = #file, _ function: String = #function, _ line: Int = #line) {
+		self.log.send((LogLevel.info, "\(value ?? "")", file, function, line))
 	}
 
-	public func w(_ value: String?, _ file: String = #file, _ function: String = #function, _ line: Int = #line) {
-		self.log?(.warning, "\(prefix) \(value!)", file, function, line)
+	func w(_ value: String?, _ file: String = #file, _ function: String = #function, _ line: Int = #line) {
+		self.log.send((LogLevel.warning, "\(value ?? "")", file, function, line))
 	}
 
-	public func e(_ value: String?, _ file: String = #file, _ function: String = #function, _ line: Int = #line) {
-		self.log?(.error, "\(prefix) \(value!)", file, function, line)
-	}	
+	func e(_ value: String?, _ file: String = #file, _ function: String = #function, _ line: Int = #line) {
+		self.log.send((LogLevel.error, "\(value ?? "")", file, function, line))
+	}
 }

@@ -182,18 +182,18 @@ class customMainCharacteristic: Characteristic {
 		
 		mutating func check() -> Bool {
 			if (enable == false) {
-				//log?.v ("\(name): Not testing - allow")
+				//logX?.v ("\(name): Not testing - allow")
 				return true
 			}
 			
 			count = count + 1
 			if (count >= limit) {
-				log?.v ("\(name): At limit - allow")
+				logX?.v ("\(name): At limit - allow")
 				count	= 0
 				return true
 			}
 			else {
-				log?.v ("\(name): Not at limit - disallow \(count) != \(limit)")
+				logX?.v ("\(name): Not at limit - disallow \(count) != \(limit)")
 				return false
 			}
 		}
@@ -229,7 +229,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func writeEpoch(_ newEpoch: Int) {
-		log?.v("\(pID): \(newEpoch)")
+		logX?.v("\(pID): \(newEpoch)")
 
 		var data = Data()
 		data.append(commands.writeEpoch.rawValue)
@@ -245,7 +245,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func readEpoch() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 
 		var data = Data()
 		data.append(commands.readEpoch.rawValue)
@@ -260,7 +260,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func endSleep() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 
 		var data = Data()
 		data.append(commands.endSleep.rawValue)
@@ -289,7 +289,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getNextPacket(_ single: Bool) {
-		log?.v("\(pID): Single? \(single)")
+		logX?.v("\(pID): Single? \(single)")
 
 		var data = Data()
 		data.append(commands.getNextPacket.rawValue)
@@ -305,7 +305,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getAllPackets(pages: Int, delay: Int, newStyle: Bool) {
-		log?.v("\(pID): Pages: \(pages), delay: \(delay) ms")
+		logX?.v("\(pID): Pages: \(pages), delay: \(delay) ms")
 
 		self.pFailedDecodeCount	= 0
 		
@@ -328,7 +328,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getAllPacketsAcknowledge(_ ack: Bool) {
-		log?.v("\(pID): Ack: \(ack)")
+		logX?.v("\(pID): Ack: \(ack)")
 		
 		var data = Data()
 		data.append(commands.getAllPacketsAcknowledge.rawValue)
@@ -344,7 +344,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getPacketCount() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 
 		if (!mSimpleCommand(.getPacketCount)) { self.getPacketCountComplete?(false, 0) }
 	}
@@ -357,7 +357,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func disableWornDetect() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 
 		if (!mSimpleCommand(.disableWornDetect)) { self.disableWornDetectComplete?(false) }
 	}
@@ -370,7 +370,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func enableWornDetect() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 
 		if (!mSimpleCommand(.enableWornDetect)) { self.enableWornDetectComplete?(false) }
 	}
@@ -383,7 +383,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func startManual(_ algorithms: ppgAlgorithmConfiguration) {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.startManual.rawValue)
@@ -399,7 +399,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func stopManual() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		if (!mSimpleCommand(.stopManual)) { self.stopManualComplete?(false) }
 	}
@@ -412,7 +412,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func userLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		log?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
+		logX?.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
 		
 		var data = Data()
 		data.append(commands.led.rawValue)
@@ -433,7 +433,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func enterShipMode() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.enterShipMode.rawValue)
@@ -448,7 +448,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func writeSerialNumber(_ partID: String) {
-		log?.v("\(pID): \(partID)")
+		logX?.v("\(pID): \(partID)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
@@ -466,7 +466,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func readSerialNumber() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
@@ -482,7 +482,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func deleteSerialNumber() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.delDeviceParam.rawValue)
@@ -498,14 +498,14 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func writeAdvInterval(_ seconds: Int) {
-		log?.v("\(pID): \(seconds)")
+		logX?.v("\(pID): \(seconds)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
 		data.append(deviceParameterType.advertisingInterval.rawValue)
 		data.append(contentsOf: seconds.leData32)
 		
-		log?.v ("\(data.hexString)")
+		logX?.v ("\(data.hexString)")
 
 		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
 	}
@@ -518,7 +518,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func readAdvInterval() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
@@ -534,7 +534,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func deleteAdvInterval() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.delDeviceParam.rawValue)
@@ -550,7 +550,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func clearChargeCycles() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
@@ -566,7 +566,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func readChargeCycles() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
@@ -582,7 +582,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func readCanLogDiagnostics() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
@@ -598,7 +598,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func updateCanLogDiagnostics(_ allow: Bool) {
-		log?.v("\(pID): Allow Diagnostics? \(allow)")
+		logX?.v("\(pID): Allow Diagnostics? \(allow)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
@@ -616,7 +616,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func allowPPG(_ allow: Bool) {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.allowPPG.rawValue)
@@ -632,7 +632,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func wornCheck() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.wornCheck.rawValue)
@@ -647,7 +647,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func rawLogging(_ enable: Bool) {
-		log?.v("\(pID): \(enable)")
+		logX?.v("\(pID): \(enable)")
 		
 		var data = Data()
 		data.append(commands.logRaw.rawValue)
@@ -663,7 +663,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getRawLoggingStatus() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getRawLoggingStatus.rawValue)
@@ -678,7 +678,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getWornOverrideStatus() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getWornOverrideStatus.rawValue)
@@ -693,7 +693,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func airplaneMode() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		if (!mSimpleCommand(.airplaneMode)) { self.airplaneModeComplete?(false) }
 	}
@@ -706,7 +706,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func reset() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 
 		if (!mSimpleCommand(.reset)) { self.resetComplete?(false) }
 	}
@@ -719,7 +719,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func setSessionParam(_ parameter: sessionParameterType, value: Int) {
-		log?.v("\(pID): \(parameter) - \(value)")
+		logX?.v("\(pID): \(parameter) - \(value)")
 		
 		var data = Data()
 		data.append(commands.setSessionParam.rawValue)
@@ -736,7 +736,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getSessionParam(_ parameter: sessionParameterType) {
-		log?.v("\(pID): \(parameter)")
+		logX?.v("\(pID): \(parameter)")
 		
 		var data = Data()
 		data.append(commands.getSessionParam.rawValue)
@@ -752,7 +752,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func resetSessionParams() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.setSessionParam.rawValue)
@@ -768,7 +768,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func acceptSessionParams() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.setSessionParam.rawValue)
@@ -785,7 +785,7 @@ class customMainCharacteristic: Characteristic {
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || ALTER
 	func alterManufacturingTest(_ test: alterManufacturingTestType) {
-		log?.v("\(pID): \(test.title)")
+		logX?.v("\(pID): \(test.title)")
 		
 		var data = Data()
 		data.append(commands.manufacturingTest.rawValue)
@@ -796,7 +796,7 @@ class customMainCharacteristic: Characteristic {
 
 	#if UNIVERSAL || KAIROS
 	func kairosManufacturingTest(_ test: kairosManufacturingTestType) {
-		log?.v("\(pID): \(test.title)")
+		logX?.v("\(pID): \(test.title)")
 		
 		var data = Data()
 		data.append(commands.manufacturingTest.rawValue)
@@ -813,7 +813,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func setAskForButtonResponse(_ enable: Bool) {
-		log?.v("\(pID): Enabled = \(enable)")
+		logX?.v("\(pID): Enabled = \(enable)")
 		
 		var data = Data()
 		data.append(commands.setAskForButtonResponse.rawValue)
@@ -829,7 +829,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getAskForButtonResponse() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getAskForButtonResponse.rawValue)
@@ -844,7 +844,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func setHRZoneColor(_ type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
-		log?.v("\(pID): \(type.title) -> R \(red), G \(green), B \(blue).  On: \(on_milliseconds), Off: \(off_milliseconds)")
+		logX?.v("\(pID): \(type.title) -> R \(red), G \(green), B \(blue).  On: \(on_milliseconds), Off: \(off_milliseconds)")
 		
 		var data = Data()
 		data.append(commands.setHRZoneColor.rawValue)
@@ -867,7 +867,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getHRZoneColor(_ type: hrZoneRangeType) {
-		log?.v("\(pID): \(type.title)")
+		logX?.v("\(pID): \(type.title)")
 		
 		var data = Data()
 		data.append(commands.getHRZoneColor.rawValue)
@@ -883,7 +883,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func setHRZoneRange(_ enabled: Bool, high_value: Int, low_value: Int) {
-		log?.v("\(pID): Enabled: \(enabled) -> High Value: \(high_value), Low Value: \(low_value)")
+		logX?.v("\(pID): Enabled: \(enabled) -> High Value: \(high_value), Low Value: \(low_value)")
 		
 		var data = Data()
 		data.append(commands.setHRZoneRange.rawValue)
@@ -901,7 +901,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getHRZoneRange() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getHRZoneRange.rawValue)
@@ -916,7 +916,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getPPGAlgorithm() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getPPGAlgorithm.rawValue)
@@ -931,7 +931,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func setAdvertiseAsHRM(_ asHRM: Bool) {
-		log?.v("\(pID): As HRM? (\(asHRM)")
+		logX?.v("\(pID): As HRM? (\(asHRM)")
 		
 		var data = Data()
 		data.append(commands.setAdvertiseAsHRM.rawValue)
@@ -947,7 +947,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getAdvertiseAsHRM() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getAdvertiseAsHRM.rawValue)
@@ -962,7 +962,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func setButtonCommand(_ tap: buttonTapType, command: buttonCommandType) {
-		log?.v("\(pID): \(tap.title) -> \(command.title)")
+		logX?.v("\(pID): \(tap.title) -> \(command.title)")
 		
 		var data = Data()
 		data.append(commands.setButtonCommand.rawValue)
@@ -979,7 +979,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getButtonCommand(_ tap: buttonTapType) {
-		log?.v("\(pID): \(tap.title)")
+		logX?.v("\(pID): \(tap.title)")
 		
 		var data = Data()
 		data.append(commands.getButtonCommand.rawValue)
@@ -995,7 +995,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func setPaired() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
@@ -1012,7 +1012,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func setUnpaired() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.delDeviceParam.rawValue)
@@ -1029,7 +1029,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getPaired() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
@@ -1045,7 +1045,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func setPageThreshold(_ threshold: Int) {
-		log?.v("\(pID): \(threshold)")
+		logX?.v("\(pID): \(threshold)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
@@ -1062,7 +1062,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getPageThreshold() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
@@ -1079,7 +1079,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func deletePageThreshold() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.delDeviceParam.rawValue)
@@ -1095,7 +1095,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func recalibratePPG() {
-		log?.v("\(pID)")
+		logX?.v("\(pID)")
 		
 		var data = Data()
 		data.append(commands.recalibratePPG.rawValue)
@@ -1110,7 +1110,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mValidateCRC() {
-		//log?.v("\(pID): \(mCRCOK)")
+		//logX?.v("\(pID): \(mCRCOK)")
 		
 		if (mCRCOK == false) {
 			mCRCFailCount	= mCRCFailCount + 1
@@ -1134,14 +1134,14 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mProcessUpdateValue(_ data: Data) {
-		log?.v ("\(pID): \(data.hexString)")
+		logX?.v ("\(pID): \(data.hexString)")
 		if let response = notifications(rawValue: data[0]) {
 			switch (response) {
 			case .completion:
 				if (data.count >= 3) {
 					if let command = commands(rawValue: data[1]) {
 						let successful = (data[2] == 0x01)
-						//log?.v ("\(pID): Got completion for '\(command)' with \(successful) status: Bytes = \(data.hexString)")
+						//logX?.v ("\(pID): Got completion for '\(command)' with \(successful) status: Bytes = \(data.hexString)")
 						switch (command) {
 						case .writeEpoch	: self.writeEpochComplete?(successful)
 						case .readEpoch		:
@@ -1230,7 +1230,7 @@ class customMainCharacteristic: Characteristic {
 								}
 							}
 							else {
-								log?.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
+								logX?.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
 						case .getDeviceParam	:
 							if let parameter = deviceParameterType(rawValue: data[3]) {
@@ -1254,7 +1254,7 @@ class customMainCharacteristic: Characteristic {
 										let paired = (data[4] != 0x00)
 										self.getPairedComplete?(successful, paired)
 									case .pageThreshold:
-										log?.v ("\(pID): \(response): Data: \(data.hexString)")
+										logX?.v ("\(pID): \(response): Data: \(data.hexString)")
 										self.getPageThresholdComplete?(successful, Int(data[4]))
 									}
 								}
@@ -1270,21 +1270,21 @@ class customMainCharacteristic: Characteristic {
 								}
 							}
 							else {
-								log?.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
+								logX?.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
 						case .delDeviceParam	:
 							if let parameter = deviceParameterType(rawValue: data[3]) {
 								switch (parameter) {
 								case .advertisingInterval	: self.deleteAdvIntervalComplete?(successful)
 								case .serialNumber			: self.deleteSerialNumberComplete?(successful)
-								case .chargeCycle			: log?.e ("\(pID): Should not have been able to delete \(parameter.title)")
-								case .canLogDiagnostics		: log?.e ("\(pID): Should not have been able to delete \(parameter.title)")
+								case .chargeCycle			: logX?.e ("\(pID): Should not have been able to delete \(parameter.title)")
+								case .canLogDiagnostics		: logX?.e ("\(pID): Should not have been able to delete \(parameter.title)")
 								case .paired				: self.setUnpairedComplete?(successful)
 								case .pageThreshold			: self.deletePageThresholdComplete?(successful)
 								}
 							}
 							else {
-								log?.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
+								logX?.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
 						case .setSessionParam		:
 							if let enumParameter = sessionParameterType(rawValue: data[3]) {
@@ -1300,7 +1300,7 @@ class customMainCharacteristic: Characteristic {
 								}
 							}
 							else {
-								log?.e ("\(pID): Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
+								logX?.e ("\(pID): Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
 							}
 
 						case .getSessionParam		:
@@ -1321,7 +1321,7 @@ class customMainCharacteristic: Characteristic {
 
 							}
 							else {
-								log?.e ("\(pID): Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
+								logX?.e ("\(pID): Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
 							}
 
 						case .manufacturingTest	: self.manufacturingTestComplete?(successful)
@@ -1483,29 +1483,29 @@ class customMainCharacteristic: Characteristic {
 						case .airplaneMode		: self.airplaneModeComplete?(successful)
 						case .reset				: self.resetComplete?(successful)
 						case .validateCRC		: break
-							//log?.v ("\(pID): Got Validate CRC completion: \(data.hexString)")
+							//logX?.v ("\(pID): Got Validate CRC completion: \(data.hexString)")
 						}
 					}
 					else {
-						log?.e ("\(pID): Unknown command: \(data.hexString)")
+						logX?.e ("\(pID): Unknown command: \(data.hexString)")
 					}
 				}
 				else {
-					log?.e ("\(pID): Incorrect length for completion: \(data.hexString)")
+					logX?.e ("\(pID): Incorrect length for completion: \(data.hexString)")
 				}
 				
 				pCommandQ?.remove() // These were updates from a write, so queue can now move on
 				
 			case .dataPacket:
 				if (data.count > 3) {	// Accounts for header byte and sequence number
-					//log?.v ("\(pID): \(data.subdata(in: Range(0...7)).hexString)")
-					//log?.v ("\(pID): \(data.hexString)")
+					//logX?.v ("\(pID): \(data.subdata(in: Range(0...7)).hexString)")
+					//logX?.v ("\(pID): \(data.hexString)")
 					let sequence_number = data.subdata(in: Range(1...2)).leUInt16
 					if (sequence_number == mExpectedSequenceNumber) {
-						//log?.v ("\(pID): Sequence Number Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")
+						//logX?.v ("\(pID): Sequence Number Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")
 					}
 					else {
-						log?.e ("\(pID): \(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
+						logX?.e ("\(pID): \(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
 						mCRCOK	= false
 					}
 					mExpectedSequenceNumber = mExpectedSequenceNumber + 1
@@ -1516,7 +1516,7 @@ class customMainCharacteristic: Characteristic {
 					}
 				}
 				else {
-					log?.e ("\(pID): Bad data length for data packet: \(data.hexString)")
+					logX?.e ("\(pID): Bad data length for data packet: \(data.hexString)")
 					mCRCOK	= false
 				}
 				
@@ -1524,7 +1524,7 @@ class customMainCharacteristic: Characteristic {
 				if      (data[1] == 0x00) { deviceWornStatus?(false) }
 				else if (data[1] == 0x01) { deviceWornStatus?(true)  }
 				else {
-					log?.e ("\(pID): Cannot parse worn status: \(data[1])")
+					logX?.e ("\(pID): Cannot parse worn status: \(data[1])")
 				}
 							
 			case .ppg_metrics:
@@ -1565,7 +1565,7 @@ class customMainCharacteristic: Characteristic {
 					self.endSleepStatus?(hasSleep)
 				}
 				else {
-					log?.e ("\(pID): Cannot parse 'endSleepStatus': \(data.hexString)")
+					logX?.e ("\(pID): Cannot parse 'endSleepStatus': \(data.hexString)")
 				}
 				
 			case .buttonResponse:
@@ -1574,18 +1574,18 @@ class customMainCharacteristic: Characteristic {
 					self.buttonClicked?(presses)
 				}
 				else {
-					log?.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
+					logX?.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
 				}
 				
 			case .validateCRC:
-				//log?.v ("\(pID): \(response) - \(data.hexString)")
+				//logX?.v ("\(pID): \(response) - \(data.hexString)")
 				
 				let sequence_number = data.subdata(in: Range(1...2)).leUInt16
 				if (sequence_number == mExpectedSequenceNumber) {
-					//log?.v ("\(pID): SN Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")
+					//logX?.v ("\(pID): SN Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")
 				}
 				else {
-					log?.e ("\(pID): \(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
+					logX?.e ("\(pID): \(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
 					mCRCOK	= false
 				}
 
@@ -1595,7 +1595,7 @@ class customMainCharacteristic: Characteristic {
 				if (allowResponse) {
 					if (allowGoodResponse) {
 						if (mCRCOK == true) {
-							//log?.v ("\(pID): Validate CRC Passed: Let received packets through")
+							//logX?.v ("\(pID): Validate CRC Passed: Let received packets through")
 							
 							if (mDataPackets.count > 0) {
 								do {
@@ -1603,13 +1603,13 @@ class customMainCharacteristic: Characteristic {
 									if let jsonString = String(data: jsonData, encoding: .utf8) {
 									self.dataPackets?(jsonString)
 								}
-									else { log?.e ("\(pID): Cannot make string from json data") }
+									else { logX?.e ("\(pID): Cannot make string from json data") }
 								}
-								catch { log?.e ("\(pID): Cannot make JSON data") }
+								catch { logX?.e ("\(pID): Cannot make JSON data") }
 						   }
 						}
 						else {
-							log?.v ("\(pID): \(response) Failed: Do not let packets through")
+							logX?.v ("\(pID): \(response) Failed: Do not let packets through")
 						}
 					}
 					else {
@@ -1634,12 +1634,12 @@ class customMainCharacteristic: Characteristic {
 							self.manufacturingTestResult?(true, jsonString)
 						}
 						else {
-							log?.e ("\(pID): Result jsonString Failed")
+							logX?.e ("\(pID): Result jsonString Failed")
 							self.manufacturingTestResult?(false, "")
 						}
 					}
 					catch {
-						log?.e ("\(pID): Result jsonData Failed")
+						logX?.e ("\(pID): Result jsonData Failed")
 						self.manufacturingTestResult?(false, "")
 					}
 				}
@@ -1657,12 +1657,12 @@ class customMainCharacteristic: Characteristic {
 							self.manufacturingTestResult?(true, jsonString)
 						}
 						else {
-							log?.e ("\(pID): Result jsonString Failed")
+							logX?.e ("\(pID): Result jsonString Failed")
 							self.manufacturingTestResult?(false, "")
 						}
 					}
 					catch {
-						log?.e ("\(pID): Result jsonData Failed")
+						logX?.e ("\(pID): Result jsonData Failed")
 						self.manufacturingTestResult?(false, "")
 					}
 				}
@@ -1682,12 +1682,12 @@ class customMainCharacteristic: Characteristic {
 								self.manufacturingTestResult?(true, jsonString)
 							}
 							else {
-								log?.e ("\(pID): Result jsonString Failed")
+								logX?.e ("\(pID): Result jsonString Failed")
 								self.manufacturingTestResult?(false, "")
 							}
 						}
 						catch {
-							log?.e ("\(pID): Result jsonData Failed")
+							logX?.e ("\(pID): Result jsonData Failed")
 							self.manufacturingTestResult?(false, "")
 						}
 					}
@@ -1704,12 +1704,12 @@ class customMainCharacteristic: Characteristic {
 								self.manufacturingTestResult?(true, jsonString)
 							}
 							else {
-								log?.e ("\(pID): Result jsonString Failed")
+								logX?.e ("\(pID): Result jsonString Failed")
 								self.manufacturingTestResult?(false, "")
 							}
 						}
 						catch {
-							log?.e ("\(pID): Result jsonData Failed")
+							logX?.e ("\(pID): Result jsonData Failed")
 							self.manufacturingTestResult?(false, "")
 						}
 					}
@@ -1728,12 +1728,12 @@ class customMainCharacteristic: Characteristic {
 				
 				self.deviceChargingStatus?(charging, on_charger, error)
 				
-			case .streamPacket: log?.e ("\(pID): Should not get '\(response)' on this characteristic!")
-			case .dataAvailable: log?.e ("\(pID): Should not get '\(response)' on this characteristic!")
+			case .streamPacket: logX?.e ("\(pID): Should not get '\(response)' on this characteristic!")
+			case .dataAvailable: logX?.e ("\(pID): Should not get '\(response)' on this characteristic!")
 			}
 		}
 		else {
-			log?.e ("\(pID): Unknown update: \(data.hexString)")
+			logX?.e ("\(pID): Unknown update: \(data.hexString)")
 		}
 	}
 	
@@ -1756,7 +1756,7 @@ class customMainCharacteristic: Characteristic {
 					let crc_calculated	= crc32(uLong(0), &input_bytes, uInt(input_bytes.count))
 
 					if (crc_received != crc_calculated) {
-						log?.e ("\(pID): Hmmm..... Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
+						logX?.e ("\(pID): Hmmm..... Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
 						mCRCOK = false;
 						mExpectedSequenceNumber = mExpectedSequenceNumber + 1	// go ahead and increase the expected sequence number.  already going to create retransmit.  this avoids other expected sequence checks from failling
 					}
@@ -1764,16 +1764,16 @@ class customMainCharacteristic: Characteristic {
 					mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
 				}
 				else {
-					log?.e ("\(pID): Cannot calculate packet CRC: Not enough data.  Length = \(data.count): \(data.hexString)")
+					logX?.e ("\(pID): Cannot calculate packet CRC: Not enough data.  Length = \(data.count): \(data.hexString)")
 					return
 				}
 				
 			}
 			else {
-				log?.e ("\(pID): Missing data")
+				logX?.e ("\(pID): Missing data")
 			}
 		}
-		else { log?.e ("\(pID): Missing characteristic") }
+		else { logX?.e ("\(pID): Missing characteristic") }
 	}
 
 	//--------------------------------------------------------------------------------

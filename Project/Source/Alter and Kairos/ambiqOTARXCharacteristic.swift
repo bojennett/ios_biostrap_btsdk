@@ -129,7 +129,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 		packet.append(UInt8((checksum >> 16) & 0xff))
 		packet.append(UInt8((checksum >> 24) & 0xff))
 		
-		//log?.v (packet.hexString)
+		//logX?.v (packet.hexString)
 		
 		return packet
 	}
@@ -235,7 +235,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 					length = ambiqOTARXCharacteristic.DATA_BLOCK_SIZE
 				}
 				
-				//log?.v ("Current offset: \(currentOffset), length: \(length), File Size: \(mFileSize), count: \(data.count), total file size: \(mFileSize + ambiqOTARXCharacteristic.FILE_HEADER_BLOCK)")
+				//logX?.v ("Current offset: \(currentOffset), length: \(length), File Size: \(mFileSize), count: \(data.count), total file size: \(mFileSize + ambiqOTARXCharacteristic.FILE_HEADER_BLOCK)")
 				
 				let packet = mBuildPacket(command: otaCommand.AMOTA_CMD_FW_DATA, data: data.subdata(in: currentOffset..<(currentOffset + length)))
 				mDataPackets.append(mBuildFrames(data: packet))
@@ -261,7 +261,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func cancel() {
-		log?.v("Cancel")
+		logX?.v("Cancel")
 		mState = .CANCEL
 
 		failed?(Int(amotaStatus.APP_CANCEL.rawValue), amotaStatus.APP_CANCEL.title)
@@ -281,13 +281,13 @@ class ambiqOTARXCharacteristic: Characteristic {
 
 		if let cmd = otaCommand(rawValue: value[2]), let status = amotaStatus(rawValue: value[3]) {
 			if (cmd == .AMOTA_CMD_UNKNOWN) {
-				log?.e("Got unknown command: \(value.hexString)")
+				logX?.e("Got unknown command: \(value.hexString)")
 				failed?(Int(amotaStatus.UNKNOWN_ERROR.rawValue), amotaStatus.UNKNOWN_ERROR.title)
 				return
 			}
 			
 			if (status != .SUCCESS) {
-				log?.e("Error '\(status)': \(value.hexString)")
+				logX?.e("Error '\(status)': \(value.hexString)")
 				failed?(Int(status.rawValue), status.title)
 				return
 			}
@@ -296,17 +296,17 @@ class ambiqOTARXCharacteristic: Characteristic {
 			case .IDLE: break
 
 			case .HEADER:
-				log?.v ("Offset: \(value.subdata(in: Range(4...7)).hexString)")
+				logX?.v ("Offset: \(value.subdata(in: Range(4...7)).hexString)")
 				let offset	= value.subdata(in: Range(4...7)).leInt32
 				if (offset == 0) {
-					log?.v("Finished the header -> send data blocks")
+					logX?.v("Finished the header -> send data blocks")
 					mState		= .DATA
 					mDataIndex	= 0
 					mFrameIndex	= 0
 					mSendFrame(data: mDataPackets[mDataIndex][mFrameIndex])
 				}
 				else {
-					log?.e("Finished the header -> pre-existing OTA exists - do not continue!")
+					logX?.e("Finished the header -> pre-existing OTA exists - do not continue!")
 					mState		= .CANCEL
 					failed?(Int(amotaStatus.APP_EXISTING_OTA.rawValue), amotaStatus.APP_EXISTING_OTA.title)
 				}
@@ -316,7 +316,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 				progress?(Float(mDataIndex) / Float(mDataPackets.count))
 
 				if (mDataIndex == mDataPackets.count) {
-					log?.v("Finished the data -> send verify command")
+					logX?.v("Finished the data -> send verify command")
 
 					mState = .VERIFY
 					mSendFrame(data: mBuildPacket(command: otaCommand.AMOTA_CMD_FW_VERIFY, data: nil))
@@ -327,26 +327,26 @@ class ambiqOTARXCharacteristic: Characteristic {
 				}
 
 			case .VERIFY:
-				log?.v("Finished the verify -> send reset command")
+				logX?.v("Finished the verify -> send reset command")
 				
 				mState = .RESET
 				mSendFrame(data: mBuildPacket(command: otaCommand.AMOTA_CMD_FW_RESET, data: nil))
 
 			case .RESET:
-				log?.v("Done")
+				logX?.v("Done")
 				mState = .DONE
 				
 				finished?()
 
 			default:
-				log?.e ("Unknown state: \(mState)")
+				logX?.e ("Unknown state: \(mState)")
 				mState = .CANCEL
 				self.failed?(Int(amotaStatus.UNKNOWN_ERROR.rawValue), amotaStatus.UNKNOWN_ERROR.title)
 			}
 
 		}
 		else {
-			log?.e ("Received an unknown command \(String(format: "0x%02X", value[2])) and/or status \(String(format: "0x%02X", value[3]))")
+			logX?.e ("Received an unknown command \(String(format: "0x%02X", value[2])) and/or status \(String(format: "0x%02X", value[3]))")
 		}
 	}
 
@@ -376,7 +376,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 		case .VERIFY: break
 		case .RESET: break
 			
-		default: log?.e ("Unknown state: \(mState)")
+		default: logX?.e ("Unknown state: \(mState)")
 		}
 	}
 }

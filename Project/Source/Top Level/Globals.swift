@@ -8,7 +8,7 @@
 import Foundation
 import CoreBluetooth
 
-var log				: Logging?
+var logX				: Logging?
 
 //--------------------------------------------------------------------------------
 //

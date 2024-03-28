@@ -74,9 +74,9 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 					index = index + 1
 				}
 			}
-			else { log?.e ("\(pID): Missing data") }
+			else { logX?.e ("\(pID): Missing data") }
 		}
-		else { log?.e ("\(pID): Missing characteristic") }
+		else { logX?.e ("\(pID): Missing characteristic") }
 	}
 
 	//--------------------------------------------------------------------------------

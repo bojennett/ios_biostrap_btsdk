@@ -34,16 +34,16 @@ class customStreamingCharacteristic: Characteristic {
 	internal func mProcessUpdateValue(_ data: Data) {
 		if let response = notifications(rawValue: data[0]) {
 			switch (response) {
-			case .completion: log?.e ("\(pID): Should not get '\(response)' on this characteristic!")
-			case .dataPacket: log?.e ("\(pID): Should not get '\(response)' on this characteristic!")
-			case .dataCaughtUp: log?.e ("\(pID): Should not get '\(response)' on this characteristic!")
-			case .validateCRC: log?.e ("\(pID): Should not get '\(response)' on this characteristic!")
+			case .completion: logX?.e ("\(pID): Should not get '\(response)' on this characteristic!")
+			case .dataPacket: logX?.e ("\(pID): Should not get '\(response)' on this characteristic!")
+			case .dataCaughtUp: logX?.e ("\(pID): Should not get '\(response)' on this characteristic!")
+			case .validateCRC: logX?.e ("\(pID): Should not get '\(response)' on this characteristic!")
 
 			case .worn:
 				if      (data[1] == 0x00) { deviceWornStatus?(false) }
 				else if (data[1] == 0x01) { deviceWornStatus?(true)  }
 				else {
-					log?.e ("\(pID): Cannot parse worn status: \(data[1])")
+					logX?.e ("\(pID): Cannot parse worn status: \(data[1])")
 				}
 				
 			case .ppg_metrics:
@@ -73,7 +73,7 @@ class customStreamingCharacteristic: Characteristic {
 					self.endSleepStatus?(hasSleep)
 				}
 				else {
-					log?.e ("\(pID): Cannot parse 'endSleepStatus': \(data.hexString)")
+					logX?.e ("\(pID): Cannot parse 'endSleepStatus': \(data.hexString)")
 				}
 				
 			case .buttonResponse:
@@ -82,7 +82,7 @@ class customStreamingCharacteristic: Characteristic {
 					self.buttonClicked?(presses)
 				}
 				else {
-					log?.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
+					logX?.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
 				}
 								
 			case .manufacturingTest:
@@ -95,12 +95,12 @@ class customStreamingCharacteristic: Characteristic {
 							self.manufacturingTestResult?(true, jsonString)
 						}
 						else {
-							log?.e ("\(pID): Result jsonString Failed")
+							logX?.e ("\(pID): Result jsonString Failed")
 							self.manufacturingTestResult?(false, "")
 						}
 					}
 					catch {
-						log?.e ("\(pID): Result jsonData Failed")
+						logX?.e ("\(pID): Result jsonData Failed")
 						self.manufacturingTestResult?(false, "")
 					}
 				}
@@ -118,12 +118,12 @@ class customStreamingCharacteristic: Characteristic {
 							self.manufacturingTestResult?(true, jsonString)
 						}
 						else {
-							log?.e ("\(pID): Result jsonString Failed")
+							logX?.e ("\(pID): Result jsonString Failed")
 							self.manufacturingTestResult?(false, "")
 						}
 					}
 					catch {
-						log?.e ("\(pID): Result jsonData Failed")
+						logX?.e ("\(pID): Result jsonData Failed")
 						self.manufacturingTestResult?(false, "")
 					}
 				}
@@ -143,12 +143,12 @@ class customStreamingCharacteristic: Characteristic {
 								self.manufacturingTestResult?(true, jsonString)
 							}
 							else {
-								log?.e ("\(pID): Result jsonString Failed")
+								logX?.e ("\(pID): Result jsonString Failed")
 								self.manufacturingTestResult?(false, "")
 							}
 						}
 						catch {
-							log?.e ("\(pID): Result jsonData Failed")
+							logX?.e ("\(pID): Result jsonData Failed")
 							self.manufacturingTestResult?(false, "")
 						}
 					}
@@ -165,12 +165,12 @@ class customStreamingCharacteristic: Characteristic {
 								self.manufacturingTestResult?(true, jsonString)
 							}
 							else {
-								log?.e ("\(pID): Result jsonString Failed")
+								logX?.e ("\(pID): Result jsonString Failed")
 								self.manufacturingTestResult?(false, "")
 							}
 						}
 						catch {
-							log?.e ("\(pID): Result jsonData Failed")
+							logX?.e ("\(pID): Result jsonData Failed")
 							self.manufacturingTestResult?(false, "")
 						}
 					}
@@ -200,7 +200,7 @@ class customStreamingCharacteristic: Characteristic {
 					packet.type				= .unknown
 					packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
 
-					log?.e ("\(pID): Bad streaming packet: \(data.hexString)")
+					logX?.e ("\(pID): Bad streaming packet: \(data.hexString)")
 				}
 				
 				do {
@@ -208,15 +208,15 @@ class customStreamingCharacteristic: Characteristic {
 					if let jsonString = String(data: jsonData, encoding: .utf8) {
 						self.streamingPacket?(jsonString)
 					}
-					else { log?.e ("\(pID): Cannot make string from json data") }
+					else { logX?.e ("\(pID): Cannot make string from json data") }
 				}
-				catch { log?.e ("\(pID): Cannot make JSON data") }
+				catch { logX?.e ("\(pID): Cannot make JSON data") }
 				
 			case .dataAvailable: dataAvailable?()
 			}
 		}
 		else {
-			log?.e ("\(pID): Unknown update: \(data.hexString)")
+			logX?.e ("\(pID): Unknown update: \(data.hexString)")
 		}
 	}
 
@@ -233,7 +233,7 @@ class customStreamingCharacteristic: Characteristic {
 				mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
 			}
 			else {
-				log?.e ("\(pID): Missing data")
+				logX?.e ("\(pID): Missing data")
 			}
 		}
 	}

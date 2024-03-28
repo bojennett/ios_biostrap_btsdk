@@ -76,25 +76,25 @@ class CommandQ {
 				}
 				else {
 					if entry.data == nil {
-						log?.e ("No data to write for \(characteristic.prettyID)")
+						logX?.e ("No data to write for \(characteristic.prettyID)")
 					}
 					
 					if entry.type == nil {
-						log?.e ("No write type for \(characteristic.prettyID)")
+						logX?.e ("No write type for \(characteristic.prettyID)")
 					}
 					remove()
 				}
 			default:
-				log?.e ("Command not defined!")
+				logX?.e ("Command not defined!")
 				remove()
 			}
 		}
 		else {
-			if peripheral == nil { log?.e ("No peripheral") }
+			if peripheral == nil { logX?.e ("No peripheral") }
 			else if let entry = entries.first {
 				if entry.characteristic == nil { "No characteristic" }
 			}
-			else { log?.e ("Command queue empty") }
+			else { logX?.e ("Command queue empty") }
 		}
 	}
 	
@@ -111,7 +111,7 @@ class CommandQ {
 			if entries.count > 0 { next() }
 		}
 		else {
-			log?.e ("No commands to remove")
+			logX?.e ("No commands to remove")
 		}
 	}
 
@@ -126,16 +126,16 @@ class CommandQ {
 		while (entries.count > 0) {
 			if let current = entries.first {
 				if let command = current.command {
-					log?.e ("Flush: \(command.title)")
+					logX?.e ("Flush: \(command.title)")
 				}
 				else {
-					log?.e ("Flush: Unknown command")
+					logX?.e ("Flush: Unknown command")
 				}
 			}
 			entries.removeFirst()
 		}
 		
-		log?.v ("All commands flushed")
+		logX?.v ("All commands flushed")
 	}
 
 }

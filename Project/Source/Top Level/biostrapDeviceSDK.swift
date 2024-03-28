@@ -62,17 +62,27 @@ import Combine
 	}
 	#endif
 	
+	private var subscriptions = Set<AnyCancellable>()
+	
 	// Observable Objects / Passthroughs
 	@objc @Published public internal(set) var bluetoothAvailable: Bool = false
 	@objc @Published public internal(set) var discoveredDevices = [ Device ]()
 	@objc @Published public internal(set) var unnamedDevices = [ Device ]()
 	@objc @Published public internal(set) var connectedDevices = [ Device ]()
 	
+	public let log = PassthroughSubject<(LogLevel, String, String, String, Int), Never>()
+	public let deviceDisconnected = PassthroughSubject<Device, Never>()
+
 	// Lambdas
+	@available(*, deprecated, message: "Use the 'log' PassthroughSubject.  This will be removed in a future version of the SDK")
 	@objc public var logV: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
+	@available(*, deprecated, message: "Use the 'log' PassthroughSubject.  This will be removed in a future version of the SDK")
 	@objc public var logD: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
+	@available(*, deprecated, message: "Use the 'log' PassthroughSubject.  This will be removed in a future version of the SDK")
 	@objc public var logI: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
+	@available(*, deprecated, message: "Use the 'log' PassthroughSubject.  This will be removed in a future version of the SDK")
 	@objc public var logW: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
+	@available(*, deprecated, message: "Use the 'log' PassthroughSubject.  This will be removed in a future version of the SDK")
 	@objc public var logE: ((_ message: String?, _ file: String, _ function: String, _ line: Int)->())?
 	
 	@available(*, deprecated, message: "Use the published bluetoothAvailable property.  This will be removed in a future version of the SDK")
@@ -84,6 +94,7 @@ import Combine
 	@available(*, deprecated, message: "Use the published connectedDevices property.  This will be removed in a future version of the SDK")
 	@objc public var connected: ((_ id: String)->())?
 	
+	@available(*, deprecated, message: "Use the 'deviceDisconnected' PassthroughSubject.  This will be removed in a future version of the SDK")
 	@objc public var disconnected: ((_ id: String)->())?
 	
 	@available(*, deprecated, message: "Use the device object's publisher directly.  This will be removed in a future version of the SDK")
@@ -278,16 +289,20 @@ import Combine
 	@objc public override init() {
 		super.init()
 		
-		log						= Logging()
-		log?.log	= { level, message, file, function, line in
-			switch (level) {
-			case .verbose:	self.logV?(message, file, function, line)
-			case .debug:	self.logD?(message, file, function, line)
-			case .info:		self.logI?(message, file, function, line)
-			case .warning:	self.logW?(message, file, function, line)
-			case .error:	self.logE?(message, file, function, line)
+		logX = Logging()
+		logX?.log
+			.sink { level, message, file, function, line in
+				switch (level) {
+				case .verbose:	self.logV?(message, file, function, line)
+				case .debug:	self.logD?(message, file, function, line)
+				case .info:		self.logI?(message, file, function, line)
+				case .warning:	self.logW?(message, file, function, line)
+				case .error:	self.logE?(message, file, function, line)
+				}
+				
+				self.log.send((level, message, file, function, line))
 			}
-		}
+			.store(in: &subscriptions)
 				
 		let backgroundQueue	= DispatchQueue.global(qos: DispatchQoS.QoSClass.background)
 		mCentralManager		= CBCentralManager(delegate: self, queue: backgroundQueue, options: [CBCentralManagerOptionRestoreIdentifierKey: Bundle.main.bundleIdentifier ?? ""])
@@ -316,7 +331,7 @@ import Combine
 		if let decrypt = AES.decrypt(licenseKeyData, key: key, seed: seed) {
 			do {
 				let license = try JSONDecoder().decode([String : String].self, from: decrypt)
-				log?.v ("\(license)")
+				logX?.v ("\(license)")
 				
 				if let strDate = license["date"] {
 					if let date = Int(strDate) {
@@ -395,26 +410,26 @@ import Combine
 		
 		#if KAIROS || UNIVERSAL
 		if (!mLicensed) {
-			log?.e ("Not licensed - cannot start scanning")
+			logX?.e ("Not licensed - cannot start scanning")
 			return (false)
 		}
 		#endif
 		
-		log?.v("InBackground: \(inBackground), forPaired: \(forPaired), forUnpaired: \(forUnpaired), forLegacy: \(forLegacy)")
+		logX?.v("InBackground: \(inBackground), forPaired: \(forPaired), forUnpaired: \(forUnpaired), forLegacy: \(forLegacy)")
 		
 		// See if there were any connected peripherals (which could happen due to a previous instance crash), and disconnect them
 		let peripherals = mCentralManager?.retrieveConnectedPeripherals(withServices: Device.scan_services)
 		if let peripherals = peripherals {
 			if (peripherals.count > 0) {
-				log?.v ("Found '\(peripherals.count)' previously connected devices (probably due to a crash).  Disconnect them to clean up")
+				logX?.v ("Found '\(peripherals.count)' previously connected devices (probably due to a crash).  Disconnect them to clean up")
 				for peripheral in peripherals {
-					log?.v ("    Disconnect \(peripheral.identifier)")
+					logX?.v ("    Disconnect \(peripheral.identifier)")
 					mCentralManager?.cancelPeripheralConnection(peripheral)
 				}
 			}
 		}
 		else {
-			log?.v ("Checking for previously connected peripherals (due to crash).  Didn't find any")
+			logX?.v ("Checking for previously connected peripherals (due to crash).  Didn't find any")
 		}
 		
 		discoveredDevices.removeAll()
@@ -435,6 +450,7 @@ import Combine
 			return (true)
 		}
 		
+		logX?.e ("Bluetooth not available")
 		return (false)
 	}
 	
@@ -446,7 +462,7 @@ import Combine
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func stopScan() {
-		log?.v("")
+		logX?.v("")
 		
 		mCentralManager?.stopScan()
 		discoveredDevices.removeAll()
@@ -461,7 +477,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Use the device object's connect function directly.  This will be removed in a future version of the SDK")
 	@objc public func connect(_ id: String) {
-		log?.v("\(id)")
+		logX?.v("\(id)")
 		
 		if let device = discoveredDevices.first(where: { $0.id == id }) {
 			if let peripheral = device.peripheral {
@@ -469,11 +485,11 @@ import Combine
 				mCentralManager?.connect(peripheral, options: nil)
 			}
 			else {
-				log?.e("Peripheral for \(id) does not exist")
+				logX?.e("Peripheral for \(id) does not exist")
 			}
 		}
 		else {
-			log?.e("Device for \(id) does not exist")
+			logX?.e("Device for \(id) does not exist")
 		}
 	}
 	
@@ -486,17 +502,17 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Use the device object's connect function directly.  This will be removed in a future version of the SDK")
 	@objc public func disconnect(_ id: String) {
-		log?.v("\(id)")
+		logX?.v("\(id)")
 		
 		if let device = discoveredDevices.first(where: { $0.id == id }), let peripheral = device.peripheral {
-			log?.v("Found \(id) in discovered list -> trying to disconnect")
+			logX?.v("Found \(id) in discovered list -> trying to disconnect")
 			discoveredDevices.removeAll { $0.id == id }
 			mCentralManager?.cancelPeripheralConnection(peripheral)
 			return
 		}
 		
 		if let device = unnamedDevices.first(where: { $0.id == id }), let peripheral = device.peripheral {
-			log?.v("Found \(id) in unnamed list -> trying to disconnect")
+			logX?.v("Found \(id) in unnamed list -> trying to disconnect")
 			unnamedDevices.removeAll { $0.id == id }
 			mCentralManager?.cancelPeripheralConnection(peripheral)
 			return
@@ -504,13 +520,13 @@ import Combine
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) {
 			if let peripheral = device.peripheral {
-				log?.v("Found \(id) in connected list -> trying to disconnect")
+				logX?.v("Found \(id) in connected list -> trying to disconnect")
 				mCentralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 		}
 		
-		log?.e("Cannot find '\(id)' in connected or discovered list.  Nothing to disconnect")
+		logX?.e("Cannot find '\(id)' in connected or discovered list.  Nothing to disconnect")
 	}
 
 	//--------------------------------------------------------------------------------
@@ -531,11 +547,11 @@ import Combine
 				return (csvResult)
 			}
 			else {
-				log?.e ("Cannot get data from json String")
+				logX?.e ("Cannot get data from json String")
 			}
 		}
 		catch {
-			log?.e ("\(error.localizedDescription)")
+			logX?.e ("\(error.localizedDescription)")
 		}
 
 		return ("")
@@ -550,7 +566,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func writeEpoch(_ id: String, newEpoch: Int) {
-		log?.v("\(id): \(newEpoch)")
+		logX?.v("\(id): \(newEpoch)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.writeEpochInternal(newEpoch) }
 		else { self.writeEpochComplete?(id, false) }
@@ -565,7 +581,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readEpoch(_ id: String) {
-		log?.v("\(id)")
+		logX?.v("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.readEpochInternal() }
 		else { self.readEpochComplete?(id, false, 0) }
@@ -580,7 +596,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func endSleep(_ id: String) {
-		log?.v("\(id)")
+		logX?.v("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.endSleepInternal() }
 		else { self.endSleepComplete?(id, false) }
@@ -621,7 +637,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPacketCount(_ id: String) {
-		log?.v ("\(id)")
+		logX?.v ("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPacketCountInternal() }
 		else { self.getPacketCountComplete?(id, false, 0) }
@@ -636,7 +652,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func disableWornDetect(_ id: String) {
-		log?.v ("\(id)")
+		logX?.v ("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.disableWornDetectInternal() }
 		else { self.disableWornDetectComplete?(id, false) }
@@ -651,7 +667,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func enableWornDetect(_ id: String) {
-		log?.v ("\(id)")
+		logX?.v ("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.enableWornDetectInternal() }
 		else { self.enableWornDetectComplete?(id, false) }
@@ -666,7 +682,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func startManual(_ id: String, algorithms: ppgAlgorithmConfiguration) {
-		log?.v ("\(id): Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
+		logX?.v ("\(id): Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.startManual(algorithms) }
 		else { self.startManualComplete?(id, false) }
@@ -681,7 +697,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func stopManual(_ id: String) {
-		log?.v ("\(id)")
+		logX?.v ("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.stopManual() }
 		else { self.stopManualComplete?(id, false) }

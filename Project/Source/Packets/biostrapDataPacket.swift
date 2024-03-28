@@ -225,7 +225,7 @@ import Foundation
 				data.append(UInt8(test))
 			}
 			else {
-				log?.e ("Cannot parse '\(str)' into a hex value")
+				logX?.e ("Cannot parse '\(str)' into a hex value")
 			}
 		}
 		

@@ -91,10 +91,10 @@ class heartRateMeasurementCharacteristic: Characteristic {
 				self.updated?(pID, epoch, hr, rr)
 			}
 			else {
-				log?.e ("\(pID): Missing data")
+				logX?.e ("\(pID): Missing data")
 			}
 		}
-		else { log?.e ("\(pID): Missing characteristic") }
+		else { logX?.e ("\(pID): Missing characteristic") }
 	}
 
 	//--------------------------------------------------------------------------------

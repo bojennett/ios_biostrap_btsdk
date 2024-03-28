@@ -99,9 +99,7 @@ public class Device: NSObject, ObservableObject {
 		case configuring
 		case configured
 	}
-	
-	@Published public var connectionState : ConnectionState = .disconnected
-	
+		
 	#if UNIVERSAL
 	@objc public var type	: biostrapDeviceSDK.biostrapDeviceType
 	#endif
@@ -109,7 +107,9 @@ public class Device: NSObject, ObservableObject {
 	var peripheral			: CBPeripheral?
 	var centralManager		: CBCentralManager?
 	
-	// MARK: Publishee properties
+	// MARK: Published properties
+	@Published public var connectionState : ConnectionState = .disconnected
+
 	@Published public var name: String
 	@Published public var id: String
 	@Published public var discovery_type: biostrapDeviceSDK.biostrapDiscoveryType
@@ -401,23 +401,23 @@ public class Device: NSObject, ObservableObject {
 	class func hit(_ service: CBService) -> Bool {
 		if let peripheral = service.peripheral {
 			if let standardService = org_bluetooth_service(rawValue: service.prettyID) {
-				log?.v ("\(peripheral.prettyID): '\(standardService.title)'")
+				logX?.v ("\(peripheral.prettyID): '\(standardService.title)'")
 				switch standardService {
 				case .device_information,
 					 .battery_service,
 					 .pulse_oximeter,
 					 .heart_rate			: return (true)
 				default:
-					log?.e ("\(peripheral.prettyID): (unknown): '\(standardService.title)'")
+					logX?.e ("\(peripheral.prettyID): (unknown): '\(standardService.title)'")
 					return (false)
 				}
 			}
 			else if let customService = Device.services(rawValue: service.prettyID) {
-				log?.v ("\(peripheral.prettyID): '\(customService.title)'")
+				logX?.v ("\(peripheral.prettyID): '\(customService.title)'")
 				return (true)
 			}
 			else {
-				log?.e ("\(peripheral.prettyID): \(service.prettyID) - don't know what to do!!!!")
+				logX?.e ("\(peripheral.prettyID): \(service.prettyID) - don't know what to do!!!!")
 				return (false)
 			}
 		}
@@ -566,7 +566,7 @@ public class Device: NSObject, ObservableObject {
 				lambdaConfigured?(peripheral.prettyID)
 			}
 			else {
-				log?.e ("Do not have a peripheral, why am I signaling configured?")
+				logX?.e ("Do not have a peripheral, why am I signaling configured?")
 			}
 		}
 	}
@@ -586,11 +586,11 @@ public class Device: NSObject, ObservableObject {
 				centralManager.connect(peripheral, options: nil)
 			}
 			else {
-				log?.e ("Either do not have a central manager or a peripheral")
+				logX?.e ("Either do not have a central manager or a peripheral")
 			}
 		}
 		else {
-			log?.e ("Device is not in a disconnected state")
+			logX?.e ("Device is not in a disconnected state")
 		}
 	}
 	
@@ -607,11 +607,11 @@ public class Device: NSObject, ObservableObject {
 				centralManager.cancelPeripheralConnection(peripheral)
 			}
 			else {
-				log?.e ("Either do not have a central manager or a peripheral")
+				logX?.e ("Either do not have a central manager or a peripheral")
 			}
 		}
 		else {
-			log?.e ("Device is not in a connecting or connected state")
+			logX?.e ("Device is not in a connecting or connected state")
 		}
 	}
 	
@@ -703,15 +703,15 @@ public class Device: NSObject, ObservableObject {
 		if let mainCharacteristic = mMainCharacteristic {
 			if let softwareVersion = mSoftwareRevision {
 				if (softwareVersion.bluetoothGreaterThan("2.0.4")) {
-					log?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use new style")
+					logX?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use new style")
 					newStyle	= true
 				}
 				else {
-					log?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use old style")
+					logX?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use old style")
 				}
 			}
 			else {
-				log?.e ("Can't find the software version, i guess i will use the old style")
+				logX?.e ("Can't find the software version, i guess i will use the old style")
 			}
 
 			mainCharacteristic.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
@@ -725,15 +725,15 @@ public class Device: NSObject, ObservableObject {
 		if let mainCharacteristic = mMainCharacteristic {
 			if let softwareVersion = mSoftwareRevision {
 				if (softwareVersion.bluetoothGreaterThan("2.0.4")) {
-					log?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use new style")
+					logX?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use new style")
 					newStyle	= true
 				}
 				else {
-					log?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use old style")
+					logX?.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use old style")
 				}
 			}
 			else {
-				log?.e ("Can't find the software version, i guess i will use the old style")
+				logX?.e ("Can't find the software version, i guess i will use the old style")
 			}
 
 			mainCharacteristic.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
@@ -1757,7 +1757,7 @@ public class Device: NSObject, ObservableObject {
 				ambiqOTARXCharacteristic.start(contents)
 			}
 			catch {
-				log?.e ("Cannot open file")
+				logX?.e ("Cannot open file")
 				self.lambdaUpdateFirmwareFailed?(self.id, 10001, "Cannot parse file for update")
 			}
 		}
@@ -1771,7 +1771,7 @@ public class Device: NSObject, ObservableObject {
 				ambiqOTARXCharacteristic.start(contents)
 			}
 			catch {
-				log?.e ("Cannot open file")
+				logX?.e ("Cannot open file")
 				DispatchQueue.main.async {
 					self.updateFirmwareFailed.send((10001, "Cannot parse file for update"))
 				}
@@ -1813,7 +1813,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func setSessionParamInternal(_ parameter: sessionParameterType, value: Int) {
-		log?.v("\(self.id): \(parameter)")
+		logX?.v("\(self.id): \(parameter)")
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.setSessionParam(parameter, value: value)
@@ -1822,7 +1822,7 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func setSessionParam(_ parameter: sessionParameterType, value: Int) {
-		log?.v("\(self.id): \(parameter)")
+		logX?.v("\(self.id): \(parameter)")
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.setSessionParam(parameter, value: value)
@@ -1848,7 +1848,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func getSessionParamInternal(_ parameter: sessionParameterType) {
-		log?.v("\(self.id): \(parameter)")
+		logX?.v("\(self.id): \(parameter)")
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getSessionParam(parameter)
@@ -1857,7 +1857,7 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func getSessionParam(_ parameter: sessionParameterType) {
-		log?.v("\(self.id): \(parameter)")
+		logX?.v("\(self.id): \(parameter)")
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getSessionParam(parameter)
@@ -1883,7 +1883,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func resetSessionParamsInternal() {
-		log?.v("\(self.id)")
+		logX?.v("\(self.id)")
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.resetSessionParams()
@@ -1892,7 +1892,7 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func resetSessionParams() {
-		log?.v("\(self.id)")
+		logX?.v("\(self.id)")
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.resetSessionParams()
@@ -1912,7 +1912,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func acceptSessionParamsInternal() {
-		log?.v("\(self.id)")
+		logX?.v("\(self.id)")
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.acceptSessionParams()
@@ -1921,7 +1921,7 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func acceptSessionParams() {
-		log?.v("\(self.id)")
+		logX?.v("\(self.id)")
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.acceptSessionParams()
@@ -2237,7 +2237,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		
 		mMainCharacteristic?.setSessionParamComplete = { successful, parameter in
-			log?.v ("setSessionParamComplete: \(successful), \(parameter)")
+			logX?.v ("setSessionParamComplete: \(successful), \(parameter)")
 			self.lambdaSetSessionParamComplete?(self.id, successful, parameter)
 			DispatchQueue.main.async {
 				self.setSessionParamComplete.send((successful ? .successful : .device_error, parameter))
@@ -2245,7 +2245,7 @@ public class Device: NSObject, ObservableObject {
 		}
 		
 		mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in
-			log?.v ("getSessionParamComplete: \(successful), \(parameter), \(value)")
+			logX?.v ("getSessionParamComplete: \(successful), \(parameter), \(value)")
 			self.lambdaGetSessionParamComplete?(self.id, successful, parameter, value)
 			DispatchQueue.main.async {
 				switch parameter {
@@ -2552,12 +2552,12 @@ public class Device: NSObject, ObservableObject {
 				peripheral.discoverServices(nil)
 			}
 			else {
-				log?.e ("\(peripheral.prettyID): Connected to a device that isn't requesting connection.  Weird!  Disconnect")
+				logX?.e ("\(peripheral.prettyID): Connected to a device that isn't requesting connection.  Weird!  Disconnect")
 				return false
 			}
 		}
 		else {
-			log?.e ("No peripheral")
+			logX?.e ("No peripheral")
 			return false
 		}
 		
@@ -2610,7 +2610,7 @@ public class Device: NSObject, ObservableObject {
 					mSerialNumber = disStringCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mSerialNumber?.read()
 				case .battery_level:
-					log?.v ("\(self.id) '\(testCharacteristic.title)' - read it and enable notifications")
+					logX?.v ("\(self.id) '\(testCharacteristic.title)' - read it and enable notifications")
 					mBatteryLevelCharacteristic	= batteryLevelCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mBatteryLevelCharacteristic?.updated	= { id, percentage in
 						self.lambdaBatteryLevelUpdated?(id, percentage)
@@ -2621,7 +2621,7 @@ public class Device: NSObject, ObservableObject {
 					mBatteryLevelCharacteristic?.read()
 					mBatteryLevelCharacteristic?.discoverDescriptors()
 				case .heart_rate_measurement:
-					log?.v ("\(self.id) '\(testCharacteristic.title)' - and enable notifications")
+					logX?.v ("\(self.id) '\(testCharacteristic.title)' - and enable notifications")
 					mHeartRateMeasurementCharacteristic	= heartRateMeasurementCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mHeartRateMeasurementCharacteristic?.updated	= { id, epoch, hr, rr in
 						self.lambdaHeartRateUpdated?(id, epoch, hr, rr)
@@ -2631,14 +2631,14 @@ public class Device: NSObject, ObservableObject {
 					}
 					mHeartRateMeasurementCharacteristic?.discoverDescriptors()
 				case .body_sensor_location:
-					log?.v ("\(self.id) '\(testCharacteristic.title)' - read it")
+					logX?.v ("\(self.id) '\(testCharacteristic.title)' - read it")
 					commandQ?.read(characteristic)
 				default:
 					if let service = characteristic.service {
-						log?.e ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)' - do not know what to do")
+						logX?.e ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)' - do not know what to do")
 					}
 					else {
-						log?.e ("\(self.id) for nil service - '\(testCharacteristic.title)' - do not know what to do")
+						logX?.e ("\(self.id) for nil service - '\(testCharacteristic.title)' - do not know what to do")
 					}
 				}
 			}
@@ -2693,10 +2693,10 @@ public class Device: NSObject, ObservableObject {
 
 				case .ambiqOTARXCharacteristic:
 					if let service = characteristic.service {
-						log?.v ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)'")
+						logX?.v ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)'")
 					}
 					else {
-						log?.v ("\(self.id) for nil service - '\(testCharacteristic.title)'")
+						logX?.v ("\(self.id) for nil service - '\(testCharacteristic.title)'")
 					}
 					
 					mAmbiqOTARXCharacteristic = ambiqOTARXCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
@@ -2730,10 +2730,10 @@ public class Device: NSObject, ObservableObject {
 					
 				case .ambiqOTATXCharacteristic:
 					if let service = characteristic.service {
-						log?.v ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)'")
+						logX?.v ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)'")
 					}
 					else {
-						log?.v ("\(self.id) for nil service - '\(testCharacteristic.title)'")
+						logX?.v ("\(self.id) for nil service - '\(testCharacteristic.title)'")
 					}
 					
 					mAmbiqOTATXCharacteristic = ambiqOTATXCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
@@ -2743,15 +2743,15 @@ public class Device: NSObject, ObservableObject {
 			}
 			else {
 				if let service = characteristic.service {
-					log?.e ("\(self.id) for service: \(service.prettyID) - \(characteristic.prettyID) - UNKNOWN")
+					logX?.e ("\(self.id) for service: \(service.prettyID) - \(characteristic.prettyID) - UNKNOWN")
 				}
 				else {
-					log?.e ("\(self.id) for nil service - \(characteristic.prettyID) - UNKNOWN")
+					logX?.e ("\(self.id) for nil service - \(characteristic.prettyID) - UNKNOWN")
 				}
 			}
 		}
 		else {
-			log?.e ("Peripheral object is nil - do nothing")
+			logX?.e ("Peripheral object is nil - do nothing")
 		}
 	}
 	
@@ -2767,7 +2767,7 @@ public class Device: NSObject, ObservableObject {
 			switch (standardDescriptor) {
 			case .client_characteristic_configuration:
 				if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
-					log?.v ("\(self.id): \(standardDescriptor.title) '\(enumerated.title)'")
+					logX?.v ("\(self.id): \(standardDescriptor.title) '\(enumerated.title)'")
 					switch (enumerated) {
 					#if UNIVERSAL || ALTER
 					case .alterMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
@@ -2781,7 +2781,7 @@ public class Device: NSObject, ObservableObject {
 					case .kairosStrmCharacteristic		: mStreamingCharacteristic?.didDiscoverDescriptor()
 					#endif
 
-					case .ambiqOTARXCharacteristic		: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
+					case .ambiqOTARXCharacteristic		: logX?.e ("\(self.id) '\(enumerated.title)' - should not be here")
 					case .ambiqOTATXCharacteristic		: mAmbiqOTATXCharacteristic?.didDiscoverDescriptor()
 					}
 				}
@@ -2790,7 +2790,7 @@ public class Device: NSObject, ObservableObject {
 					case .battery_level					: mBatteryLevelCharacteristic?.didDiscoverDescriptor()
 					case .heart_rate_measurement		: mHeartRateMeasurementCharacteristic?.didDiscoverDescriptor()
 					default:
-						log?.e ("\(self.id) '\(enumerated.title)' - don't know what to do")
+						logX?.e ("\(self.id) '\(enumerated.title)' - don't know what to do")
 					}
 				}
 				
@@ -2798,11 +2798,11 @@ public class Device: NSObject, ObservableObject {
 				break
 
 			default:
-				log?.e ("\(self.id) for characteristic: \(characteristic.prettyID) - '\(standardDescriptor.title)'.  Do not know what to do - skipping")
+				logX?.e ("\(self.id) for characteristic: \(characteristic.prettyID) - '\(standardDescriptor.title)'.  Do not know what to do - skipping")
 			}
 		}
 		else {
-			log?.e ("\(self.id) for characteristic \(characteristic.prettyID): \(descriptor.prettyID) - do not know what to do")
+			logX?.e ("\(self.id) for characteristic \(characteristic.prettyID): \(descriptor.prettyID) - do not know what to do")
 		}
 	}
 
@@ -2865,11 +2865,11 @@ public class Device: NSObject, ObservableObject {
 			case .heart_rate_measurement		: mHeartRateMeasurementCharacteristic?.didUpdateValue()
 			case .body_sensor_location:
 				if let value = characteristic.value {
-					log?.v ("\(self.id): '\(enumerated.title)' - \(value.hexString)")
+					logX?.v ("\(self.id): '\(enumerated.title)' - \(value.hexString)")
 				}
-				else { log?.e ("No valid \(enumerated.title) data!") }
+				else { logX?.e ("No valid \(enumerated.title) data!") }
 			default:
-				log?.e ("\(self.id) for characteristic: '\(enumerated.title)' - do not know what to do")
+				logX?.e ("\(self.id) for characteristic: '\(enumerated.title)' - do not know what to do")
 			}
 		}
 		else if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
@@ -2886,19 +2886,19 @@ public class Device: NSObject, ObservableObject {
 			case .kairosStrmCharacteristic		: mStreamingCharacteristic?.didUpdateValue()
 			#endif
 				
-			case .ambiqOTARXCharacteristic		: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
+			case .ambiqOTARXCharacteristic		: logX?.e ("\(self.id) '\(enumerated.title)' - should not be here")
 			case .ambiqOTATXCharacteristic		:
 				// Commands to RX come in on TX, causes RX to do next step
 				if let value = characteristic.value {
 					mAmbiqOTARXCharacteristic?.didUpdateTXValue(value)
 				}
 				else {
-					log?.e ("\(self.id) '\(enumerated.title)' - No data received for RX command")
+					logX?.e ("\(self.id) '\(enumerated.title)' - No data received for RX command")
 				}
 			}
 		}
 		else {
-			log?.v ("\(self.id) for characteristic: \(characteristic.prettyID)")
+			logX?.v ("\(self.id) for characteristic: \(characteristic.prettyID)")
 		}
 	}
 
@@ -2913,7 +2913,7 @@ public class Device: NSObject, ObservableObject {
 		if let _ = peripheral {
 			if (characteristic.isNotifying) {
 				if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
-					log?.v ("\(self.id): '\(enumerated.title)'")
+					logX?.v ("\(self.id): '\(enumerated.title)'")
 					
 					switch (enumerated) {
 					#if UNIVERSAL || ALTER
@@ -2929,27 +2929,27 @@ public class Device: NSObject, ObservableObject {
 					#endif
 						
 					#if UNIVERSAL || ALTER || KAIROS
-					case .ambiqOTARXCharacteristic			: log?.e ("\(self.id) '\(enumerated.title)' - should not be here")
+					case .ambiqOTARXCharacteristic			: logX?.e ("\(self.id) '\(enumerated.title)' - should not be here")
 					case .ambiqOTATXCharacteristic			: mAmbiqOTATXCharacteristic?.didUpdateNotificationState()
 					#endif
 					}
 				}
 				else if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
-					log?.v ("\(self.id): '\(enumerated.title)'")
+					logX?.v ("\(self.id): '\(enumerated.title)'")
 					
 					switch (enumerated) {
 					case .battery_level					: mBatteryLevelCharacteristic?.didUpdateNotificationState()
 					case .heart_rate_measurement		: mHeartRateMeasurementCharacteristic?.didUpdateNotificationState()
-					default								: log?.e ("\(self.id): '\(enumerated.title)'.  Do not know what to do - skipping")
+					default								: logX?.e ("\(self.id): '\(enumerated.title)'.  Do not know what to do - skipping")
 					}
 				}
 				else {
-					log?.e ("\(self.id): \(characteristic.prettyID) - do not know what to do")
+					logX?.e ("\(self.id): \(characteristic.prettyID) - do not know what to do")
 				}
 			}
 		}
 		else {
-			log?.e ("Peripheral object is nil - do nothing")
+			logX?.e ("Peripheral object is nil - do nothing")
 		}
 	}
 

@@ -18,7 +18,7 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheralDidUpdateName(_ peripheral: CBPeripheral) {
-		log?.i ("\(peripheral.prettyID): (do nothing)")
+		logX?.i ("\(peripheral.prettyID): (do nothing)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ extension Device: CBPeripheralDelegate {
 	public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
 		DispatchQueue.main.async {
 			if let error = error {
-				log?.e ("\(peripheral.prettyID): didDiscoverServices: Error: \(error.localizedDescription).  Disconnecting")
+				logX?.e ("\(peripheral.prettyID): didDiscoverServices: Error: \(error.localizedDescription).  Disconnecting")
 				self.centralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
@@ -65,10 +65,10 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
-		log?.v ("\(peripheral.prettyID): didModifyServices (do nothing)")
-		log?.v ("Invalidated services: \(invalidatedServices.count)")
+		logX?.v ("\(peripheral.prettyID): didModifyServices (do nothing)")
+		logX?.v ("Invalidated services: \(invalidatedServices.count)")
 		for service in invalidatedServices {
-			log?.v ("\(service.prettyID)")
+			logX?.v ("\(service.prettyID)")
 		}
 		centralManager?.cancelPeripheralConnection(peripheral)
 	}
@@ -81,7 +81,7 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
-		log?.v ("\(peripheral.prettyID): didReadRSSI (do nothing)")
+		logX?.v ("\(peripheral.prettyID): didReadRSSI (do nothing)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didOpen channel: CBL2CAPChannel?, error: Error?) {
-		log?.i ("\(peripheral.prettyID): didOpen channel (do nothing)")
+		logX?.i ("\(peripheral.prettyID): didOpen channel (do nothing)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor descriptor: CBDescriptor, error: Error?) {
-		log?.v ("\(peripheral.prettyID): didWriteValueFor descriptor: \(descriptor.prettyID)")
+		logX?.v ("\(peripheral.prettyID): didWriteValueFor descriptor: \(descriptor.prettyID)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -114,7 +114,7 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor descriptor: CBDescriptor, error: Error?) {
-		log?.v ("\(peripheral.prettyID): didUpdateValueFor descriptor: \(descriptor.prettyID)")
+		logX?.v ("\(peripheral.prettyID): didUpdateValueFor descriptor: \(descriptor.prettyID)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ extension Device: CBPeripheralDelegate {
 	public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
 		DispatchQueue.main.async {
 			if let error = error {
-				log?.e ("\(peripheral.prettyID): didDiscoverCharacteristics for service: \(service.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
+				logX?.e ("\(peripheral.prettyID): didDiscoverCharacteristics for service: \(service.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
 				self.centralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
@@ -149,7 +149,7 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-		//log?.v ("\(peripheral.prettyID): didWriteValueFor characteristic: \(characteristic.prettyID)")
+		//logX?.v ("\(peripheral.prettyID): didWriteValueFor characteristic: \(characteristic.prettyID)")
 	}
 		
 	//--------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ extension Device: CBPeripheralDelegate {
 	public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
 		DispatchQueue.main.async {
 			if let error = error {
-				log?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription)")
+				logX?.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription)")
 				//self.mCentralManager?.cancelPeripheralConnection(peripheral)
 				//return
 			}
@@ -180,11 +180,11 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?) {
-		log?.v ("\(peripheral.prettyID): didDiscoverDescriptorsFor characteristic: \(characteristic.prettyID)")
+		logX?.v ("\(peripheral.prettyID): didDiscoverDescriptorsFor characteristic: \(characteristic.prettyID)")
 		
 		DispatchQueue.main.async {
 			if let error = error {
-				log?.e ("\(peripheral.prettyID): didDiscoverDescriptors for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Skipping")
+				logX?.e ("\(peripheral.prettyID): didDiscoverDescriptors for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Skipping")
 				self.centralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
@@ -195,7 +195,7 @@ extension Device: CBPeripheralDelegate {
 				}
 			}
 			else {
-				log?.e ("\(peripheral.prettyID): didDiscoverDescriptor for characteristic \(characteristic.prettyID): No descriptors - do not know what to do")
+				logX?.e ("\(peripheral.prettyID): didDiscoverDescriptor for characteristic \(characteristic.prettyID): No descriptors - do not know what to do")
 			}
 		}
 	}
@@ -208,7 +208,7 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didDiscoverIncludedServicesFor service: CBService, error: Error?) {
-		log?.v ("\(peripheral.prettyID): didDiscoverIncludedServicesFor service: \(service.prettyID)")
+		logX?.v ("\(peripheral.prettyID): didDiscoverIncludedServicesFor service: \(service.prettyID)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -222,7 +222,7 @@ extension Device: CBPeripheralDelegate {
 		
 		DispatchQueue.main.async {
 			if let error = error {
-				log?.e ("\(peripheral.prettyID): didUpdateNotificationState for characteristic: \(characteristic.prettyID) - Error: '\(error.localizedDescription)'  Skipping")
+				logX?.e ("\(peripheral.prettyID): didUpdateNotificationState for characteristic: \(characteristic.prettyID) - Error: '\(error.localizedDescription)'  Skipping")
 				self.centralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
@@ -240,6 +240,6 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func centralManager(_ central: CBCentralManager, didUpdateANCSAuthorizationFor peripheral: CBPeripheral) {
-		log?.i ("\(peripheral.prettyID): didUpdateANCSAuthorization - (do nothing)")
+		logX?.i ("\(peripheral.prettyID): didUpdateANCSAuthorization - (do nothing)")
 	}
 }
