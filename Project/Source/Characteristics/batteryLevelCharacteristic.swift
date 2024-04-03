@@ -44,10 +44,10 @@ class batteryLevelCharacteristic: Characteristic {
 		if let characteristic = pCharacteristic {
 			if let data = characteristic.value { self.updated?(pID, Int(data[0])) }
 			else {
-				logX?.e ("\(pID): Missing data")
+				globals.log.e ("\(pID): Missing data")
 			}
 		}
-		else { logX?.e ("\(pID): Missing characteristic") }
+		else { globals.log.e ("\(pID): Missing characteristic") }
 	}
 
 	//--------------------------------------------------------------------------------

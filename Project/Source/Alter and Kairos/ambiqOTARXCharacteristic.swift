@@ -129,7 +129,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 		packet.append(UInt8((checksum >> 16) & 0xff))
 		packet.append(UInt8((checksum >> 24) & 0xff))
 		
-		//logX?.v (packet.hexString)
+		//globals.log.v (packet.hexString)
 		
 		return packet
 	}
@@ -235,7 +235,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 					length = ambiqOTARXCharacteristic.DATA_BLOCK_SIZE
 				}
 				
-				//logX?.v ("Current offset: \(currentOffset), length: \(length), File Size: \(mFileSize), count: \(data.count), total file size: \(mFileSize + ambiqOTARXCharacteristic.FILE_HEADER_BLOCK)")
+				//globals.log.v ("Current offset: \(currentOffset), length: \(length), File Size: \(mFileSize), count: \(data.count), total file size: \(mFileSize + ambiqOTARXCharacteristic.FILE_HEADER_BLOCK)")
 				
 				let packet = mBuildPacket(command: otaCommand.AMOTA_CMD_FW_DATA, data: data.subdata(in: currentOffset..<(currentOffset + length)))
 				mDataPackets.append(mBuildFrames(data: packet))
@@ -261,7 +261,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func cancel() {
-		logX?.v("Cancel")
+		globals.log.v("Cancel")
 		mState = .CANCEL
 
 		failed?(Int(amotaStatus.APP_CANCEL.rawValue), amotaStatus.APP_CANCEL.title)
@@ -281,13 +281,13 @@ class ambiqOTARXCharacteristic: Characteristic {
 
 		if let cmd = otaCommand(rawValue: value[2]), let status = amotaStatus(rawValue: value[3]) {
 			if (cmd == .AMOTA_CMD_UNKNOWN) {
-				logX?.e("Got unknown command: \(value.hexString)")
+				globals.log.e("Got unknown command: \(value.hexString)")
 				failed?(Int(amotaStatus.UNKNOWN_ERROR.rawValue), amotaStatus.UNKNOWN_ERROR.title)
 				return
 			}
 			
 			if (status != .SUCCESS) {
-				logX?.e("Error '\(status)': \(value.hexString)")
+				globals.log.e("Error '\(status)': \(value.hexString)")
 				failed?(Int(status.rawValue), status.title)
 				return
 			}
@@ -296,17 +296,17 @@ class ambiqOTARXCharacteristic: Characteristic {
 			case .IDLE: break
 
 			case .HEADER:
-				logX?.v ("Offset: \(value.subdata(in: Range(4...7)).hexString)")
+				globals.log.v ("Offset: \(value.subdata(in: Range(4...7)).hexString)")
 				let offset	= value.subdata(in: Range(4...7)).leInt32
 				if (offset == 0) {
-					logX?.v("Finished the header -> send data blocks")
+					globals.log.v("Finished the header -> send data blocks")
 					mState		= .DATA
 					mDataIndex	= 0
 					mFrameIndex	= 0
 					mSendFrame(data: mDataPackets[mDataIndex][mFrameIndex])
 				}
 				else {
-					logX?.e("Finished the header -> pre-existing OTA exists - do not continue!")
+					globals.log.e("Finished the header -> pre-existing OTA exists - do not continue!")
 					mState		= .CANCEL
 					failed?(Int(amotaStatus.APP_EXISTING_OTA.rawValue), amotaStatus.APP_EXISTING_OTA.title)
 				}
@@ -316,7 +316,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 				progress?(Float(mDataIndex) / Float(mDataPackets.count))
 
 				if (mDataIndex == mDataPackets.count) {
-					logX?.v("Finished the data -> send verify command")
+					globals.log.v("Finished the data -> send verify command")
 
 					mState = .VERIFY
 					mSendFrame(data: mBuildPacket(command: otaCommand.AMOTA_CMD_FW_VERIFY, data: nil))
@@ -327,26 +327,26 @@ class ambiqOTARXCharacteristic: Characteristic {
 				}
 
 			case .VERIFY:
-				logX?.v("Finished the verify -> send reset command")
+				globals.log.v("Finished the verify -> send reset command")
 				
 				mState = .RESET
 				mSendFrame(data: mBuildPacket(command: otaCommand.AMOTA_CMD_FW_RESET, data: nil))
 
 			case .RESET:
-				logX?.v("Done")
+				globals.log.v("Done")
 				mState = .DONE
 				
 				finished?()
 
 			default:
-				logX?.e ("Unknown state: \(mState)")
+				globals.log.e ("Unknown state: \(mState)")
 				mState = .CANCEL
 				self.failed?(Int(amotaStatus.UNKNOWN_ERROR.rawValue), amotaStatus.UNKNOWN_ERROR.title)
 			}
 
 		}
 		else {
-			logX?.e ("Received an unknown command \(String(format: "0x%02X", value[2])) and/or status \(String(format: "0x%02X", value[3]))")
+			globals.log.e ("Received an unknown command \(String(format: "0x%02X", value[2])) and/or status \(String(format: "0x%02X", value[3]))")
 		}
 	}
 
@@ -376,7 +376,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 		case .VERIFY: break
 		case .RESET: break
 			
-		default: logX?.e ("Unknown state: \(mState)")
+		default: globals.log.e ("Unknown state: \(mState)")
 		}
 	}
 }

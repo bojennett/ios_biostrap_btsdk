@@ -76,25 +76,25 @@ class CommandQ {
 				}
 				else {
 					if entry.data == nil {
-						logX?.e ("No data to write for \(characteristic.prettyID)")
+						globals.log.e ("No data to write for \(characteristic.prettyID)")
 					}
 					
 					if entry.type == nil {
-						logX?.e ("No write type for \(characteristic.prettyID)")
+						globals.log.e ("No write type for \(characteristic.prettyID)")
 					}
 					remove()
 				}
 			default:
-				logX?.e ("Command not defined!")
+				globals.log.e ("Command not defined!")
 				remove()
 			}
 		}
 		else {
-			if peripheral == nil { logX?.e ("No peripheral") }
+			if peripheral == nil { globals.log.e ("No peripheral") }
 			else if let entry = entries.first {
-				if entry.characteristic == nil { "No characteristic" }
+				if entry.characteristic == nil { globals.log.e ("No characteristic") }
 			}
-			else { logX?.e ("Command queue empty") }
+			else { globals.log.e ("Command queue empty") }
 		}
 	}
 	
@@ -111,7 +111,7 @@ class CommandQ {
 			if entries.count > 0 { next() }
 		}
 		else {
-			logX?.e ("No commands to remove")
+			globals.log.e ("No commands to remove")
 		}
 	}
 
@@ -126,16 +126,16 @@ class CommandQ {
 		while (entries.count > 0) {
 			if let current = entries.first {
 				if let command = current.command {
-					logX?.e ("Flush: \(command.title)")
+					globals.log.e ("Flush: \(command.title)")
 				}
 				else {
-					logX?.e ("Flush: Unknown command")
+					globals.log.e ("Flush: Unknown command")
 				}
 			}
 			entries.removeFirst()
 		}
 		
-		logX?.v ("All commands flushed")
+		globals.log.v ("All commands flushed")
 	}
 
 }

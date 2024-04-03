@@ -32,11 +32,11 @@ class pulseOxContinuousCharacteristic: Characteristic {
 					self.updated?(pID, spo2, hr)
 				}
 				else {
-					logX?.e ("\(pID): Need at least 5 bytes (flags + spo2 + hr).  Only have \(data.count)")
+					globals.log.e ("\(pID): Need at least 5 bytes (flags + spo2 + hr).  Only have \(data.count)")
 				}				
 			}
 		}
-		else { logX?.e ("\(pID): Missing characteristic") }
+		else { globals.log.e ("\(pID): Missing characteristic") }
 	}
 
 	//--------------------------------------------------------------------------------

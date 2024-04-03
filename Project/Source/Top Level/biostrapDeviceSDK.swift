@@ -289,8 +289,7 @@ import Combine
 	@objc public override init() {
 		super.init()
 		
-		logX = Logging()
-		logX?.log
+		globals.log.log
 			.sink { level, message, file, function, line in
 				switch (level) {
 				case .verbose:	self.logV?(message, file, function, line)
@@ -331,7 +330,7 @@ import Combine
 		if let decrypt = AES.decrypt(licenseKeyData, key: key, seed: seed) {
 			do {
 				let license = try JSONDecoder().decode([String : String].self, from: decrypt)
-				logX?.v ("\(license)")
+				globals.log.v ("\(license)")
 				
 				if let strDate = license["date"] {
 					if let date = Int(strDate) {
@@ -340,7 +339,15 @@ import Combine
 
 						if (current_ts < expiration_ts) {
 							days = Int(expiration_ts - current_ts) / 60 / 60 / 24
-							message = "License is valid for '\(days)' more days"
+							
+							let formatter = DateComponentsFormatter()
+							formatter.allowedUnits = [.year, .month, .day]
+							formatter.unitsStyle = .full
+							
+							let formattedDuration = formatter.string(from: (expiration_ts - current_ts))
+							//print(formattedDuration)
+							
+							message = "License is valid for '\(formattedDuration ?? "Unknown")'"
 							
 							if let bundle = license["bundle"] {
 								if (bundle == "*") {
@@ -410,26 +417,26 @@ import Combine
 		
 		#if KAIROS || UNIVERSAL
 		if (!mLicensed) {
-			logX?.e ("Not licensed - cannot start scanning")
+			globals.log.e ("Not licensed - cannot start scanning")
 			return (false)
 		}
 		#endif
 		
-		logX?.v("InBackground: \(inBackground), forPaired: \(forPaired), forUnpaired: \(forUnpaired), forLegacy: \(forLegacy)")
+		globals.log.v("InBackground: \(inBackground), forPaired: \(forPaired), forUnpaired: \(forUnpaired), forLegacy: \(forLegacy)")
 		
 		// See if there were any connected peripherals (which could happen due to a previous instance crash), and disconnect them
 		let peripherals = mCentralManager?.retrieveConnectedPeripherals(withServices: Device.scan_services)
 		if let peripherals = peripherals {
 			if (peripherals.count > 0) {
-				logX?.v ("Found '\(peripherals.count)' previously connected devices (probably due to a crash).  Disconnect them to clean up")
+				globals.log.v ("Found '\(peripherals.count)' previously connected devices (probably due to a crash).  Disconnect them to clean up")
 				for peripheral in peripherals {
-					logX?.v ("    Disconnect \(peripheral.identifier)")
+					globals.log.v ("    Disconnect \(peripheral.identifier)")
 					mCentralManager?.cancelPeripheralConnection(peripheral)
 				}
 			}
 		}
 		else {
-			logX?.v ("Checking for previously connected peripherals (due to crash).  Didn't find any")
+			globals.log.v ("Checking for previously connected peripherals (due to crash).  Didn't find any")
 		}
 		
 		discoveredDevices.removeAll()
@@ -450,7 +457,7 @@ import Combine
 			return (true)
 		}
 		
-		logX?.e ("Bluetooth not available")
+		globals.log.e ("Bluetooth not available")
 		return (false)
 	}
 	
@@ -462,7 +469,7 @@ import Combine
 	//
 	//--------------------------------------------------------------------------------
 	@objc public func stopScan() {
-		logX?.v("")
+		globals.log.v("")
 		
 		mCentralManager?.stopScan()
 		discoveredDevices.removeAll()
@@ -477,7 +484,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Use the device object's connect function directly.  This will be removed in a future version of the SDK")
 	@objc public func connect(_ id: String) {
-		logX?.v("\(id)")
+		globals.log.v("\(id)")
 		
 		if let device = discoveredDevices.first(where: { $0.id == id }) {
 			if let peripheral = device.peripheral {
@@ -485,11 +492,11 @@ import Combine
 				mCentralManager?.connect(peripheral, options: nil)
 			}
 			else {
-				logX?.e("Peripheral for \(id) does not exist")
+				globals.log.e("Peripheral for \(id) does not exist")
 			}
 		}
 		else {
-			logX?.e("Device for \(id) does not exist")
+			globals.log.e("Device for \(id) does not exist")
 		}
 	}
 	
@@ -502,17 +509,17 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Use the device object's connect function directly.  This will be removed in a future version of the SDK")
 	@objc public func disconnect(_ id: String) {
-		logX?.v("\(id)")
+		globals.log.v("\(id)")
 		
 		if let device = discoveredDevices.first(where: { $0.id == id }), let peripheral = device.peripheral {
-			logX?.v("Found \(id) in discovered list -> trying to disconnect")
+			globals.log.v("Found \(id) in discovered list -> trying to disconnect")
 			discoveredDevices.removeAll { $0.id == id }
 			mCentralManager?.cancelPeripheralConnection(peripheral)
 			return
 		}
 		
 		if let device = unnamedDevices.first(where: { $0.id == id }), let peripheral = device.peripheral {
-			logX?.v("Found \(id) in unnamed list -> trying to disconnect")
+			globals.log.v("Found \(id) in unnamed list -> trying to disconnect")
 			unnamedDevices.removeAll { $0.id == id }
 			mCentralManager?.cancelPeripheralConnection(peripheral)
 			return
@@ -520,13 +527,13 @@ import Combine
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) {
 			if let peripheral = device.peripheral {
-				logX?.v("Found \(id) in connected list -> trying to disconnect")
+				globals.log.v("Found \(id) in connected list -> trying to disconnect")
 				mCentralManager?.cancelPeripheralConnection(peripheral)
 				return
 			}
 		}
 		
-		logX?.e("Cannot find '\(id)' in connected or discovered list.  Nothing to disconnect")
+		globals.log.e("Cannot find '\(id)' in connected or discovered list.  Nothing to disconnect")
 	}
 
 	//--------------------------------------------------------------------------------
@@ -547,11 +554,11 @@ import Combine
 				return (csvResult)
 			}
 			else {
-				logX?.e ("Cannot get data from json String")
+				globals.log.e ("Cannot get data from json String")
 			}
 		}
 		catch {
-			logX?.e ("\(error.localizedDescription)")
+			globals.log.e ("\(error.localizedDescription)")
 		}
 
 		return ("")
@@ -566,7 +573,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func writeEpoch(_ id: String, newEpoch: Int) {
-		logX?.v("\(id): \(newEpoch)")
+		globals.log.v("\(id): \(newEpoch)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.writeEpochInternal(newEpoch) }
 		else { self.writeEpochComplete?(id, false) }
@@ -581,7 +588,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readEpoch(_ id: String) {
-		logX?.v("\(id)")
+		globals.log.v("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.readEpochInternal() }
 		else { self.readEpochComplete?(id, false, 0) }
@@ -596,7 +603,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func endSleep(_ id: String) {
-		logX?.v("\(id)")
+		globals.log.v("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.endSleepInternal() }
 		else { self.endSleepComplete?(id, false) }
@@ -637,7 +644,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPacketCount(_ id: String) {
-		logX?.v ("\(id)")
+		globals.log.v ("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPacketCountInternal() }
 		else { self.getPacketCountComplete?(id, false, 0) }
@@ -652,7 +659,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func disableWornDetect(_ id: String) {
-		logX?.v ("\(id)")
+		globals.log.v ("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.disableWornDetectInternal() }
 		else { self.disableWornDetectComplete?(id, false) }
@@ -667,7 +674,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func enableWornDetect(_ id: String) {
-		logX?.v ("\(id)")
+		globals.log.v ("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.enableWornDetectInternal() }
 		else { self.enableWornDetectComplete?(id, false) }
@@ -682,7 +689,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func startManual(_ id: String, algorithms: ppgAlgorithmConfiguration) {
-		logX?.v ("\(id): Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
+		globals.log.v ("\(id): Algorithms: \(String(format: "0x%02X", algorithms.commandByte))")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.startManual(algorithms) }
 		else { self.startManualComplete?(id, false) }
@@ -697,7 +704,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func stopManual(_ id: String) {
-		logX?.v ("\(id)")
+		globals.log.v ("\(id)")
 		
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.stopManual() }
 		else { self.stopManualComplete?(id, false) }

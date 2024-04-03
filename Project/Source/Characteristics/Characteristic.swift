@@ -54,7 +54,7 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func pParseSinglePacket(_ data: Data, index: Int) -> (Bool, packetType, biostrapDataPacket) {
-		//logX?.v ("\(index): \(String(format: "0x%02X", data[index]))")
+		//globals.log.v ("\(index): \(String(format: "0x%02X", data[index]))")
 		if let type = packetType(rawValue: data[index]) {
 			switch (type) {
 			case .diagnostic:
@@ -66,12 +66,12 @@ class Characteristic {
 						return (true, type, biostrapDataPacket(packetData))
 					}
 					else {
-						logX?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					logX?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+					globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
@@ -85,12 +85,12 @@ class Characteristic {
 						return (true, type, biostrapDataPacket(packetData))
 					}
 					else {
-						logX?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					logX?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+					globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 								
@@ -104,12 +104,12 @@ class Characteristic {
 						return (true, type, biostrapDataPacket(packetData))
 					}
 					else {
-						logX?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					logX?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+					globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
@@ -122,12 +122,12 @@ class Characteristic {
 						return (true, type, biostrapDataPacket(packetData))
 					}
 					else {
-						logX?.e ("\(pID): \(type.title): (Out of range) Index: \(index), packets: \(packets), final index: \(final_index), full packet: \(data.hexString)")
+						globals.log.e ("\(pID): \(type.title): (Out of range) Index: \(index), packets: \(packets), final index: \(final_index), full packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					logX?.e ("\(pID): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
+					globals.log.e ("\(pID): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
@@ -140,12 +140,12 @@ class Characteristic {
 						return (true, type, biostrapDataPacket(packetData))
 					}
 					else {
-						logX?.e ("\(pID): \(type.title): (Out of range) Index: \(index), packets: \(packets), final index: \(final_index), full packet: \(data.hexString)")
+						globals.log.e ("\(pID): \(type.title): (Out of range) Index: \(index), packets: \(packets), final index: \(final_index), full packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					logX?.e ("\(pID): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
+					globals.log.e ("\(pID): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
@@ -158,17 +158,17 @@ class Characteristic {
 						return (true, type, biostrapDataPacket(packetData))
 					}
 					else {
-						logX?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					logX?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+					globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
 			case .unknown:
-				logX?.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+				globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 				return (false, .unknown, biostrapDataPacket())
 				
 			default:
@@ -177,14 +177,14 @@ class Characteristic {
 					return (true, type, biostrapDataPacket(packetData))
 				}
 				else {
-					logX?.e ("\(pID): \(type.title): '\(type.length)' from '\(index)' exceeds length of data '\(data.count)'")
+					globals.log.e ("\(pID): \(type.title): '\(type.length)' from '\(index)' exceeds length of data '\(data.count)'")
 					return (false, .unknown, biostrapDataPacket())
 				}
 			}
 			
 		}
 		else {
-			logX?.e ("\(pID): Could not parse type: Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+			globals.log.e ("\(pID): Could not parse type: Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
 			return (false, .unknown, biostrapDataPacket())
 		}
 	}
@@ -304,7 +304,7 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func pParseDataPackets(_ data: Data) -> ([biostrapDataPacket]) {
-		//logX?.v ("\(pID): Data: \(data.hexString)")
+		//globals.log.v ("\(pID): Data: \(data.hexString)")
 		
 		var index = 0
 		var dataPackets = [biostrapDataPacket]()
@@ -390,7 +390,7 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func read() {
-		logX?.e ("\(pID): Did you mean to override?")
+		globals.log.e ("\(pID): Did you mean to override?")
 	}
 
 	//--------------------------------------------------------------------------------
@@ -401,7 +401,7 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func didDiscover() {
-		logX?.e ("\(pID): Did you mean to override?")
+		globals.log.e ("\(pID): Did you mean to override?")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -412,7 +412,7 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func didWrite() {
-		logX?.e ("\(pID): Did you mean to override?")
+		globals.log.e ("\(pID): Did you mean to override?")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -423,7 +423,7 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func didUpdateValue() {
-		logX?.e ("\(pID): Did you mean to override?")
+		globals.log.e ("\(pID): Did you mean to override?")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -434,7 +434,7 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func didUpdateNotificationState() {
-		logX?.e ("\(pID): Did you mean to override?")
+		globals.log.e ("\(pID): Did you mean to override?")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -472,6 +472,6 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func isReady() {
-		logX?.e ("\(pID): Did you mean to override?")
+		globals.log.e ("\(pID): Did you mean to override?")
 	}
 }

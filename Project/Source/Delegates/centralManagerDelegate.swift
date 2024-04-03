@@ -45,16 +45,16 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func centralManagerDidUpdateState(_ central: CBCentralManager) {
-		logX?.v("\(central.state.rawValue)")
+		globals.log.v("\(central.state.rawValue)")
 		
 		DispatchQueue.main.async {
 			if central.state == .poweredOn {
-				logX?.e ("Bluetooth in powered on state and has permissions")
+				globals.log.e ("Bluetooth in powered on state and has permissions")
 				self.bluetoothReady?(true)
 				self.bluetoothAvailable = true
 			}
 			else {
-				logX?.e ("Bluetooth in state: \(central.state.title) - '\(central.state.description)'")
+				globals.log.e ("Bluetooth in state: \(central.state.title) - '\(central.state.description)'")
 				self.discoveredDevices.removeAll()
 				self.unnamedDevices.removeAll()
 
@@ -85,7 +85,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 				//log?.v ("Manufacturer Data: \(manufacturer_data.hexString)")
 				if (manufacturer_data.count == 3) {
 					if ((manufacturer_data[2] & 0x80) == 0x00) { // if bit 7 is set, this has a name, so length should not be 3!
-						logX?.v (" --- No name: Flags = \(manufacturer_data.hexString)")
+						globals.log.v (" --- No name: Flags = \(manufacturer_data.hexString)")
 						valid = true
 						if ((manufacturer_data[2] & 0x01) != 0x00) {
 							paired = .paired_w_uuid
@@ -97,7 +97,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						has_serial = ((manufacturer_data[2] & 0x02) != 0x00)
 					}
 					else {
-						logX?.w (" --- has name, but length is weird: ${data.hexString()}")
+						globals.log.w (" --- has name, but length is weird: ${data.hexString()}")
 					}
 				}
 				
@@ -140,7 +140,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					}
 					
 					else {
-						logX?.w ("Found a device with BS as the first two characters, but other advertising data I do not understand: \(manufacturer_data.hexString)")
+						globals.log.w ("Found a device with BS as the first two characters, but other advertising data I do not understand: \(manufacturer_data.hexString)")
 					}
 				}
 
@@ -166,7 +166,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					self.connected?(id)
 				}
 				else {
-					logX?.e ("Device was already in the connected list when i received 'configured' callback.  Weird.")
+					globals.log.e ("Device was already in the connected list when i received 'configured' callback.  Weird.")
 				}
 			}
 			else if let unnamedDevice = self.discoveredDevices.first(where: { $0.id == id }) {
@@ -176,16 +176,16 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					self.connected?(id)
 				}
 				else {
-					logX?.e ("Device was already in the connected list when i received 'configured' callback.  Weird.")
+					globals.log.e ("Device was already in the connected list when i received 'configured' callback.  Weird.")
 				}
 			}
 			else {
 				if let peripheral = device.peripheral {
-					logX?.e ("Received a configured callback, but my device is not in my discovered or unnamed list.  Very bizarre.  disconnect this")
+					globals.log.e ("Received a configured callback, but my device is not in my discovered or unnamed list.  Very bizarre.  disconnect this")
 					self.mCentralManager?.cancelPeripheralConnection(peripheral)
 				}
 				else {
-					logX?.e ("Received a configured callback, but my device is not in my discovered or unnamed list.  Very bizarre.  And don't have a peripheral to even disconnect.  What?!?!?")
+					globals.log.e ("Received a configured callback, but my device is not in my discovered or unnamed list.  Very bizarre.  And don't have a peripheral to even disconnect.  What?!?!?")
 				}
 			}
 		}
@@ -439,7 +439,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 		
 		DispatchQueue.main.async { [self] in
 			if let _ = self.connectedDevices.first(where: { $0.id == peripheral.prettyID }) {
-				logX?.e ("\(peripheral.prettyID): didDiscover: Discovered a device that is in my connected list.  Don't expect this...  Ignore")
+				globals.log.e ("\(peripheral.prettyID): didDiscover: Discovered a device that is in my connected list.  Don't expect this...  Ignore")
 			}
 							
 			for thisUUID in services {
@@ -450,7 +450,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						if valid { discovered?(peripheral.prettyID, device) }
 						else {
 							if valid_type_but_no_name {
-								logX?.v ("\(peripheral.prettyID): didDiscover: Had already found this device, but it now has no name.  Strange...  Don't say it now has no name, though")
+								globals.log.v ("\(peripheral.prettyID): didDiscover: Had already found this device, but it now has no name.  Strange...  Don't say it now has no name, though")
 							}
 						}
 					}
@@ -465,7 +465,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						
 						if valid {
 							if let _ = self.unnamedDevices.first(where: { $0.id == peripheral.prettyID }) {
-								logX?.v ("\(peripheral.prettyID): didDiscover: Discovered a device that was unnamed but now has a name.  Update as named, and remove unnamed version")
+								globals.log.v ("\(peripheral.prettyID): didDiscover: Discovered a device that was unnamed but now has a name.  Update as named, and remove unnamed version")
 								self.unnamedDevices.removeAll(where: { $0.id == peripheral.prettyID })
 							}
 							self.discoveredDevices.append(device)
@@ -489,7 +489,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						if valid { discovered?(peripheral.prettyID, device) }
 						else {
 							if valid_type_but_no_name {
-								logX?.v ("\(peripheral.prettyID): didDiscover: Had already found this device, but it now has no name.  Strange...  Don't say it now has no name, though")
+								globals.log.v ("\(peripheral.prettyID): didDiscover: Had already found this device, but it now has no name.  Strange...  Don't say it now has no name, though")
 							}
 						}
 					}
@@ -504,7 +504,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						
 						if valid {
 							if let _ = self.unnamedDevices.first(where: { $0.id == peripheral.prettyID }) {
-								logX?.v ("\(peripheral.prettyID): didDiscover: Discovered a device that was unnamed but now has a name.  Update as named, and remove unnamed version")
+								globals.log.v ("\(peripheral.prettyID): didDiscover: Discovered a device that was unnamed but now has a name.  Update as named, and remove unnamed version")
 								self.unnamedDevices.removeAll(where: { $0.id == peripheral.prettyID })
 							}
 							self.discoveredDevices.append(device)
@@ -532,23 +532,23 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-		logX?.v("\(peripheral.prettyID): didConnect")
+		globals.log.v("\(peripheral.prettyID): didConnect")
 		
 		DispatchQueue.main.async { [self] in
 			if let device = discoveredDevices.first(where: { $0.id == peripheral.prettyID }) {
 				if !device.didConnect() {
-					logX?.e ("Can't finish the didConnect for a device in my discovered list - disconnecting")
+					globals.log.e ("Can't finish the didConnect for a device in my discovered list - disconnecting")
 					mCentralManager?.cancelPeripheralConnection(peripheral)
 				}
 			}
 			else if let device = unnamedDevices.first(where: { $0.id == peripheral.prettyID }) {
 				if !device.didConnect() {
-					logX?.e ("Can't finish the didConnect for a device in my unnamed list - disconnecting")
+					globals.log.e ("Can't finish the didConnect for a device in my unnamed list - disconnecting")
 					mCentralManager?.cancelPeripheralConnection(peripheral)
 				}
 			}
 			else {
-				logX?.e ("\(peripheral.prettyID): didConnect - Connected to a device not in my discovered or unnamed list.  Disconnect")
+				globals.log.e ("\(peripheral.prettyID): didConnect - Connected to a device not in my discovered or unnamed list.  Disconnect")
 				mCentralManager?.cancelPeripheralConnection(peripheral)
 			}
 		}
@@ -568,7 +568,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					device.connectionState = .disconnected
 				}
 				else {
-					logX?.e ("\(id): Disconnected from an unnamed device that is in state '\(device.connectionState)'.  Weird!")
+					globals.log.e ("\(id): Disconnected from an unnamed device that is in state '\(device.connectionState)'.  Weird!")
 				}
 				
 				self.deviceDisconnected.send(device)
@@ -579,7 +579,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					device.connectionState = .disconnected
 				}
 				else {
-					logX?.e ("\(id): Disconnected from a discovered device that is in state '\(device.connectionState)'.  Weird!")
+					globals.log.e ("\(id): Disconnected from a discovered device that is in state '\(device.connectionState)'.  Weird!")
 				}
 
 				self.deviceDisconnected.send(device)
@@ -590,7 +590,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 					device.connectionState = .disconnected
 				}
 				else {
-					logX?.e ("\(id): Disconnected from a connected device that is in state '\(device.connectionState)'.  Weird!")
+					globals.log.e ("\(id): Disconnected from a connected device that is in state '\(device.connectionState)'.  Weird!")
 				}
 				
 				self.deviceDisconnected.send(device)
@@ -612,7 +612,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-		logX?.v("\(peripheral.prettyID): didDisconnectPeripheral")
+		globals.log.v("\(peripheral.prettyID): didDisconnectPeripheral")
 		self.mProcessDisconnection(peripheral.prettyID)
 	}
 	
@@ -624,7 +624,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-		logX?.v("\(peripheral.prettyID): didFailToConnect")
+		globals.log.v("\(peripheral.prettyID): didFailToConnect")
 		self.mProcessDisconnection(peripheral.prettyID)
 	}
 	

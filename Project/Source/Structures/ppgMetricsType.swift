@@ -28,12 +28,12 @@ public class ppgMetricsType: ObservableObject {
 				//if (packet.spo2_valid) { spo2	= packet.spo2_result }
 			}
 			else {
-				logX?.e ("Cannot get PPG Metrics data from json String")
+				globals.log.e ("Cannot get PPG Metrics data from json String")
 				status = "Cannot get PPG Metrics data from json String"
 			}
 		}
 		catch {
-			logX?.e ("\(error.localizedDescription)")
+			globals.log.e ("\(error.localizedDescription)")
 			status = error.localizedDescription
 		}
 	}

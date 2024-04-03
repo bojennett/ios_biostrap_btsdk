@@ -57,9 +57,9 @@ class disFirmwareVersionCharacteristic: Characteristic {
 					if let test = Int(values[2]) { mBuild = test }
 				}
 			}
-			else { logX?.e ("\(pID): Missing data") }
+			else { globals.log.e ("\(pID): Missing data") }
 		}
-		else { logX?.e ("\(pID): Missing characteristic") }
+		else { globals.log.e ("\(pID): Missing characteristic") }
 	}
 	
 	//--------------------------------------------------------------------------------

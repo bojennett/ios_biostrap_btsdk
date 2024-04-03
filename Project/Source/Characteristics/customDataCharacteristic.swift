@@ -22,7 +22,7 @@ class customDataCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mProcessUpdateValue(_ data: Data) {
-		logX?.v ("\(pID): \(data.count) bytes - \(data.hexString)")
+		globals.log.v ("\(pID): \(data.count) bytes - \(data.hexString)")
 		if let response = notifications(rawValue: data[0]) {
 			switch (response) {
 			case .dataPacket:
@@ -35,13 +35,13 @@ class customDataCharacteristic: Characteristic {
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
 							self.dataPackets?(sequence_number, jsonString)
 						}
-						else { logX?.e ("\(pID): Cannot make string from json data") }
+						else { globals.log.e ("\(pID): Cannot make string from json data") }
 					}
-					catch { logX?.e ("\(pID): Cannot make JSON data") }
+					catch { globals.log.e ("\(pID): Cannot make JSON data") }
 
 				}
 				else {
-					logX?.e ("\(pID): Bad data length for data packet: \(data.hexString)")
+					globals.log.e ("\(pID): Bad data length for data packet: \(data.hexString)")
 					//mCRCOK	= false
 				}
 				
@@ -60,11 +60,11 @@ class customDataCharacteristic: Characteristic {
 				}
 				
 			default:
-				logX?.e ("\(pID): Should not get a packet here of type: \(response)")
+				globals.log.e ("\(pID): Should not get a packet here of type: \(response)")
 			}
 		}
 		else {
-			logX?.e ("\(pID): Unknown update: \(data.hexString)")
+			globals.log.e ("\(pID): Unknown update: \(data.hexString)")
 		}
 	}
 
@@ -86,7 +86,7 @@ class customDataCharacteristic: Characteristic {
 					let crc_calculated	= crc32(uLong(0), &input_bytes, uInt(input_bytes.count))
 					
 					if (crc_received != crc_calculated) {
-						logX?.e ("\(pID): Hmmm..... Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
+						globals.log.e ("\(pID): Hmmm..... Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
 						//mCRCOK = false;
 						//mExpectedSequenceNumber = mExpectedSequenceNumber + 1	// go ahead and increase the expected sequence number.  already going to create retransmit.  this avoids other expected sequence checks from failling
 						self.pFailedDecodeCount = self.pFailedDecodeCount + 1
@@ -95,15 +95,15 @@ class customDataCharacteristic: Characteristic {
 					mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
 				}
 				else {
-					logX?.e ("\(pID): Cannot calculate packet CRC: Not enough data.  Length = \(data.count): \(data.hexString)")
+					globals.log.e ("\(pID): Cannot calculate packet CRC: Not enough data.  Length = \(data.count): \(data.hexString)")
 					return
 				}
 			}
 			else {
-				logX?.e ("\(pID): Missing data")
+				globals.log.e ("\(pID): Missing data")
 			}
 		}
-		else { logX?.e ("\(pID): Missing characteristic") }
+		else { globals.log.e ("\(pID): Missing characteristic") }
 	}
 	
 	//--------------------------------------------------------------------------------
