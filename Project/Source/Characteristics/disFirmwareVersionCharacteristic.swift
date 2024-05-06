@@ -17,26 +17,6 @@ class disFirmwareVersionCharacteristic: Characteristic {
 	internal var mBuild	: Int		= 0
 	
 	//--------------------------------------------------------------------------------
-	//
-	// Constructor
-	//
-	//--------------------------------------------------------------------------------
-	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
-		super.init (peripheral, characteristic: characteristic, commandQ: commandQ)
-	}
-	
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	override func read() {
-		pCommandQ?.read(pCharacteristic)
-	}
-	
-	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
 	//

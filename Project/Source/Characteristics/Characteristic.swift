@@ -390,7 +390,7 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func read() {
-		globals.log.e ("\(pID): Did you mean to override?")
+		pCommandQ?.read(pCharacteristic)
 	}
 
 	//--------------------------------------------------------------------------------

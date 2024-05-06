@@ -11,15 +11,6 @@ import CoreBluetooth
 class ambiqOTATXCharacteristic: Characteristic {
 	
 	//--------------------------------------------------------------------------------
-	//
-	// Constructor
-	//
-	//--------------------------------------------------------------------------------
-	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
-		super.init (peripheral, characteristic: characteristic, commandQ: commandQ)
-	}
-
-	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
 	//

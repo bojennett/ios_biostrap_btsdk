@@ -14,26 +14,6 @@ class batteryLevelCharacteristic: Characteristic {
 	var updated: ((_ id: String, _ percentage: Int)->())?
 
 	//--------------------------------------------------------------------------------
-	//
-	// Constructor
-	//
-	//--------------------------------------------------------------------------------
-	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
-		super.init (peripheral, characteristic: characteristic, commandQ: commandQ)
-	}
-	
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	override func read() {
-		pCommandQ?.read(pCharacteristic)
-	}
-	
-	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
 	//
