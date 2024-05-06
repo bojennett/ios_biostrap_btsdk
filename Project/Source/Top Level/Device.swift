@@ -2656,6 +2656,7 @@ public class Device: NSObject, ObservableObject {
 					
 				case .alterDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
+					attachDataCharacteristicLambdas()
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .alterStrmCharacteristic:
@@ -2679,6 +2680,7 @@ public class Device: NSObject, ObservableObject {
 
 				case .kairosDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
+					attachDataCharacteristicLambdas()
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .kairosStrmCharacteristic:
