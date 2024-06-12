@@ -1579,8 +1579,10 @@ public class Device: NSObject, ObservableObject {
 	public func getPaired() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPaired() }
 		else {
-			self.paired = nil
-			self.getPairedComplete.send(.not_configured)
+			DispatchQueue.main.async {
+				self.paired = nil
+				self.getPairedComplete.send(.not_configured)
+			}
 		}
 	}
 	
@@ -1599,7 +1601,9 @@ public class Device: NSObject, ObservableObject {
 	public func setPageThreshold(_ threshold: Int) {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPageThreshold(threshold) }
 		else {
-			self.setPageThresholdComplete.send(.not_configured)
+			DispatchQueue.main.async {
+				self.setPageThresholdComplete.send(.not_configured)
+			}
 		}
 	}
 	
@@ -1618,8 +1622,10 @@ public class Device: NSObject, ObservableObject {
 	public func getPageThreshold() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPageThreshold() }
 		else {
-			self.advertisingPageThreshold = nil
-			self.getPageThresholdComplete.send(.not_configured)
+			DispatchQueue.main.async {
+				self.advertisingPageThreshold = nil
+				self.getPageThresholdComplete.send(.not_configured)
+			}
 		}
 	}
 	
@@ -1638,7 +1644,9 @@ public class Device: NSObject, ObservableObject {
 	public func deletePageThreshold() {
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.deletePageThreshold() }
 		else {
-			self.deletePageThresholdComplete.send(.not_configured)
+			DispatchQueue.main.async {
+				self.deletePageThresholdComplete.send(.not_configured)
+			}
 		}
 	}
 
@@ -2821,7 +2829,9 @@ public class Device: NSObject, ObservableObject {
 			case .model_number_string			:
 				mModelNumber?.didUpdateValue()
 				if let modelNumberCharacteristic = mModelNumber {
-					self.modelNumber = modelNumberCharacteristic.value
+					DispatchQueue.main.async {
+						self.modelNumber = modelNumberCharacteristic.value
+					}
 				}
 
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
@@ -2829,37 +2839,47 @@ public class Device: NSObject, ObservableObject {
 			case .hardware_revision_string		:
 				mHardwareRevision?.didUpdateValue()
 				if let hardwareRevisionCharacteristic = mHardwareRevision {
-					self.hardwareRevision = hardwareRevisionCharacteristic.value
+					DispatchQueue.main.async {
+						self.hardwareRevision = hardwareRevisionCharacteristic.value
+					}
 				}
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
 			case .firmware_revision_string		:
 				mFirmwareVersion?.didUpdateValue()
 				if let firmwareVersionCharacteristic = mFirmwareVersion {
-					self.firmwareRevision = firmwareVersionCharacteristic.value
+					DispatchQueue.main.async {
+						self.firmwareRevision = firmwareVersionCharacteristic.value
+					}
 				}
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
 			case .software_revision_string		:
 				mSoftwareRevision?.didUpdateValue()
 				if let softwareRevisionCharacteristic = mSoftwareRevision {
-					self.bluetoothSoftwareRevision = softwareRevisionCharacteristic.bluetooth
-					self.algorithmsSoftwareRevision	= softwareRevisionCharacteristic.algorithms
-					self.sleepSoftwareRevision = softwareRevisionCharacteristic.sleep
+					DispatchQueue.main.async {
+						self.bluetoothSoftwareRevision = softwareRevisionCharacteristic.bluetooth
+						self.algorithmsSoftwareRevision	= softwareRevisionCharacteristic.algorithms
+						self.sleepSoftwareRevision = softwareRevisionCharacteristic.sleep
+					}
 				}
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
 			case .manufacturer_name_string		:
 				mManufacturerName?.didUpdateValue()
 				if let manufacturerNameCharacteristic = mManufacturerName {
-					self.manufacturerName = manufacturerNameCharacteristic.value
+					DispatchQueue.main.async {
+						self.manufacturerName = manufacturerNameCharacteristic.value
+					}
 				}
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
 			case .serial_number_string			:
 				mSerialNumber?.didUpdateValue()
 				if let serialNumberCharacteristic = mSerialNumber {
-					self.serialNumber = serialNumberCharacteristic.value
+					DispatchQueue.main.async {
+						self.serialNumber = serialNumberCharacteristic.value
+					}
 				}
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
