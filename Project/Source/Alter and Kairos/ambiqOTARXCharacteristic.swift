@@ -152,7 +152,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 			deviceMTU = peripheral.maximumWriteValueLength(for: .withoutResponse)
 		}
 
-		var mtu = deviceMTU > 200 ? 200 : deviceMTU
+		let mtu = deviceMTU > 200 ? 200 : deviceMTU
 		
 		while (index < data.count) {
 			var frameLength: Int

@@ -160,16 +160,14 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-		DispatchQueue.main.async {
-			if let error = error {
-				globals.log.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription)")
-				//self.mCentralManager?.cancelPeripheralConnection(peripheral)
-				//return
-			}
-	
-			self.didUpdateValue(characteristic)
-			self.checkConfigured()
+		if let error = error {
+			globals.log.e ("\(peripheral.prettyID): didUpdateValue for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription)")
+			//self.mCentralManager?.cancelPeripheralConnection(peripheral)
+			//return
 		}
+
+		self.didUpdateValue(characteristic)
+		self.checkConfigured()
 	}
 	
 	//--------------------------------------------------------------------------------
