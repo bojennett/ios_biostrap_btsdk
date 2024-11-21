@@ -232,7 +232,6 @@ import Foundation
 		return data
 	}
 
-
 	//--------------------------------------------------------------------------------
 	//
 	// Constructor
@@ -247,7 +246,7 @@ import Foundation
 	// Constructor from data stream returned from Bluetooth
 	//
 	//--------------------------------------------------------------------------------
-	init(_ data: Data) {
+    init(_ data: Data, offset: Int) {
 		super.init()
 		if let thisType = packetType(rawValue: data[0]) {
 			type = thisType
@@ -257,21 +256,21 @@ import Foundation
 
 			switch (type) {
 			case .activity:
-				epoch		= data.subdata(in: Range(1...4)).leInt32
+				epoch		= data.subdata(in: Range(1...4)).leInt32 + offset
 				seconds		= Int(data[5])
 				value		= data.subdata(in: Range(6...9)).leInt32
 
 			case .temp:
-				epoch		= data.subdata(in: Range(1...4)).leInt32
+				epoch		= data.subdata(in: Range(1...4)).leInt32 + offset
 				temperature	= data.subdata(in: Range(5...8)).leFloat
 
 			case .worn:
-				epoch		= data.subdata(in: Range(1...4)).leInt32
+				epoch		= data.subdata(in: Range(1...4)).leInt32 + offset
 				worn		= (data[5] == 0x01)
 				
 			case .sleep:
-				epoch		= data.subdata(in: Range(1...4)).leInt32
-				end_epoch	= data.subdata(in: Range(5...8)).leInt32
+				epoch		= data.subdata(in: Range(1...4)).leInt32 + offset
+				end_epoch	= data.subdata(in: Range(5...8)).leInt32 + offset
 				
 			case .diagnostic:
 				if (raw_data.count > 2) {
@@ -283,7 +282,7 @@ import Foundation
 			case .rawPPGFifoCount,
 				 .rawAccelFifoCount:
 				value		= Int(data[1])
-				epoch_ms	= data.subdata(in: Range(2...9)).leInt64
+				epoch_ms	= data.subdata(in: Range(2...9)).leInt64 + (offset * 1000)
 
 			case .rawPPGCompressedGreen,
 				 .rawPPGCompressedIR,
@@ -304,10 +303,10 @@ import Foundation
 				 .rawAccelCompressedZADC: break // use raw_data
 
 			case .ppgCalibrationStart:
-				epoch_ms				= data.subdata(in: Range(1...8)).leInt64
+				epoch_ms				= data.subdata(in: Range(1...8)).leInt64 + (offset * 1000)
 				
 			case .ppgCalibrationDone:
-				epoch_ms				= data.subdata(in: Range(1...8)).leInt64
+				epoch_ms				= data.subdata(in: Range(1...8)).leInt64 + (offset * 1000)
 				green_led_current		= Int(data[ 9])
 				red_led_current			= Int(data[10])
 				ir_led_current			= Int(data[11])
@@ -316,22 +315,22 @@ import Foundation
 				
 			case .motionLevel:
 				value					= Int(data[2])
-				epoch_ms				= data.subdata(in: Range(2...9)).leInt64
+				epoch_ms				= data.subdata(in: Range(2...9)).leInt64 + (offset * 1000)
 
 			case .rawPPGProximity:
 				value				= data.subdata(in: Range(1...4)).leInt32
 				
 			case .steps:
-				epoch				= data.subdata(in: Range(1...4)).leInt32
+				epoch				= data.subdata(in: Range(1...4)).leInt32 + offset
 				value				= data.subdata(in: Range(5...6)).leUInt16
 
 			case .steps_active:
-				epoch				= data.subdata(in: Range(1...4)).leInt32
+				epoch				= data.subdata(in: Range(1...4)).leInt32 + offset
 				value				= Int(data[5])
 				active_seconds		= Int(data[6])
 
 			case .ppg_metrics:
-				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
+				epoch_ms			= data.subdata(in: Range(1...8)).leInt64 + (offset * 1000)
 				if let test = ppgStatusType(rawValue: raw_data[9]) { ppg_metrics_status = test }
 				else { ppg_metrics_status = .unknown }
 				hr_valid			= (((data[10] >> 0) & 0x01) != 0)
@@ -344,14 +343,14 @@ import Foundation
 				hr_result			= data.subdata(in: Range(17...18)).leFloat16
 				
 			case .continuous_hr:
-				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
+				epoch_ms			= data.subdata(in: Range(1...8)).leInt64 + (offset * 1000)
 				continuous_hr.removeAll()
 				for i in (9...18) {
 					if (data[i] != 0xff) { continuous_hr.append(Int(data[i])) }
 				}
 				
 			case .bbi:
-				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
+				epoch_ms			= data.subdata(in: Range(1...8)).leInt64 + (offset * 1000)
 				bbi.removeAll()
 				let count			= Int(data[9])
 				var index			= 10
@@ -362,7 +361,7 @@ import Foundation
 				}
 				
 			case .cadence:
-				epoch_ms			= data.subdata(in: Range(1...8)).leInt64
+				epoch_ms			= data.subdata(in: Range(1...8)).leInt64 + (offset * 1000)
 				cadence_spm.removeAll()
 				let count			= Int(data[9])
 				var index			= 10
@@ -378,7 +377,7 @@ import Foundation
 				else {
 					event_type		= .unknown
 				}
-				epoch_ms			= data.subdata(in: Range(2...9)).leInt64
+				epoch_ms			= data.subdata(in: Range(2...9)).leInt64 + (offset * 1000)
 				
 			case .bookend:
 				if let thisBookend = bookendType(rawValue: data[1]) {
@@ -388,7 +387,7 @@ import Foundation
 					bookend_type	= .unknown
 				}
 				bookend_payload		= data[2].Int8
-				epoch_ms			= data.subdata(in: Range(3...10)).leInt64
+				epoch_ms			= data.subdata(in: Range(3...10)).leInt64 + (offset * 1000)
 				duration_ms			= data.subdata(in: Range(11...14)).leInt32
 				
 			case .algorithmData:
@@ -403,22 +402,22 @@ import Foundation
 				algorithmPacketData		= data.subdata(in: Range(5...(data.count - 1)))
 				
 			case .ppg_failed:
-				epoch				= data.subdata(in: Range(1...4)).leInt32
+				epoch				= data.subdata(in: Range(1...4)).leInt32 + offset
 				if let test = ppgFailedType(rawValue: raw_data[5]) { ppg_failed_type = test }
 				else { ppg_failed_type = .unknown }
 
 			case .battery:
-				epoch				= data.subdata(in: Range(1...4)).leInt32
+				epoch				= data.subdata(in: Range(1...4)).leInt32 + offset
 				value				= Int(data[5])
 				voltage				= data.subdata(in: Range(6...7)).leUInt16
 				
 			case .charger:
-				epoch				= data.subdata(in: Range(1...4)).leInt32
+				epoch				= data.subdata(in: Range(1...4)).leInt32 + offset
 				charging			= (data[5] != 0)
 				charge_full			= (data[6] != 0)
 
 			case .milestone:
-				epoch				= data.subdata(in: Range(1...4)).leInt32
+				epoch				= data.subdata(in: Range(1...4)).leInt32 + offset
 				if let testTag = String(data: data.subdata(in: Range(5...6)), encoding: .utf8) { tag = testTag }
 				else { tag			= "UK" }
 				

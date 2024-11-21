@@ -2816,14 +2816,25 @@ public class Device: NSObject, ObservableObject {
 		}
 	}
 
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    // This is for updating from a file
+    //
+    //--------------------------------------------------------------------------------
+    func didUpdateValue(_ data: Data, offset: Int) {
+        mDataCharacteristic?.didUpdateValue(true, data: data, offset: offset)
+    }
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
 	//
-	//
+	// This is for updating from a characteristic
 	//
 	//--------------------------------------------------------------------------------
-	func didUpdateValue (_ characteristic: CBCharacteristic) {
+	func didUpdateValue(_ characteristic: CBCharacteristic) {
 		if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
 			switch (enumerated) {
 			case .model_number_string			:

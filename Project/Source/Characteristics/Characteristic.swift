@@ -53,7 +53,7 @@ class Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	internal func pParseSinglePacket(_ data: Data, index: Int) -> (Bool, packetType, biostrapDataPacket) {
+    internal func pParseSinglePacket(_ data: Data, index: Int, offset: Int) -> (Bool, packetType, biostrapDataPacket) {
 		//globals.log.v ("\(index): \(String(format: "0x%02X", data[index]))")
 		if let type = packetType(rawValue: data[index]) {
 			switch (type) {
@@ -63,7 +63,7 @@ class Characteristic {
 					
 					if ((index + length) <= data.count) {
 						let packetData = data.subdata(in: Range(index...(index + length - 1)))
-						return (true, type, biostrapDataPacket(packetData))
+						return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
 						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
@@ -82,7 +82,7 @@ class Characteristic {
 					let length = Int(data[index + 1]) + 1 + 1 + 1 + 3
 					if ((index + length) <= data.count) {
 						let packetData = data.subdata(in: Range(index...(index + length - 1)))
-						return (true, type, biostrapDataPacket(packetData))
+						return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
 						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
@@ -101,7 +101,7 @@ class Characteristic {
 					let length = Int(data[index + 1]) + 1 + 1 + 2 + 2
 					if ((index + length) <= data.count) {
 						let packetData = data.subdata(in: Range(index...(index + length - 1)))
-						return (true, type, biostrapDataPacket(packetData))
+						return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
 						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
@@ -119,7 +119,7 @@ class Characteristic {
 					let final_index = index + 9 + (packets * 2)
 					if (final_index < data.count) {
 						let packetData = data.subdata(in: Range(index...final_index))
-						return (true, type, biostrapDataPacket(packetData))
+						return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
 						globals.log.e ("\(pID): \(type.title): (Out of range) Index: \(index), packets: \(packets), final index: \(final_index), full packet: \(data.hexString)")
@@ -137,7 +137,7 @@ class Characteristic {
 					let final_index = index + 9 + packets
 					if (final_index < data.count) {
 						let packetData = data.subdata(in: Range(index...final_index))
-						return (true, type, biostrapDataPacket(packetData))
+						return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
 						globals.log.e ("\(pID): \(type.title): (Out of range) Index: \(index), packets: \(packets), final index: \(final_index), full packet: \(data.hexString)")
@@ -155,7 +155,7 @@ class Characteristic {
 					
 					if ((index + length) <= data.count) {
 						let packetData = data.subdata(in: Range(index...(index + length - 1)))
-						return (true, type, biostrapDataPacket(packetData))
+                        return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
 						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
@@ -174,7 +174,7 @@ class Characteristic {
 			default:
 				if ((index + type.length) <= data.count) {
 					let packetData = data.subdata(in: Range((index)...(index + type.length - 1)))
-					return (true, type, biostrapDataPacket(packetData))
+					return (true, type, biostrapDataPacket(packetData, offset: offset))
 				}
 				else {
 					globals.log.e ("\(pID): \(type.title): '\(type.length)' from '\(index)' exceeds length of data '\(data.count)'")
@@ -303,7 +303,7 @@ class Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	internal func pParseDataPackets(_ data: Data) -> ([biostrapDataPacket]) {
+    internal func pParseDataPackets(_ data: Data, offset: Int) -> ([biostrapDataPacket]) {
 		//globals.log.v ("\(pID): Data: \(data.hexString)")
 		
 		var index = 0
@@ -318,7 +318,7 @@ class Characteristic {
 		dataPackets.append(incomingDataDiagnostic)
 		
 		while (index < data.count) {
-			let (found, type, packet) = pParseSinglePacket(data, index: index)
+            let (found, type, packet) = pParseSinglePacket(data, index: index, offset: offset)
 			
 			if (found) {
 				switch (type) {

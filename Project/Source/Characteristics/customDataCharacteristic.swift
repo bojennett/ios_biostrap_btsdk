@@ -21,14 +21,14 @@ class customDataCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	internal func mProcessUpdateValue(_ data: Data) {
+    internal func mProcessUpdateValue(_ data: Data, offset: Int) {
 		globals.log.v ("\(pID): \(data.count) bytes - \(data.hexString)")
 		if let response = notifications(rawValue: data[0]) {
 			switch (response) {
 			case .dataPacket:
 				if (data.count > 3) {	// Accounts for header byte and sequence number
 					let sequence_number = data.subdata(in: Range(1...2)).leUInt16
-					let dataPackets = self.pParseDataPackets(data.subdata(in: Range(3...(data.count - 1))))
+                    let dataPackets = self.pParseDataPackets(data.subdata(in: Range(3...(data.count - 1))), offset: offset)
 					
 					do {
 						let jsonData = try JSONEncoder().encode(dataPackets)
@@ -72,38 +72,21 @@ class customDataCharacteristic: Characteristic {
 	// Function Name:
 	//--------------------------------------------------------------------------------
 	//
-	//
+	// This update is from Bluetooth
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateValue() {
-		if let characteristic = pCharacteristic {
-			if let data = characteristic.value {
-				// Packets have to be at least a header + CRC.  If not, do not parse
-				if (data.count >= 4) {
-					// Get the CRC.  Only process the packet if the CRC is good.
-					let crc_received	= data.subdata(in: Range((data.count - 4)...(data.count - 1))).leInt32
-					var input_bytes 	= data.subdata(in: Range(0...(data.count - 5))).bytes
-					let crc_calculated	= crc32(uLong(0), &input_bytes, uInt(input_bytes.count))
-					
-					if (crc_received != crc_calculated) {
-						globals.log.e ("\(pID): Hmmm..... Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
-						//mCRCOK = false;
-						//mExpectedSequenceNumber = mExpectedSequenceNumber + 1	// go ahead and increase the expected sequence number.  already going to create retransmit.  this avoids other expected sequence checks from failling
-						self.pFailedDecodeCount = self.pFailedDecodeCount + 1
-					}
-					
-					mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
-				}
-				else {
-					globals.log.e ("\(pID): Cannot calculate packet CRC: Not enough data.  Length = \(data.count): \(data.hexString)")
-					return
-				}
-			}
-			else {
-				globals.log.e ("\(pID): Missing data")
-			}
-		}
-		else { globals.log.e ("\(pID): Missing characteristic") }
+        guard let characteristic = pCharacteristic else {
+            globals.log.e ("\(pID): Missing characteristic")
+            return
+        }
+        
+        guard let data = characteristic.value else {
+            globals.log.e ("\(pID): Missing data")
+            return
+        }
+
+        didUpdateValue(false, data: data, offset: 0)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -116,5 +99,35 @@ class customDataCharacteristic: Characteristic {
 	override func didUpdateNotificationState() {
 		pConfigured	= true
 	}
-	
+	    
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    // This is an update either from Bluetooth, or from a file.  When from a file,
+    // there is no CRC
+    //
+    //--------------------------------------------------------------------------------
+    func didUpdateValue(_ fromFile: Bool, data: Data, offset: Int) {
+        if fromFile {
+            mProcessUpdateValue(data, offset: offset)
+        } else {
+            // Packets have to be at least a header + CRC.  If not, do not parse
+            if (data.count >= 4) {
+                // Get the CRC.  Only process the packet if the CRC is good.
+                let crc_received    = data.subdata(in: Range((data.count - 4)...(data.count - 1))).leInt32
+                var input_bytes     = data.subdata(in: Range(0...(data.count - 5))).bytes
+                let crc_calculated  = crc32(uLong(0), &input_bytes, uInt(input_bytes.count))
+                
+                if (crc_received != crc_calculated) {
+                    globals.log.e ("\(pID): Hmmm..... Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
+                    self.pFailedDecodeCount = self.pFailedDecodeCount + 1
+                }
+                
+                mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))), offset: offset)
+            } else {
+                globals.log.e ("\(pID): Not enough data.  Length = \(data.count): \(data.hexString)")
+            }
+        }
+    }
 }

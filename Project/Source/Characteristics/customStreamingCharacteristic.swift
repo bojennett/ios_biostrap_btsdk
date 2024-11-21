@@ -47,7 +47,7 @@ class customStreamingCharacteristic: Characteristic {
 				}
 				
 			case .ppg_metrics:
-				let (_, type, packet) = pParseSinglePacket(data, index: 1)
+                let (_, type, packet) = pParseSinglePacket(data, index: 1, offset: 0)
 				if (type == .ppg_metrics) {
 					do {
 						let jsonData = try JSONEncoder().encode(packet)

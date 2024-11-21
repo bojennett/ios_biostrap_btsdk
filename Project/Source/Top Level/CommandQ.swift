@@ -105,7 +105,7 @@ class CommandQ {
 	//
 	//
 	//----------------------------------------------------------------------------
-	internal func remove() {
+	func remove() {
 		if (entries.count > 0) {
 			entries.removeFirst()
 			if entries.count > 0 { next() }
@@ -114,28 +114,4 @@ class CommandQ {
 			globals.log.e ("No commands to remove")
 		}
 	}
-
-	//----------------------------------------------------------------------------
-	// Function Name:
-	//----------------------------------------------------------------------------
-	//
-	//
-	//
-	//----------------------------------------------------------------------------
-	internal func flush() {
-		while (entries.count > 0) {
-			if let current = entries.first {
-				if let command = current.command {
-					globals.log.e ("Flush: \(command.title)")
-				}
-				else {
-					globals.log.e ("Flush: Unknown command")
-				}
-			}
-			entries.removeFirst()
-		}
-		
-		globals.log.v ("All commands flushed")
-	}
-
 }

@@ -1170,7 +1170,7 @@ class customMainCharacteristic: Characteristic {
 								let caughtUp	= (data[4] == 0x01)
 
 								if (successful) {
-									let dataPackets = self.pParseDataPackets(data.subdata(in: Range(5...(data.count - 1))))
+                                    let dataPackets = self.pParseDataPackets(data.subdata(in: Range(5...(data.count - 1))), offset: 0)
 									do {
 										let jsonData = try JSONEncoder().encode(dataPackets)
 										if let jsonString = String(data: jsonData, encoding: .utf8) {
@@ -1494,7 +1494,9 @@ class customMainCharacteristic: Characteristic {
 					globals.log.e ("\(pID): Incorrect length for completion: \(data.hexString)")
 				}
 				
-				pCommandQ?.remove() // These were updates from a write, so queue can now move on
+                DispatchQueue.main.async {
+                    self.pCommandQ?.remove() // These were updates from a write, so queue can now move on
+                }
 				
 			case .dataPacket:
 				if (data.count > 3) {	// Accounts for header byte and sequence number
@@ -1511,7 +1513,7 @@ class customMainCharacteristic: Characteristic {
 					mExpectedSequenceNumber = mExpectedSequenceNumber + 1
 					
 					if (mCRCOK) {
-						let dataPackets = self.pParseDataPackets(data.subdata(in: Range(3...(data.count - 1))))
+                        let dataPackets = self.pParseDataPackets(data.subdata(in: Range(3...(data.count - 1))), offset: 0)
 						mDataPackets.append(contentsOf: dataPackets)
 					}
 				}
@@ -1528,7 +1530,7 @@ class customMainCharacteristic: Characteristic {
 				}
 							
 			case .ppg_metrics:
-				let (_, type, packet) = pParseSinglePacket(data, index: 1)
+                let (_, type, packet) = pParseSinglePacket(data, index: 1, offset: 0)
 				if (type == .ppg_metrics) {
 					do {
 						let jsonData = try JSONEncoder().encode(packet)

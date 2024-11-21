@@ -1272,7 +1272,6 @@ import Combine
 		if let device = connectedDevices.first(where: { $0.id == id }) { device.resetSessionParamsInternal() }
 		else { self.resetSessionParamsComplete?(id, false) }
 	}
-
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -1283,10 +1282,76 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func acceptSessionParams(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.acceptSessionParamsInternal() }
-		else { self.acceptSessionParamsComplete?(id, false) }
+        guard let device = connectedDevices.first(where: { $0.id == id }) else {
+            self.acceptSessionParamsComplete?(id, false)
+            return
+        }
+        device.acceptSessionParamsInternal()
 	}
 
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    @objc public func runSessionFile(_ id: String, file: URL, offset: Int) {
+        globals.log.v ("\(id): \(file) \(offset) seconds")
+        
+        guard let device = connectedDevices.first(where: { $0.id == id }) else {
+            globals.log.e ("Cannot find device to run session to")
+            return
+        }
+
+        var packet = Data()
+        var packets = [Data]()
+        
+        do {
+            let fileContents = try String(contentsOf: file)
+            let lines = fileContents.components(separatedBy: "\n")
+            
+            // Build data packets - maximum size of each packet will be 200 bytes
+            for line in lines {
+                let pieces = line.split(separator: ",")
+                if pieces.count > 0 {
+                    let rawString = String(pieces[0])
+                    let raw = rawString.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "[", with: "").replacingOccurrences(of: "]", with: "")
+                    let bytes = Data(hex: raw)
+                    
+                    if packet.count + bytes.count > 200 {
+                        let sequence = packets.count.leData16
+                        packet.insert(contentsOf: sequence, at: 0)
+                        packet.insert(Characteristic.notifications.dataPacket.rawValue, at: 0)
+                        packets.append(packet)
+                        packet.removeAll()
+                    }
+                    
+                    packet.append(bytes)
+                }
+            }
+
+            // Build data caught up packet
+            packet.removeAll()
+            packet.append(Characteristic.notifications.dataCaughtUp.rawValue)
+            packet.append(0x00) // Lower byte of bad_read_count
+            packet.append(0x00) // Upper byte of bad_read_count
+            packet.append(0x00) // Lower byte of bad_parse_count
+            packet.append(0x00) // Upper byte of bad_parse_count
+            packet.append(0x00) // Lower byte of overflow_count
+            packet.append(0x00) // Upper byte of overflow_count
+            packet.append(0x00) // Intermediate
+            packets.append(packet)
+
+            // Send data packets and the data caught up packet
+            for packet in packets {
+                device.didUpdateValue(packet, offset: offset)
+            }
+
+        } catch {
+            globals.log.e ("Cannot convert file data into array")
+        }
+    }
 }
 
 

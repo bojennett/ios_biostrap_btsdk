@@ -14,11 +14,11 @@ use File::Path qw(make_path remove_tree);
 ########################################################################################################################
 sub Usage {
 	print "Usage:\n\n";
-	print "    $0 -s [ alterBTSDK | kairosBTSDK | ethosBTSDK | universalBTSDK | pods | all ] [-k]\n";
+	print "    $0 -s [ alterBTSDK | kairosBTSDK | universalBTSDK | all ] [-k]\n";
 	print "\n\n";
 	
 	print "The scheme (-s or --scheme) is the scheme in that workspace\n";
-	print "if 'all' chosen, all are made, including pods\n";
+	print "if 'all' chosen, all are made\n";
 	print "the optional keep (k) is whether to keep the underlying frameworks after assembling the XCFramework\n";
 	print "\n\n";
 }
@@ -80,9 +80,7 @@ if ($scheme eq "") {
 undef (@schemes);
 
 if ($scheme eq "all") {
-	push (@schemes, "pods");
 	push (@schemes, "alterBTSDK");
-	push (@schemes, "ethosBTSDK");
 	push (@schemes, "kairosBTSDK");
 	push (@schemes, "universalBTSDK");
 }
@@ -95,35 +93,30 @@ $workspace				= "biostrapDeviceSDK";
 $allStartTime	= time();
 
 for $scheme (@schemes) {
-	if ($scheme eq "pods") {
-		$scheme = "iOSDFULibrary";	# Will also build ZIPFoundation
-	}
-	else {
-		$opt_command			="xcodebuild -workspace $workspace.xcworkspace -scheme $scheme -showBuildSettings";
+	$opt_command			="xcodebuild -workspace $workspace.xcworkspace -scheme $scheme -showBuildSettings";
 
-		print "-------------------------------------------------------\n";
-		print "$0: Building '", BOLD, BRIGHT_CYAN, "$scheme", RESET, "'\n";
+	print "-------------------------------------------------------\n";
+	print "$0: Building '", BOLD, BRIGHT_CYAN, "$scheme", RESET, "'\n";
 
-		open (CMD, "$opt_command 2>&1 |") || die "Can't get settings\n";
-		while (<CMD>) {
-			chop;
-			s/^\s+//;
-	
-			if (/MARKETING_VERSION/) {
-				($var, $equal, $value) = split (/\s+/, $_);
-				$major_minor = $value;
-			}
-	
-			if (/CURRENT_PROJECT_VERSION/) {
-				($var, $equal, $value) = split (/\s+/, $_);
-				$build = $value;
-			}
+	open (CMD, "$opt_command 2>&1 |") || die "Can't get settings\n";
+	while (<CMD>) {
+		chop;
+		s/^\s+//;
+
+		if (/MARKETING_VERSION/) {
+			($var, $equal, $value) = split (/\s+/, $_);
+			$major_minor = $value;
 		}
 
-		$version = "$major_minor.$build";
-
-		print "$0: Version is '", BOLD, BRIGHT_YELLOW, "$version", RESET, "'\n";
+		if (/CURRENT_PROJECT_VERSION/) {
+			($var, $equal, $value) = split (/\s+/, $_);
+			$build = $value;
+		}
 	}
+
+	$version = "$major_minor.$build";
+
+	print "$0: Version is '", BOLD, BRIGHT_YELLOW, "$version", RESET, "'\n";
 
 	$output					= "./releases/$scheme";
 	if ($version ne "") { $output .= "-$version"; }
