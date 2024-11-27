@@ -81,7 +81,7 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
-		globals.log.v ("\(peripheral.prettyID): didReadRSSI (do nothing)")
+        self.didReadRSSI(RSSI.intValue)
 	}
 	
 	//--------------------------------------------------------------------------------

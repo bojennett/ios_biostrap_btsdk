@@ -161,7 +161,9 @@ public class Device: NSObject, ObservableObject {
 	@Published public var tag: String?
 	
 	@Published public var ppgMetrics: ppgMetricsType?
-	
+
+    @Published public var signalStrength: Int?
+
 	// MARK: Passthrough Subjects (Completions)
 	public let readEpochComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 	public let writeEpochComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
@@ -1940,6 +1942,21 @@ public class Device: NSObject, ObservableObject {
 			}
 		}
 	}
+    
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    public func getSignalStrength() {
+        if let peripheral {
+            peripheral.readRSSI()
+        } else {
+            self.signalStrength = nil
+        }
+    }
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -2986,7 +3003,19 @@ public class Device: NSObject, ObservableObject {
 		}
 	}
 
-	
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    // Getting the new RSSI value from a read
+    //
+    //--------------------------------------------------------------------------------
+    func didReadRSSI(_ rssi: Int) {
+        DispatchQueue.main.async {
+            self.signalStrength = rssi
+        }
+    }
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------

@@ -1,0 +1,4 @@
+framework module alterBTSDK {
+  header "alterBTSDK-Swift.h"
+  requires objc
+}

@@ -1,0 +1,4 @@
+framework module kairosBTSDK {
+  header "kairosBTSDK-Swift.h"
+  requires objc
+}
