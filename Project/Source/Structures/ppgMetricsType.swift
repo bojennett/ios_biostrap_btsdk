@@ -37,5 +37,12 @@ public class ppgMetricsType: ObservableObject {
 			status = error.localizedDescription
 		}
 	}
+    
+    init() {
+        status = ""
+        hr = 0.0
+        hrv = 0.0
+        rr = 0.0
+    }
 }
 

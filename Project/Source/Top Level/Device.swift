@@ -98,6 +98,15 @@ public class Device: NSObject, ObservableObject {
 		case connecting
 		case configuring
 		case configured
+        
+        var title: String {
+            switch self {
+            case .disconnected: return "Disconnected"
+            case .connecting: return "Connecting"
+            case .configuring: return "Configuring"
+            case .configured: return "Configured"
+            }
+        }
 	}
 		
 	#if UNIVERSAL
@@ -110,59 +119,59 @@ public class Device: NSObject, ObservableObject {
 	// MARK: Published properties
 	@Published public var connectionState : ConnectionState = .disconnected
 
-	@Published public var name: String
-	@Published public var id: String
-	@Published public var discovery_type: biostrapDeviceSDK.biostrapDiscoveryType
-	@Published public var epoch: Int?
+	@Published public private(set) var name: String
+	@Published public private(set) var id: String
+	@Published public private(set) var discovery_type: biostrapDeviceSDK.biostrapDiscoveryType
+	@Published public private(set) var epoch: Int?
 	
-	@Published public var batteryLevel: Int?
-	@Published public var worn: Bool?
-	@Published public var charging: Bool?
-	@Published public var on_charger: Bool?
-	@Published public var charge_error: Bool?
+	@Published public private(set) var batteryLevel: Int?
+	@Published public private(set) var worn: Bool?
+	@Published public private(set) var charging: Bool?
+	@Published public private(set) var on_charger: Bool?
+	@Published public private(set) var charge_error: Bool?
 
-	@Published public var modelNumber: String?
-	@Published public var firmwareRevision: String?
-	@Published public var hardwareRevision: String?
-	@Published public var manufacturerName: String?
-	@Published public var serialNumber: String?
-	@Published public var bluetoothSoftwareRevision: String?
-	@Published public var algorithmsSoftwareRevision: String?
-	@Published public var sleepSoftwareRevision: String?
+	@Published public private(set) var modelNumber: String?
+	@Published public private(set) var firmwareRevision: String?
+	@Published public private(set) var hardwareRevision: String?
+	@Published public private(set) var manufacturerName: String?
+	@Published public private(set) var serialNumber: String?
+	@Published public private(set) var bluetoothSoftwareRevision: String?
+	@Published public private(set) var algorithmsSoftwareRevision: String?
+	@Published public private(set) var sleepSoftwareRevision: String?
 	
-	@Published public var canLogDiagnostics: Bool?
+	@Published public private(set) var canLogDiagnostics: Bool?
 	
-	@Published public var wornCheckResult: DeviceWornCheckResultType?
+	@Published public private(set) var wornCheckResult: DeviceWornCheckResultType?
 
-	@Published public var advertisingInterval: Int?
-	@Published public var chargeCycles: Float?
-	@Published public var advertiseAsHRM: Bool?
-	@Published public var rawLogging: Bool?
-	@Published public var wornOverridden: Bool?
+	@Published public private(set) var advertisingInterval: Int?
+	@Published public private(set) var chargeCycles: Float?
+	@Published public private(set) var advertiseAsHRM: Bool?
+	@Published public private(set) var rawLogging: Bool?
+	@Published public private(set) var wornOverridden: Bool?
 	@Published public var buttonResponseEnabled: Bool?
 	
-	@Published public var singleButtonPressAction: buttonCommandType?
-	@Published public var doubleButtonPressAction: buttonCommandType?
-	@Published public var tripleButtonPressAction: buttonCommandType?
-	@Published public var longButtonPressAction: buttonCommandType?
+	@Published public private(set) var singleButtonPressAction: buttonCommandType?
+	@Published public private(set) var doubleButtonPressAction: buttonCommandType?
+	@Published public private(set) var tripleButtonPressAction: buttonCommandType?
+	@Published public private(set) var longButtonPressAction: buttonCommandType?
 
-	@Published public var hrZoneLEDBelow: hrZoneLEDValueType?
-	@Published public var hrZoneLEDWithin: hrZoneLEDValueType?
-	@Published public var hrZoneLEDAbove: hrZoneLEDValueType?
-	@Published public var hrZoneRange: hrZoneRangeValueType?
+	@Published public private(set) var hrZoneLEDBelow: hrZoneLEDValueType?
+	@Published public private(set) var hrZoneLEDWithin: hrZoneLEDValueType?
+	@Published public private(set) var hrZoneLEDAbove: hrZoneLEDValueType?
+	@Published public private(set) var hrZoneRange: hrZoneRangeValueType?
 	
-	@Published public var buttonTaps: Int?
+	@Published public private(set) var buttonTaps: Int?
 
-	@Published public var paired: Bool?
-	@Published public var advertisingPageThreshold: Int?
+	@Published public private(set) var paired: Bool?
+	@Published public private(set) var advertisingPageThreshold: Int?
 	
-	@Published public var ppgCapturePeriod: Int?
-	@Published public var ppgCaptureDuration: Int?
-	@Published public var tag: String?
+	@Published public private(set) var ppgCapturePeriod: Int?
+	@Published public private(set) var ppgCaptureDuration: Int?
+	@Published public private(set) var tag: String?
 	
-	@Published public var ppgMetrics: ppgMetricsType?
+	@Published public private(set) var ppgMetrics: ppgMetricsType?
 
-    @Published public var signalStrength: Int?
+    @Published public private(set) var signalStrength: Int?
 
 	// MARK: Passthrough Subjects (Completions)
 	public let readEpochComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
@@ -371,7 +380,15 @@ public class Device: NSObject, ObservableObject {
 	internal var mHeartRateMeasurementCharacteristic	: heartRateMeasurementCharacteristic?
 	internal var mAmbiqOTARXCharacteristic				: ambiqOTARXCharacteristic?
 	internal var mAmbiqOTATXCharacteristic				: ambiqOTATXCharacteristic?
-	
+    
+    internal var preview: Bool = false
+    internal var previewTag: String?
+    internal var previewPPGCapturePeriod: Int?
+    internal var previewPPGCaptureDuration: Int?
+    internal var previewCommandStatus: DeviceCommandCompletionStatus = .successful
+    internal var previewFirmwareTimer: Timer?
+    internal var previewFirmwareProgress: Float = 0.0
+
 	class var manufacturer_prefixes: [String] {
 		#if UNIVERSAL
 		return [prefixes.alter.rawValue, prefixes.kairos.rawValue]
@@ -427,7 +444,90 @@ public class Device: NSObject, ObservableObject {
 			return (false)
 		}
 	}
+    
+	#if UNIVERSAL
+    static public func previewed(type: biostrapDeviceSDK.biostrapDeviceType = .alter,
+                                 battery: Int? = nil,
+                                 charging: Bool? = nil,
+                                 on_charger: Bool? = nil,
+                                 worn: Bool? = nil,
+                                 modelNumber: String? = nil,
+                                 firmwareRevision: String? = nil,
+                                 hardwareRevision: String? = nil,
+                                 manufacturerName: String? = nil,
+                                 serialNumber: String? = nil,
+                                 bluetoothSoftwareRevision: String? = nil,
+                                 algorithmsSoftwareRevision: String? = nil,
+                                 sleepSoftwareRevision: String? = nil,
+                                 commandCompletionStatus: DeviceCommandCompletionStatus? = nil
+    ) -> Device {
+        let device = Device()
+        device.type = type
+        device.name = "\(type.title)-Preview"
 
+        device.updatePreview(battery: battery,
+                             charging: charging,
+                             on_charger: on_charger,
+                             worn: worn,
+                             modelNumber: modelNumber,
+                             firmwareRevision: firmwareRevision,
+                             hardwareRevision: hardwareRevision,
+                             manufacturerName: manufacturerName,
+                             serialNumber: serialNumber,
+                             bluetoothSoftwareRevision: bluetoothSoftwareRevision,
+                             algorithmsSoftwareRevision: algorithmsSoftwareRevision,
+                             sleepSoftwareRevision: sleepSoftwareRevision,
+                             commandCompletionStatus: commandCompletionStatus
+        )
+        
+        return device
+    }
+	#endif
+
+	#if ALTER || KAIROS
+    static public func previewed(battery: Int? = nil,
+                                 charging: Bool? = nil,
+                                 on_charger: Bool? = nil,
+                                 worn: Bool? = nil,
+                                 modelNumber: String? = nil,
+                                 firmwareRevision: String? = nil,
+                                 hardwareRevision: String? = nil,
+                                 manufacturerName: String? = nil,
+                                 serialNumber: String? = nil,
+                                 bluetoothSoftwareRevision: String? = nil,
+                                 algorithmsSoftwareRevision: String? = nil,
+                                 sleepSoftwareRevision: String? = nil,
+                                 commandCompletionStatus: DeviceCommandCompletionStatus? = nil
+    ) -> Device {
+        let device = Device()
+        
+		#if ALTER
+        device.name = "Alter-Preview"
+		#endif
+
+		#if KAIROS
+        device.name = "Kairos-Preview"
+		#endif
+
+        device.updatePreview(battery: battery,
+                             charging: charging,
+                             on_charger: on_charger,
+                             worn: worn,
+                             modelNumber: modelNumber,
+                             firmwareRevision: firmwareRevision,
+                             hardwareRevision: hardwareRevision,
+                             manufacturerName: manufacturerName,
+                             serialNumber: serialNumber,
+                             bluetoothSoftwareRevision: bluetoothSoftwareRevision,
+                             algorithmsSoftwareRevision: algorithmsSoftwareRevision,
+                             sleepSoftwareRevision: sleepSoftwareRevision,
+                             commandCompletionStatus: commandCompletionStatus
+        )
+        
+        return device
+    }
+	#endif
+    
 	override public init() {
 		self.connectionState = .disconnected
 
@@ -441,7 +541,7 @@ public class Device: NSObject, ObservableObject {
 		self.type							= .unknown
 		#endif
 	}
-
+    
 	#if UNIVERSAL
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, type: biostrapDeviceSDK.biostrapDeviceType, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
@@ -541,8 +641,8 @@ public class Device: NSObject, ObservableObject {
 			customCharacteristic.firmwareVersion = firmwareVesion.value
 		}
 		
-		// If i was already configured, i don't need to tell the app this again
-		if (connectionState == .configured) { return }
+		if connectionState == .configured { return } // If i was already configured, i don't need to tell the app this again
+        if preview { return } // If i am mocked, i don't need to tell the app again
 		
 		var configured: Bool = false
 		
@@ -633,6 +733,12 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func writeEpoch(_ newEpoch: Int) {
+        if preview {
+            self.epoch = newEpoch
+            self.writeEpochComplete.send(previewCommandStatus)
+            return
+        }
+
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.writeEpoch(newEpoch)
 		}
@@ -657,6 +763,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func readEpoch() {
+        if preview {
+            self.readEpochComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.readEpoch()
 		}
@@ -683,6 +794,12 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func endSleep() {
+        if preview {
+            self.endSleepComplete.send(previewCommandStatus)
+            self.endSleepStatus.send(true)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.endSleep()
 		}
@@ -722,6 +839,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func getAllPackets(pages: Int, delay: Int) {
+        if preview {
+            self.getAllPacketsComplete.send(previewCommandStatus)
+            return
+        }
+        
 		var newStyle	= false
 		
 		if let mainCharacteristic = mMainCharacteristic {
@@ -762,6 +884,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func getAllPacketsAcknowledge(_ ack: Bool) {
+        if preview {
+            self.getAllPacketsAcknowledgeComplete.send((previewCommandStatus, ack))
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getAllPacketsAcknowledge(ack)
 		}
@@ -787,6 +914,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func getPacketCount() {
+        if preview {
+            self.getPacketCountComplete.send((previewCommandStatus, 0))
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getPacketCount()
 		}
@@ -812,6 +944,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func disableWornDetect() {
+        if preview {
+            self.disableWornDetectComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.disableWornDetect()
 		}
@@ -835,6 +972,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func enableWornDetect() {
+        if preview {
+            self.enableWornDetectComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.enableWornDetect()
 		}
@@ -858,6 +1000,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func startManual(_ algorithms: ppgAlgorithmConfiguration) {
+        if preview {
+            self.startManualComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.startManual(algorithms)
 		}
@@ -881,6 +1028,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func stopManual() {
+        if preview {
+            self.stopManualComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.stopManual()
 		}
@@ -898,6 +1050,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func userLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
+        if preview {
+            self.ledComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.userLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
 		}
@@ -922,6 +1079,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func enterShipMode() {
+        if preview {
+            self.enterShipModeComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.enterShipMode()
 		}
@@ -947,6 +1109,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func reset() {
+        if preview {
+            self.resetComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.reset()
 		}
@@ -972,6 +1139,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func airplaneMode() {
+        if preview {
+            self.airplaneModeComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.airplaneMode()
 		}
@@ -997,6 +1169,12 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func writeSerialNumber(_ partID: String) {
+        if preview {
+            self.serialNumber = partID
+            self.writeSerialNumberComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.writeSerialNumber(partID)
 		}
@@ -1022,6 +1200,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func readSerialNumber() {
+        if preview {
+            self.readSerialNumberComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.readSerialNumber()
 		}
@@ -1047,6 +1230,12 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func deleteSerialNumber() {
+        if preview {
+            self.serialNumber = nil
+            self.deleteSerialNumberComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.deleteSerialNumber()
 		}
@@ -1072,6 +1261,12 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func writeAdvInterval(_ seconds: Int) {
+        if preview {
+            self.advertisingInterval = seconds
+            self.writeAdvIntervalComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.writeAdvInterval(seconds)
 		}
@@ -1097,6 +1292,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func readAdvInterval() {
+        if preview {
+            self.readAdvIntervalComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.readAdvInterval()
 		}
@@ -1122,6 +1322,12 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func deleteAdvInterval() {
+        if preview {
+            self.advertisingInterval = nil
+            self.deleteAdvIntervalComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.deleteAdvInterval()
 		}
@@ -1147,6 +1353,12 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func clearChargeCycles() {
+        if preview {
+            self.chargeCycles = 0.0
+            self.clearChargeCyclesComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.clearChargeCycles()
 		}
@@ -1172,6 +1384,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func readChargeCycles() {
+        if preview {
+            self.readChargeCyclesComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.readChargeCycles()
 		}
@@ -1197,6 +1414,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func readCanLogDiagnostics() {
+        if preview {
+            self.readCanLogDiagnosticsComplete.send(previewCommandStatus)
+            return
+        }
+            
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.readCanLogDiagnostics()
 		}
@@ -1223,7 +1445,13 @@ public class Device: NSObject, ObservableObject {
 	}
 		
 	public func updateCanLogDiagnostics(_ allow: Bool) {
-		if let mainCharacteristic = mMainCharacteristic {
+        if preview {
+            self.canLogDiagnostics = allow
+            self.updateCanLogDiagnosticsComplete.send(previewCommandStatus)
+            return
+        }
+
+        if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.updateCanLogDiagnostics(allow)
 		}
 		else {
@@ -1249,6 +1477,14 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func alterManufacturingTest(_ test: alterManufacturingTestType) {
+        if preview {
+            self.manufacturingTestComplete.send(previewCommandStatus)
+            if previewCommandStatus == .successful {
+                self.previewSendAlterTestResult(test)
+            }
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.alterManufacturingTest(test)
 		}
@@ -1269,6 +1505,14 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func kairosManufacturingTest(_ test: kairosManufacturingTestType) {
+        if preview {
+            self.manufacturingTestComplete.send(previewCommandStatus)
+            if previewCommandStatus == .successful {
+                self.previewSendKairosTestResult(test)
+            }
+            return
+        }
+
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.kairosManufacturingTest(test)
 		}
@@ -1293,6 +1537,12 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func setAskForButtonResponse(_ enable: Bool) {
+        if preview {
+            self.buttonResponseEnabled = enable
+            self.setAskForButtonResponseComplete.send(previewCommandStatus)
+            return
+        }
+
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAskForButtonResponse(enable) }
 		else {
 			DispatchQueue.main.async {
@@ -1314,6 +1564,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func getAskForButtonResponse() {
+        if preview {
+            self.getAskForButtonResponseComplete.send(previewCommandStatus)
+            return
+        }
+
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAskForButtonResponse() }
 		else {
 			DispatchQueue.main.async {
@@ -1337,6 +1592,18 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func setHRZoneColor(_ type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
+        if preview {
+            switch (type) {
+            case .below: self.hrZoneLEDBelow = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_milliseconds, off_ms: off_milliseconds)
+            case .within: self.hrZoneLEDWithin = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_milliseconds, off_ms: off_milliseconds)
+            case .above: self.hrZoneLEDAbove = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_milliseconds, off_ms: off_milliseconds)
+            default: break
+            }
+            
+            self.setHRZoneColorComplete.send((previewCommandStatus, type))
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
 		}
@@ -1362,6 +1629,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func getHRZoneColor(_ type: hrZoneRangeType) {
+        if preview {
+            self.getHRZoneColorComplete.send((previewCommandStatus, type))
+            return
+        }
+
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getHRZoneColor(type)
 		}
@@ -1387,6 +1659,12 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func setHRZoneRange(_ enabled: Bool, high_value: Int, low_value: Int) {
+        if preview {
+            self.hrZoneRange = hrZoneRangeValueType(enabled: enabled, lower: low_value, upper: high_value)
+            self.setHRZoneRangeComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
 		}
@@ -1412,6 +1690,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func getHRZoneRange() {
+        if preview {
+            self.getHRZoneRangeComplete.send(previewCommandStatus)
+            return
+        }
+
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getHRZoneRange()
 		}
@@ -1435,6 +1718,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func getPPGAlgorithm() {
+        if preview {
+            self.getPPGAlgorithmComplete.send((true, ppgAlgorithmConfiguration(), eventType.unknown))
+            return
+        }
+
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPPGAlgorithm() }
 		else {
 			DispatchQueue.main.async {
@@ -1456,6 +1744,12 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func setAdvertiseAsHRM(_ asHRM: Bool) {
+        if preview {
+            self.advertiseAsHRM = asHRM
+            self.setAdvertiseAsHRMComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAdvertiseAsHRM(asHRM) }
 		else {
 			DispatchQueue.main.async {
@@ -1478,6 +1772,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func getAdvertiseAsHRM() {
+        if preview {
+            self.getAdvertiseAsHRMComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAdvertiseAsHRM() }
 		else {
 			DispatchQueue.main.async {
@@ -1499,6 +1798,18 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func setButtonCommand(_ tap: buttonTapType, command: buttonCommandType) {
+        if preview {
+            switch tap {
+            case .single: self.singleButtonPressAction = command
+            case .double: self.doubleButtonPressAction = command
+            case .triple: self.tripleButtonPressAction = command
+            case .long: self.longButtonPressAction = command
+            case .unknown: break
+            }
+            self.setButtonCommandComplete.send((previewCommandStatus, tap))
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setButtonCommand(tap, command: command) }
 		else {
 			DispatchQueue.main.async {
@@ -1520,6 +1831,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func getButtonCommand(_ tap: buttonTapType) {
+        if preview {
+            self.getButtonCommandComplete.send((previewCommandStatus, tap))
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getButtonCommand(tap) }
 		else {
 			DispatchQueue.main.async {
@@ -1601,6 +1917,12 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func setPageThreshold(_ threshold: Int) {
+        if preview {
+            self.advertisingPageThreshold = threshold
+            self.setPageThresholdComplete.send(previewCommandStatus)
+            return
+        }
+
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPageThreshold(threshold) }
 		else {
 			DispatchQueue.main.async {
@@ -1622,6 +1944,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func getPageThreshold() {
+        if preview {
+            self.getPageThresholdComplete.send(previewCommandStatus)
+            return
+        }
+
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPageThreshold() }
 		else {
 			DispatchQueue.main.async {
@@ -1644,6 +1971,12 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func deletePageThreshold() {
+        if preview {
+            self.advertisingPageThreshold = nil
+            self.deletePageThresholdComplete.send(previewCommandStatus)
+            return
+        }
+
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.deletePageThreshold() }
 		else {
 			DispatchQueue.main.async {
@@ -1667,6 +2000,11 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func rawLogging(_ enable: Bool) {
+        if preview {
+            self.rawLoggingComplete.send(previewCommandStatus)
+            return
+        }
+
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.rawLogging(enable)
 		}
@@ -1692,6 +2030,12 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func wornCheck() {
+        if preview {
+            self.wornCheckResult = DeviceWornCheckResultType(code: "Preview", value: 0)
+            self.wornCheckResultComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.wornCheck()
 		}
@@ -1718,6 +2062,11 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func getRawLoggingStatus() {
+        if preview {
+            self.getRawLoggingStatusComplete.send(previewCommandStatus)
+            return
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getRawLoggingStatus()
 		}
@@ -1743,6 +2092,10 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func getWornOverrideStatus() {
+        if preview {
+            self.getWornOverrideStatusComplete.send(previewCommandStatus)
+        }
+        
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getWornOverrideStatus()
 		}
@@ -1775,6 +2128,30 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func updateFirmware(_ file: URL) {
+        if preview {
+            if previewCommandStatus != .successful {
+                self.updateFirmwareFailed.send((10001, "Cannot do preview firmware update"))
+            } else {
+                self.updateFirmwareStarted.send()
+                self.previewFirmwareTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+                    let updatePercent = Float.random(in: 0..<0.1)
+                    if self.previewFirmwareProgress + updatePercent >= 1.0 {
+                        DispatchQueue.main.async {
+                            self.previewFirmwareTimer?.invalidate()
+                            self.previewFirmwareProgress = 0.0
+                            self.updateFirmwareProgress.send(1.0)
+                            self.updateFirmwareFinished.send()
+                        }
+                    } else {
+                        self.previewFirmwareProgress += updatePercent
+                        self.updateFirmwareProgress.send(self.previewFirmwareProgress)
+                    }
+                }
+            }
+            
+            return
+        }
+        
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
 			do {
 				let contents = try Data(contentsOf: file)
@@ -1807,6 +2184,13 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func cancelFirmwareUpdate() {
+        if preview {
+            self.previewFirmwareTimer?.invalidate()
+            self.previewFirmwareProgress = 0.0
+            self.updateFirmwareFailed.send((10001, "User cancelled"))
+            return
+        }
+        
 		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic { ambiqOTARXCharacteristic.cancel() }
 		else {
 			DispatchQueue.main.async {
@@ -1832,7 +2216,15 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func setSessionParam(_ parameter: sessionParameterType, value: Int) {
-		globals.log.v("\(self.id): \(parameter)")
+        if preview {
+            switch parameter {
+            case .tag: self.previewTag = String(value)
+            case .ppgCapturePeriod: self.previewPPGCapturePeriod = value
+            case .ppgCaptureDuration: self.previewPPGCaptureDuration = value
+            default: break
+            }
+            self.setSessionParamComplete.send((previewCommandStatus, parameter))
+        }
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.setSessionParam(parameter, value: value)
@@ -1862,17 +2254,17 @@ public class Device: NSObject, ObservableObject {
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getSessionParam(parameter)
-		}
-		else { self.lambdaGetSessionParamComplete?(self.id, false, parameter, 0) }
+		} else { self.lambdaGetSessionParamComplete?(self.id, false, parameter, 0) }
 	}
 
 	public func getSessionParam(_ parameter: sessionParameterType) {
-		globals.log.v("\(self.id): \(parameter)")
+        if preview {
+            self.getSessionParamComplete.send((previewCommandStatus, parameter))
+        }
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.getSessionParam(parameter)
-		}
-		else {
+		} else {
 			DispatchQueue.main.async {
 				switch parameter {
 				case .tag: self.tag = nil
@@ -1880,7 +2272,7 @@ public class Device: NSObject, ObservableObject {
 				case .ppgCaptureDuration: self.ppgCaptureDuration = nil
 				default: break
 				}
-				self.setSessionParamComplete.send((.not_configured, parameter))
+				self.getSessionParamComplete.send((.not_configured, parameter))
 			}
 		}
 	}
@@ -1893,8 +2285,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func resetSessionParamsInternal() {
-		globals.log.v("\(self.id)")
-
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.resetSessionParams()
 		}
@@ -1902,7 +2292,12 @@ public class Device: NSObject, ObservableObject {
 	}
 
 	public func resetSessionParams() {
-		globals.log.v("\(self.id)")
+        if preview {
+            self.previewTag = self.tag
+            self.previewPPGCapturePeriod = self.ppgCapturePeriod
+            self.previewPPGCaptureDuration = self.ppgCaptureDuration
+            self.resetSessionParamsComplete.send(previewCommandStatus)
+        }
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.resetSessionParams()
@@ -1931,7 +2326,12 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	public func acceptSessionParams() {
-		globals.log.v("\(self.id)")
+        if preview {
+            self.tag = self.previewTag
+            self.ppgCapturePeriod = self.previewPPGCapturePeriod
+            self.ppgCaptureDuration = self.previewPPGCaptureDuration
+            self.acceptSessionParamsComplete.send(previewCommandStatus)
+        }
 
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.acceptSessionParams()
@@ -1951,6 +2351,11 @@ public class Device: NSObject, ObservableObject {
     //
     //--------------------------------------------------------------------------------
     public func getSignalStrength() {
+        if preview {
+            self.signalStrength = -1 * Int.random(in: 50..<90)
+            return
+        }
+        
         if let peripheral {
             peripheral.readRSSI()
         } else {
@@ -3035,4 +3440,122 @@ extension Device {
 	static func ==(lhs: Device, rhs: Device) -> Bool {
 		return lhs.id == rhs.id
 	}
+    
+    private func updatePreview(battery: Int? = nil,
+                               charging: Bool? = nil,
+                               on_charger: Bool? = nil,
+                               worn: Bool? = nil,
+                               modelNumber: String? = nil,
+                               firmwareRevision: String? = nil,
+                               hardwareRevision: String? = nil,
+                               manufacturerName: String? = nil,
+                               serialNumber: String? = nil,
+                               bluetoothSoftwareRevision: String? = nil,
+                               algorithmsSoftwareRevision: String? = nil,
+                               sleepSoftwareRevision: String? = nil,
+                               commandCompletionStatus: DeviceCommandCompletionStatus? = nil
+    ) {
+        self.preview = true
+
+        self.id = UUID().uuidString
+        self.connectionState = .configured
+        self.epoch = Int.random(in: 0..<3000)
+        self.batteryLevel = 50
+        self.worn = false
+        self.charging = false
+        self.on_charger = false
+        self.charge_error = false
+        self.modelNumber = "modelNumber"
+        self.firmwareRevision = "2.2.2"
+        self.hardwareRevision = "0.0.3"
+        self.manufacturerName = "manufacturerName"
+        self.serialNumber = "serialNumber"
+        self.bluetoothSoftwareRevision = "bluetoothSoftwareRevision"
+        self.algorithmsSoftwareRevision = "algorithmsSoftwareRevision"
+        self.sleepSoftwareRevision = "sleepSoftwareRevision"
+        self.canLogDiagnostics = false
+        self.wornCheckResult = DeviceWornCheckResultType(code: "Not Worn", value: 4)
+        self.advertisingInterval = 10
+        self.chargeCycles = 1.0
+        self.advertiseAsHRM = false
+        self.rawLogging = false
+        self.wornOverridden = false
+        self.buttonResponseEnabled = false
+        self.singleButtonPressAction = buttonCommandType.none
+        self.doubleButtonPressAction = buttonCommandType.none
+        self.tripleButtonPressAction = buttonCommandType.none
+        self.longButtonPressAction = buttonCommandType.none
+        self.hrZoneLEDBelow = hrZoneLEDValueType(red: false, green: false, blue: false, on_ms: 0, off_ms: 0)
+        self.hrZoneLEDWithin = hrZoneLEDValueType(red: false, green: false, blue: false, on_ms: 0, off_ms: 0)
+        self.hrZoneLEDAbove = hrZoneLEDValueType(red: false, green: false, blue: false, on_ms: 0, off_ms: 0)
+        self.hrZoneRange = hrZoneRangeValueType(enabled: false, lower: 0, upper: 0)
+        self.buttonTaps = 0
+        self.paired = false
+        self.advertisingPageThreshold = 10
+        
+        self.previewPPGCapturePeriod = 300
+        self.previewPPGCaptureDuration = 45
+        self.previewTag = "UK"
+
+        self.ppgCapturePeriod = 300
+        self.ppgCaptureDuration = 45
+        self.tag = "UK"
+        
+        self.ppgMetrics = ppgMetricsType()
+        self.signalStrength = -50
+
+        if let battery { self.batteryLevel = battery }
+        if let charging { self.charging = charging }
+        if let on_charger { self.on_charger = on_charger }
+        if let worn { self.worn = worn }
+        if let modelNumber { self.modelNumber = modelNumber }
+        if let firmwareRevision { self.firmwareRevision = firmwareRevision }
+        if let hardwareRevision { self.hardwareRevision = hardwareRevision }
+        if let manufacturerName { self.manufacturerName = manufacturerName }
+        if let serialNumber { self.serialNumber = serialNumber }
+        if let bluetoothSoftwareRevision { self.bluetoothSoftwareRevision = bluetoothSoftwareRevision }
+        if let algorithmsSoftwareRevision { self.algorithmsSoftwareRevision = algorithmsSoftwareRevision }
+        if let sleepSoftwareRevision { self.sleepSoftwareRevision = sleepSoftwareRevision }
+        if let commandCompletionStatus { self.previewCommandStatus = commandCompletionStatus }
+    }
+    
+    #if UNIVERSAL || ALTER
+    private func previewSendAlterTestResult(_ test: alterManufacturingTestType) {
+        let testResult = alterManufacturingTestResult()
+        testResult.test = test
+        testResult.result = Bool.random() ? "Passed" : "Failed"
+        do {
+            let jsonData = try JSONEncoder().encode(testResult)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                self.manufacturingTestResult.send((true, jsonString))
+            } else {
+                globals.log.e ("Result jsonString Failed")
+                self.manufacturingTestResult.send((false, ""))
+            }
+        } catch {
+            globals.log.e ("Result creation Failed")
+            self.manufacturingTestResult.send((false, ""))
+        }
+    }
+    #endif
+    
+    #if UNIVERSAL || KAIROS
+    private func previewSendKairosTestResult(_ test: kairosManufacturingTestType) {
+        let testResult = kairosManufacturingTestResult()
+        testResult.test = test
+        testResult.result = Bool.random() ? "Passed" : "Failed"
+        do {
+            let jsonData = try JSONEncoder().encode(testResult)
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                self.manufacturingTestResult.send((true, jsonString))
+            } else {
+                globals.log.e ("Result jsonString Failed")
+                self.manufacturingTestResult.send((false, ""))
+            }
+        } catch {
+            globals.log.e ("Result creation Failed")
+            self.manufacturingTestResult.send((false, ""))
+        }
+    }
+	#endif
 }

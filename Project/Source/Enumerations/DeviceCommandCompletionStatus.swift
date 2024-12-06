@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum DeviceCommandCompletionStatus {
+public enum DeviceCommandCompletionStatus: CaseIterable {
 	case successful
 	case not_configured
 	case device_error

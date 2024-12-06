@@ -1,4 +1,0 @@
-framework module universalBTSDK {
-  header "universalBTSDK-Swift.h"
-  requires objc
-}
