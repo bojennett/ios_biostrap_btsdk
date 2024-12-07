@@ -40,7 +40,7 @@ class hrsService: ServiceTemplate {
     }
     
     override var configured: Bool {
-        return mHeartRateMeasurementCharacteristic?.configured ?? false
+        return mHeartRateMeasurementCharacteristic?.pConfigured ?? false
     }
 
     //--------------------------------------------------------------------------------

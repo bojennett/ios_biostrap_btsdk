@@ -48,7 +48,7 @@ class ambiqOTAService: ServiceTemplate {
     
     override var configured: Bool {
         if let rxCharacteristic, let txCharacteristic {
-            return txCharacteristic.configured && rxCharacteristic.configured
+            return txCharacteristic.pConfigured && rxCharacteristic.pConfigured
         }
         
         return false

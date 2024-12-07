@@ -27,24 +27,13 @@ class Characteristic {
 	}
 	
 	// MARK: Internal Variables
-	internal var pPeripheral		: CBPeripheral?
-	internal var pCharacteristic	: CBCharacteristic?
-	internal var pID				: String				= "UNKNOWN"
-	internal var pConfigured		: Bool					= false
-	internal var pDiscovered		: Bool					= false
+	internal var pPeripheral: CBPeripheral?
+	internal var pCharacteristic: CBCharacteristic?
+	internal var pID: String = "UNKNOWN"
+	internal var pConfigured: Bool = false
 	internal var pCommandQ: CommandQ?
 
-	// MARK: Public Variables
-	var configured: Bool {
-		return (pConfigured)
-	}
-
-	// MARK: Public Variables
-	var discovered: Bool {
-		return (pDiscovered)
-	}
-
-	internal var pFailedDecodeCount			: Int = 0
+	internal var pFailedDecodeCount: Int = 0
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -358,8 +347,7 @@ class Characteristic {
 					index = index + type.length
 					if (type != .unknown) { dataPackets.append(packet) }
 				}
-			}
-			else {
+			} else {
 				index = index + packetType.unknown.length
 				pFailedDecodeCount	= pFailedDecodeCount + 1
 			}
@@ -384,11 +372,10 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
-		pID				= peripheral.prettyID
-		pPeripheral		= peripheral
-		pCharacteristic	= characteristic
-		pConfigured		= false
-		pDiscovered		= false
+		pID = peripheral.prettyID
+		pPeripheral = peripheral
+		pCharacteristic = characteristic
+		pConfigured = false
 		pCommandQ = commandQ
 	}
 	
@@ -455,8 +442,8 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func didDiscoverDescriptor() {
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			peripheral.setNotifyValue(true, for: characteristic)
+		if let pPeripheral, let pCharacteristic {
+			pPeripheral.setNotifyValue(true, for: pCharacteristic)
 		}
 	}
 	
@@ -468,8 +455,8 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func discoverDescriptors() {
-		if let peripheral = pPeripheral, let characteristic = pCharacteristic {
-			peripheral.discoverDescriptors(for: characteristic)
+		if let pPeripheral, let pCharacteristic {
+			pPeripheral.discoverDescriptors(for: pCharacteristic)
 		}
 	}
 	

@@ -32,8 +32,6 @@ public class Device: NSObject, ObservableObject {
 		case kairos			= "140BB753-9845-4C0E-B61A-E6BAE41712F0"
 		#endif
 
-		case ambiqOTA		= "00002760-08C2-11E1-9073-0E8AC72E1001"
-		
 		var UUID: CBUUID {
 			return CBUUID(string: self.rawValue)
 		}
@@ -46,9 +44,7 @@ public class Device: NSObject, ObservableObject {
 
 			#if UNIVERSAL || KAIROS
 			case .kairos	: return "Kairos Service"
-			#endif
-				
-			case .ambiqOTA	: return "Ambiq OTA Service"
+			#endif				
 			}
 		}
 	}
@@ -412,19 +408,20 @@ public class Device: NSObject, ObservableObject {
 				case .device_information,
 					 .battery_service,
 					 .pulse_oximeter,
-					 .heart_rate			: return (true)
+					 .heart_rate			: return true
 				default:
 					globals.log.e ("\(peripheral.prettyID): (unknown): '\(standardService.title)'")
-					return (false)
+					return false
 				}
-			}
-			else if let customService = Device.services(rawValue: service.prettyID) {
+			} else if let customService = Device.services(rawValue: service.prettyID) {
 				globals.log.v ("\(peripheral.prettyID): '\(customService.title)'")
-				return (true)
-			}
-			else {
+				return true
+			} else if service.uuid == ambiqOTAService.scan_service {
+                globals.log.v ("\(peripheral.prettyID): 'Ambiq OTA'")
+                return true
+            } else {
 				globals.log.e ("\(peripheral.prettyID): \(service.prettyID) - don't know what to do!!!!")
-				return (false)
+				return false
 			}
 		}
 		else {
@@ -565,22 +562,24 @@ public class Device: NSObject, ObservableObject {
 	#if UNIVERSAL || ALTER
 	internal var mAlterConfigured: Bool {
         if let mAmbiqOTAService, let mMainCharacteristic, let mBAS, let mHRS, let mDIS {
+            
+            //globals.log.e ("\(mAmbiqOTAService.configured):\(mBAS.configured):\(mHRS.configured):\(mDIS.configured),\(mMainCharacteristic.pConfigured):\(mStreamingCharacteristic?.pConfigured):\(mDataCharacteristic?.pConfigured)")
 			
 			if let mDataCharacteristic, let mStreamingCharacteristic {
 				return (mBAS.configured &&
                         mHRS.configured &&
                         mDIS.configured &&
                         mAmbiqOTAService.configured &&
-						mMainCharacteristic.configured &&
-						mDataCharacteristic.configured &&
-                        mStreamingCharacteristic.configured
+						mMainCharacteristic.pConfigured &&
+						mDataCharacteristic.pConfigured &&
+                        mStreamingCharacteristic.pConfigured
 				)
 			} else {
 				return (mBAS.configured &&
                         mHRS.configured &&
                         mDIS.configured &&
                         mAmbiqOTAService.configured &&
-						mMainCharacteristic.configured
+						mMainCharacteristic.pConfigured
 				)
 			}
 		}
@@ -597,16 +596,16 @@ public class Device: NSObject, ObservableObject {
                         mHRS.configured &&
                         mDIS.configured &&
                         mAmbiqOTAService.configured &&
-						mMainCharacteristic.configured &&
-						mDataCharacteristic.configured &&
-                        mStreamingCharacteristic.configured
+						mMainCharacteristic.pConfigured &&
+						mDataCharacteristic.pConfigured &&
+                        mStreamingCharacteristic.pConfigured
 				)
 			} else {
 				return (mBAS.configured &&
                         mHRS.configured &&
                         mDIS.configured &&
                         mAmbiqOTAService.configured &&
-						mMainCharacteristic.configured
+						mMainCharacteristic.pConfigured
 				)
 			}
 		}

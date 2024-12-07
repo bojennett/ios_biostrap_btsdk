@@ -37,7 +37,7 @@ class basService: ServiceTemplate {
     }
     
     override var configured: Bool {
-        return mBatteryLevelCharacteristic?.configured ?? false
+        return mBatteryLevelCharacteristic?.pConfigured ?? false
     }
 
     //--------------------------------------------------------------------------------
