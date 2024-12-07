@@ -14,7 +14,7 @@ class basService: ServiceTemplate {
     internal var mBatteryLevelCharacteristic    : batteryLevelCharacteristic?
     
     @Published var batteryLevel: Int?
-    var updated: ((_ id: String, _ percentage: Int)->())?
+    var lambdaUpdated: ((_ id: String, _ percentage: Int)->())?
 
     //--------------------------------------------------------------------------------
     //
@@ -56,8 +56,8 @@ class basService: ServiceTemplate {
                 }
                 .store(in: &pSubscriptions)
             
-            mBatteryLevelCharacteristic?.updated = { [weak self] id, percentage in
-                self?.updated?(id, percentage)
+            mBatteryLevelCharacteristic?.lambdaUpdated = { [weak self] id, percentage in
+                self?.lambdaUpdated?(id, percentage)
             }
             
             mBatteryLevelCharacteristic?.didDiscover()

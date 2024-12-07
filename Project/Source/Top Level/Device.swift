@@ -2991,6 +2991,7 @@ public class Device: NSObject, ObservableObject {
 			if connectionState == .connecting {
 				peripheral.delegate = self
                 
+                // Battery Service
                 mBAS?.didConnect(peripheral)
                 mBAS?.$batteryLevel
                     .compactMap { $0 }
@@ -3000,12 +3001,12 @@ public class Device: NSObject, ObservableObject {
                     }
                     .store(in: &subscriptions)
                 
-                mBAS?.updated    = { [weak self] id, percentage in
+                mBAS?.lambdaUpdated = { [weak self] id, percentage in
                     self?.lambdaBatteryLevelUpdated?(id, percentage)
                 }
                 
+                // Heart Rate Service
                 mHRS?.didConnect(peripheral)
-                
                 mHRS?.updated
                     .compactMap { $0 }
                     .receive(on: DispatchQueue.main)
@@ -3018,6 +3019,7 @@ public class Device: NSObject, ObservableObject {
                     self?.lambdaHeartRateUpdated?(id, epoch, hr, rr)
                 }
 
+                // Configure
 				connectionState = .configuring
 				peripheral.discoverServices(nil)
 			}

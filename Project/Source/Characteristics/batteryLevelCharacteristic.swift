@@ -11,7 +11,7 @@ import CoreBluetooth
 class batteryLevelCharacteristic: Characteristic {
 	    
     @Published var batteryLevel: Int?
-    var updated: ((_ id: String, _ percentage: Int)->())?
+    var lambdaUpdated: ((_ id: String, _ percentage: Int)->())?
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -24,7 +24,7 @@ class batteryLevelCharacteristic: Characteristic {
 		if let characteristic = pCharacteristic {
             if let data = characteristic.value {
                 batteryLevel = Int(data[0])
-                updated?(pID, Int(data[0]))
+                lambdaUpdated?(pID, Int(data[0]))
             } else {
 				globals.log.e ("\(pID): Missing data")
 			}
