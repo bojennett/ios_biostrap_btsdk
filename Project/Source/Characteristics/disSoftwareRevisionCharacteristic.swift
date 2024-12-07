@@ -10,12 +10,12 @@ import CoreBluetooth
 
 class disSoftwareRevisionCharacteristic: Characteristic {
 	
-	var bluetooth			: String	= ""
-	var algorithms			: String	= ""
-	var sleep				: String	= ""
+	@Published var bluetooth : String = ""
+    @Published var algorithms : String = ""
+    @Published var sleep : String = ""
 	
 	#if UNIVERSAL
-	var type				: biostrapDeviceSDK.biostrapDeviceType	= .unknown
+	var type : biostrapDeviceSDK.biostrapDeviceType	= .unknown
 	#endif
 		
 	//--------------------------------------------------------------------------------
@@ -47,18 +47,18 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 		
 		if let characteristic = pCharacteristic {
 			if let data = characteristic.value {
-				bluetooth	= ""
-				algorithms	= ""
-				sleep		= ""
+				bluetooth = ""
+				algorithms = ""
+				sleep = ""
 
 				let dataString = String(decoding: data, as: UTF8.self).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"])))
 				let components = dataString.split(separator: "_")
 				
 				var index = 0
 				for component in components {
-					if (index == 0) { bluetooth		= String(component) }
-					if (index == 1) { algorithms	= String(component) }
-					if (index == 2) { sleep		= String(component) }
+					if (index == 0) { bluetooth = String(component) }
+					if (index == 1) { algorithms = String(component) }
+					if (index == 2) { sleep = String(component) }
 
 					index = index + 1
 				}
@@ -67,6 +67,17 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 		}
 		else { globals.log.e ("\(pID): Missing characteristic") }
 	}
+
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    override func didDiscover() {
+        read()
+    }
 
 	//--------------------------------------------------------------------------------
 	// Function Name:

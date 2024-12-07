@@ -116,5 +116,4 @@ class hrsService: ServiceTemplate {
         default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
         }
     }
-
 }

@@ -363,24 +363,16 @@ public class Device: NSObject, ObservableObject {
 
 	internal var commandQ: CommandQ?
 	
-	internal var mModelNumber					: disStringCharacteristic?
-	internal var mFirmwareVersion				: disFirmwareVersionCharacteristic?
-	internal var mSoftwareRevision				: disSoftwareRevisionCharacteristic?
-	internal var mHardwareRevision				: disStringCharacteristic?
-	internal var mManufacturerName				: disStringCharacteristic?
-	internal var mSerialNumber					: disStringCharacteristic?
-	internal var mDISCharacteristicCount		: Int = 0
-	internal var mDISCharacteristicsDiscovered	: Bool = false
-	
     internal var mBAS: basService?
     internal var mHRS: hrsService?
+    internal var mDIS: disService?
 
-	internal var mMainCharacteristic			: customMainCharacteristic?
-	internal var mDataCharacteristic			: customDataCharacteristic?
-	internal var mStreamingCharacteristic		: customStreamingCharacteristic?
+	internal var mMainCharacteristic: customMainCharacteristic?
+	internal var mDataCharacteristic: customDataCharacteristic?
+	internal var mStreamingCharacteristic: customStreamingCharacteristic?
 
-	internal var mAmbiqOTARXCharacteristic				: ambiqOTARXCharacteristic?
-	internal var mAmbiqOTATXCharacteristic				: ambiqOTATXCharacteristic?
+	internal var mAmbiqOTARXCharacteristic: ambiqOTARXCharacteristic?
+	internal var mAmbiqOTATXCharacteristic: ambiqOTATXCharacteristic?
     
     internal var subscriptions = Set<AnyCancellable>()
 
@@ -537,8 +529,6 @@ public class Device: NSObject, ObservableObject {
 
 		self.name							= "UNKNOWN"
 		self.id								= "UNKNOWN"
-		self.mDISCharacteristicCount		= 0
-		self.mDISCharacteristicsDiscovered	= false
 		self.discovery_type					= .unknown
 		
 		#if UNIVERSAL
@@ -560,6 +550,7 @@ public class Device: NSObject, ObservableObject {
         
         self.mBAS = basService(commandQ)
         self.mHRS = hrsService(commandQ)
+        self.mDIS = disService(commandQ, type: type)
 	}
 	#else
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
@@ -574,34 +565,31 @@ public class Device: NSObject, ObservableObject {
         
         self.mBAS = basService(commandQ)
         self.mHRS = hrsService(commandQ)
+        self.mDIS = disService(commandQ)
 	}
 	#endif
 	
 	#if UNIVERSAL || ALTER
 	internal var mAlterConfigured: Bool {
-		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let mBAS, let mHRS {
+		if let mAmbiqOTARXCharacteristic, let mAmbiqOTATXCharacteristic, let mMainCharacteristic, let mBAS, let mHRS, let mDIS {
 			
-			if let dataCharacteristic = mDataCharacteristic, let strmCharacteristic = mStreamingCharacteristic {
-				//log?.v ("ALTER MAIN: \(mainCharacteristic.configured), ALTER DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
-				
-				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-                        mBAS.configured &&
+			if let mDataCharacteristic, let mStreamingCharacteristic {
+				return (mBAS.configured &&
                         mHRS.configured &&
-						mainCharacteristic.configured &&
-						dataCharacteristic.configured &&
-						strmCharacteristic.configured &&
-						ambiqOTARXCharacteristic.configured &&
-						ambiqOTATXCharacteristic.configured
+                        mDIS.configured &&
+						mMainCharacteristic.configured &&
+						mDataCharacteristic.configured &&
+                        mStreamingCharacteristic.configured &&
+						mAmbiqOTARXCharacteristic.configured &&
+						mAmbiqOTATXCharacteristic.configured
 				)
 			} else {
-				//log?.v ("ALTER: \(mainCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
-				
-				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-                        mBAS.configured &&
+				return (mBAS.configured &&
                         mHRS.configured &&
-						mainCharacteristic.configured &&
-						ambiqOTARXCharacteristic.configured &&
-						ambiqOTATXCharacteristic.configured
+                        mDIS.configured &&
+						mMainCharacteristic.configured &&
+						mAmbiqOTARXCharacteristic.configured &&
+						mAmbiqOTATXCharacteristic.configured
 				)
 			}
 		}
@@ -611,29 +599,29 @@ public class Device: NSObject, ObservableObject {
 
 	#if UNIVERSAL || KAIROS
 	internal var mKairosConfigured: Bool {
-		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let mBAS, let mHRS {
+		if let mAmbiqOTARXCharacteristic, let mAmbiqOTATXCharacteristic, let mMainCharacteristic, let mBAS, let mHRS, let mDIS {
 			
-			if let dataCharacteristic = mDataCharacteristic, let strmCharacteristic = mStreamingCharacteristic {
+			if let mDataCharacteristic, let mStreamingCharacteristic {
 				//log?.v ("ALTER MAIN: \(mainCharacteristic.configured), ALTER DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 				
-				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-                        mBAS.configured &&
+				return (mBAS.configured &&
                         mHRS.configured &&
-						mainCharacteristic.configured &&
-						dataCharacteristic.configured &&
-						strmCharacteristic.configured &&
-						ambiqOTARXCharacteristic.configured &&
-						ambiqOTATXCharacteristic.configured
+                        mDIS.configured &&
+						mMainCharacteristic.configured &&
+						mDataCharacteristic.configured &&
+                        mStreamingCharacteristic.configured &&
+						mAmbiqOTARXCharacteristic.configured &&
+						mAmbiqOTATXCharacteristic.configured
 				)
 			} else {
 				//log?.v ("ALTER: \(mainCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 				
-				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-                        mBAS.configured &&
+				return (mBAS.configured &&
                         mHRS.configured &&
-						mainCharacteristic.configured &&
-						ambiqOTARXCharacteristic.configured &&
-						ambiqOTATXCharacteristic.configured
+                        mDIS.configured &&
+						mMainCharacteristic.configured &&
+						mAmbiqOTARXCharacteristic.configured &&
+						mAmbiqOTATXCharacteristic.configured
 				)
 			}
 		}
@@ -649,7 +637,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	internal func checkConfigured() {
-		if let firmwareVesion = mFirmwareVersion, let customCharacteristic = mMainCharacteristic {
+        if let mDIS, let firmwareVesion = mDIS.mFirmwareRevisionCharacteristic, let customCharacteristic = mMainCharacteristic {
 			customCharacteristic.firmwareVersion = firmwareVesion.value
 		}
 		
@@ -832,7 +820,7 @@ public class Device: NSObject, ObservableObject {
 		var newStyle	= false
 		
 		if let mainCharacteristic = mMainCharacteristic {
-			if let softwareVersion = mSoftwareRevision {
+            if let mDIS, let softwareVersion = mDIS.mSoftwareRevisionCharacteristic {
 				if (softwareVersion.bluetoothGreaterThan("2.0.4")) {
 					globals.log.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use new style")
 					newStyle	= true
@@ -859,7 +847,7 @@ public class Device: NSObject, ObservableObject {
 		var newStyle	= false
 		
 		if let mainCharacteristic = mMainCharacteristic {
-			if let softwareVersion = mSoftwareRevision {
+            if let mDIS, let softwareVersion = mDIS.mSoftwareRevisionCharacteristic {
 				if (softwareVersion.bluetoothGreaterThan("2.0.4")) {
 					globals.log.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use new style")
 					newStyle	= true
@@ -2994,7 +2982,6 @@ public class Device: NSObject, ObservableObject {
                 // Battery Service
                 mBAS?.didConnect(peripheral)
                 mBAS?.$batteryLevel
-                    .compactMap { $0 }
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] level in
                         self?.batteryLevel = level
@@ -3018,6 +3005,64 @@ public class Device: NSObject, ObservableObject {
                 mHRS?.lambdaUpdated = { [weak self] id, epoch, hr, rr in
                     self?.lambdaHeartRateUpdated?(id, epoch, hr, rr)
                 }
+                
+                // Device Information Service
+                mDIS?.didConnect(peripheral)
+                mDIS?.$modelNumber
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] value in
+                        self?.modelNumber = value
+                    }
+                    .store(in: &subscriptions)
+                
+                mDIS?.$serialNumber
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] value in
+                        self?.serialNumber = value
+                    }
+                    .store(in: &subscriptions)
+                
+                mDIS?.$hardwareRevision
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] value in
+                        self?.hardwareRevision = value
+                    }
+                    .store(in: &subscriptions)
+                
+                mDIS?.$manufacturerName
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] value in
+                        self?.manufacturerName = value
+                    }
+                    .store(in: &subscriptions)
+
+                mDIS?.$firmwareRevision
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] value in
+                        self?.firmwareRevision = value
+                    }
+                    .store(in: &subscriptions)
+
+                mDIS?.$bluetoothSoftwareRevision
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] value in
+                        self?.bluetoothSoftwareRevision = value
+                    }
+                    .store(in: &subscriptions)
+
+                mDIS?.$algorithmsSoftwareRevision
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] value in
+                        self?.algorithmsSoftwareRevision = value
+                    }
+                    .store(in: &subscriptions)
+
+                mDIS?.$sleepSoftwareRevision
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] value in
+                        self?.sleepSoftwareRevision = value
+                    }
+                    .store(in: &subscriptions)
 
                 // Configure
 				connectionState = .configuring
@@ -3054,43 +3099,14 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
+        if disService.hit(characteristic) {
+            mDIS?.didDiscoverCharacteristic(characteristic)
+            return
+        }
+        
 		if let peripheral = peripheral {
 			if let testCharacteristic = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
 				switch (testCharacteristic) {
-				case .model_number_string:
-					mDISCharacteristicsDiscovered	= true
-					mDISCharacteristicCount = mDISCharacteristicCount + 1
-					mModelNumber = disStringCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
-					mModelNumber?.read()
-				case .hardware_revision_string:
-					mDISCharacteristicsDiscovered	= true
-					mDISCharacteristicCount = mDISCharacteristicCount + 1
-					mHardwareRevision = disStringCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
-					mHardwareRevision?.read()
-				case .firmware_revision_string:
-					mDISCharacteristicsDiscovered	= true
-					mDISCharacteristicCount = mDISCharacteristicCount + 1
-					mFirmwareVersion = disFirmwareVersionCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
-					mFirmwareVersion?.read()
-				case .software_revision_string:
-					mDISCharacteristicsDiscovered	= true
-					mDISCharacteristicCount = mDISCharacteristicCount + 1
-					#if UNIVERSAL
-					mSoftwareRevision = disSoftwareRevisionCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ, type: type)
-					#else
-					mSoftwareRevision = disSoftwareRevisionCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
-					#endif
-					mSoftwareRevision?.read()
-				case .manufacturer_name_string:
-					mDISCharacteristicsDiscovered	= true
-					mDISCharacteristicCount = mDISCharacteristicCount + 1
-					mManufacturerName = disStringCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
-					mManufacturerName?.read()
-				case .serial_number_string:
-					mDISCharacteristicsDiscovered	= true
-					mDISCharacteristicCount = mDISCharacteristicCount + 1
-					mSerialNumber = disStringCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
-					mSerialNumber?.read()
 				default:
 					if let service = characteristic.service {
 						globals.log.e ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)' - do not know what to do")
@@ -3304,66 +3320,14 @@ public class Device: NSObject, ObservableObject {
             mHRS?.didUpdateValue(characteristic)
             return
         }
-        
+
+        if disService.hit(characteristic) {
+            mDIS?.didUpdateValue(characteristic)
+            return
+        }
+
 		if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
 			switch (enumerated) {
-			case .model_number_string			:
-				mModelNumber?.didUpdateValue()
-				if let modelNumberCharacteristic = mModelNumber {
-					DispatchQueue.main.async {
-						self.modelNumber = modelNumberCharacteristic.value
-					}
-				}
-
-				mDISCharacteristicCount			= mDISCharacteristicCount - 1
-
-			case .hardware_revision_string		:
-				mHardwareRevision?.didUpdateValue()
-				if let hardwareRevisionCharacteristic = mHardwareRevision {
-					DispatchQueue.main.async {
-						self.hardwareRevision = hardwareRevisionCharacteristic.value
-					}
-				}
-				mDISCharacteristicCount			= mDISCharacteristicCount - 1
-
-			case .firmware_revision_string		:
-				mFirmwareVersion?.didUpdateValue()
-				if let firmwareVersionCharacteristic = mFirmwareVersion {
-					DispatchQueue.main.async {
-						self.firmwareRevision = firmwareVersionCharacteristic.value
-					}
-				}
-				mDISCharacteristicCount			= mDISCharacteristicCount - 1
-
-			case .software_revision_string		:
-				mSoftwareRevision?.didUpdateValue()
-				if let softwareRevisionCharacteristic = mSoftwareRevision {
-					DispatchQueue.main.async {
-						self.bluetoothSoftwareRevision = softwareRevisionCharacteristic.bluetooth
-						self.algorithmsSoftwareRevision	= softwareRevisionCharacteristic.algorithms
-						self.sleepSoftwareRevision = softwareRevisionCharacteristic.sleep
-					}
-				}
-				mDISCharacteristicCount			= mDISCharacteristicCount - 1
-
-			case .manufacturer_name_string		:
-				mManufacturerName?.didUpdateValue()
-				if let manufacturerNameCharacteristic = mManufacturerName {
-					DispatchQueue.main.async {
-						self.manufacturerName = manufacturerNameCharacteristic.value
-					}
-				}
-				mDISCharacteristicCount			= mDISCharacteristicCount - 1
-
-			case .serial_number_string			:
-				mSerialNumber?.didUpdateValue()
-				if let serialNumberCharacteristic = mSerialNumber {
-					DispatchQueue.main.async {
-						self.serialNumber = serialNumberCharacteristic.value
-					}
-				}
-				mDISCharacteristicCount			= mDISCharacteristicCount - 1
-
 			default:
 				globals.log.e ("\(self.id) for characteristic: '\(enumerated.title)' - do not know what to do")
 			}

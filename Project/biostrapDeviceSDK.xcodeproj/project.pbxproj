@@ -49,6 +49,9 @@
 		18ABB2EC2D04C10600CD6726 /* bodySensorLocationCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2EB2D04C10600CD6726 /* bodySensorLocationCharacteristic.swift */; };
 		18ABB2ED2D04C10600CD6726 /* bodySensorLocationCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2EB2D04C10600CD6726 /* bodySensorLocationCharacteristic.swift */; };
 		18ABB2EE2D04C10600CD6726 /* bodySensorLocationCharacteristic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2EB2D04C10600CD6726 /* bodySensorLocationCharacteristic.swift */; };
+		18ABB2F42D04C59B00CD6726 /* disService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2F32D04C59B00CD6726 /* disService.swift */; };
+		18ABB2F52D04C59B00CD6726 /* disService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2F32D04C59B00CD6726 /* disService.swift */; };
+		18ABB2F62D04C59B00CD6726 /* disService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2F32D04C59B00CD6726 /* disService.swift */; };
 		3B0B204C291460C300BDB984 /* nextPacketStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */; };
 		3B0B204F291460C300BDB984 /* nextPacketStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */; };
 		3B14E9BF28EB921C000E85F2 /* manufacturingTestType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */; };
@@ -198,6 +201,7 @@
 		18ABB2D32D041B8800CD6726 /* basService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = basService.swift; sourceTree = "<group>"; };
 		18ABB2DF2D042AC900CD6726 /* hrsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hrsService.swift; sourceTree = "<group>"; };
 		18ABB2EB2D04C10600CD6726 /* bodySensorLocationCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = bodySensorLocationCharacteristic.swift; sourceTree = "<group>"; };
+		18ABB2F32D04C59B00CD6726 /* disService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = disService.swift; sourceTree = "<group>"; };
 		3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nextPacketStatusType.swift; sourceTree = "<group>"; };
 		3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = manufacturingTestType.swift; sourceTree = "<group>"; };
 		3B14EA2928EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = pulseOxContinuousCharacteristic.swift; sourceTree = "<group>"; };
@@ -279,6 +283,7 @@
 				18ABB2CF2D041ABC00CD6726 /* ServiceTemplate.swift */,
 				18ABB2D32D041B8800CD6726 /* basService.swift */,
 				18ABB2DF2D042AC900CD6726 /* hrsService.swift */,
+				18ABB2F32D04C59B00CD6726 /* disService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -623,6 +628,7 @@
 				3B2602BB2890541E00D5CAAA /* packetType.swift in Sources */,
 				3B2602BC2890541E00D5CAAA /* ppgAlgorithmConfiguration.swift in Sources */,
 				3B2602BD2890541E00D5CAAA /* batteryLevelCharacteristic.swift in Sources */,
+				18ABB2F62D04C59B00CD6726 /* disService.swift in Sources */,
 				3B2602BE2890541E00D5CAAA /* settingsType.swift in Sources */,
 				3B930F162A323C7D00DB151C /* buttonCommandType.swift in Sources */,
 				3B2602BF2890541E00D5CAAA /* heartRateMeasurementCharacteristic.swift in Sources */,
@@ -658,6 +664,7 @@
 				3BC00B8F2981BD36009F67CB /* ppgStatusType.swift in Sources */,
 				3B8E1F1C2A292035000C2FDF /* eventType.swift in Sources */,
 				3BC00B912981BD36009F67CB /* Characteristic.swift in Sources */,
+				18ABB2F52D04C59B00CD6726 /* disService.swift in Sources */,
 				3BC00B922981BD36009F67CB /* CoreBluetoothExtensions.swift in Sources */,
 				183D6D2C2B97E13700550D5C /* hrZoneLEDValueType.swift in Sources */,
 				18ABB2ED2D04C10600CD6726 /* bodySensorLocationCharacteristic.swift in Sources */,
@@ -748,6 +755,7 @@
 				1818395F2BACEBDF00C48D63 /* Command.swift in Sources */,
 				3B8E1EF12A26BDED000C2FDF /* streamingType.swift in Sources */,
 				3BFF754328F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */,
+				18ABB2F42D04C59B00CD6726 /* disService.swift in Sources */,
 				3BF807CC27A1AFA000595493 /* DataExtensions.swift in Sources */,
 				3B14EA2B28EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift in Sources */,
 				18ABB2D02D041ABC00CD6726 /* ServiceTemplate.swift in Sources */,

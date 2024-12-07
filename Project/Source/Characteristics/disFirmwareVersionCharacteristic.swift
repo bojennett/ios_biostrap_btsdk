@@ -10,11 +10,11 @@ import CoreBluetooth
 
 class disFirmwareVersionCharacteristic: Characteristic {
 	
-	var value			: String	= ""
+    @Published var value : String = ""
 	
-	internal var mMajor	: Int		= 0
-	internal var mMinor	: Int		= 0
-	internal var mBuild	: Int		= 0
+	internal var mMajor	: Int = 0
+	internal var mMinor	: Int = 0
+	internal var mBuild	: Int = 0
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -42,7 +42,18 @@ class disFirmwareVersionCharacteristic: Characteristic {
 		else { globals.log.e ("\(pID): Missing characteristic") }
 	}
 	
-	//--------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    override func didDiscover() {
+        read()
+    }
+
+    //--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
 	//

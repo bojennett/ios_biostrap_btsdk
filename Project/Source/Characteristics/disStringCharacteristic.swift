@@ -10,7 +10,7 @@ import CoreBluetooth
 
 class disStringCharacteristic: Characteristic {
 	
-	var value	: String	= ""
+	@Published var value : String = ""
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -40,4 +40,15 @@ class disStringCharacteristic: Characteristic {
 		}
 		else { globals.log.e ("\(pID): Missing characteristic") }
 	}
+    
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    override func didDiscover() {
+        read()
+    }
 }
