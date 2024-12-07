@@ -1786,7 +1786,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateNotificationState() {
-		pConfigured	= true
+		configured	= true
 	}
 	
 }

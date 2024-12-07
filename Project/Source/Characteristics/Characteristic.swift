@@ -30,7 +30,7 @@ class Characteristic {
 	internal var pPeripheral: CBPeripheral?
 	internal var pCharacteristic: CBCharacteristic?
 	internal var pID: String = "UNKNOWN"
-	internal var pConfigured: Bool = false
+    @Published var configured: Bool = false
 	internal var pCommandQ: CommandQ?
 
 	internal var pFailedDecodeCount: Int = 0
@@ -375,7 +375,7 @@ class Characteristic {
 		pID = peripheral.prettyID
 		pPeripheral = peripheral
 		pCharacteristic = characteristic
-		pConfigured = false
+		configured = false
 		pCommandQ = commandQ
 	}
 	

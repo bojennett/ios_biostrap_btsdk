@@ -68,12 +68,12 @@ class disService: ServiceTemplate {
                let mSerialNumberCharacteristic,
                let mFirmwareRevisionCharacteristic,
                let mSoftwareRevisionCharacteristic {
-                return mModelNumberCharacteristic.pConfigured &&
-                       mHardwareRevisionCharacteristic.pConfigured &&
-                       mManufacturerNameCharacteristic.pConfigured &&
-                       mSerialNumberCharacteristic.pConfigured &&
-                       mFirmwareRevisionCharacteristic.pConfigured &&
-                       mSoftwareRevisionCharacteristic.pConfigured
+                return mModelNumberCharacteristic.configured &&
+                       mHardwareRevisionCharacteristic.configured &&
+                       mManufacturerNameCharacteristic.configured &&
+                       mSerialNumberCharacteristic.configured &&
+                       mFirmwareRevisionCharacteristic.configured &&
+                       mSoftwareRevisionCharacteristic.configured
             }
         }
         

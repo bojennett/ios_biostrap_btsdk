@@ -25,6 +25,9 @@ class ambiqOTAService: ServiceTemplate {
     let progress = PassthroughSubject<Float, Never>()
     let failed = PassthroughSubject<(Int, String), Never>()
 
+    @Published private var rxConfigured: Bool = false
+    @Published private var txConfigured: Bool = false
+
     //--------------------------------------------------------------------------------
     //
     //
@@ -46,12 +49,21 @@ class ambiqOTAService: ServiceTemplate {
         }
     }
     
-    override var configured: Bool {
-        if let rxCharacteristic, let txCharacteristic {
-            return txCharacteristic.pConfigured && rxCharacteristic.pConfigured
-        }
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    override init(_ commandQ: CommandQ?) {
+        super.init(commandQ)
         
-        return false
+        Publishers.CombineLatest($txConfigured, $rxConfigured)
+            .sink { [weak self] txConfigured, rxConfigured in
+                self?.pConfigured = txConfigured && rxConfigured
+            }
+            .store(in: &pSubscriptions)
     }
 
     //--------------------------------------------------------------------------------
@@ -85,9 +97,17 @@ class ambiqOTAService: ServiceTemplate {
             rxCharacteristic?.progress
                 .sink { percent in self.progress.send(percent) }
                 .store(in: &pSubscriptions)
+            
+            rxCharacteristic?.$configured
+                .sink { [weak self] configured in self?.rxConfigured = configured }
+                .store(in: &pSubscriptions)
 
         case ambiqOTATXCharacteristic.uuid:
             txCharacteristic = ambiqOTATXCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+            txCharacteristic?.$configured
+                .sink { [weak self] configured in self?.txConfigured = configured }
+                .store(in: &pSubscriptions)
+
             txCharacteristic?.discoverDescriptors()
             
         default: return

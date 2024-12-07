@@ -100,7 +100,7 @@ class heartRateMeasurementCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateNotificationState() {
-		pConfigured	= true
+		configured	= true
 	}
 	
 }

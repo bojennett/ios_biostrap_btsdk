@@ -17,6 +17,9 @@ class hrsService: ServiceTemplate {
     @Published var batteryLevel: Int?
     var lambdaUpdated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
     let updated = PassthroughSubject<(Int, Int, [Double]), Never>()
+    
+    @Published private var hrmConfigured: Bool = false
+    @Published private var bslConfigured: Bool = false
 
     //--------------------------------------------------------------------------------
     //
@@ -38,9 +41,22 @@ class hrsService: ServiceTemplate {
         default: return false
         }
     }
-    
-    override var configured: Bool {
-        return mHeartRateMeasurementCharacteristic?.pConfigured ?? false
+        
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    override init(_ commandQ: CommandQ?) {
+        super.init(commandQ)
+        
+        Publishers.CombineLatest($hrmConfigured, $bslConfigured)
+            .sink { [weak self] hrmConfigured, bslConfigured in
+                self?.pConfigured = hrmConfigured && bslConfigured
+            }
+            .store(in: &pSubscriptions)
     }
 
     //--------------------------------------------------------------------------------
@@ -59,6 +75,12 @@ class hrsService: ServiceTemplate {
                     self?.updated.send((epoch, hr, rr))
                 }
                 .store(in: &pSubscriptions)
+            
+            mHeartRateMeasurementCharacteristic?.$configured
+                .sink { [weak self] in
+                    self?.hrmConfigured = $0
+                }
+                .store(in: &pSubscriptions)
 
             mHeartRateMeasurementCharacteristic?.lambdaUpdated    = { id, epoch, hr, rr in
                 self.lambdaUpdated?(id, epoch, hr, rr)
@@ -67,6 +89,12 @@ class hrsService: ServiceTemplate {
             mHeartRateMeasurementCharacteristic?.didDiscover()
         case org_bluetooth_characteristic.body_sensor_location.UUID:
             mBodySensorLocationCharacteristic = bodySensorLocationCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+            mBodySensorLocationCharacteristic?.$configured
+                .sink { [weak self] in
+                    self?.bslConfigured = $0
+                }
+                .store(in: &pSubscriptions)
+
             mBodySensorLocationCharacteristic?.didDiscover()
         default: return
         }

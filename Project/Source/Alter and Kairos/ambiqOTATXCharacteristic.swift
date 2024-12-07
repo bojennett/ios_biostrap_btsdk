@@ -22,7 +22,7 @@ class ambiqOTATXCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateNotificationState() {
-		pConfigured	= true
+		configured	= true
 	}
 	
 

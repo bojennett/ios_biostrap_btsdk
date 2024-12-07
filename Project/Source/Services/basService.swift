@@ -37,7 +37,7 @@ class basService: ServiceTemplate {
     }
     
     override var configured: Bool {
-        return mBatteryLevelCharacteristic?.pConfigured ?? false
+        return mBatteryLevelCharacteristic?.configured ?? false
     }
 
     //--------------------------------------------------------------------------------
@@ -53,6 +53,12 @@ class basService: ServiceTemplate {
             mBatteryLevelCharacteristic?.$batteryLevel
                 .sink { [weak self] in
                     self?.batteryLevel = $0
+                }
+                .store(in: &pSubscriptions)
+            
+            mBatteryLevelCharacteristic?.$configured
+                .sink { [weak self] in
+                    self?.pConfigured = $0
                 }
                 .store(in: &pSubscriptions)
             

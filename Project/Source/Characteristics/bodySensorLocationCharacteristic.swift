@@ -26,7 +26,7 @@ class bodySensorLocationCharacteristic: Characteristic {
     //--------------------------------------------------------------------------------
     override func didDiscover() {
         globals.log.v ("\(pID): read")
-        pConfigured = true
+        configured = true
         read()
     }
 

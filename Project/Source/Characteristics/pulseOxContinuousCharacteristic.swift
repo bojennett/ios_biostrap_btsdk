@@ -47,7 +47,7 @@ class pulseOxContinuousCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateNotificationState() {
-		pConfigured	= true
+		configured	= true
 	}
 
 }

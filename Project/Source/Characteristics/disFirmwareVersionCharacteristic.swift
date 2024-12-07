@@ -24,7 +24,7 @@ class disFirmwareVersionCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateValue() {
-		pConfigured = true
+		configured = true
 		
 		if let characteristic = pCharacteristic {
 			if let data = characteristic.value {

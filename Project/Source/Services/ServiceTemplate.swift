@@ -16,8 +16,8 @@ open class ServiceTemplate: ObservableObject {
     open var pAttributes: [ String : String ]
     open var pSubscriptions = Set<AnyCancellable>()
 
-    var allConfigured: (()->())?
-
+    @Published var pConfigured: Bool = false
+    
     internal var pCommandQ: CommandQ?
 
     //--------------------------------------------------------------------------------

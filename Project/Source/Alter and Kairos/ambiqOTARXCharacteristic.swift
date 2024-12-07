@@ -206,7 +206,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 
 		super.init (peripheral, characteristic: characteristic, commandQ: commandQ)
 
-		pConfigured		= true
+		configured		= true
 	}
 	
 	//--------------------------------------------------------------------------------
