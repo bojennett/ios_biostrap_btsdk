@@ -9,9 +9,8 @@ import Foundation
 import CoreBluetooth
 
 class batteryLevelCharacteristic: Characteristic {
-	
-	// MARK: Callbacks
-	var updated: ((_ id: String, _ percentage: Int)->())?
+	    
+    @Published var batteryLevel: Int?
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -22,13 +21,27 @@ class batteryLevelCharacteristic: Characteristic {
 	//--------------------------------------------------------------------------------
 	override func didUpdateValue() {
 		if let characteristic = pCharacteristic {
-			if let data = characteristic.value { self.updated?(pID, Int(data[0])) }
-			else {
+            if let data = characteristic.value {
+                batteryLevel = Int(data[0])
+            } else {
 				globals.log.e ("\(pID): Missing data")
 			}
 		}
 		else { globals.log.e ("\(pID): Missing characteristic") }
 	}
+    
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    override func didDiscover() {
+        globals.log.v ("\(pID): Read it and enable notifications")
+        read()
+        discoverDescriptors()
+    }
 
 	//--------------------------------------------------------------------------------
 	// Function Name:

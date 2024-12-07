@@ -37,6 +37,12 @@
 		1860FFD52BBE069D00FA4506 /* deviceParameterType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1860FFD42BBE069D00FA4506 /* deviceParameterType.swift */; };
 		1860FFD62BBE069D00FA4506 /* deviceParameterType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1860FFD42BBE069D00FA4506 /* deviceParameterType.swift */; };
 		1860FFD72BBE069D00FA4506 /* deviceParameterType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1860FFD42BBE069D00FA4506 /* deviceParameterType.swift */; };
+		18ABB2D02D041ABC00CD6726 /* ServiceTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2CF2D041ABC00CD6726 /* ServiceTemplate.swift */; };
+		18ABB2D12D041ABC00CD6726 /* ServiceTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2CF2D041ABC00CD6726 /* ServiceTemplate.swift */; };
+		18ABB2D22D041ABC00CD6726 /* ServiceTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2CF2D041ABC00CD6726 /* ServiceTemplate.swift */; };
+		18ABB2D42D041B8800CD6726 /* basService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2D32D041B8800CD6726 /* basService.swift */; };
+		18ABB2D52D041B8800CD6726 /* basService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2D32D041B8800CD6726 /* basService.swift */; };
+		18ABB2D62D041B8800CD6726 /* basService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2D32D041B8800CD6726 /* basService.swift */; };
 		3B0B204C291460C300BDB984 /* nextPacketStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */; };
 		3B0B204F291460C300BDB984 /* nextPacketStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */; };
 		3B14E9BF28EB921C000E85F2 /* manufacturingTestType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */; };
@@ -182,6 +188,8 @@
 		183D6D362B97E1B300550D5C /* ppgMetricsType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ppgMetricsType.swift; sourceTree = "<group>"; };
 		1860FFD02BBE067C00FA4506 /* sessionParameterType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sessionParameterType.swift; sourceTree = "<group>"; };
 		1860FFD42BBE069D00FA4506 /* deviceParameterType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = deviceParameterType.swift; sourceTree = "<group>"; };
+		18ABB2CF2D041ABC00CD6726 /* ServiceTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceTemplate.swift; sourceTree = "<group>"; };
+		18ABB2D32D041B8800CD6726 /* basService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = basService.swift; sourceTree = "<group>"; };
 		3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nextPacketStatusType.swift; sourceTree = "<group>"; };
 		3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = manufacturingTestType.swift; sourceTree = "<group>"; };
 		3B14EA2928EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = pulseOxContinuousCharacteristic.swift; sourceTree = "<group>"; };
@@ -257,6 +265,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		18ABB2CE2D0419D600CD6726 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				18ABB2CF2D041ABC00CD6726 /* ServiceTemplate.swift */,
+				18ABB2D32D041B8800CD6726 /* basService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 		3B14E9C328EB9229000E85F2 /* Enumerations */ = {
 			isa = PBXGroup;
 			children = (
@@ -386,6 +403,7 @@
 				3B2602CF2890591200D5CAAA /* Alter */,
 				3BC00B832981BCDE009F67CB /* Kairos */,
 				3B2602D32890594400D5CAAA /* Alter and Kairos */,
+				18ABB2CE2D0419D600CD6726 /* Services */,
 				3B29C592264C9638006BC11B /* Characteristics */,
 			);
 			path = Source;
@@ -556,6 +574,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B8E1EED2A26BDED000C2FDF /* streamingType.swift in Sources */,
+				18ABB2D22D041ABC00CD6726 /* ServiceTemplate.swift in Sources */,
 				3B5AFD562A2FEE6800F99663 /* buttonTapType.swift in Sources */,
 				3B2602AA2890541E00D5CAAA /* CrcCalculator.swift in Sources */,
 				3B276E5029FC5F1B003B4B65 /* AES.swift in Sources */,
@@ -601,6 +620,7 @@
 				3B2602C12890541E00D5CAAA /* disStringCharacteristic.swift in Sources */,
 				3B2602C22890541E00D5CAAA /* Device.swift in Sources */,
 				181839592BACE44100C48D63 /* CommandQ.swift in Sources */,
+				18ABB2D42D041B8800CD6726 /* basService.swift in Sources */,
 				3B78695529CCD657007FE112 /* hrZoneRangeType.swift in Sources */,
 				3B3E1BA52A7C22CA00D11023 /* UInt8Extensions.swift in Sources */,
 				183D6D2F2B97E15A00550D5C /* hrZoneRangeValueType.swift in Sources */,
@@ -617,6 +637,7 @@
 			files = (
 				3BC00B8B2981BD36009F67CB /* CrcCalculator.swift in Sources */,
 				3BC7AFFB2A57825400A3C1B8 /* algorithmPacketType.swift in Sources */,
+				18ABB2D52D041B8800CD6726 /* basService.swift in Sources */,
 				3B5AFD572A2FEE6800F99663 /* buttonTapType.swift in Sources */,
 				3BC00B8C2981BD36009F67CB /* ambiqOTATXCharacteristic.swift in Sources */,
 				3BC00B8D2981BD36009F67CB /* Globals.swift in Sources */,
@@ -669,6 +690,7 @@
 				3BC00BAA2981BD36009F67CB /* diagnosticType.swift in Sources */,
 				3B8E1F2E2A2A5283000C2FDF /* bookendType.swift in Sources */,
 				3BC00BAB2981BD36009F67CB /* IntExtentions.swift in Sources */,
+				18ABB2D12D041ABC00CD6726 /* ServiceTemplate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -713,12 +735,14 @@
 				3BFF754328F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift in Sources */,
 				3BF807CC27A1AFA000595493 /* DataExtensions.swift in Sources */,
 				3B14EA2B28EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift in Sources */,
+				18ABB2D02D041ABC00CD6726 /* ServiceTemplate.swift in Sources */,
 				183D6D352B97E17C00550D5C /* DeviceWornCheckResultType.swift in Sources */,
 				3BF807CE27A1AFA000595493 /* centralManagerDelegate.swift in Sources */,
 				3B930F1A2A323C7D00DB151C /* buttonCommandType.swift in Sources */,
 				3BF807CF27A1AFA000595493 /* batteryLevelCharacteristic.swift in Sources */,
 				3B8E1F1F2A292035000C2FDF /* eventType.swift in Sources */,
 				3BC7AFFE2A57825400A3C1B8 /* algorithmPacketType.swift in Sources */,
+				18ABB2D62D041B8800CD6726 /* basService.swift in Sources */,
 				1860FFD32BBE067C00FA4506 /* sessionParameterType.swift in Sources */,
 				3BF807D027A1AFA000595493 /* heartRateMeasurementCharacteristic.swift in Sources */,
 				3BF807D127A1AFA000595493 /* disStringCharacteristic.swift in Sources */,
@@ -852,7 +876,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 80;
+				CURRENT_PROJECT_VERSION = 81;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -865,7 +889,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 3.1;
+				MARKETING_VERSION = 3.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
