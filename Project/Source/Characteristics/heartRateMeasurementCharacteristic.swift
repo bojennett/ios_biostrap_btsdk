@@ -7,11 +7,13 @@
 
 import Foundation
 import CoreBluetooth
+import Combine
 
 class heartRateMeasurementCharacteristic: Characteristic {
 	
 	// MARK: Callbacks
-	var updated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
+	var lambdaUpdated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
+    let updated = PassthroughSubject<(Int, Int, [Double]), Never>()
 
 	//--------------------------------------------------------------------------------
 	// Function Name: mParse
@@ -57,6 +59,18 @@ class heartRateMeasurementCharacteristic: Characteristic {
 		return (epoch, hr, rr)
 	}
 
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    override func didDiscover() {
+        globals.log.v ("\(pID): Enable notifications")
+        discoverDescriptors()
+    }
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -68,7 +82,8 @@ class heartRateMeasurementCharacteristic: Characteristic {
 		if let characteristic = pCharacteristic {
 			if let data = characteristic.value {
 				let (epoch, hr, rr) = mParse(data)
-				self.updated?(pID, epoch, hr, rr)
+				self.lambdaUpdated?(pID, epoch, hr, rr)
+                self.updated.send((epoch, hr, rr))
 			}
 			else {
 				globals.log.e ("\(pID): Missing data")

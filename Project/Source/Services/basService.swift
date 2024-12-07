@@ -14,11 +14,11 @@ class basService: ServiceTemplate {
     internal var mBatteryLevelCharacteristic    : batteryLevelCharacteristic?
     
     @Published var batteryLevel: Int?
-    
+    var updated: ((_ id: String, _ percentage: Int)->())?
+
     //--------------------------------------------------------------------------------
     //
-    // Return the service UUID string -> This is a class var, so you do not
-    // need to create an instance of the object to use it
+    //
     //
     //--------------------------------------------------------------------------------
     override class var scan_service: CBUUID {
@@ -55,6 +55,10 @@ class basService: ServiceTemplate {
                     self?.batteryLevel = $0
                 }
                 .store(in: &pSubscriptions)
+            
+            mBatteryLevelCharacteristic?.updated = { [weak self] id, percentage in
+                self?.updated?(id, percentage)
+            }
             
             mBatteryLevelCharacteristic?.didDiscover()
         }

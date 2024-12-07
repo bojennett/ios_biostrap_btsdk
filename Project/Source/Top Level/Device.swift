@@ -373,12 +373,12 @@ public class Device: NSObject, ObservableObject {
 	internal var mDISCharacteristicsDiscovered	: Bool = false
 	
     internal var mBAS: basService?
-    
+    internal var mHRS: hrsService?
+
 	internal var mMainCharacteristic			: customMainCharacteristic?
 	internal var mDataCharacteristic			: customDataCharacteristic?
 	internal var mStreamingCharacteristic		: customStreamingCharacteristic?
 
-	internal var mHeartRateMeasurementCharacteristic	: heartRateMeasurementCharacteristic?
 	internal var mAmbiqOTARXCharacteristic				: ambiqOTARXCharacteristic?
 	internal var mAmbiqOTATXCharacteristic				: ambiqOTATXCharacteristic?
     
@@ -559,6 +559,7 @@ public class Device: NSObject, ObservableObject {
 		self.commandQ = CommandQ(peripheral)
         
         self.mBAS = basService(commandQ)
+        self.mHRS = hrsService(commandQ)
 	}
 	#else
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
@@ -572,18 +573,20 @@ public class Device: NSObject, ObservableObject {
 		self.commandQ = CommandQ(peripheral)
         
         self.mBAS = basService(commandQ)
+        self.mHRS = hrsService(commandQ)
 	}
 	#endif
 	
 	#if UNIVERSAL || ALTER
 	internal var mAlterConfigured: Bool {
-		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let bas = mBAS {
+		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let mBAS, let mHRS {
 			
 			if let dataCharacteristic = mDataCharacteristic, let strmCharacteristic = mStreamingCharacteristic {
 				//log?.v ("ALTER MAIN: \(mainCharacteristic.configured), ALTER DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 				
 				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-						bas.configured &&
+                        mBAS.configured &&
+                        mHRS.configured &&
 						mainCharacteristic.configured &&
 						dataCharacteristic.configured &&
 						strmCharacteristic.configured &&
@@ -594,7 +597,8 @@ public class Device: NSObject, ObservableObject {
 				//log?.v ("ALTER: \(mainCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 				
 				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-                        bas.configured &&
+                        mBAS.configured &&
+                        mHRS.configured &&
 						mainCharacteristic.configured &&
 						ambiqOTARXCharacteristic.configured &&
 						ambiqOTATXCharacteristic.configured
@@ -607,13 +611,14 @@ public class Device: NSObject, ObservableObject {
 
 	#if UNIVERSAL || KAIROS
 	internal var mKairosConfigured: Bool {
-		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let bas = mBAS {
+		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic, let ambiqOTATXCharacteristic = mAmbiqOTATXCharacteristic, let mainCharacteristic = mMainCharacteristic, let mBAS, let mHRS {
 			
 			if let dataCharacteristic = mDataCharacteristic, let strmCharacteristic = mStreamingCharacteristic {
 				//log?.v ("ALTER MAIN: \(mainCharacteristic.configured), ALTER DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 				
 				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-						bas.configured &&
+                        mBAS.configured &&
+                        mHRS.configured &&
 						mainCharacteristic.configured &&
 						dataCharacteristic.configured &&
 						strmCharacteristic.configured &&
@@ -624,7 +629,8 @@ public class Device: NSObject, ObservableObject {
 				//log?.v ("ALTER: \(mainCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
 				
 				return (mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 &&
-						bas.configured &&
+                        mBAS.configured &&
+                        mHRS.configured &&
 						mainCharacteristic.configured &&
 						ambiqOTARXCharacteristic.configured &&
 						ambiqOTATXCharacteristic.configured
@@ -2989,11 +2995,28 @@ public class Device: NSObject, ObservableObject {
                 mBAS?.$batteryLevel
                     .compactMap { $0 }
                     .receive(on: DispatchQueue.main)
-                    .sink { [weak self] in
-                        globals.log.w("BATTERY LEVEL: \($0)")
-                        self?.batteryLevel = $0
+                    .sink { [weak self] level in
+                        self?.batteryLevel = level
                     }
                     .store(in: &subscriptions)
+                
+                mBAS?.updated    = { [weak self] id, percentage in
+                    self?.lambdaBatteryLevelUpdated?(id, percentage)
+                }
+                
+                mHRS?.didConnect(peripheral)
+                
+                mHRS?.updated
+                    .compactMap { $0 }
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] (epoch, hr, rr) in
+                        self?.heartRateUpdated.send((epoch, hr, rr))
+                    }
+                    .store(in: &subscriptions)
+                
+                mHRS?.lambdaUpdated = { [weak self] id, epoch, hr, rr in
+                    self?.lambdaHeartRateUpdated?(id, epoch, hr, rr)
+                }
 
 				connectionState = .configuring
 				peripheral.discoverServices(nil)
@@ -3021,6 +3044,11 @@ public class Device: NSObject, ObservableObject {
 	func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
         if basService.hit(characteristic) {
             mBAS?.didDiscoverCharacteristic(characteristic)
+            return
+        }
+        
+        if hrsService.hit(characteristic) {
+            mHRS?.didDiscoverCharacteristic(characteristic)
             return
         }
         
@@ -3061,19 +3089,6 @@ public class Device: NSObject, ObservableObject {
 					mDISCharacteristicCount = mDISCharacteristicCount + 1
 					mSerialNumber = disStringCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
 					mSerialNumber?.read()
-				case .heart_rate_measurement:
-					globals.log.v ("\(self.id) '\(testCharacteristic.title)' - and enable notifications")
-					mHeartRateMeasurementCharacteristic	= heartRateMeasurementCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
-					mHeartRateMeasurementCharacteristic?.updated	= { id, epoch, hr, rr in
-						self.lambdaHeartRateUpdated?(id, epoch, hr, rr)
-						DispatchQueue.main.async {
-							self.heartRateUpdated.send((epoch, hr, rr))
-						}
-					}
-					mHeartRateMeasurementCharacteristic?.discoverDescriptors()
-				case .body_sensor_location:
-					globals.log.v ("\(self.id) '\(testCharacteristic.title)' - read it")
-					commandQ?.read(characteristic)
 				default:
 					if let service = characteristic.service {
 						globals.log.e ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)' - do not know what to do")
@@ -3207,8 +3222,13 @@ public class Device: NSObject, ObservableObject {
 	//--------------------------------------------------------------------------------
 	func didDiscoverDescriptor (_ descriptor: CBDescriptor, forCharacteristic characteristic: CBCharacteristic) {
         
-        if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
+        if basService.hit(characteristic) {
             mBAS?.didDiscoverDescriptor(characteristic)
+            return
+        }
+        
+        if hrsService.hit(characteristic) {
+            mHRS?.didDiscoverDescriptor(characteristic)
             return
         }
         
@@ -3236,7 +3256,6 @@ public class Device: NSObject, ObservableObject {
 				}
 				else if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
 					switch (enumerated) {
-					case .heart_rate_measurement		: mHeartRateMeasurementCharacteristic?.didDiscoverDescriptor()
 					default:
 						globals.log.e ("\(self.id) '\(enumerated.title)' - don't know what to do")
 					}
@@ -3276,6 +3295,11 @@ public class Device: NSObject, ObservableObject {
         
         if basService.hit(characteristic) {
             mBAS?.didUpdateValue(characteristic)
+            return
+        }
+        
+        if hrsService.hit(characteristic) {
+            mHRS?.didUpdateValue(characteristic)
             return
         }
         
@@ -3338,12 +3362,6 @@ public class Device: NSObject, ObservableObject {
 				}
 				mDISCharacteristicCount			= mDISCharacteristicCount - 1
 
-			case .heart_rate_measurement		: mHeartRateMeasurementCharacteristic?.didUpdateValue()
-			case .body_sensor_location:
-				if let value = characteristic.value {
-					globals.log.v ("\(self.id): '\(enumerated.title)' - \(value.hexString)")
-				}
-				else { globals.log.e ("No valid \(enumerated.title) data!") }
 			default:
 				globals.log.e ("\(self.id) for characteristic: '\(enumerated.title)' - do not know what to do")
 			}
@@ -3393,6 +3411,11 @@ public class Device: NSObject, ObservableObject {
                 return
             }
             
+            if hrsService.hit(characteristic) {
+                mHRS?.didUpdateNotificationState(characteristic)
+                return
+            }
+            
 			if (characteristic.isNotifying) {
 				if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
 					globals.log.v ("\(self.id): '\(enumerated.title)'")
@@ -3420,7 +3443,6 @@ public class Device: NSObject, ObservableObject {
 					globals.log.v ("\(self.id): '\(enumerated.title)'")
 					
 					switch (enumerated) {
-					case .heart_rate_measurement		: mHeartRateMeasurementCharacteristic?.didUpdateNotificationState()
 					default								: globals.log.e ("\(self.id): '\(enumerated.title)'.  Do not know what to do - skipping")
 					}
 				}
