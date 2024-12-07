@@ -367,6 +367,16 @@ class Characteristic {
 		
 		return (dataPackets)
 	}
+    
+    //--------------------------------------------------------------------------------
+    //
+    // Constructor
+    //
+    //--------------------------------------------------------------------------------
+    open class var uuid: CBUUID {
+        globals.log.e ("Don't know what to do here.  Perhaps need to override?")
+        return org_bluetooth_characteristic.string.UUID
+    }
 
 	//--------------------------------------------------------------------------------
 	//

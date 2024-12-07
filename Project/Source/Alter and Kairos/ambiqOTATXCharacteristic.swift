@@ -10,6 +10,10 @@ import CoreBluetooth
 
 class ambiqOTATXCharacteristic: Characteristic {
 	
+    override class var uuid: CBUUID {
+        return CBUUID(string: "00002760-08C2-11E1-9073-0E8AC72E0002")
+    }
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------

@@ -66,9 +66,6 @@ public class Device: NSObject, ObservableObject {
 		case kairosStrmCharacteristic	= "140BB753-9845-4C0E-B61A-E6BAE41712F3"
 		#endif
 
-		case ambiqOTARXCharacteristic	= "00002760-08C2-11E1-9073-0E8AC72E0001"
-		case ambiqOTATXCharacteristic	= "00002760-08C2-11E1-9073-0E8AC72E0002"
-
 		var UUID: CBUUID {
 			return CBUUID(string: self.rawValue)
 		}
@@ -86,9 +83,6 @@ public class Device: NSObject, ObservableObject {
 			case .kairosDataCharacteristic	: return "Kairos Data Characteristic"
 			case .kairosStrmCharacteristic	: return "Kairos Streaming Characteristic"
 			#endif
-				
-			case .ambiqOTARXCharacteristic	: return "Ambiq OTA RX Characteristic"
-			case .ambiqOTATXCharacteristic	: return "Ambiq OTA TX Characteristic"
 			}
 		}
 	}
@@ -366,16 +360,13 @@ public class Device: NSObject, ObservableObject {
     internal var mBAS: basService?
     internal var mHRS: hrsService?
     internal var mDIS: disService?
+    internal var mAmbiqOTAService: ambiqOTAService?
 
 	internal var mMainCharacteristic: customMainCharacteristic?
 	internal var mDataCharacteristic: customDataCharacteristic?
 	internal var mStreamingCharacteristic: customStreamingCharacteristic?
-
-	internal var mAmbiqOTARXCharacteristic: ambiqOTARXCharacteristic?
-	internal var mAmbiqOTATXCharacteristic: ambiqOTATXCharacteristic?
     
     internal var subscriptions = Set<AnyCancellable>()
-
     
     internal var preview: Bool = false
     internal var previewTag: String?
@@ -551,6 +542,7 @@ public class Device: NSObject, ObservableObject {
         self.mBAS = basService(commandQ)
         self.mHRS = hrsService(commandQ)
         self.mDIS = disService(commandQ, type: type)
+        self.mAmbiqOTAService = ambiqOTAService(commandQ)
 	}
 	#else
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
@@ -566,30 +558,29 @@ public class Device: NSObject, ObservableObject {
         self.mBAS = basService(commandQ)
         self.mHRS = hrsService(commandQ)
         self.mDIS = disService(commandQ)
+        self.mAmbiqOTAService = ambiqOTAService(commandQ)
 	}
 	#endif
 	
 	#if UNIVERSAL || ALTER
 	internal var mAlterConfigured: Bool {
-		if let mAmbiqOTARXCharacteristic, let mAmbiqOTATXCharacteristic, let mMainCharacteristic, let mBAS, let mHRS, let mDIS {
+        if let mAmbiqOTAService, let mMainCharacteristic, let mBAS, let mHRS, let mDIS {
 			
 			if let mDataCharacteristic, let mStreamingCharacteristic {
 				return (mBAS.configured &&
                         mHRS.configured &&
                         mDIS.configured &&
+                        mAmbiqOTAService.configured &&
 						mMainCharacteristic.configured &&
 						mDataCharacteristic.configured &&
-                        mStreamingCharacteristic.configured &&
-						mAmbiqOTARXCharacteristic.configured &&
-						mAmbiqOTATXCharacteristic.configured
+                        mStreamingCharacteristic.configured
 				)
 			} else {
 				return (mBAS.configured &&
                         mHRS.configured &&
                         mDIS.configured &&
-						mMainCharacteristic.configured &&
-						mAmbiqOTARXCharacteristic.configured &&
-						mAmbiqOTATXCharacteristic.configured
+                        mAmbiqOTAService.configured &&
+						mMainCharacteristic.configured
 				)
 			}
 		}
@@ -599,29 +590,23 @@ public class Device: NSObject, ObservableObject {
 
 	#if UNIVERSAL || KAIROS
 	internal var mKairosConfigured: Bool {
-		if let mAmbiqOTARXCharacteristic, let mAmbiqOTATXCharacteristic, let mMainCharacteristic, let mBAS, let mHRS, let mDIS {
+        if let mAmbiqOTAService, let mMainCharacteristic, let mBAS, let mHRS, let mDIS {
 			
 			if let mDataCharacteristic, let mStreamingCharacteristic {
-				//log?.v ("ALTER MAIN: \(mainCharacteristic.configured), ALTER DATA: \(dataCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
-				
 				return (mBAS.configured &&
                         mHRS.configured &&
                         mDIS.configured &&
+                        mAmbiqOTAService.configured &&
 						mMainCharacteristic.configured &&
 						mDataCharacteristic.configured &&
-                        mStreamingCharacteristic.configured &&
-						mAmbiqOTARXCharacteristic.configured &&
-						mAmbiqOTATXCharacteristic.configured
+                        mStreamingCharacteristic.configured
 				)
 			} else {
-				//log?.v ("ALTER: \(mainCharacteristic.configured), BAT: \(batteryCharacteristic.configured), OTARX: \(ambiqOTARXCharacteristic.configured), OTATX: \(ambiqOTATXCharacteristic.configured)")
-				
 				return (mBAS.configured &&
                         mHRS.configured &&
                         mDIS.configured &&
-						mMainCharacteristic.configured &&
-						mAmbiqOTARXCharacteristic.configured &&
-						mAmbiqOTATXCharacteristic.configured
+                        mAmbiqOTAService.configured &&
+						mMainCharacteristic.configured
 				)
 			}
 		}
@@ -770,8 +755,7 @@ public class Device: NSObject, ObservableObject {
         
 		if let mainCharacteristic = mMainCharacteristic {
 			mainCharacteristic.readEpoch()
-		}
-		else {
+		} else {
 			DispatchQueue.main.async {
 				self.epoch = nil
 				self.readEpochComplete.send(.not_configured)
@@ -2114,10 +2098,10 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func updateFirmwareInternal(_ file: URL) {
-		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
+        if let mAmbiqOTAService, let rxCharacteristic = mAmbiqOTAService.rxCharacteristic {
 			do {
 				let contents = try Data(contentsOf: file)
-				ambiqOTARXCharacteristic.start(contents)
+				rxCharacteristic.start(contents)
 			}
 			catch {
 				globals.log.e ("Cannot open file")
@@ -2152,10 +2136,10 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic {
+        if let mAmbiqOTAService, let rxCharacteristic = mAmbiqOTAService.rxCharacteristic {
 			do {
 				let contents = try Data(contentsOf: file)
-				ambiqOTARXCharacteristic.start(contents)
+                rxCharacteristic.start(contents)
 			}
 			catch {
 				globals.log.e ("Cannot open file")
@@ -2179,8 +2163,8 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func cancelFirmwareUpdateInternal() {
-		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic { ambiqOTARXCharacteristic.cancel() }
-		else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }		
+        if let mAmbiqOTAService, let rxCharacteristic = mAmbiqOTAService.rxCharacteristic { rxCharacteristic.cancel() }
+		else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
 	}
 
 	public func cancelFirmwareUpdate() {
@@ -2191,7 +2175,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let ambiqOTARXCharacteristic = mAmbiqOTARXCharacteristic { ambiqOTARXCharacteristic.cancel() }
+		if let mAmbiqOTAService, let rxCharacteristic = mAmbiqOTAService.rxCharacteristic { rxCharacteristic.cancel() }
 		else {
 			DispatchQueue.main.async {
 				self.updateFirmwareFailed.send((10001, "No characteristic to cancel"))
@@ -3063,6 +3047,66 @@ public class Device: NSObject, ObservableObject {
                         self?.sleepSoftwareRevision = value
                     }
                     .store(in: &subscriptions)
+                
+                // AMBIQ OTA
+                mAmbiqOTAService?.didConnect(peripheral)
+
+                mAmbiqOTAService?.lambdaStarted    = {
+                    self.lambdaUpdateFirmwareStarted?(self.id)
+                    DispatchQueue.main.async {
+                        self.updateFirmwareStarted.send()
+                    }
+                }
+                
+                mAmbiqOTAService?.lambdaFinished = {
+                    self.lambdaUpdateFirmwareFinished?(self.id)
+                    DispatchQueue.main.async {
+                        self.updateFirmwareFinished.send()
+                    }
+                }
+                
+                mAmbiqOTAService?.lambdaFailed    = { code, message in
+                    self.lambdaUpdateFirmwareFailed?(self.id, code, message)
+                    DispatchQueue.main.async {
+                        self.updateFirmwareFailed.send((code, message))
+                    }
+                }
+                
+                mAmbiqOTAService?.lambdaProgress    = { percent in
+                    self.lambdaUpdateFirmwareProgress?(self.id, percent)
+                    DispatchQueue.main.async {
+                        self.updateFirmwareProgress.send(percent)
+                    }
+                }
+                
+                mAmbiqOTAService?.started
+                    .receive(on: DispatchQueue.main)
+                    .sink {
+                        self.updateFirmwareStarted.send()
+                    }
+                    .store(in: &subscriptions)
+
+                mAmbiqOTAService?.finished
+                    .receive(on: DispatchQueue.main)
+                    .sink {
+                        self.updateFirmwareFinished.send()
+                    }
+                    .store(in: &subscriptions)
+                
+                mAmbiqOTAService?.failed
+                    .receive(on: DispatchQueue.main)
+                    .sink { code, message in
+                        self.updateFirmwareFailed.send((code, message))
+                    }
+                    .store(in: &subscriptions)
+
+                mAmbiqOTAService?.progress
+                    .receive(on: DispatchQueue.main)
+                    .sink { percent in
+                        self.updateFirmwareProgress.send(percent)
+                    }
+                    .store(in: &subscriptions)
+
 
                 // Configure
 				connectionState = .configuring
@@ -3101,6 +3145,11 @@ public class Device: NSObject, ObservableObject {
         
         if disService.hit(characteristic) {
             mDIS?.didDiscoverCharacteristic(characteristic)
+            return
+        }
+        
+        if ambiqOTAService.hit(characteristic) {
+            mAmbiqOTAService?.didDiscoverCharacteristic(characteristic)
             return
         }
         
@@ -3164,57 +3213,7 @@ public class Device: NSObject, ObservableObject {
 					#endif
 					attachStreamingCharacteristicLambdas()
 					mStreamingCharacteristic?.discoverDescriptors()
-
 				#endif
-
-				case .ambiqOTARXCharacteristic:
-					if let service = characteristic.service {
-						globals.log.v ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)'")
-					}
-					else {
-						globals.log.v ("\(self.id) for nil service - '\(testCharacteristic.title)'")
-					}
-					
-					mAmbiqOTARXCharacteristic = ambiqOTARXCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
-					mAmbiqOTARXCharacteristic?.started	= {
-						self.lambdaUpdateFirmwareStarted?(self.id)
-						DispatchQueue.main.async {
-							self.updateFirmwareStarted.send()
-						}
-					}
-					
-					mAmbiqOTARXCharacteristic?.finished = {
-						self.lambdaUpdateFirmwareFinished?(self.id)
-						DispatchQueue.main.async {
-							self.updateFirmwareFinished.send()
-						}
-					}
-					
-					mAmbiqOTARXCharacteristic?.failed	= { code, message in
-						self.lambdaUpdateFirmwareFailed?(self.id, code, message)
-						DispatchQueue.main.async {
-							self.updateFirmwareFailed.send((code, message))
-						}
-					}
-					
-					mAmbiqOTARXCharacteristic?.progress	= { percent in
-						self.lambdaUpdateFirmwareProgress?(self.id, percent)
-						DispatchQueue.main.async {
-							self.updateFirmwareProgress.send(percent)
-						}
-					}
-					
-				case .ambiqOTATXCharacteristic:
-					if let service = characteristic.service {
-						globals.log.v ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)'")
-					}
-					else {
-						globals.log.v ("\(self.id) for nil service - '\(testCharacteristic.title)'")
-					}
-					
-					mAmbiqOTATXCharacteristic = ambiqOTATXCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
-					mAmbiqOTATXCharacteristic?.discoverDescriptors()
-				
 				}
 			}
 			else {
@@ -3250,6 +3249,11 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
+        if ambiqOTAService.hit(characteristic) {
+            mAmbiqOTAService?.didDiscoverDescriptor(characteristic)
+            return
+        }
+        
 		if let standardDescriptor = org_bluetooth_descriptor(rawValue: descriptor.prettyID) {
 			switch (standardDescriptor) {
 			case .client_characteristic_configuration:
@@ -3267,9 +3271,6 @@ public class Device: NSObject, ObservableObject {
 					case .kairosDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
 					case .kairosStrmCharacteristic		: mStreamingCharacteristic?.didDiscoverDescriptor()
 					#endif
-
-					case .ambiqOTARXCharacteristic		: globals.log.e ("\(self.id) '\(enumerated.title)' - should not be here")
-					case .ambiqOTATXCharacteristic		: mAmbiqOTATXCharacteristic?.didDiscoverDescriptor()
 					}
 				}
 				else if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
@@ -3325,6 +3326,11 @@ public class Device: NSObject, ObservableObject {
             mDIS?.didUpdateValue(characteristic)
             return
         }
+        
+        if ambiqOTAService.hit(characteristic) {
+            mAmbiqOTAService?.didUpdateValue(characteristic)
+            return
+        }
 
 		if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
 			switch (enumerated) {
@@ -3345,16 +3351,6 @@ public class Device: NSObject, ObservableObject {
 			case .kairosDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
 			case .kairosStrmCharacteristic		: mStreamingCharacteristic?.didUpdateValue()
 			#endif
-				
-			case .ambiqOTARXCharacteristic		: globals.log.e ("\(self.id) '\(enumerated.title)' - should not be here")
-			case .ambiqOTATXCharacteristic		:
-				// Commands to RX come in on TX, causes RX to do next step
-				if let value = characteristic.value {
-					mAmbiqOTARXCharacteristic?.didUpdateTXValue(value)
-				}
-				else {
-					globals.log.e ("\(self.id) '\(enumerated.title)' - No data received for RX command")
-				}
 			}
 		}
 		else {
@@ -3382,6 +3378,11 @@ public class Device: NSObject, ObservableObject {
                 return
             }
             
+            if ambiqOTAService.hit(characteristic) {
+                mAmbiqOTAService?.didUpdateNotificationState(characteristic)
+                return
+            }
+            
 			if (characteristic.isNotifying) {
 				if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
 					globals.log.v ("\(self.id): '\(enumerated.title)'")
@@ -3397,11 +3398,6 @@ public class Device: NSObject, ObservableObject {
 					case .kairosMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
 					case .kairosDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
 					case .kairosStrmCharacteristic			: mStreamingCharacteristic?.didUpdateNotificationState()
-					#endif
-						
-					#if UNIVERSAL || ALTER || KAIROS
-					case .ambiqOTARXCharacteristic			: globals.log.e ("\(self.id) '\(enumerated.title)' - should not be here")
-					case .ambiqOTATXCharacteristic			: mAmbiqOTATXCharacteristic?.didUpdateNotificationState()
 					#endif
 					}
 				}
@@ -3444,7 +3440,9 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func isReady() {
-		mAmbiqOTARXCharacteristic?.isReady()
+        if let mAmbiqOTAService, let rxCharacteristic = mAmbiqOTAService.rxCharacteristic {
+            rxCharacteristic.isReady()
+        }
 	}
 }
 

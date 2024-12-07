@@ -52,6 +52,9 @@
 		18ABB2F42D04C59B00CD6726 /* disService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2F32D04C59B00CD6726 /* disService.swift */; };
 		18ABB2F52D04C59B00CD6726 /* disService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2F32D04C59B00CD6726 /* disService.swift */; };
 		18ABB2F62D04C59B00CD6726 /* disService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB2F32D04C59B00CD6726 /* disService.swift */; };
+		18ABB31C2D04E46D00CD6726 /* ambiqOTAService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB31B2D04E46D00CD6726 /* ambiqOTAService.swift */; };
+		18ABB31D2D04E46D00CD6726 /* ambiqOTAService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB31B2D04E46D00CD6726 /* ambiqOTAService.swift */; };
+		18ABB31E2D04E46D00CD6726 /* ambiqOTAService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18ABB31B2D04E46D00CD6726 /* ambiqOTAService.swift */; };
 		3B0B204C291460C300BDB984 /* nextPacketStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */; };
 		3B0B204F291460C300BDB984 /* nextPacketStatusType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */; };
 		3B14E9BF28EB921C000E85F2 /* manufacturingTestType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */; };
@@ -202,6 +205,7 @@
 		18ABB2DF2D042AC900CD6726 /* hrsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hrsService.swift; sourceTree = "<group>"; };
 		18ABB2EB2D04C10600CD6726 /* bodySensorLocationCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = bodySensorLocationCharacteristic.swift; sourceTree = "<group>"; };
 		18ABB2F32D04C59B00CD6726 /* disService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = disService.swift; sourceTree = "<group>"; };
+		18ABB31B2D04E46D00CD6726 /* ambiqOTAService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ambiqOTAService.swift; sourceTree = "<group>"; };
 		3B0B204B291460C300BDB984 /* nextPacketStatusType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nextPacketStatusType.swift; sourceTree = "<group>"; };
 		3B14E9BE28EB921C000E85F2 /* manufacturingTestType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = manufacturingTestType.swift; sourceTree = "<group>"; };
 		3B14EA2928EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = pulseOxContinuousCharacteristic.swift; sourceTree = "<group>"; };
@@ -284,6 +288,7 @@
 				18ABB2D32D041B8800CD6726 /* basService.swift */,
 				18ABB2DF2D042AC900CD6726 /* hrsService.swift */,
 				18ABB2F32D04C59B00CD6726 /* disService.swift */,
+				18ABB31B2D04E46D00CD6726 /* ambiqOTAService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -602,6 +607,7 @@
 				18ABB2E12D042AC900CD6726 /* hrsService.swift in Sources */,
 				1860FFD52BBE069D00FA4506 /* deviceParameterType.swift in Sources */,
 				3B2602AF2890541E00D5CAAA /* Characteristic.swift in Sources */,
+				18ABB31D2D04E46D00CD6726 /* ambiqOTAService.swift in Sources */,
 				3B1A3DE529F0563E00FCF0DF /* customStreamingCharacteristic.swift in Sources */,
 				3B2602B02890541E00D5CAAA /* CoreBluetoothExtensions.swift in Sources */,
 				3B14E9BF28EB921C000E85F2 /* manufacturingTestType.swift in Sources */,
@@ -688,6 +694,7 @@
 				3BC00B9E2981BD36009F67CB /* DataExtensions.swift in Sources */,
 				3BC00BB22981BFF2009F67CB /* kairosManufacturingTestResult.swift in Sources */,
 				1818395E2BACEBDF00C48D63 /* Command.swift in Sources */,
+				18ABB31E2D04E46D00CD6726 /* ambiqOTAService.swift in Sources */,
 				183D6D382B97E1B300550D5C /* ppgMetricsType.swift in Sources */,
 				3B276E5129FC5F1B003B4B65 /* AES.swift in Sources */,
 				3B9C5C732A40AAE500570699 /* StringExtentions.swift in Sources */,
@@ -725,6 +732,7 @@
 				3B260293288A05CE00D5CAAA /* settingsType.swift in Sources */,
 				3B5AFD592A2FEE6800F99663 /* buttonTapType.swift in Sources */,
 				3BD10BDB28BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift in Sources */,
+				18ABB31C2D04E46D00CD6726 /* ambiqOTAService.swift in Sources */,
 				3B28D46C28E4B72900F6953A /* ppgStatusType.swift in Sources */,
 				183D6D392B97E1B300550D5C /* ppgMetricsType.swift in Sources */,
 				3BF807C227A1AFA000595493 /* Globals.swift in Sources */,
