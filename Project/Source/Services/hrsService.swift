@@ -15,7 +15,6 @@ class hrsService: ServiceTemplate {
     internal var mBodySensorLocationCharacteristic: bodySensorLocationCharacteristic?
 
     @Published var batteryLevel: Int?
-    var lambdaUpdated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
     let updated = PassthroughSubject<(Int, Int, [Double]), Never>()
     
     @Published private var hrmConfigured: Bool = false
@@ -77,10 +76,6 @@ class hrsService: ServiceTemplate {
                     self?.hrmConfigured = $0
                 }
                 .store(in: &pSubscriptions)
-
-            mHeartRateMeasurementCharacteristic?.lambdaUpdated    = { id, epoch, hr, rr in
-                self.lambdaUpdated?(id, epoch, hr, rr)
-            }
 
             mHeartRateMeasurementCharacteristic?.didDiscover()
         case org_bluetooth_characteristic.body_sensor_location.UUID:

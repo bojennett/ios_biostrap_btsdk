@@ -14,12 +14,6 @@ class ambiqOTAService: ServiceTemplate {
     internal var rxCharacteristic: ambiqOTARXCharacteristic?
     internal var txCharacteristic: ambiqOTATXCharacteristic?
 
-    // Lambdas
-    var lambdaStarted: (()->())?
-    var lambdaFinished: (()->())?
-    var lambdaFailed: ((_ code: Int, _ message: String)->())?
-    var lambdaProgress: ((_ percentage: Float)->())?
-
     let started = PassthroughSubject<Void, Never>()
     let finished = PassthroughSubject<Void, Never>()
     let progress = PassthroughSubject<Float, Never>()
@@ -73,10 +67,6 @@ class ambiqOTAService: ServiceTemplate {
         switch characteristic.uuid {
         case ambiqOTARXCharacteristic.uuid:
             rxCharacteristic = ambiqOTARXCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
-            rxCharacteristic?.lambdaStarted = { self.lambdaStarted?() }
-            rxCharacteristic?.lambdaFinished = { self.lambdaFinished?() }
-            rxCharacteristic?.lambdaFailed = { code, message in self.lambdaFailed?(code, message) }
-            rxCharacteristic?.lambdaProgress = { percent in self.lambdaProgress?(percent) }
             
             rxCharacteristic?.started
                 .sink { self.started.send() }

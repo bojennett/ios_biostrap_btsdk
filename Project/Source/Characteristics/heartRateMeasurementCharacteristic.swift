@@ -12,7 +12,6 @@ import Combine
 class heartRateMeasurementCharacteristic: Characteristic {
 	
 	// MARK: Callbacks
-	var lambdaUpdated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
     let updated = PassthroughSubject<(Int, Int, [Double]), Never>()
 
 	//--------------------------------------------------------------------------------
@@ -82,7 +81,6 @@ class heartRateMeasurementCharacteristic: Characteristic {
 		if let characteristic = pCharacteristic {
 			if let data = characteristic.value {
 				let (epoch, hr, rr) = mParse(data)
-				self.lambdaUpdated?(pID, epoch, hr, rr)
                 self.updated.send((epoch, hr, rr))
 			}
 			else {

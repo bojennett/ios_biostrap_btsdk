@@ -80,12 +80,6 @@ class ambiqOTARXCharacteristic: Characteristic {
 		case CANCEL
 	}
 	
-	// Lambdas
-	var lambdaStarted: (()->())?
-	var lambdaFinished: (()->())?
-	var lambdaFailed: ((_ code: Int, _ message: String)->())?
-	var lambdaProgress: ((_ percentage: Float)->())?
-	
     let started = PassthroughSubject<Void, Never>()
     let finished = PassthroughSubject<Void, Never>()
     let progress = PassthroughSubject<Float, Never>()
@@ -220,11 +214,9 @@ class ambiqOTARXCharacteristic: Characteristic {
 		mData = data
 		
 		if let _ = pPeripheral, let _ = pCharacteristic, let data = mData {
-			self.lambdaStarted?()
             self.started.send()
 			
 			if (data.count < ambiqOTARXCharacteristic.FILE_HEADER_BLOCK) {
-				self.lambdaFailed?(Int(amotaStatus.APP_NOT_ENOUGH_DATA.rawValue), amotaStatus.APP_NOT_ENOUGH_DATA.title)
                 self.failed.send((Int(amotaStatus.APP_NOT_ENOUGH_DATA.rawValue), amotaStatus.APP_NOT_ENOUGH_DATA.title))
 				return
 			}
@@ -257,11 +249,9 @@ class ambiqOTARXCharacteristic: Characteristic {
 			
 			mState			= .HEADER
 			mFrameIndex		= 0
-            lambdaProgress?(0.0)
             progress.send(0.0)
 			mSendFrame(data: mHeaderPackets[mFrameIndex])
 		} else {
-            self.lambdaFailed?(Int(amotaStatus.APP_MISSING_OBJECTS.rawValue), amotaStatus.APP_MISSING_OBJECTS.title)
             self.failed.send((Int(amotaStatus.APP_MISSING_OBJECTS.rawValue), amotaStatus.APP_MISSING_OBJECTS.title))
 		}
 	}
@@ -277,7 +267,6 @@ class ambiqOTARXCharacteristic: Characteristic {
 		globals.log.v("Cancel")
 		mState = .CANCEL
 
-		lambdaFailed?(Int(amotaStatus.APP_CANCEL.rawValue), amotaStatus.APP_CANCEL.title)
         failed.send((Int(amotaStatus.APP_CANCEL.rawValue), amotaStatus.APP_CANCEL.title))
 	}
 
@@ -296,14 +285,12 @@ class ambiqOTARXCharacteristic: Characteristic {
 		if let cmd = otaCommand(rawValue: value[2]), let status = amotaStatus(rawValue: value[3]) {
 			if (cmd == .AMOTA_CMD_UNKNOWN) {
 				globals.log.e("Got unknown command: \(value.hexString)")
-				lambdaFailed?(Int(amotaStatus.UNKNOWN_ERROR.rawValue), amotaStatus.UNKNOWN_ERROR.title)
                 failed.send((Int(amotaStatus.UNKNOWN_ERROR.rawValue), amotaStatus.UNKNOWN_ERROR.title))
 				return
 			}
 			
 			if (status != .SUCCESS) {
 				globals.log.e("Error '\(status)': \(value.hexString)")
-				lambdaFailed?(Int(status.rawValue), status.title)
                 failed.send((Int(status.rawValue), status.title))
 				return
 			}
@@ -324,13 +311,11 @@ class ambiqOTARXCharacteristic: Characteristic {
 				else {
 					globals.log.e("Finished the header -> pre-existing OTA exists - do not continue!")
 					mState		= .CANCEL
-					lambdaFailed?(Int(amotaStatus.APP_EXISTING_OTA.rawValue), amotaStatus.APP_EXISTING_OTA.title)
                     failed.send((Int(amotaStatus.APP_EXISTING_OTA.rawValue), amotaStatus.APP_EXISTING_OTA.title))
 				}
 
 			case .DATA:
 				mDataIndex = mDataIndex + 1
-				lambdaProgress?(Float(mDataIndex) / Float(mDataPackets.count))
                 progress.send(Float(mDataIndex) / Float(mDataPackets.count))
 
 				if (mDataIndex == mDataPackets.count) {
@@ -354,13 +339,11 @@ class ambiqOTARXCharacteristic: Characteristic {
 				globals.log.v("Done")
 				mState = .DONE
 				
-				lambdaFinished?()
                 finished.send()
 
 			default:
 				globals.log.e ("Unknown state: \(mState)")
 				mState = .CANCEL
-				lambdaFailed?(Int(amotaStatus.UNKNOWN_ERROR.rawValue), amotaStatus.UNKNOWN_ERROR.title)
                 failed.send((Int(amotaStatus.UNKNOWN_ERROR.rawValue), amotaStatus.UNKNOWN_ERROR.title))
 			}
 

@@ -2968,12 +2968,15 @@ public class Device: NSObject, ObservableObject {
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] level in
                         self?.batteryLevel = level
+                        if let level {
+                            self?.lambdaBatteryLevelUpdated?(self!.id, level)
+                        }
                     }
                     .store(in: &subscriptions)
                 
-                mBAS?.lambdaUpdated = { [weak self] id, percentage in
-                    self?.lambdaBatteryLevelUpdated?(id, percentage)
-                }
+                //mBAS?.lambdaUpdated = { [weak self] id, percentage in
+                //    self?.lambdaBatteryLevelUpdated?(id, percentage)
+                //}
                 
                 // Heart Rate Service
                 mHRS?.didConnect(peripheral)
@@ -2982,12 +2985,13 @@ public class Device: NSObject, ObservableObject {
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] (epoch, hr, rr) in
                         self?.heartRateUpdated.send((epoch, hr, rr))
+                        self?.lambdaHeartRateUpdated?(self!.id, epoch, hr, rr)
                     }
                     .store(in: &subscriptions)
                 
-                mHRS?.lambdaUpdated = { [weak self] id, epoch, hr, rr in
-                    self?.lambdaHeartRateUpdated?(id, epoch, hr, rr)
-                }
+                //mHRS?.lambdaUpdated = { [weak self] id, epoch, hr, rr in
+                //    self?.lambdaHeartRateUpdated?(id, epoch, hr, rr)
+                //}
                 
                 // Device Information Service
                 mDIS?.didConnect(peripheral)
@@ -3050,38 +3054,29 @@ public class Device: NSObject, ObservableObject {
                 // AMBIQ OTA
                 mAmbiqOTAService?.didConnect(peripheral)
 
+                /*
                 mAmbiqOTAService?.lambdaStarted    = {
                     self.lambdaUpdateFirmwareStarted?(self.id)
-                    DispatchQueue.main.async {
-                        self.updateFirmwareStarted.send()
-                    }
                 }
                 
                 mAmbiqOTAService?.lambdaFinished = {
                     self.lambdaUpdateFirmwareFinished?(self.id)
-                    DispatchQueue.main.async {
-                        self.updateFirmwareFinished.send()
-                    }
                 }
                 
                 mAmbiqOTAService?.lambdaFailed    = { code, message in
                     self.lambdaUpdateFirmwareFailed?(self.id, code, message)
-                    DispatchQueue.main.async {
-                        self.updateFirmwareFailed.send((code, message))
-                    }
                 }
                 
                 mAmbiqOTAService?.lambdaProgress    = { percent in
                     self.lambdaUpdateFirmwareProgress?(self.id, percent)
-                    DispatchQueue.main.async {
-                        self.updateFirmwareProgress.send(percent)
-                    }
                 }
+                 */
                 
                 mAmbiqOTAService?.started
                     .receive(on: DispatchQueue.main)
                     .sink {
                         self.updateFirmwareStarted.send()
+                        self.lambdaUpdateFirmwareStarted?(self.id)
                     }
                     .store(in: &subscriptions)
 
@@ -3089,6 +3084,7 @@ public class Device: NSObject, ObservableObject {
                     .receive(on: DispatchQueue.main)
                     .sink {
                         self.updateFirmwareFinished.send()
+                        self.lambdaUpdateFirmwareFinished?(self.id)
                     }
                     .store(in: &subscriptions)
                 
@@ -3096,6 +3092,7 @@ public class Device: NSObject, ObservableObject {
                     .receive(on: DispatchQueue.main)
                     .sink { code, message in
                         self.updateFirmwareFailed.send((code, message))
+                        self.lambdaUpdateFirmwareFailed?(self.id, code, message)
                     }
                     .store(in: &subscriptions)
 
@@ -3103,6 +3100,7 @@ public class Device: NSObject, ObservableObject {
                     .receive(on: DispatchQueue.main)
                     .sink { percent in
                         self.updateFirmwareProgress.send(percent)
+                        self.lambdaUpdateFirmwareProgress?(self.id, percent)
                     }
                     .store(in: &subscriptions)
 
