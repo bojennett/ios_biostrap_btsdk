@@ -42,10 +42,6 @@ class disService: ServiceTemplate {
         return org_bluetooth_service.heart_rate.UUID
     }
     
-    override class func discover_characteristics() -> [ CBUUID ] {
-        return [ org_bluetooth_characteristic.heart_rate_measurement.UUID ]
-    }
-    
     override class func hit(_ characteristic: CBCharacteristic) -> Bool {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.model_number_string.UUID: return true
@@ -58,7 +54,7 @@ class disService: ServiceTemplate {
         }
     }
     
-    override var configured: Bool {
+    override var isConfigured: Bool {
         //globals.log.w ("\(mDISCharacteristicsDiscovered) - \(mDISCharacteristicCount) \(mModelNumberCharacteristic?.configured):\(mHardwareRevisionCharacteristic?.configured):\(mManufacturerNameCharacteristic?.configured):\(mSerialNumberCharacteristic?.configured):\(mFirmwareRevisionCharacteristic?.configured)")
         
         if mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 {

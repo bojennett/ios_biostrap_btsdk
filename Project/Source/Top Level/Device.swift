@@ -563,12 +563,12 @@ public class Device: NSObject, ObservableObject {
 	internal var mAlterConfigured: Bool {
         if let mAmbiqOTAService, let mMainCharacteristic, let mBAS, let mHRS, let mDIS {
             
-            globals.log.e ("\(mAmbiqOTAService.pConfigured):\(mBAS.pConfigured):\(mHRS.pConfigured):\(mDIS.configured),\(mMainCharacteristic.configured):\(mStreamingCharacteristic?.configured):\(mDataCharacteristic?.configured)")
+            globals.log.e ("\(mAmbiqOTAService.pConfigured):\(mBAS.pConfigured):\(mHRS.pConfigured):\(mDIS.isConfigured),\(mMainCharacteristic.configured):\(mStreamingCharacteristic?.configured):\(mDataCharacteristic?.configured)")
 			
 			if let mDataCharacteristic, let mStreamingCharacteristic {
 				return (mBAS.pConfigured &&
                         mHRS.pConfigured &&
-                        mDIS.configured &&
+                        mDIS.isConfigured &&
                         mAmbiqOTAService.pConfigured &&
 						mMainCharacteristic.configured &&
 						mDataCharacteristic.configured &&
@@ -577,7 +577,7 @@ public class Device: NSObject, ObservableObject {
 			} else {
 				return (mBAS.pConfigured &&
                         mHRS.pConfigured &&
-                        mDIS.configured &&
+                        mDIS.isConfigured &&
                         mAmbiqOTAService.pConfigured &&
 						mMainCharacteristic.configured
 				)
@@ -594,8 +594,8 @@ public class Device: NSObject, ObservableObject {
 			if let mDataCharacteristic, let mStreamingCharacteristic {
 				return (mBAS.pConfigured &&
                         mHRS.pConfigured &&
-                        mDIS.configured &&
-                        mAmbiqOTAService.configured &&
+                        mDIS.isConfigured &&
+                        mAmbiqOTAService.isConfigured &&
 						mMainCharacteristic.configured &&
 						mDataCharacteristic.configured &&
                         mStreamingCharacteristic.configured
@@ -603,8 +603,8 @@ public class Device: NSObject, ObservableObject {
 			} else {
 				return (mBAS.pConfigured &&
                         mHRS.pConfigured &&
-                        mDIS.configured &&
-                        mAmbiqOTAService.configured &&
+                        mDIS.isConfigured &&
+                        mAmbiqOTAService.isConfigured &&
 						mMainCharacteristic.configured
 				)
 			}

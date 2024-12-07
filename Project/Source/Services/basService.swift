@@ -24,11 +24,7 @@ class basService: ServiceTemplate {
     override class var scan_service: CBUUID {
         return org_bluetooth_service.battery_service.UUID
     }
-    
-    override class func discover_characteristics() -> [ CBUUID ] {
-        return [ org_bluetooth_characteristic.battery_level.UUID ]
-    }
-    
+        
     override class func hit(_ characteristic: CBCharacteristic) -> Bool {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
             return true
@@ -36,7 +32,7 @@ class basService: ServiceTemplate {
         return false
     }
     
-    override var configured: Bool {
+    override var isConfigured: Bool {
         return mBatteryLevelCharacteristic?.configured ?? false
     }
 

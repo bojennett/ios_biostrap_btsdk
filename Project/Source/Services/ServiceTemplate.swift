@@ -26,17 +26,12 @@ open class ServiceTemplate: ObservableObject {
     // need to create an instance of the object to use it
     //
     //--------------------------------------------------------------------------------
-    open class var scan_service: CBUUID {
+    class var scan_service: CBUUID {
         globals.log.e ("Don't know what to do here.  Perhaps need to override?")
         return org_bluetooth_service.generic_access.UUID
     }
     
-    open class func discover_characteristics() -> [ CBUUID ] {
-        globals.log.e ("Don't know what to do here.  Perhaps need to override?")
-        return ([ CBUUID ]())
-    }
-    
-    open class func hit(_ characteristic: CBCharacteristic) -> Bool {
+    class func hit(_ characteristic: CBCharacteristic) -> Bool {
         globals.log.e ("Don't know what to do here.  Perhaps need to override?")
         return (false)
     }
@@ -60,7 +55,7 @@ open class ServiceTemplate: ObservableObject {
     //
     //
     //--------------------------------------------------------------------------------
-    open var configured: Bool { return false }
+    var isConfigured: Bool { return false }
 
     //--------------------------------------------------------------------------------
     // Function Name:
@@ -69,7 +64,7 @@ open class ServiceTemplate: ObservableObject {
     //
     //
     //--------------------------------------------------------------------------------
-    open func didConnect(_ peripheral: CBPeripheral) {
+    func didConnect(_ peripheral: CBPeripheral) {
         pPeripheral = peripheral
         pID = peripheral.prettyID
     }
@@ -81,7 +76,7 @@ open class ServiceTemplate: ObservableObject {
     //
     //
     //--------------------------------------------------------------------------------
-    open func getAttributes() -> [ String : String ] { return (pAttributes) }
+    func getAttributes() -> [ String : String ] { return (pAttributes) }
 
     //--------------------------------------------------------------------------------
     // Function Name:
@@ -90,17 +85,7 @@ open class ServiceTemplate: ObservableObject {
     //
     //
     //--------------------------------------------------------------------------------
-    open func didDisconnect() {
-    }
-    
-    //--------------------------------------------------------------------------------
-    // Function Name:
-    //--------------------------------------------------------------------------------
-    //
-    //
-    //
-    //--------------------------------------------------------------------------------
-    open func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
+    func didDisconnect() {
         globals.log.e ("Don't know what to do here.  Perhaps this needs to override?")
     }
     
@@ -111,7 +96,7 @@ open class ServiceTemplate: ObservableObject {
     //
     //
     //--------------------------------------------------------------------------------
-    open func didDiscoverDescriptor(_ characteristic: CBCharacteristic) {
+    func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
         globals.log.e ("Don't know what to do here.  Perhaps this needs to override?")
     }
     
@@ -122,11 +107,21 @@ open class ServiceTemplate: ObservableObject {
     //
     //
     //--------------------------------------------------------------------------------
-    open func didWriteValue(_ characteristic: CBCharacteristic) {
+    func didDiscoverDescriptor(_ characteristic: CBCharacteristic) {
+        globals.log.e ("Don't know what to do here.  Perhaps this needs to override?")
+    }
+    
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    func didWriteValue(_ characteristic: CBCharacteristic) {
         if let value = characteristic.value {
             globals.log.e ("Don't know what to do here.  Perhaps this needs to override? (0x\(value.hexString)")
-        }
-        else {
+        } else {
             globals.log.e ("Don't know what to do here.  Perhaps this needs to override? (No data)")
         }
     }
@@ -138,11 +133,10 @@ open class ServiceTemplate: ObservableObject {
     //
     //
     //--------------------------------------------------------------------------------
-    open func didUpdateValue(_ characteristic: CBCharacteristic) {
+    func didUpdateValue(_ characteristic: CBCharacteristic) {
         if let value = characteristic.value {
             globals.log.e ("Don't know what to do here.  Perhaps this needs to override? (0x\(value.hexString)")
-        }
-        else {
+        } else {
             globals.log.e ("Don't know what to do here.  Perhaps this needs to override? (No data)")
         }
     }
@@ -154,7 +148,7 @@ open class ServiceTemplate: ObservableObject {
     //
     //
     //--------------------------------------------------------------------------------
-    open func didUpdateNotificationState(_ characteristic: CBCharacteristic) {
+    func didUpdateNotificationState(_ characteristic: CBCharacteristic) {
         globals.log.e ("Don't know what to do here for \(characteristic.prettyID).  Perhaps this needs to override? (No data)")
     }
 }

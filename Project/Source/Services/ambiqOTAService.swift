@@ -37,10 +37,6 @@ class ambiqOTAService: ServiceTemplate {
         return CBUUID(string: "00002760-08C2-11E1-9073-0E8AC72E1001")
     }
     
-    override class func discover_characteristics() -> [ CBUUID ] {
-        return [ org_bluetooth_characteristic.heart_rate_measurement.UUID ]
-    }
-    
     override class func hit(_ characteristic: CBCharacteristic) -> Bool {
         switch characteristic.uuid {
         case ambiqOTARXCharacteristic.uuid: return true
