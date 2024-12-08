@@ -11,14 +11,12 @@ import Combine
 
 class disService: ServiceTemplate {
     
-    internal var mModelNumberCharacteristic : disStringCharacteristic?
-    internal var mFirmwareRevisionCharacteristic : disFirmwareVersionCharacteristic?
-    internal var mSoftwareRevisionCharacteristic : disSoftwareRevisionCharacteristic?
-    internal var mHardwareRevisionCharacteristic : disStringCharacteristic?
-    internal var mManufacturerNameCharacteristic : disStringCharacteristic?
-    internal var mSerialNumberCharacteristic : disStringCharacteristic?
-    internal var mDISCharacteristicCount : Int = 0
-    internal var mDISCharacteristicsDiscovered : Bool = false
+	internal var mModelNumberCharacteristic: disStringCharacteristic
+	internal var mFirmwareRevisionCharacteristic: disFirmwareVersionCharacteristic
+	internal var mSoftwareRevisionCharacteristic: disSoftwareRevisionCharacteristic
+	internal var mHardwareRevisionCharacteristic: disStringCharacteristic
+	internal var mManufacturerNameCharacteristic: disStringCharacteristic
+	internal var mSerialNumberCharacteristic: disStringCharacteristic
 
     @Published var modelNumber: String?
     @Published var hardwareRevision: String?
@@ -28,7 +26,7 @@ class disService: ServiceTemplate {
     @Published var bluetoothSoftwareRevision: String?
     @Published var algorithmsSoftwareRevision: String?
     @Published var sleepSoftwareRevision: String?
-    
+	
 	#if UNIVERSAL
     var type = biostrapDeviceSDK.biostrapDeviceType.unknown
     #endif
@@ -54,28 +52,67 @@ class disService: ServiceTemplate {
         }
     }
     
-    override var isConfigured: Bool {
-        //globals.log.w ("\(mDISCharacteristicsDiscovered) - \(mDISCharacteristicCount) \(mModelNumberCharacteristic?.configured):\(mHardwareRevisionCharacteristic?.configured):\(mManufacturerNameCharacteristic?.configured):\(mSerialNumberCharacteristic?.configured):\(mFirmwareRevisionCharacteristic?.configured)")
-        
-        if mDISCharacteristicsDiscovered && mDISCharacteristicCount == 0 {
-            if let mModelNumberCharacteristic,
-               let mHardwareRevisionCharacteristic,
-               let mManufacturerNameCharacteristic,
-               let mSerialNumberCharacteristic,
-               let mFirmwareRevisionCharacteristic,
-               let mSoftwareRevisionCharacteristic {
-                return mModelNumberCharacteristic.configured &&
-                       mHardwareRevisionCharacteristic.configured &&
-                       mManufacturerNameCharacteristic.configured &&
-                       mSerialNumberCharacteristic.configured &&
-                       mFirmwareRevisionCharacteristic.configured &&
-                       mSoftwareRevisionCharacteristic.configured
-            }
-        }
-        
-        return false
-    }
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	internal func setupSubscribers() {
+		mModelNumberCharacteristic.$value
+			.sink { [weak self] in self?.modelNumber = $0 }
+			.store(in: &pSubscriptions)
 
+		mHardwareRevisionCharacteristic.$value
+			.sink { [weak self] in self?.hardwareRevision = $0 }
+			.store(in: &pSubscriptions)
+
+		mManufacturerNameCharacteristic.$value
+			.sink { [weak self] in self?.manufacturerName = $0 }
+			.store(in: &pSubscriptions)
+
+		mSerialNumberCharacteristic.$value
+			.sink { [weak self] in self?.serialNumber = $0 }
+			.store(in: &pSubscriptions)
+
+		mFirmwareRevisionCharacteristic.$value
+			.sink { [weak self] in self?.firmwareRevision = $0 }
+			.store(in: &pSubscriptions)
+		
+		mSoftwareRevisionCharacteristic.$bluetooth
+			.sink { [weak self] in self?.bluetoothSoftwareRevision = $0 }
+			.store(in: &pSubscriptions)
+
+		mSoftwareRevisionCharacteristic.$algorithms
+			.sink { [weak self] in self?.algorithmsSoftwareRevision = $0 }
+			.store(in: &pSubscriptions)
+
+		mSoftwareRevisionCharacteristic.$sleep
+			.sink { [weak self] in self?.sleepSoftwareRevision = $0 }
+			.store(in: &pSubscriptions)
+		
+		// Get Configured - 2 step process as so many characteristics
+		let partialConfigured1 = Publishers.CombineLatest3(
+			mModelNumberCharacteristic.$configured,
+			mHardwareRevisionCharacteristic.$configured,
+			mManufacturerNameCharacteristic.$configured
+		).map { $0 && $1 && $2 }
+		
+		let partialConfigured2 = Publishers.CombineLatest3(
+			mSerialNumberCharacteristic.$configured,
+			mFirmwareRevisionCharacteristic.$configured,
+			mFirmwareRevisionCharacteristic.$configured
+		).map { $0 && $1 && $2 }
+
+		Publishers.CombineLatest(partialConfigured1, partialConfigured2)
+			.sink { [weak self] in
+				self?.pConfigured = $0 && $1
+			}
+			.store(in: &pSubscriptions)
+
+	}
+	
     //--------------------------------------------------------------------------------
     // Function Name:
     //--------------------------------------------------------------------------------
@@ -85,9 +122,31 @@ class disService: ServiceTemplate {
     //--------------------------------------------------------------------------------
 	#if UNIVERSAL
     init(_ commandQ: CommandQ?, type: biostrapDeviceSDK.biostrapDeviceType) {
+		mModelNumberCharacteristic = disStringCharacteristic()
+		mFirmwareRevisionCharacteristic = disFirmwareVersionCharacteristic()
+		mSoftwareRevisionCharacteristic = disSoftwareRevisionCharacteristic(type)
+		mHardwareRevisionCharacteristic = disStringCharacteristic()
+		mManufacturerNameCharacteristic = disStringCharacteristic()
+		mSerialNumberCharacteristic = disStringCharacteristic()
+		
         super .init(commandQ)
+		setupSubscribers()
     }
     #endif
+	
+	#if ALTER || KAIROS
+	init(_ commandQ: CommandQ?) {
+		mModelNumberCharacteristic = disStringCharacteristic()
+		mFirmwareRevisionCharacteristic = disFirmwareVersionCharacteristic()
+		mSoftwareRevisionCharacteristic = disSoftwareRevisionCharacteristic()
+		mHardwareRevisionCharacteristic = disStringCharacteristic()
+		mManufacturerNameCharacteristic = disStringCharacteristic()
+		mSerialNumberCharacteristic = disStringCharacteristic()
+		
+		super .init(commandQ)
+		setupSubscribers()
+	}
+	#endif
 
     //--------------------------------------------------------------------------------
     // Function Name:
@@ -99,97 +158,22 @@ class disService: ServiceTemplate {
     override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.model_number_string.UUID:
-            mDISCharacteristicsDiscovered = true
-            mDISCharacteristicCount += 1
-            
-            mModelNumberCharacteristic = disStringCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
-            mModelNumberCharacteristic?.$value
-                .sink { [weak self] in
-                    self?.modelNumber = $0
-                }
-                .store(in: &pSubscriptions)
-
-            mModelNumberCharacteristic?.didDiscover()
+			mModelNumberCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
             
         case org_bluetooth_characteristic.hardware_revision_string.UUID:
-            mDISCharacteristicsDiscovered = true
-            mDISCharacteristicCount += 1
-            
-            mHardwareRevisionCharacteristic = disStringCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
-            mHardwareRevisionCharacteristic?.$value
-                .sink { [weak self] in
-                    self?.hardwareRevision = $0
-                }
-                .store(in: &pSubscriptions)
-            
-            mHardwareRevisionCharacteristic?.didDiscover()
+			mHardwareRevisionCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
             
         case org_bluetooth_characteristic.manufacturer_name_string.UUID:
-            mDISCharacteristicsDiscovered = true
-            mDISCharacteristicCount += 1
-            
-            mManufacturerNameCharacteristic = disStringCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
-            mManufacturerNameCharacteristic?.$value
-                .sink { [weak self] in
-                    self?.manufacturerName = $0
-                }
-                .store(in: &pSubscriptions)
-            
-            mManufacturerNameCharacteristic?.didDiscover()
+			mManufacturerNameCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
             
         case org_bluetooth_characteristic.serial_number_string.UUID:
-            mDISCharacteristicsDiscovered = true
-            mDISCharacteristicCount += 1
-            
-            mSerialNumberCharacteristic = disStringCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
-            mSerialNumberCharacteristic?.$value
-                .sink { [weak self] in
-                    self?.serialNumber = $0
-                }
-                .store(in: &pSubscriptions)
-            
-            mSerialNumberCharacteristic?.didDiscover()
+			mSerialNumberCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
             
         case org_bluetooth_characteristic.firmware_revision_string.UUID:
-            mDISCharacteristicsDiscovered    = true
-            mDISCharacteristicCount += 1
-            mFirmwareRevisionCharacteristic = disFirmwareVersionCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
-            mFirmwareRevisionCharacteristic?.$value
-                .sink { [weak self] in
-                    self?.firmwareRevision = $0
-                }
-                .store(in: &pSubscriptions)
-
-            mFirmwareRevisionCharacteristic?.didDiscover()
+			mFirmwareRevisionCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
             
         case org_bluetooth_characteristic.software_revision_string.UUID:
-            mDISCharacteristicsDiscovered    = true
-            mDISCharacteristicCount += 1
-            #if UNIVERSAL
-            mSoftwareRevisionCharacteristic = disSoftwareRevisionCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ, type: type)
-            #else
-            mSoftwareRevisionCharacteristic = disSoftwareRevisionCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
-            #endif
-            
-            mSoftwareRevisionCharacteristic?.$bluetooth
-                .sink { [weak self] in
-                    self?.bluetoothSoftwareRevision = $0
-                }
-                .store(in: &pSubscriptions)
-
-            mSoftwareRevisionCharacteristic?.$algorithms
-                .sink { [weak self] in
-                    self?.algorithmsSoftwareRevision = $0
-                }
-                .store(in: &pSubscriptions)
-
-            mSoftwareRevisionCharacteristic?.$sleep
-                .sink { [weak self] in
-                    self?.sleepSoftwareRevision = $0
-                }
-                .store(in: &pSubscriptions)
-
-            mSoftwareRevisionCharacteristic?.didDiscover()
+			mSoftwareRevisionCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
 
         default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)")
         }
@@ -205,31 +189,24 @@ class disService: ServiceTemplate {
     override func didUpdateValue(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.model_number_string.UUID:
-            mDISCharacteristicCount -= 1
-            mModelNumberCharacteristic?.didUpdateValue()
+            mModelNumberCharacteristic.didUpdateValue()
 
         case org_bluetooth_characteristic.hardware_revision_string.UUID:
-            mDISCharacteristicCount -= 1
-            mHardwareRevisionCharacteristic?.didUpdateValue()
+            mHardwareRevisionCharacteristic.didUpdateValue()
             
         case org_bluetooth_characteristic.manufacturer_name_string.UUID:
-            mDISCharacteristicCount -= 1
-            mManufacturerNameCharacteristic?.didUpdateValue()
+            mManufacturerNameCharacteristic.didUpdateValue()
             
         case org_bluetooth_characteristic.serial_number_string.UUID:
-            mDISCharacteristicCount -= 1
-            mSerialNumberCharacteristic?.didUpdateValue()
+            mSerialNumberCharacteristic.didUpdateValue()
             
         case org_bluetooth_characteristic.firmware_revision_string.UUID:
-            mDISCharacteristicCount -= 1
-            mFirmwareRevisionCharacteristic?.didUpdateValue()
+            mFirmwareRevisionCharacteristic.didUpdateValue()
             
         case org_bluetooth_characteristic.software_revision_string.UUID:
-            mDISCharacteristicCount -= 1
-            mSoftwareRevisionCharacteristic?.didUpdateValue()
+            mSoftwareRevisionCharacteristic.didUpdateValue()
 
         default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)")
         }
     }
-
 }

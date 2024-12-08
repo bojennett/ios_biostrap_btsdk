@@ -190,7 +190,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 	// Constructor
 	//
 	//--------------------------------------------------------------------------------
-	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+	override init() {
 		mState			= .IDLE
 		mDataIndex		= 0
 		mFrameIndex		= 0
@@ -198,11 +198,23 @@ class ambiqOTARXCharacteristic: Characteristic {
 		mHeaderPackets	= [Data]()
 		mDataPackets	= [[Data]]()
 
-		super.init (peripheral, characteristic: characteristic, commandQ: commandQ)
+		super.init ()
 
 		configured		= true
 	}
 	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	override func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		super.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
+		configured = true
+	}
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------

@@ -367,18 +367,20 @@ class Characteristic {
     }
 
 	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
 	//
-	// Constructor
+	//
 	//
 	//--------------------------------------------------------------------------------
-	init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+	func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
 		pID = peripheral.prettyID
 		pPeripheral = peripheral
 		pCharacteristic = characteristic
 		configured = false
 		pCommandQ = commandQ
 	}
-	
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
@@ -390,17 +392,6 @@ class Characteristic {
 		pCommandQ?.read(pCharacteristic)
 	}
 
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	func didDiscover() {
-		globals.log.e ("\(pID): Did you mean to override?")
-	}
-	
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------

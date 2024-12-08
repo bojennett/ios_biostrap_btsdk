@@ -37,8 +37,8 @@ class batteryLevelCharacteristic: Characteristic {
     //
     //
     //--------------------------------------------------------------------------------
-    override func didDiscover() {
-        globals.log.v ("\(pID): Read it and enable notifications")
+	override func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		super.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
         read()
         discoverDescriptors()
     }

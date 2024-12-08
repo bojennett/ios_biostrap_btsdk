@@ -563,12 +563,12 @@ public class Device: NSObject, ObservableObject {
 	internal var mAlterConfigured: Bool {
         if let mAmbiqOTAService, let mMainCharacteristic, let mBAS, let mHRS, let mDIS {
             
-            globals.log.e ("\(mAmbiqOTAService.pConfigured):\(mBAS.pConfigured):\(mHRS.pConfigured):\(mDIS.isConfigured),\(mMainCharacteristic.configured):\(mStreamingCharacteristic?.configured):\(mDataCharacteristic?.configured)")
+			//globals.log.e ("\(mAmbiqOTAService.pConfigured):\(mBAS.pConfigured):\(mHRS.pConfigured):\(mDIS.isConfigured),\(mMainCharacteristic.configured):\(mStreamingCharacteristic?.configured):\(mDataCharacteristic?.configured)")
 			
 			if let mDataCharacteristic, let mStreamingCharacteristic {
 				return (mBAS.pConfigured &&
                         mHRS.pConfigured &&
-                        mDIS.isConfigured &&
+                        mDIS.pConfigured &&
                         mAmbiqOTAService.pConfigured &&
 						mMainCharacteristic.configured &&
 						mDataCharacteristic.configured &&
@@ -577,7 +577,7 @@ public class Device: NSObject, ObservableObject {
 			} else {
 				return (mBAS.pConfigured &&
                         mHRS.pConfigured &&
-                        mDIS.isConfigured &&
+                        mDIS.pConfigured &&
                         mAmbiqOTAService.pConfigured &&
 						mMainCharacteristic.configured
 				)
@@ -594,8 +594,8 @@ public class Device: NSObject, ObservableObject {
 			if let mDataCharacteristic, let mStreamingCharacteristic {
 				return (mBAS.pConfigured &&
                         mHRS.pConfigured &&
-                        mDIS.isConfigured &&
-                        mAmbiqOTAService.isConfigured &&
+                        mDIS.pConfigured &&
+                        mAmbiqOTAService.pConfigured &&
 						mMainCharacteristic.configured &&
 						mDataCharacteristic.configured &&
                         mStreamingCharacteristic.configured
@@ -603,8 +603,8 @@ public class Device: NSObject, ObservableObject {
 			} else {
 				return (mBAS.pConfigured &&
                         mHRS.pConfigured &&
-                        mDIS.isConfigured &&
-                        mAmbiqOTAService.isConfigured &&
+                        mDIS.pConfigured &&
+                        mAmbiqOTAService.pConfigured &&
 						mMainCharacteristic.configured
 				)
 			}
@@ -621,8 +621,8 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	internal func checkConfigured() {
-        if let mDIS, let firmwareVesion = mDIS.mFirmwareRevisionCharacteristic, let customCharacteristic = mMainCharacteristic {
-			customCharacteristic.firmwareVersion = firmwareVesion.value
+        if let mDIS, let customCharacteristic = mMainCharacteristic {
+			customCharacteristic.firmwareVersion = mDIS.mFirmwareRevisionCharacteristic.value
 		}
 		
 		if connectionState == .configured { return } // If i was already configured, i don't need to tell the app this again
@@ -803,13 +803,13 @@ public class Device: NSObject, ObservableObject {
 		var newStyle	= false
 		
 		if let mainCharacteristic = mMainCharacteristic {
-            if let mDIS, let softwareVersion = mDIS.mSoftwareRevisionCharacteristic {
-				if (softwareVersion.bluetoothGreaterThan("2.0.4")) {
-					globals.log.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use new style")
+            if let mDIS {
+				if (mDIS.mSoftwareRevisionCharacteristic.bluetoothGreaterThan("2.0.4")) {
+					globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use new style")
 					newStyle	= true
 				}
 				else {
-					globals.log.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use old style")
+					globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use old style")
 				}
 			}
 			else {
@@ -830,13 +830,13 @@ public class Device: NSObject, ObservableObject {
 		var newStyle	= false
 		
 		if let mainCharacteristic = mMainCharacteristic {
-            if let mDIS, let softwareVersion = mDIS.mSoftwareRevisionCharacteristic {
-				if (softwareVersion.bluetoothGreaterThan("2.0.4")) {
-					globals.log.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use new style")
+            if let mDIS {
+				if (mDIS.mSoftwareRevisionCharacteristic.bluetoothGreaterThan("2.0.4")) {
+					globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use new style")
 					newStyle	= true
 				}
 				else {
-					globals.log.v ("Bluetooth library version: '\(softwareVersion.bluetooth)' - Use old style")
+					globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use old style")
 				}
 			}
 			else {
@@ -2097,10 +2097,10 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func updateFirmwareInternal(_ file: URL) {
-        if let mAmbiqOTAService, let rxCharacteristic = mAmbiqOTAService.rxCharacteristic {
+        if let mAmbiqOTAService {
 			do {
 				let contents = try Data(contentsOf: file)
-				rxCharacteristic.start(contents)
+				mAmbiqOTAService.rxCharacteristic.start(contents)
 			}
 			catch {
 				globals.log.e ("Cannot open file")
@@ -2135,10 +2135,10 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        if let mAmbiqOTAService, let rxCharacteristic = mAmbiqOTAService.rxCharacteristic {
+        if let mAmbiqOTAService {
 			do {
 				let contents = try Data(contentsOf: file)
-                rxCharacteristic.start(contents)
+				mAmbiqOTAService.rxCharacteristic.start(contents)
 			}
 			catch {
 				globals.log.e ("Cannot open file")
@@ -2162,7 +2162,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func cancelFirmwareUpdateInternal() {
-        if let mAmbiqOTAService, let rxCharacteristic = mAmbiqOTAService.rxCharacteristic { rxCharacteristic.cancel() }
+        if let mAmbiqOTAService { mAmbiqOTAService.rxCharacteristic.cancel() }
 		else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
 	}
 
@@ -2174,7 +2174,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mAmbiqOTAService, let rxCharacteristic = mAmbiqOTAService.rxCharacteristic { rxCharacteristic.cancel() }
+		if let mAmbiqOTAService { mAmbiqOTAService.rxCharacteristic.cancel() }
 		else {
 			DispatchQueue.main.async {
 				self.updateFirmwareFailed.send((10001, "No characteristic to cancel"))
@@ -3167,7 +3167,8 @@ public class Device: NSObject, ObservableObject {
 					
 				#if UNIVERSAL || ALTER
 				case .alterMainCharacteristic:
-					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mMainCharacteristic = customMainCharacteristic()
+					mMainCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mMainCharacteristic?.type	= .alter
 					#endif
@@ -3175,12 +3176,14 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.discoverDescriptors()
 					
 				case .alterDataCharacteristic:
-					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mDataCharacteristic = customDataCharacteristic()
+					mDataCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
 					attachDataCharacteristicLambdas()
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .alterStrmCharacteristic:
-					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mStreamingCharacteristic = customStreamingCharacteristic()
+					mStreamingCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .alter
 					#endif
@@ -3191,7 +3194,8 @@ public class Device: NSObject, ObservableObject {
 
 				#if UNIVERSAL || KAIROS
 				case .kairosMainCharacteristic:
-					mMainCharacteristic	= customMainCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mMainCharacteristic = customMainCharacteristic()
+					mMainCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mMainCharacteristic?.type	= .kairos
 					#endif
@@ -3199,12 +3203,14 @@ public class Device: NSObject, ObservableObject {
 					mMainCharacteristic?.discoverDescriptors()
 
 				case .kairosDataCharacteristic:
-					mDataCharacteristic = customDataCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mDataCharacteristic = customDataCharacteristic()
+					mDataCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
 					attachDataCharacteristicLambdas()
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .kairosStrmCharacteristic:
-					mStreamingCharacteristic = customStreamingCharacteristic(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mStreamingCharacteristic = customStreamingCharacteristic()
+					mStreamingCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .kairos
 					#endif
@@ -3437,8 +3443,8 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func isReady() {
-        if let mAmbiqOTAService, let rxCharacteristic = mAmbiqOTAService.rxCharacteristic {
-            rxCharacteristic.isReady()
+        if let mAmbiqOTAService {
+			mAmbiqOTAService.rxCharacteristic.isReady()
         }
 	}
 }

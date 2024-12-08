@@ -24,14 +24,9 @@ class disSoftwareRevisionCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL
-	init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?, type: biostrapDeviceSDK.biostrapDeviceType) {
-		super.init(peripheral, characteristic: characteristic, commandQ: commandQ)
-		
+	init(_ type: biostrapDeviceSDK.biostrapDeviceType) {
+		super.init()
 		self.type	= type
-	}
-	#else
-	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
-		super.init(peripheral, characteristic: characteristic, commandQ: commandQ)
 	}
 	#endif
 	
@@ -75,7 +70,8 @@ class disSoftwareRevisionCharacteristic: Characteristic {
     //
     //
     //--------------------------------------------------------------------------------
-    override func didDiscover() {
+	override func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		super.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
         read()
     }
 

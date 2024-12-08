@@ -11,16 +11,13 @@ import Combine
 
 class ambiqOTAService: ServiceTemplate {
     
-    internal var rxCharacteristic: ambiqOTARXCharacteristic?
-    internal var txCharacteristic: ambiqOTATXCharacteristic?
+    internal var rxCharacteristic: ambiqOTARXCharacteristic
+    internal var txCharacteristic: ambiqOTATXCharacteristic
 
     let started = PassthroughSubject<Void, Never>()
     let finished = PassthroughSubject<Void, Never>()
     let progress = PassthroughSubject<Float, Never>()
     let failed = PassthroughSubject<(Int, String), Never>()
-
-    @Published private var rxConfigured: Bool = false
-    @Published private var txConfigured: Bool = false
 
     //--------------------------------------------------------------------------------
     //
@@ -39,6 +36,37 @@ class ambiqOTAService: ServiceTemplate {
         }
     }
     
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	private func setupSubscribers() {
+		rxCharacteristic.started
+			.sink { self.started.send() }
+			.store(in: &pSubscriptions)
+
+		rxCharacteristic.finished
+			.sink { self.finished.send() }
+			.store(in: &pSubscriptions)
+		
+		rxCharacteristic.failed
+			.sink { code, message in self.failed.send((code, message)) }
+			.store(in: &pSubscriptions)
+
+		rxCharacteristic.progress
+			.sink { percent in self.progress.send(percent) }
+			.store(in: &pSubscriptions)
+				
+		Publishers.CombineLatest(txCharacteristic.$configured, rxCharacteristic.$configured)
+			.sink { [weak self] txConfigured, rxConfigured in
+				self?.pConfigured = txConfigured && rxConfigured
+			}
+			.store(in: &pSubscriptions)
+	}
+
     //--------------------------------------------------------------------------------
     // Function Name:
     //--------------------------------------------------------------------------------
@@ -47,13 +75,12 @@ class ambiqOTAService: ServiceTemplate {
     //
     //--------------------------------------------------------------------------------
     override init(_ commandQ: CommandQ?) {
+		rxCharacteristic = ambiqOTARXCharacteristic()
+		txCharacteristic = ambiqOTATXCharacteristic()
+
         super.init(commandQ)
-        
-        Publishers.CombineLatest($txConfigured, $rxConfigured)
-            .sink { [weak self] txConfigured, rxConfigured in
-                self?.pConfigured = txConfigured && rxConfigured
-            }
-            .store(in: &pSubscriptions)
+		
+		setupSubscribers()
     }
 
     //--------------------------------------------------------------------------------
@@ -66,35 +93,10 @@ class ambiqOTAService: ServiceTemplate {
     override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
         case ambiqOTARXCharacteristic.uuid:
-            rxCharacteristic = ambiqOTARXCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			rxCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
             
-            rxCharacteristic?.started
-                .sink { self.started.send() }
-                .store(in: &pSubscriptions)
-
-            rxCharacteristic?.finished
-                .sink { self.finished.send() }
-                .store(in: &pSubscriptions)
-            
-            rxCharacteristic?.failed
-                .sink { code, message in self.failed.send((code, message)) }
-                .store(in: &pSubscriptions)
-
-            rxCharacteristic?.progress
-                .sink { percent in self.progress.send(percent) }
-                .store(in: &pSubscriptions)
-            
-            rxCharacteristic?.$configured
-                .sink { [weak self] configured in self?.rxConfigured = configured }
-                .store(in: &pSubscriptions)
-
         case ambiqOTATXCharacteristic.uuid:
-            txCharacteristic = ambiqOTATXCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
-            txCharacteristic?.$configured
-                .sink { [weak self] configured in self?.txConfigured = configured }
-                .store(in: &pSubscriptions)
-
-            txCharacteristic?.discoverDescriptors()
+			txCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
             
         default: return
         }
@@ -110,7 +112,7 @@ class ambiqOTAService: ServiceTemplate {
     override func didDiscoverDescriptor(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
         case ambiqOTARXCharacteristic.uuid: globals.log.e ("\(pID) RX chacteristic - should not be here")
-        case ambiqOTATXCharacteristic.uuid: txCharacteristic?.didDiscoverDescriptor()
+        case ambiqOTATXCharacteristic.uuid: txCharacteristic.didDiscoverDescriptor()
         default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
         }
     }
@@ -125,7 +127,7 @@ class ambiqOTAService: ServiceTemplate {
     override func didUpdateNotificationState(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
         case ambiqOTARXCharacteristic.uuid: globals.log.e ("\(pID) 'RX Characteristic' - should not be here")
-        case ambiqOTATXCharacteristic.uuid: txCharacteristic?.didUpdateNotificationState()
+        case ambiqOTATXCharacteristic.uuid: txCharacteristic.didUpdateNotificationState()
         default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
         }
     }
@@ -143,7 +145,7 @@ class ambiqOTAService: ServiceTemplate {
         case ambiqOTATXCharacteristic.uuid:
             // Commands to RX come in on TX, causes RX to do next step
             if let value = characteristic.value {
-                rxCharacteristic?.didUpdateTXValue(value)
+                rxCharacteristic.didUpdateTXValue(value)
             } else {
                 globals.log.e ("\(pID) 'TX Characteristic' - No data received for RX command")
             }

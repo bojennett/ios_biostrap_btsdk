@@ -11,15 +11,12 @@ import Combine
 
 class hrsService: ServiceTemplate {
     
-    internal var mHeartRateMeasurementCharacteristic: heartRateMeasurementCharacteristic?
-    internal var mBodySensorLocationCharacteristic: bodySensorLocationCharacteristic?
+    internal var mHeartRateMeasurementCharacteristic: heartRateMeasurementCharacteristic
+    internal var mBodySensorLocationCharacteristic: bodySensorLocationCharacteristic
 
     @Published var batteryLevel: Int?
     let updated = PassthroughSubject<(Int, Int, [Double]), Never>()
     
-    @Published private var hrmConfigured: Bool = false
-    @Published private var bslConfigured: Bool = false
-
     //--------------------------------------------------------------------------------
     //
     //
@@ -45,9 +42,20 @@ class hrsService: ServiceTemplate {
     //
     //--------------------------------------------------------------------------------
     override init(_ commandQ: CommandQ?) {
+		mHeartRateMeasurementCharacteristic = heartRateMeasurementCharacteristic()
+		mBodySensorLocationCharacteristic = bodySensorLocationCharacteristic()
+
         super.init(commandQ)
         
-        Publishers.CombineLatest($hrmConfigured, $bslConfigured)
+		mHeartRateMeasurementCharacteristic.updated
+			.sink { [weak self] (epoch, hr, rr) in
+				self?.updated.send((epoch, hr, rr))
+			}
+			.store(in: &pSubscriptions)
+		
+        Publishers.CombineLatest(
+			mHeartRateMeasurementCharacteristic.$configured,
+			mBodySensorLocationCharacteristic.$configured)
             .sink { [weak self] hrmConfigured, bslConfigured in
                 self?.pConfigured = hrmConfigured && bslConfigured
             }
@@ -64,29 +72,9 @@ class hrsService: ServiceTemplate {
     override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.heart_rate_measurement.UUID:
-            mHeartRateMeasurementCharacteristic = heartRateMeasurementCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
-            mHeartRateMeasurementCharacteristic?.updated
-                .sink { [weak self] (epoch, hr, rr) in
-                    self?.updated.send((epoch, hr, rr))
-                }
-                .store(in: &pSubscriptions)
-            
-            mHeartRateMeasurementCharacteristic?.$configured
-                .sink { [weak self] in
-                    self?.hrmConfigured = $0
-                }
-                .store(in: &pSubscriptions)
-
-            mHeartRateMeasurementCharacteristic?.didDiscover()
+			mHeartRateMeasurementCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
         case org_bluetooth_characteristic.body_sensor_location.UUID:
-            mBodySensorLocationCharacteristic = bodySensorLocationCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
-            mBodySensorLocationCharacteristic?.$configured
-                .sink { [weak self] in
-                    self?.bslConfigured = $0
-                }
-                .store(in: &pSubscriptions)
-
-            mBodySensorLocationCharacteristic?.didDiscover()
+			mBodySensorLocationCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
         default: return
         }
     }
@@ -101,7 +89,7 @@ class hrsService: ServiceTemplate {
     override func didDiscoverDescriptor(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.heart_rate_measurement.UUID:
-            mHeartRateMeasurementCharacteristic?.didDiscoverDescriptor()
+            mHeartRateMeasurementCharacteristic.didDiscoverDescriptor()
         default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
         }
     }
@@ -116,7 +104,7 @@ class hrsService: ServiceTemplate {
     override func didUpdateNotificationState(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.heart_rate_measurement.UUID:
-            mHeartRateMeasurementCharacteristic?.didUpdateNotificationState()
+            mHeartRateMeasurementCharacteristic.didUpdateNotificationState()
         default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
         }
     }
@@ -130,8 +118,8 @@ class hrsService: ServiceTemplate {
     //--------------------------------------------------------------------------------
     override func didUpdateValue(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
-        case org_bluetooth_characteristic.heart_rate_measurement.UUID: mHeartRateMeasurementCharacteristic?.didUpdateValue()
-        case org_bluetooth_characteristic.body_sensor_location.UUID: mBodySensorLocationCharacteristic?.didUpdateValue()
+        case org_bluetooth_characteristic.heart_rate_measurement.UUID: mHeartRateMeasurementCharacteristic.didUpdateValue()
+        case org_bluetooth_characteristic.body_sensor_location.UUID: mBodySensorLocationCharacteristic.didUpdateValue()
         default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
         }
     }

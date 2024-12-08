@@ -49,7 +49,8 @@ class disFirmwareVersionCharacteristic: Characteristic {
     //
     //
     //--------------------------------------------------------------------------------
-    override func didDiscover() {
+	override func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		super.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
         read()
     }
 

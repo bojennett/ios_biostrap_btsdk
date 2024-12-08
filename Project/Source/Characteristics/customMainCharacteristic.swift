@@ -202,12 +202,7 @@ class customMainCharacteristic: Characteristic {
 	internal var mCRCIgnoreTest				: testStruct
 	internal var mCRCFailTest				: testStruct
 	
-	//--------------------------------------------------------------------------------
-	//
-	// Constructor
-	//
-	//--------------------------------------------------------------------------------
-	override init(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+	override init() {
 		mCRCIgnoreTest	= testStruct(name: "CRC Ignore", enable: false, limit: 3)
 		mCRCFailTest	= testStruct(name: "CRC Fail", enable: false, limit: 3)
 		
@@ -215,11 +210,28 @@ class customMainCharacteristic: Characteristic {
 		mExpectedSequenceNumber	= 0
 		mCRCFailCount			= 0
 
-		super.init (peripheral, characteristic: characteristic, commandQ: commandQ)
+		super.init()
+		
+		mDataPackets = [biostrapDataPacket]()
+	}
+	
+	//--------------------------------------------------------------------------------
+	//
+	// Constructor
+	//
+	//--------------------------------------------------------------------------------
+	/*
+	override func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		mCRCIgnoreTest	= testStruct(name: "CRC Ignore", enable: false, limit: 3)
+		mCRCFailTest	= testStruct(name: "CRC Fail", enable: false, limit: 3)
+		
+		mCRCOK					= false
+		mExpectedSequenceNumber	= 0
+		mCRCFailCount			= 0
 
 		mDataPackets = [biostrapDataPacket]()
-		
 	}
+	 */
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:

@@ -25,5 +25,16 @@ class ambiqOTATXCharacteristic: Characteristic {
 		configured	= true
 	}
 	
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	override func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		super.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
+		discoverDescriptors()
+	}
 
 }

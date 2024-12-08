@@ -24,9 +24,8 @@ class bodySensorLocationCharacteristic: Characteristic {
     //
     //
     //--------------------------------------------------------------------------------
-    override func didDiscover() {
-        globals.log.v ("\(pID): read")
-        configured = true
+	override func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		super.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
         read()
     }
 
@@ -47,5 +46,7 @@ class bodySensorLocationCharacteristic: Characteristic {
             }
         }
         else { globals.log.e ("\(pID): Missing characteristic") }
+		
+		configured = true
     }
 }

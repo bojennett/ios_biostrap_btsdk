@@ -11,7 +11,7 @@ import Combine
 
 class basService: ServiceTemplate {
     
-    internal var mBatteryLevelCharacteristic    : batteryLevelCharacteristic?
+    internal var mBatteryLevelCharacteristic: batteryLevelCharacteristic
     
     @Published var batteryLevel: Int?
 
@@ -32,8 +32,32 @@ class basService: ServiceTemplate {
     }
     
     override var isConfigured: Bool {
-        return mBatteryLevelCharacteristic?.configured ?? false
+        return mBatteryLevelCharacteristic.configured
     }
+	
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	override init(_ commandQ: CommandQ?) {
+		mBatteryLevelCharacteristic = batteryLevelCharacteristic()
+
+		super.init(commandQ)
+		
+		mBatteryLevelCharacteristic.$batteryLevel
+			.sink { [weak self] in
+				self?.batteryLevel = $0
+			}
+			.store(in: &pSubscriptions)
+		
+		mBatteryLevelCharacteristic.$configured
+			.sink { [weak self] in
+				self?.pConfigured = $0
+			}
+			.store(in: &pSubscriptions)
+
+	}
 
     //--------------------------------------------------------------------------------
     // Function Name:
@@ -44,20 +68,7 @@ class basService: ServiceTemplate {
     //--------------------------------------------------------------------------------
     override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
-            mBatteryLevelCharacteristic = batteryLevelCharacteristic(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
-            mBatteryLevelCharacteristic?.$batteryLevel
-                .sink { [weak self] in
-                    self?.batteryLevel = $0
-                }
-                .store(in: &pSubscriptions)
-            
-            mBatteryLevelCharacteristic?.$configured
-                .sink { [weak self] in
-                    self?.pConfigured = $0
-                }
-                .store(in: &pSubscriptions)
-                        
-            mBatteryLevelCharacteristic?.didDiscover()
+			mBatteryLevelCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
         }
     }
     
@@ -70,7 +81,7 @@ class basService: ServiceTemplate {
     //--------------------------------------------------------------------------------
     override func didDiscoverDescriptor(_ characteristic: CBCharacteristic) {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
-            mBatteryLevelCharacteristic?.didDiscoverDescriptor()
+            mBatteryLevelCharacteristic.didDiscoverDescriptor()
         }
     }
 
@@ -83,7 +94,7 @@ class basService: ServiceTemplate {
     //--------------------------------------------------------------------------------
     override func didUpdateNotificationState(_ characteristic: CBCharacteristic) {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
-            mBatteryLevelCharacteristic?.didUpdateNotificationState()
+            mBatteryLevelCharacteristic.didUpdateNotificationState()
         }
     }
 
@@ -96,7 +107,7 @@ class basService: ServiceTemplate {
     //--------------------------------------------------------------------------------
     override func didUpdateValue(_ characteristic: CBCharacteristic) {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
-            mBatteryLevelCharacteristic?.didUpdateValue()
+            mBatteryLevelCharacteristic.didUpdateValue()
         } else {
             globals.log.e ("\(pID): Unhandled characteristic update: \(characteristic.uuid)")
         }
