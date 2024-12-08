@@ -575,7 +575,7 @@ import Combine
 	@objc public func writeEpoch(_ id: String, newEpoch: Int) {
 		globals.log.v("\(id): \(newEpoch)")
 		
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.writeEpochInternal(newEpoch) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.writeEpoch(newEpoch) }
 		else { self.writeEpochComplete?(id, false) }
 	}
 
@@ -590,7 +590,7 @@ import Combine
 	@objc public func readEpoch(_ id: String) {
 		globals.log.v("\(id)")
 		
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.readEpochInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.readEpoch() }
 		else { self.readEpochComplete?(id, false, 0) }
 	}
 
@@ -605,7 +605,7 @@ import Combine
 	@objc public func endSleep(_ id: String) {
 		globals.log.v("\(id)")
 		
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.endSleepInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.endSleep() }
 		else { self.endSleepComplete?(id, false) }
 	}
 	
@@ -631,7 +631,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAllPacketsAcknowledge(_ id: String, ack: Bool) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getAllPacketsAcknowledgeInternal(ack) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getAllPacketsAcknowledge(ack) }
 		else { self.getAllPacketsAcknowledgeComplete?(id, false, ack) }
 	}
 	
@@ -646,7 +646,7 @@ import Combine
 	@objc public func getPacketCount(_ id: String) {
 		globals.log.v ("\(id)")
 		
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPacketCountInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPacketCount() }
 		else { self.getPacketCountComplete?(id, false, 0) }
 	}
 
@@ -661,7 +661,7 @@ import Combine
 	@objc public func disableWornDetect(_ id: String) {
 		globals.log.v ("\(id)")
 		
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.disableWornDetectInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.disableWornDetect() }
 		else { self.disableWornDetectComplete?(id, false) }
 	}
 
@@ -676,7 +676,7 @@ import Combine
 	@objc public func enableWornDetect(_ id: String) {
 		globals.log.v ("\(id)")
 		
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.enableWornDetectInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.enableWornDetect() }
 		else { self.enableWornDetectComplete?(id, false) }
 	}
 
@@ -719,7 +719,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func userLED(_ id: String, red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.userLEDInternal(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.userLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds) }
 		else { self.ledComplete?(id, false) }
 	}
 	
@@ -732,7 +732,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func enterShipMode(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.enterShipModeInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.enterShipMode() }
 		else { self.enterShipModeComplete?(id, false) }
 	}
 
@@ -745,7 +745,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func writeSerialNumber(_ id: String, partID: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.writeSerialNumberInternal(partID) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.writeSerialNumber(partID) }
 		else { self.writeSerialNumberComplete?(id, false) }
 	}
 
@@ -758,7 +758,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readSerialNumber(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.readSerialNumberInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.readSerialNumber() }
 		else { self.readSerialNumberComplete?(id, false, "") }
 	}
 
@@ -771,7 +771,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func deleteSerialNumber(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.deleteSerialNumberInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.deleteSerialNumber() }
 		else { self.deleteSerialNumberComplete?(id, false) }
 	}
 
@@ -784,7 +784,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func writeAdvInterval(_ id: String, seconds: Int) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.writeAdvIntervalInternal(seconds) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.writeAdvInterval(seconds) }
 		else { self.writeAdvIntervalComplete?(id, false) }
 	}
 
@@ -797,7 +797,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readAdvInterval(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.readAdvIntervalInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.readAdvInterval() }
 		else { self.readAdvIntervalComplete?(id, false, 0) }
 	}
 
@@ -810,7 +810,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func deleteAdvInterval(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.deleteAdvIntervalInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.deleteAdvInterval() }
 		else { self.deleteAdvIntervalComplete?(id, false) }
 	}
 
@@ -823,7 +823,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func clearChargeCycles(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.clearChargeCyclesInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.clearChargeCycles() }
 		else { self.clearChargeCyclesComplete?(id, false) }
 	}
 
@@ -836,7 +836,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readChargeCycles(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.readChargeCyclesInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.readChargeCycles() }
 		else { self.readChargeCyclesComplete?(id, false, 0) }
 	}
 
@@ -849,7 +849,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func readCanLogDiagnostics(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.readCanLogDiagnosticsInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.readCanLogDiagnostics() }
 		else { self.readCanLogDiagnosticsComplete?(id, false, false) }
 	}
 	
@@ -862,7 +862,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func updateCanLogDiagnostics(_ id: String, allow: Bool) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.updateCanLogDiagnosticsInternal(allow) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.updateCanLogDiagnostics(allow) }
 		else { self.updateCanLogDiagnosticsComplete?(id, false) }
 	}
 		
@@ -876,7 +876,7 @@ import Combine
 	#if ALTER
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: alterManufacturingTestType) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.alterManufacturingTestInternal(test) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.alterManufacturingTest(test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
@@ -884,7 +884,7 @@ import Combine
 	#if KAIROS
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func manufacturingTest(_ id: String, test: kairosManufacturingTestType) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.kairosManufacturingTestInternal(test) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.kairosManufacturingTest(test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
@@ -892,13 +892,13 @@ import Combine
 	#if UNIVERSAL
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func alterManufacturingTest(_ id: String, test: alterManufacturingTestType) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.alterManufacturingTestInternal(test) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.alterManufacturingTest(test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func kairosManufacturingTest(_ id: String, test: kairosManufacturingTestType) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.kairosManufacturingTestInternal(test) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.kairosManufacturingTest(test) }
 		else { self.manufacturingTestComplete?(id, false) }
 	}
 	#endif
@@ -912,7 +912,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setAskForButtonResponse(_ id: String, enable: Bool) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.setAskForButtonResponseInternal(enable) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setAskForButtonResponse(enable) }
 		else { self.setAskForButtonResponseComplete?(id, false, enable) }
 	}
 	
@@ -925,7 +925,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAskForButtonResponse(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getAskForButtonResponseInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getAskForButtonResponse() }
 		else { self.getAskForButtonResponseComplete?(id, false, false) }
 	}
 
@@ -939,7 +939,7 @@ import Combine
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setHRZoneColor(_ id: String, type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
 		if let device = connectedDevices.first(where: { $0.id == id }) {
-			device.setHRZoneColorInternal(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
+			device.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
 		}
 		else { self.setHRZoneColorComplete?(id, false, type) }
 	}
@@ -953,7 +953,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getHRZoneColor(_ id: String, type: hrZoneRangeType) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getHRZoneColorInternal(type) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getHRZoneColor(type) }
 		else { self.getHRZoneColorComplete?(id, false, type, false, false, false, 0, 0) }
 	}
 	
@@ -967,7 +967,7 @@ import Combine
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setHRZoneRange(_ id: String, enabled: Bool, high_value: Int, low_value: Int) {
 		if let device = connectedDevices.first(where: { $0.id == id }) {
-			device.setHRZoneRangeInternal(enabled, high_value: high_value, low_value: low_value)
+			device.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
 		}
 		else { self.setHRZoneRangeComplete?(id, false) }
 	}
@@ -981,7 +981,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getHRZoneRange(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getHRZoneRangeInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getHRZoneRange() }
 		else { self.getHRZoneRangeComplete?(id, false, false, 0, 0) }
 	}
 	
@@ -994,7 +994,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPPGAlgorithm(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPPGAlgorithmInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPPGAlgorithm() }
 		else { self.getPPGAlgorithmComplete?(id, false, ppgAlgorithmConfiguration(), eventType.unknown) }
 	}
 	
@@ -1007,7 +1007,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setAdvertiseAsHRM(_ id: String, asHRM: Bool) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.setAdvertiseAsHRMInternal(asHRM) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setAdvertiseAsHRM(asHRM) }
 		else { self.setAdvertiseAsHRMComplete?(id, false, false) }
 	}
 	
@@ -1020,7 +1020,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getAdvertiseAsHRM(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getAdvertiseAsHRMInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getAdvertiseAsHRM() }
 		else { self.getAdvertiseAsHRMComplete?(id, false, false) }
 	}
 
@@ -1033,7 +1033,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setButtonCommand(_ id: String, tap: buttonTapType, command: buttonCommandType) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.setButtonCommandInternal(tap, command: command) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setButtonCommand(tap, command: command) }
 		else { self.setButtonCommandComplete?(id, false, tap, command) }
 	}
 	
@@ -1046,7 +1046,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getButtonCommand(_ id: String, tap: buttonTapType) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getButtonCommandInternal(tap) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getButtonCommand(tap) }
 		else { self.getButtonCommandComplete?(id, false, tap, .unknown) }
 	}
 	
@@ -1059,7 +1059,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setPaired(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.setPairedInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setPaired() }
 		else { self.setPairedComplete?(id, false) }
 	}
 	
@@ -1072,7 +1072,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setUnpaired(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.setUnpairedInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setUnpaired() }
 		else { self.setUnpairedComplete?(id, false) }
 	}
 	
@@ -1085,7 +1085,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPaired(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPairedInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPaired() }
 		else { self.getPairedComplete?(id, false, false) }
 	}
 	
@@ -1098,7 +1098,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setPageThreshold(_ id: String, threshold: Int) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.setPageThresholdInternal(threshold) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setPageThreshold(threshold) }
 		else { self.setPageThresholdComplete?(id, false) }
 	}
 	
@@ -1111,7 +1111,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getPageThreshold(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPageThresholdInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getPageThreshold() }
 		else { self.getPageThresholdComplete?(id, false, 1) }
 	}
 	
@@ -1124,7 +1124,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func deletePageThreshold(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.deletePageThresholdInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.deletePageThreshold() }
 		else { self.deletePageThresholdComplete?(id, false) }
 	}
 
@@ -1137,7 +1137,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func wornCheck(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.wornCheckInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.wornCheck() }
 		else { self.wornCheckComplete?(id, false, "No device", 0) }
 	}
 
@@ -1150,7 +1150,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func rawLogging(_ id: String, enable: Bool) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.rawLoggingInternal(enable) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.rawLogging(enable) }
 		else { self.rawLoggingComplete?(id, false) }
 	}
 
@@ -1163,7 +1163,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getRawLoggingStatus(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getRawLoggingStatusInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getRawLoggingStatus() }
 		else { self.getRawLoggingStatusComplete?(id, false, false) }
 	}
 
@@ -1176,7 +1176,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getWornOverrideStatus(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getWornOverrideStatusInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getWornOverrideStatus() }
 		else { self.getWornOverrideStatusComplete?(id, false, false) }
 	}
 
@@ -1189,7 +1189,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func airplaneMode(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.airplaneModeInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.airplaneMode() }
 		else { self.airplaneModeComplete?(id, false) }
 	}
 
@@ -1202,7 +1202,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func reset(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.resetInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.reset() }
 		else { self.resetComplete?(id, false) }
 	}
 
@@ -1215,7 +1215,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func updateFirmware(_ id: String, file: URL) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.updateFirmwareInternal(file) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.updateFirmware(file) }
 		else { self.updateFirmwareFailed?(id, 10000, "No connected device to update") }
 
 	}
@@ -1229,7 +1229,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func cancelFirmwareUpdate(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.cancelFirmwareUpdateInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.cancelFirmwareUpdate() }
 		else { self.updateFirmwareFailed?(id, 10000, "No connected device to update") }
 	}
 	
@@ -1242,7 +1242,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func setSessionParam(_ id: String, parameter: sessionParameterType, value: Int) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.setSessionParamInternal(parameter, value: value) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.setSessionParam(parameter, value: value) }
 		else { self.setSessionParamComplete?(id, false, parameter) }
 
 	}
@@ -1256,7 +1256,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func getSessionParam(_ id: String, parameter: sessionParameterType) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.getSessionParamInternal(parameter) }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.getSessionParam(parameter) }
 		else { self.getSessionParamComplete?(id, false, parameter, 0) }
 	}
 
@@ -1269,7 +1269,7 @@ import Combine
 	//--------------------------------------------------------------------------------
 	@available(*, deprecated, message: "Send commands to the Device object directly.  This will be removed in a future version of the SDK")
 	@objc public func resetSessionParams(_ id: String) {
-		if let device = connectedDevices.first(where: { $0.id == id }) { device.resetSessionParamsInternal() }
+		if let device = connectedDevices.first(where: { $0.id == id }) { device.resetSessionParams() }
 		else { self.resetSessionParamsComplete?(id, false) }
 	}
 	
@@ -1286,7 +1286,7 @@ import Combine
             self.acceptSessionParamsComplete?(id, false)
             return
         }
-        device.acceptSessionParamsInternal()
+        device.acceptSessionParams()
 	}
 
     //--------------------------------------------------------------------------------

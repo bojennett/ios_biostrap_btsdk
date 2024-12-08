@@ -358,9 +358,12 @@ public class Device: NSObject, ObservableObject {
     internal var mDIS: disService?
     internal var mAmbiqOTAService: ambiqOTAService?
 
-	internal var mMainCharacteristic: customMainCharacteristic?
-	internal var mDataCharacteristic: customDataCharacteristic?
-	internal var mStreamingCharacteristic: customStreamingCharacteristic?
+	internal var mMainCharacteristic: customMainCharacteristic
+	internal var mDataCharacteristic: customDataCharacteristic
+	internal var mStreamingCharacteristic: customStreamingCharacteristic
+    
+    internal var mDataCharacteristicDiscovered: Bool = false
+    internal var mStreamingCharacteristicDiscovered: Bool = false
     
     internal var subscriptions = Set<AnyCancellable>()
     
@@ -514,7 +517,11 @@ public class Device: NSObject, ObservableObject {
     
 	override public init() {
 		self.connectionState = .disconnected
-
+        
+        mMainCharacteristic = customMainCharacteristic()
+        mDataCharacteristic = customDataCharacteristic()
+        mStreamingCharacteristic = customStreamingCharacteristic()
+        
 		self.name							= "UNKNOWN"
 		self.id								= "UNKNOWN"
 		self.discovery_type					= .unknown
@@ -528,6 +535,10 @@ public class Device: NSObject, ObservableObject {
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, type: biostrapDeviceSDK.biostrapDeviceType, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
+        self.subscribeMainCharacteristic()
+        self.subscribeDataCharacteristic()
+        self.subscribeStreamingCharacteristic()
+
 		self.name		= name
 		self.id			= id
 		self.peripheral	= peripheral
@@ -545,6 +556,10 @@ public class Device: NSObject, ObservableObject {
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
+        self.subscribeMainCharacteristic()
+        self.subscribeDataCharacteristic()
+        self.subscribeStreamingCharacteristic()
+
 		self.name		= name
 		self.id			= id
 		self.peripheral	= peripheral
@@ -561,11 +576,11 @@ public class Device: NSObject, ObservableObject {
 	
 	#if UNIVERSAL || ALTER
 	internal var mAlterConfigured: Bool {
-        if let mAmbiqOTAService, let mMainCharacteristic, let mBAS, let mHRS, let mDIS {
+        if let mAmbiqOTAService, let mBAS, let mHRS, let mDIS {
             
-			//globals.log.e ("\(mAmbiqOTAService.pConfigured):\(mBAS.pConfigured):\(mHRS.pConfigured):\(mDIS.isConfigured),\(mMainCharacteristic.configured):\(mStreamingCharacteristic?.configured):\(mDataCharacteristic?.configured)")
+			//globals.log.e ("\(mAmbiqOTAService.pConfigured):\(mBAS.pConfigured):\(mHRS.pConfigured):\(mDIS.isConfigured),\(mMainCharacteristic.configured):\(mStreamingCharacteristic.configured):\(mDataCharacteristic.configured)")
 			
-			if let mDataCharacteristic, let mStreamingCharacteristic {
+			if mDataCharacteristicDiscovered && mStreamingCharacteristicDiscovered {
 				return (mBAS.pConfigured &&
                         mHRS.pConfigured &&
                         mDIS.pConfigured &&
@@ -589,9 +604,9 @@ public class Device: NSObject, ObservableObject {
 
 	#if UNIVERSAL || KAIROS
 	internal var mKairosConfigured: Bool {
-        if let mAmbiqOTAService, let mMainCharacteristic, let mBAS, let mHRS, let mDIS {
+        if let mAmbiqOTAService, let mBAS, let mHRS, let mDIS {
 			
-			if let mDataCharacteristic, let mStreamingCharacteristic {
+			if mDataCharacteristicDiscovered && mStreamingCharacteristicDiscovered {
 				return (mBAS.pConfigured &&
                         mHRS.pConfigured &&
                         mDIS.pConfigured &&
@@ -621,8 +636,8 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	internal func checkConfigured() {
-        if let mDIS, let customCharacteristic = mMainCharacteristic {
-			customCharacteristic.firmwareVersion = mDIS.mFirmwareRevisionCharacteristic.value
+        if let mDIS {
+            mMainCharacteristic.firmwareVersion = mDIS.mFirmwareRevisionCharacteristic.value
 		}
 		
 		if connectionState == .configured { return } // If i was already configured, i don't need to tell the app this again
@@ -709,13 +724,6 @@ public class Device: NSObject, ObservableObject {
 	// directly (public).
 	//
 	//--------------------------------------------------------------------------------
-	func writeEpochInternal(_ newEpoch: Int) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.writeEpoch(newEpoch)
-		}
-		else { self.lambdaWriteEpochComplete?(id, false) }
-	}
-
 	public func writeEpoch(_ newEpoch: Int) {
         if preview {
             self.epoch = newEpoch
@@ -723,12 +731,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.writeEpoch(newEpoch)
-		}
-		else {
-			DispatchQueue.main.async { self.writeEpochComplete.send(.not_configured) }
-		}
+        mMainCharacteristic.writeEpoch(newEpoch)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -739,27 +742,13 @@ public class Device: NSObject, ObservableObject {
 	// directly (public).
 	//
 	//--------------------------------------------------------------------------------
-	func readEpochInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.readEpoch()
-		}
-		else { self.lambdaReadEpochComplete?(id, false, 0) }
-	}
-
 	public func readEpoch() {
         if preview {
             self.readEpochComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.readEpoch()
-		} else {
-			DispatchQueue.main.async {
-				self.epoch = nil
-				self.readEpochComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.readEpoch()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -769,13 +758,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func endSleepInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.endSleep()
-		}
-		else { self.lambdaEndSleepComplete?(id, false) }
-	}
-	
 	public func endSleep() {
         if preview {
             self.endSleepComplete.send(previewCommandStatus)
@@ -783,12 +765,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.endSleep()
-		}
-		else {
-			DispatchQueue.main.async { self.endSleepComplete.send(.not_configured) }
-		}
+        mMainCharacteristic.endSleep()
 	}
 
 
@@ -799,28 +776,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getAllPacketsInternal(pages: Int, delay: Int) {
-		var newStyle	= false
-		
-		if let mainCharacteristic = mMainCharacteristic {
-            if let mDIS {
-				if (mDIS.mSoftwareRevisionCharacteristic.bluetoothGreaterThan("2.0.4")) {
-					globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use new style")
-					newStyle	= true
-				}
-				else {
-					globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use old style")
-				}
-			}
-			else {
-				globals.log.e ("Can't find the software version, i guess i will use the old style")
-			}
-
-			mainCharacteristic.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
-		}
-		else { self.lambdaGetAllPacketsComplete?(id, false) }
-	}
-
 	public func getAllPackets(pages: Int, delay: Int) {
         if preview {
             self.getAllPacketsComplete.send(previewCommandStatus)
@@ -829,27 +784,19 @@ public class Device: NSObject, ObservableObject {
         
 		var newStyle	= false
 		
-		if let mainCharacteristic = mMainCharacteristic {
-            if let mDIS {
-				if (mDIS.mSoftwareRevisionCharacteristic.bluetoothGreaterThan("2.0.4")) {
-					globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use new style")
-					newStyle	= true
-				}
-				else {
-					globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use old style")
-				}
-			}
-			else {
-				globals.log.e ("Can't find the software version, i guess i will use the old style")
-			}
+        if let mDIS {
+            if (mDIS.mSoftwareRevisionCharacteristic.bluetoothGreaterThan("2.0.4")) {
+                globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use new style")
+                newStyle    = true
+            }
+            else {
+                globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use old style")
+            }
+        } else {
+            globals.log.e ("Can't find the software version, i guess i will use the old style")
+        }
 
-			mainCharacteristic.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
-		}
-		else {
-			DispatchQueue.main.async {
-				self.getAllPacketsComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -859,27 +806,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getAllPacketsAcknowledgeInternal(_ ack: Bool) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getAllPacketsAcknowledge(ack)
-		}
-		else { self.lambdaGetAllPacketsAcknowledgeComplete?(id, false, ack) }
-	}
-	
 	public func getAllPacketsAcknowledge(_ ack: Bool) {
         if preview {
             self.getAllPacketsAcknowledgeComplete.send((previewCommandStatus, ack))
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getAllPacketsAcknowledge(ack)
-		}
-		else {
-			DispatchQueue.main.async {
-				self.getAllPacketsAcknowledgeComplete.send((.not_configured, ack))
-			}
-		}
+        mMainCharacteristic.getAllPacketsAcknowledge(ack)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -889,27 +822,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getPacketCountInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getPacketCount()
-		}
-		else { self.lambdaGetPacketCountComplete?(id, false, 0) }
-	}
-
 	public func getPacketCount() {
         if preview {
             self.getPacketCountComplete.send((previewCommandStatus, 0))
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getPacketCount()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.getPacketCountComplete.send((.not_configured, 0))
-			}
-		}
+        mMainCharacteristic.getPacketCount()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -919,25 +838,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func disableWornDetectInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.disableWornDetect()
-		}
-		else { self.lambdaDisableWornDetectComplete?(id, false) }
-	}
-
 	public func disableWornDetect() {
         if preview {
             self.disableWornDetectComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.disableWornDetect()
-		}
-		else {
-			DispatchQueue.main.async { self.disableWornDetectComplete.send(.not_configured) }
-		}
+        mMainCharacteristic.disableWornDetect()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -947,25 +854,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func enableWornDetectInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.enableWornDetect()
-		}
-		else { self.lambdaEnableWornDetectComplete?(id, false) }
-	}
-
 	public func enableWornDetect() {
         if preview {
             self.enableWornDetectComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.enableWornDetect()
-		}
-		else {
-			DispatchQueue.main.async { self.enableWornDetectComplete.send(.not_configured) }
-		}
+        mMainCharacteristic.enableWornDetect()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -975,25 +870,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func startManualInternal(_ algorithms: ppgAlgorithmConfiguration) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.startManual(algorithms)
-		}
-		else { self.lambdaStartManualComplete?(id, false) }
-	}
-
 	public func startManual(_ algorithms: ppgAlgorithmConfiguration) {
         if preview {
             self.startManualComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.startManual(algorithms)
-		}
-		else {
-			DispatchQueue.main.async { self.startManualComplete.send(.not_configured) }
-		}
+        mMainCharacteristic.startManual(algorithms)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1003,49 +886,30 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func stopManualInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.stopManual()
-		}
-		else { self.lambdaStopManualComplete?(id, false) }
-	}
-	
 	public func stopManual() {
         if preview {
             self.stopManualComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.stopManual()
-		}
-		else {
-			DispatchQueue.main.async { self.stopManualComplete.send(.not_configured) }
-		}
+        mMainCharacteristic.stopManual()
 	}
 
-	#if UNIVERSAL || ALTER || KAIROS
-	func userLEDInternal(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.userLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
-		}
-		else { self.lambdaLEDComplete?(id, false) }
-	}
-	
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
 	public func userLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
         if preview {
             self.ledComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.userLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
-		}
-		else {
-			DispatchQueue.main.async { self.ledComplete.send(.not_configured) }
-		}
+        mMainCharacteristic.userLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
 	}
-	#endif
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -1054,27 +918,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func enterShipModeInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.enterShipMode()
-		}
-		else { self.lambdaEnterShipModeComplete?(id, false) }
-	}
-
 	public func enterShipMode() {
         if preview {
             self.enterShipModeComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.enterShipMode()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.enterShipModeComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.enterShipMode()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1084,27 +934,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func resetInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.reset()
-		}
-		else { self.lambdaResetComplete?(id, false) }
-	}
-	
 	public func reset() {
         if preview {
             self.resetComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.reset()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.resetComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.reset()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1114,27 +950,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func airplaneModeInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.airplaneMode()
-		}
-		else { self.lambdaAirplaneModeComplete?(id, false) }
-	}
-
 	public func airplaneMode() {
         if preview {
             self.airplaneModeComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.airplaneMode()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.airplaneModeComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.airplaneMode()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1144,13 +966,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func writeSerialNumberInternal(_ partID: String) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.writeSerialNumber(partID)
-		}
-		else { self.lamdaWriteSerialNumberComplete?(id, false) }
-	}
-
 	public func writeSerialNumber(_ partID: String) {
         if preview {
             self.serialNumber = partID
@@ -1158,14 +973,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.writeSerialNumber(partID)
-		}
-		else {
-			DispatchQueue.main.async {
-				self.writeSerialNumberComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.writeSerialNumber(partID)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1175,27 +983,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func readSerialNumberInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.readSerialNumber()
-		}
-		else { self.lambdaReadSerialNumberComplete?(id, false, "") }
-	}
-
 	public func readSerialNumber() {
         if preview {
             self.readSerialNumberComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.readSerialNumber()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.readSerialNumberComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.readSerialNumber()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1205,13 +999,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func deleteSerialNumberInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.deleteSerialNumber()
-		}
-		else { self.lambdaDeleteSerialNumberComplete?(id, false) }
-	}
-
 	public func deleteSerialNumber() {
         if preview {
             self.serialNumber = nil
@@ -1219,14 +1006,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.deleteSerialNumber()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.deleteSerialNumberComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.deleteSerialNumber()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1236,13 +1016,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func writeAdvIntervalInternal(_ seconds: Int) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.writeAdvInterval(seconds)
-		}
-		else { self.lambdaWriteAdvIntervalComplete?(id, false) }
-	}
-
 	public func writeAdvInterval(_ seconds: Int) {
         if preview {
             self.advertisingInterval = seconds
@@ -1250,14 +1023,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.writeAdvInterval(seconds)
-		}
-		else {
-			DispatchQueue.main.async {
-				self.writeAdvIntervalComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.writeAdvInterval(seconds)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1267,27 +1033,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func readAdvIntervalInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.readAdvInterval()
-		}
-		else { self.lambdaReadAdvIntervalComplete?(id, false, 0) }
-	}
-
 	public func readAdvInterval() {
         if preview {
             self.readAdvIntervalComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.readAdvInterval()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.readAdvIntervalComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.readAdvInterval()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1297,13 +1049,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func deleteAdvIntervalInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.deleteAdvInterval()
-		}
-		else { self.lambdaDeleteAdvIntervalComplete?(id, false) }
-	}
-
 	public func deleteAdvInterval() {
         if preview {
             self.advertisingInterval = nil
@@ -1311,14 +1056,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.deleteAdvInterval()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.deleteAdvIntervalComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.deleteAdvInterval()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1328,13 +1066,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func clearChargeCyclesInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.clearChargeCycles()
-		}
-		else { self.lambdaClearChargeCyclesComplete?(id, false) }
-	}
-
 	public func clearChargeCycles() {
         if preview {
             self.chargeCycles = 0.0
@@ -1342,14 +1073,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.clearChargeCycles()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.clearChargeCyclesComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.clearChargeCycles()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1359,27 +1083,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func readChargeCyclesInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.readChargeCycles()
-		}
-		else { self.lambdaReadChargeCyclesComplete?(id, false, 0.0) }
-	}
-
 	public func readChargeCycles() {
         if preview {
             self.readChargeCyclesComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.readChargeCycles()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.readChargeCyclesComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.readChargeCycles()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1389,28 +1099,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func readCanLogDiagnosticsInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.readCanLogDiagnostics()
-		}
-		else { self.lambdaReadCanLogDiagnosticsComplete?(id, false, false) }
-	}
-	
 	public func readCanLogDiagnostics() {
         if preview {
             self.readCanLogDiagnosticsComplete.send(previewCommandStatus)
             return
         }
             
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.readCanLogDiagnostics()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.canLogDiagnostics = nil
-				self.readCanLogDiagnosticsComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.readCanLogDiagnostics()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1420,13 +1115,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func updateCanLogDiagnosticsInternal(_ allow: Bool) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.updateCanLogDiagnostics(allow)
-		}
-		else { self.lambdaUpdateCanLogDiagnosticsComplete?(id, false) }
-	}
-		
 	public func updateCanLogDiagnostics(_ allow: Bool) {
         if preview {
             self.canLogDiagnostics = allow
@@ -1434,14 +1122,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.updateCanLogDiagnostics(allow)
-		}
-		else {
-			DispatchQueue.main.async {
-				self.updateCanLogDiagnosticsComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.updateCanLogDiagnostics(allow)
 	}
 		
 	//--------------------------------------------------------------------------------
@@ -1452,13 +1133,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || ALTER
-	func alterManufacturingTestInternal(_ test: alterManufacturingTestType) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.alterManufacturingTest(test)
-		}
-		else { self.lambdaManufacturingTestComplete?(id, false) }
-	}
-	
 	public func alterManufacturingTest(_ test: alterManufacturingTestType) {
         if preview {
             self.manufacturingTestComplete.send(previewCommandStatus)
@@ -1468,25 +1142,11 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.alterManufacturingTest(test)
-		}
-		else {
-			DispatchQueue.main.async {
-				self.manufacturingTestComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.alterManufacturingTest(test)
 	}
 	#endif
 
 	#if UNIVERSAL || KAIROS
-	func kairosManufacturingTestInternal(_ test: kairosManufacturingTestType) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.kairosManufacturingTest(test)
-		}
-		else { self.lambdaManufacturingTestComplete?(id, false) }
-	}
-	
 	public func kairosManufacturingTest(_ test: kairosManufacturingTestType) {
         if preview {
             self.manufacturingTestComplete.send(previewCommandStatus)
@@ -1496,14 +1156,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.kairosManufacturingTest(test)
-		}
-		else {
-			DispatchQueue.main.async {
-				self.manufacturingTestComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.kairosManufacturingTest(test)
 	}
 	#endif
 
@@ -1514,11 +1167,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setAskForButtonResponseInternal(_ enable: Bool) {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAskForButtonResponse(enable) }
-		else { self.lambdaSetAskForButtonResponseComplete?(self.id, false, enable) }
-	}
-	
 	public func setAskForButtonResponse(_ enable: Bool) {
         if preview {
             self.buttonResponseEnabled = enable
@@ -1526,12 +1174,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAskForButtonResponse(enable) }
-		else {
-			DispatchQueue.main.async {
-				self.setAskForButtonResponseComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.setAskForButtonResponse(enable)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1541,23 +1184,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getAskForButtonResponseInternal() {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAskForButtonResponse() }
-		else { self.lambdaGetAskForButtonResponseComplete?(self.id, false, false) }
-	}
-	
 	public func getAskForButtonResponse() {
         if preview {
             self.getAskForButtonResponseComplete.send(previewCommandStatus)
             return
         }
 
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAskForButtonResponse() }
-		else {
-			DispatchQueue.main.async {
-				self.getAskForButtonResponseComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.getAskForButtonResponse()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1567,13 +1200,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setHRZoneColorInternal(_ type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
-		}
-		else { self.lambdaSetHRZoneColorComplete?(self.id, false, type) }
-	}
-
 	public func setHRZoneColor(_ type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
         if preview {
             switch (type) {
@@ -1587,14 +1213,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
-		}
-		else {
-			DispatchQueue.main.async {
-				self.setHRZoneColorComplete.send((.not_configured, type))
-			}
-		}
+        mMainCharacteristic.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1604,27 +1223,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getHRZoneColorInternal(_ type: hrZoneRangeType) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getHRZoneColor(type)
-		}
-		else { self.lambdaGetHRZoneColorComplete?(self.id, false, type, false, false, false, 0, 0) }
-	}
-	
 	public func getHRZoneColor(_ type: hrZoneRangeType) {
         if preview {
             self.getHRZoneColorComplete.send((previewCommandStatus, type))
             return
         }
 
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getHRZoneColor(type)
-		}
-		else {
-			DispatchQueue.main.async {
-				self.getHRZoneColorComplete.send((.not_configured, type))
-			}
-		}
+        mMainCharacteristic.getHRZoneColor(type)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1634,13 +1239,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setHRZoneRangeInternal(_ enabled: Bool, high_value: Int, low_value: Int) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
-		}
-		else { self.lambdaSetHRZoneRangeComplete?(self.id, false) }
-	}
-	
 	public func setHRZoneRange(_ enabled: Bool, high_value: Int, low_value: Int) {
         if preview {
             self.hrZoneRange = hrZoneRangeValueType(enabled: enabled, lower: low_value, upper: high_value)
@@ -1648,14 +1246,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
-		}
-		else {
-			DispatchQueue.main.async {
-				self.setHRZoneRangeComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1665,27 +1256,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getHRZoneRangeInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getHRZoneRange()
-		}
-		else { self.lambdaGetHRZoneRangeComplete?(self.id, false, false, 0, 0) }
-	}
-	
 	public func getHRZoneRange() {
         if preview {
             self.getHRZoneRangeComplete.send(previewCommandStatus)
             return
         }
 
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getHRZoneRange()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.getHRZoneRangeComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.getHRZoneRange()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1695,23 +1272,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getPPGAlgorithmInternal() {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPPGAlgorithm() }
-		else { self.lambdaGetPPGAlgorithmComplete?(self.id, false, ppgAlgorithmConfiguration(), eventType.unknown) }
-	}
-	
 	public func getPPGAlgorithm() {
         if preview {
             self.getPPGAlgorithmComplete.send((previewCommandStatus, ppgAlgorithmConfiguration(), eventType.unknown))
             return
         }
 
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPPGAlgorithm() }
-		else {
-			DispatchQueue.main.async {
-                self.getPPGAlgorithmComplete.send((.not_configured, ppgAlgorithmConfiguration(), eventType.unknown))
-			}
-		}
+        mMainCharacteristic.getPPGAlgorithm()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1721,11 +1288,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setAdvertiseAsHRMInternal(_ asHRM: Bool) {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAdvertiseAsHRM(asHRM) }
-		else { self.lambdaSetAdvertiseAsHRMComplete?(self.id, false, false) }
-	}
-
 	public func setAdvertiseAsHRM(_ asHRM: Bool) {
         if preview {
             self.advertiseAsHRM = asHRM
@@ -1733,13 +1295,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setAdvertiseAsHRM(asHRM) }
-		else {
-			DispatchQueue.main.async {
-				self.advertiseAsHRM = nil
-				self.setAdvertiseAsHRMComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.setAdvertiseAsHRM(asHRM)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1749,23 +1305,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getAdvertiseAsHRMInternal() {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAdvertiseAsHRM() }
-		else { self.lambdaGetAdvertiseAsHRMComplete?(self.id, false, false) }
-	}
-
 	public func getAdvertiseAsHRM() {
         if preview {
             self.getAdvertiseAsHRMComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getAdvertiseAsHRM() }
-		else {
-			DispatchQueue.main.async {
-				self.getAdvertiseAsHRMComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.getAdvertiseAsHRM()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1775,11 +1321,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setButtonCommandInternal(_ tap: buttonTapType, command: buttonCommandType) {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setButtonCommand(tap, command: command) }
-		else { self.lambdaSetButtonCommandComplete?(self.id, false, tap, command) }
-	}
-
 	public func setButtonCommand(_ tap: buttonTapType, command: buttonCommandType) {
         if preview {
             switch tap {
@@ -1793,12 +1334,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setButtonCommand(tap, command: command) }
-		else {
-			DispatchQueue.main.async {
-				self.setButtonCommandComplete.send((.not_configured, tap))
-			}
-		}
+        mMainCharacteristic.setButtonCommand(tap, command: command)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1808,23 +1344,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getButtonCommandInternal(_ tap: buttonTapType) {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getButtonCommand(tap) }
-		else { self.lambdaGetButtonCommandComplete?(self.id, false, tap, .unknown) }
-	}
-	
 	public func getButtonCommand(_ tap: buttonTapType) {
         if preview {
             self.getButtonCommandComplete.send((previewCommandStatus, tap))
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getButtonCommand(tap) }
-		else {
-			DispatchQueue.main.async {
-				self.getButtonCommandComplete.send((.not_configured, tap))
-			}
-		}
+        mMainCharacteristic.getButtonCommand(tap)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1834,16 +1360,8 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setPairedInternal() {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPaired() }
-		else { self.lambdaSetPairedComplete?(self.id, false) }
-	}
-
 	public func setPaired() {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPaired() }
-		else {
-			self.setPairedComplete.send(.not_configured)
-		}
+        mMainCharacteristic.setPaired()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1853,16 +1371,8 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setUnpairedInternal() {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setUnpaired() }
-		else { self.lambdaSetUnpairedComplete?(self.id, false) }
-	}
-	
 	public func setUnpaired() {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setUnpaired() }
-		else {
-			self.setUnpairedComplete.send(.not_configured)
-		}
+        mMainCharacteristic.setUnpaired()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1872,19 +1382,8 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getPairedInternal() {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPaired() }
-		else { self.lambdaGetPairedComplete?(self.id, false, false) }
-	}
-	
 	public func getPaired() {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPaired() }
-		else {
-			DispatchQueue.main.async {
-				self.paired = nil
-				self.getPairedComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.getPaired()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1894,11 +1393,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setPageThresholdInternal(_ threshold: Int) {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPageThreshold(threshold) }
-		else { self.lambdaSetPageThresholdComplete?(self.id, false) }
-	}
-	
 	public func setPageThreshold(_ threshold: Int) {
         if preview {
             self.advertisingPageThreshold = threshold
@@ -1906,12 +1400,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.setPageThreshold(threshold) }
-		else {
-			DispatchQueue.main.async {
-				self.setPageThresholdComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.setPageThreshold(threshold)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1921,24 +1410,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getPageThresholdInternal() {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPageThreshold() }
-		else { self.lambdaGetPageThresholdComplete?(self.id, false, 1) }
-	}
-	
 	public func getPageThreshold() {
         if preview {
             self.getPageThresholdComplete.send(previewCommandStatus)
             return
         }
 
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPageThreshold() }
-		else {
-			DispatchQueue.main.async {
-				self.advertisingPageThreshold = nil
-				self.getPageThresholdComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.getPageThreshold()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1948,11 +1426,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func deletePageThresholdInternal() {
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.deletePageThreshold() }
-		else { self.lambdaDeletePageThresholdComplete?(self.id, false) }
-	}
-
 	public func deletePageThreshold() {
         if preview {
             self.advertisingPageThreshold = nil
@@ -1960,12 +1433,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.deletePageThreshold() }
-		else {
-			DispatchQueue.main.async {
-				self.deletePageThresholdComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.deletePageThreshold()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1975,27 +1443,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func rawLoggingInternal(_ enable: Bool) {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.rawLogging(enable)
-		}
-		else { self.lambdaRawLoggingComplete?(id, false) }
-	}
-
 	public func rawLogging(_ enable: Bool) {
         if preview {
             self.rawLoggingComplete.send(previewCommandStatus)
             return
         }
 
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.rawLogging(enable)
-		}
-		else {
-			DispatchQueue.main.async {
-				self.rawLoggingComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.rawLogging(enable)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2005,13 +1459,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func wornCheckInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.wornCheck()
-		}
-		else { self.lambdaWornCheckComplete?(id, false, "Missing Characteristic", 0) }
-	}
-
 	public func wornCheck() {
         if preview {
             self.wornCheckResult = DeviceWornCheckResultType(code: "Preview", value: 0)
@@ -2019,15 +1466,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.wornCheck()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.wornCheckResult = DeviceWornCheckResultType(code: "Not Configured", value: 0)
-				self.wornCheckResultComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.wornCheck()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2037,27 +1476,13 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getRawLoggingStatusInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getRawLoggingStatus()
-		}
-		else { self.lambdaGetRawLoggingStatusComplete?(id, false, false) }
-	}
-	
 	public func getRawLoggingStatus() {
         if preview {
             self.getRawLoggingStatusComplete.send(previewCommandStatus)
             return
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getRawLoggingStatus()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.getRawLoggingStatusComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.getRawLoggingStatus()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -2067,26 +1492,12 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getWornOverrideStatusInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getWornOverrideStatus()
-		}
-		else { self.lambdaGetWornOverrideStatusComplete?(id, false, false) }
-	}
-	
 	public func getWornOverrideStatus() {
         if preview {
             self.getWornOverrideStatusComplete.send(previewCommandStatus)
         }
         
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getWornOverrideStatus()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.getWornOverrideStatusComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.getWornOverrideStatus()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -2096,20 +1507,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func updateFirmwareInternal(_ file: URL) {
-        if let mAmbiqOTAService {
-			do {
-				let contents = try Data(contentsOf: file)
-				mAmbiqOTAService.rxCharacteristic.start(contents)
-			}
-			catch {
-				globals.log.e ("Cannot open file")
-				self.lambdaUpdateFirmwareFailed?(self.id, 10001, "Cannot parse file for update")
-			}
-		}
-		else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No OTA RX characteristic to update") }
-	}
-
 	public func updateFirmware(_ file: URL) {
         if preview {
             if previewCommandStatus != .successful {
@@ -2161,11 +1558,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func cancelFirmwareUpdateInternal() {
-        if let mAmbiqOTAService { mAmbiqOTAService.rxCharacteristic.cancel() }
-		else { lambdaUpdateFirmwareFailed?(self.id, 10001, "No characteristic to cancel") }
-	}
-
 	public func cancelFirmwareUpdate() {
         if preview {
             self.previewFirmwareTimer?.invalidate()
@@ -2189,15 +1581,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func setSessionParamInternal(_ parameter: sessionParameterType, value: Int) {
-		globals.log.v("\(self.id): \(parameter)")
-
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.setSessionParam(parameter, value: value)
-		}
-		else { self.lambdaSetSessionParamComplete?(self.id, false, parameter) }
-	}
-
 	public func setSessionParam(_ parameter: sessionParameterType, value: Int) {
         if preview {
             switch parameter {
@@ -2209,20 +1592,7 @@ public class Device: NSObject, ObservableObject {
             self.setSessionParamComplete.send((previewCommandStatus, parameter))
         }
 
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.setSessionParam(parameter, value: value)
-		}
-		else {
-			DispatchQueue.main.async {
-				switch parameter {
-				case .tag: self.tag = nil
-				case .ppgCapturePeriod: self.ppgCapturePeriod = nil
-				case .ppgCaptureDuration: self.ppgCaptureDuration = nil
-				default: break
-				}
-				self.setSessionParamComplete.send((.not_configured, parameter))
-			}
-		}
+        mMainCharacteristic.setSessionParam(parameter, value: value)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2232,32 +1602,12 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func getSessionParamInternal(_ parameter: sessionParameterType) {
-		globals.log.v("\(self.id): \(parameter)")
-
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getSessionParam(parameter)
-		} else { self.lambdaGetSessionParamComplete?(self.id, false, parameter, 0) }
-	}
-
 	public func getSessionParam(_ parameter: sessionParameterType) {
         if preview {
             self.getSessionParamComplete.send((previewCommandStatus, parameter))
         }
 
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.getSessionParam(parameter)
-		} else {
-			DispatchQueue.main.async {
-				switch parameter {
-				case .tag: self.tag = nil
-				case .ppgCapturePeriod: self.ppgCapturePeriod = nil
-				case .ppgCaptureDuration: self.ppgCaptureDuration = nil
-				default: break
-				}
-				self.getSessionParamComplete.send((.not_configured, parameter))
-			}
-		}
+        mMainCharacteristic.getSessionParam(parameter)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2267,13 +1617,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func resetSessionParamsInternal() {
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.resetSessionParams()
-		}
-		else { self.lambdaResetSessionParamsComplete?(self.id, false) }
-	}
-
 	public func resetSessionParams() {
         if preview {
             self.previewTag = self.tag
@@ -2282,14 +1625,7 @@ public class Device: NSObject, ObservableObject {
             self.resetSessionParamsComplete.send(previewCommandStatus)
         }
 
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.resetSessionParams()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.resetSessionParamsComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.resetSessionParams()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2299,15 +1635,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func acceptSessionParamsInternal() {
-		globals.log.v("\(self.id)")
-
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.acceptSessionParams()
-		}
-		else { self.lambdaAcceptSessionParamsComplete?(self.id, false) }
-	}
-	
 	public func acceptSessionParams() {
         if preview {
             self.tag = self.previewTag
@@ -2316,14 +1643,7 @@ public class Device: NSObject, ObservableObject {
             self.acceptSessionParamsComplete.send(previewCommandStatus)
         }
 
-		if let mainCharacteristic = mMainCharacteristic {
-			mainCharacteristic.acceptSessionParams()
-		}
-		else {
-			DispatchQueue.main.async {
-				self.acceptSessionParamsComplete.send(.not_configured)
-			}
-		}
+        mMainCharacteristic.acceptSessionParams()
 	}
     
     //--------------------------------------------------------------------------------
@@ -2353,8 +1673,8 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	private func attachMainCharacteristicLambdas() {
-		mMainCharacteristic?.writeEpochComplete
+	private func subscribeMainCharacteristic() {
+		mMainCharacteristic.writeEpochComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaWriteEpochComplete?(self.id, status.successful)
@@ -2362,7 +1682,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.readEpochComplete
+		mMainCharacteristic.readEpochComplete
             .receive(on: DispatchQueue.main)
             .sink { status, value in
                 self.lambdaReadEpochComplete?(self.id, status.successful,  value)
@@ -2371,7 +1691,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.deviceWornStatus
+		mMainCharacteristic.deviceWornStatus
             .receive(on: DispatchQueue.main)
             .sink { isWorn in
 				self.lambdaWornStatus?(self.id, isWorn)
@@ -2379,7 +1699,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.deviceChargingStatus
+		mMainCharacteristic.deviceChargingStatus
             .receive(on: DispatchQueue.main)
             .sink { charging, on_charger, error in
 				self.lambdaChargingStatus?(self.id, charging, on_charger, error)
@@ -2389,7 +1709,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.startManualComplete
+		mMainCharacteristic.startManualComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaStartManualComplete?(self.id, status.successful)
@@ -2397,7 +1717,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.stopManualComplete
+		mMainCharacteristic.stopManualComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaStopManualComplete?(self.id, status.successful)
@@ -2405,7 +1725,7 @@ public class Device: NSObject, ObservableObject {
             }
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.ledComplete
+		mMainCharacteristic.ledComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaLEDComplete?(self.id, status.successful)
@@ -2413,7 +1733,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getRawLoggingStatusComplete
+		mMainCharacteristic.getRawLoggingStatusComplete
             .receive(on: DispatchQueue.main)
             .sink { status, enabled in
                 self.lambdaGetRawLoggingStatusComplete?(self.id, status.successful, enabled)
@@ -2426,7 +1746,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
         
-		mMainCharacteristic?.getWornOverrideStatusComplete
+		mMainCharacteristic.getWornOverrideStatusComplete
             .receive(on: DispatchQueue.main)
             .sink { status, overridden in
                 self.lambdaGetWornOverrideStatusComplete?(self.id, status.successful, overridden)
@@ -2439,7 +1759,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.writeSerialNumberComplete
+		mMainCharacteristic.writeSerialNumberComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lamdaWriteSerialNumberComplete?(self.id, status.successful)
@@ -2447,7 +1767,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.readSerialNumberComplete
+		mMainCharacteristic.readSerialNumberComplete
             .receive(on: DispatchQueue.main)
             .sink { status, partID in
             	self.lambdaReadSerialNumberComplete?(self.id, status.successful, partID)
@@ -2456,7 +1776,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.deleteSerialNumberComplete
+		mMainCharacteristic.deleteSerialNumberComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
             	self.lambdaDeleteSerialNumberComplete?(self.id, status.successful)
@@ -2464,7 +1784,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.writeAdvIntervalComplete
+		mMainCharacteristic.writeAdvIntervalComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
 	            self.lambdaWriteAdvIntervalComplete?(self.id, status.successful)
@@ -2472,7 +1792,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.readAdvIntervalComplete
+		mMainCharacteristic.readAdvIntervalComplete
             .receive(on: DispatchQueue.main)
             .sink { status, seconds in
                 self.lambdaReadAdvIntervalComplete?(self.id, status.successful, seconds)
@@ -2481,7 +1801,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.deleteAdvIntervalComplete
+		mMainCharacteristic.deleteAdvIntervalComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaDeleteAdvIntervalComplete?(self.id, status.successful)
@@ -2490,7 +1810,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.clearChargeCyclesComplete
+		mMainCharacteristic.clearChargeCyclesComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaClearChargeCyclesComplete?(self.id, status.successful)
@@ -2499,7 +1819,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.readChargeCyclesComplete
+		mMainCharacteristic.readChargeCyclesComplete
             .receive(on: DispatchQueue.main)
             .sink { status, cycles in
                 self.lambdaReadChargeCyclesComplete?(self.id, status.successful, cycles)
@@ -2508,7 +1828,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.setAdvertiseAsHRMComplete
+		mMainCharacteristic.setAdvertiseAsHRMComplete
             .receive(on: DispatchQueue.main)
             .sink { status, asHRM in
                 self.lambdaSetAdvertiseAsHRMComplete?(self.id, status.successful, asHRM)
@@ -2521,7 +1841,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
     
-		mMainCharacteristic?.getAdvertiseAsHRMComplete
+		mMainCharacteristic.getAdvertiseAsHRMComplete
             .receive(on: DispatchQueue.main)
             .sink { status, asHRM in
                 self.lambdaGetAdvertiseAsHRMComplete?(self.id, status.successful, asHRM)
@@ -2534,7 +1854,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.setButtonCommandComplete
+		mMainCharacteristic.setButtonCommandComplete
             .receive(on: DispatchQueue.main)
             .sink { status, tap, command in
 				self.lambdaSetButtonCommandComplete?(self.id, status.successful, tap, command)
@@ -2549,7 +1869,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
         
-		mMainCharacteristic?.getButtonCommandComplete
+		mMainCharacteristic.getButtonCommandComplete
             .receive(on: DispatchQueue.main)
             .sink { status, tap, command in
                 self.lambdaGetButtonCommandComplete?(self.id, status.successful, tap, command)
@@ -2564,7 +1884,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setAskForButtonResponseComplete
+		mMainCharacteristic.setAskForButtonResponseComplete
             .receive(on: DispatchQueue.main)
             .sink { status, enable in
                 self.lambdaSetAskForButtonResponseComplete?(self.id, status.successful, enable)
@@ -2577,7 +1897,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getAskForButtonResponseComplete
+		mMainCharacteristic.getAskForButtonResponseComplete
             .receive(on: DispatchQueue.main)
             .sink { status, enable in
                 self.lambdaGetAskForButtonResponseComplete?(self.id, status.successful, enable)
@@ -2590,7 +1910,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setHRZoneColorComplete
+		mMainCharacteristic.setHRZoneColorComplete
             .receive(on: DispatchQueue.main)
             .sink { status, type in
                 self.lambdaSetHRZoneColorComplete?(self.id, status.successful, type)
@@ -2598,7 +1918,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getHRZoneColorComplete
+		mMainCharacteristic.getHRZoneColorComplete
             .receive(on: DispatchQueue.main)
             .sink { status, type, red, green, blue, on_ms, off_ms in
                 self.lambdaGetHRZoneColorComplete?(self.id, status.successful, type, red, green, blue, on_ms, off_ms)
@@ -2612,7 +1932,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setHRZoneRangeComplete
+		mMainCharacteristic.setHRZoneRangeComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaSetHRZoneRangeComplete?(self.id, status.successful)
@@ -2620,7 +1940,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getHRZoneRangeComplete
+		mMainCharacteristic.getHRZoneRangeComplete
             .receive(on: DispatchQueue.main)
             .sink { status, enabled, high_value, low_value in
                 self.lambdaGetHRZoneRangeComplete?(self.id, status.successful, enabled, high_value, low_value)
@@ -2631,7 +1951,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getPPGAlgorithmComplete
+		mMainCharacteristic.getPPGAlgorithmComplete
             .receive(on: DispatchQueue.main)
             .sink { status, algorithm, state in
                 self.lambdaGetPPGAlgorithmComplete?(self.id, status.successful, algorithm, state)
@@ -2639,7 +1959,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.endSleepComplete
+		mMainCharacteristic.endSleepComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaEndSleepComplete?(self.id, status.successful)
@@ -2647,7 +1967,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.endSleepStatus
+		mMainCharacteristic.endSleepStatus
             .receive(on: DispatchQueue.main)
             .sink { enable in
 				self.lambdaEndSleepStatus?(self.id, enable)
@@ -2655,7 +1975,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.disableWornDetectComplete
+		mMainCharacteristic.disableWornDetectComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaDisableWornDetectComplete?(self.id, status.successful)
@@ -2663,7 +1983,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.enableWornDetectComplete
+		mMainCharacteristic.enableWornDetectComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaEnableWornDetectComplete?(self.id, status.successful)
@@ -2671,7 +1991,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.buttonClicked
+		mMainCharacteristic.buttonClicked
             .receive(on: DispatchQueue.main)
             .sink { presses in
 				self.lambdaButtonClicked?(self.id, presses)
@@ -2679,7 +1999,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.wornCheckComplete
+		mMainCharacteristic.wornCheckComplete
             .receive(on: DispatchQueue.main)
             .sink { status, code, value in
                 self.lambdaWornCheckComplete?(self.id, status.successful, code, value )
@@ -2688,7 +2008,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setSessionParamComplete
+		mMainCharacteristic.setSessionParamComplete
             .receive(on: DispatchQueue.main)
             .sink { status, parameter in
                 self.lambdaSetSessionParamComplete?(self.id, status.successful, parameter)
@@ -2696,7 +2016,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getSessionParamComplete
+		mMainCharacteristic.getSessionParamComplete
             .receive(on: DispatchQueue.main)
             .sink { status, parameter, value in
                 self.lambdaGetSessionParamComplete?(self.id, status.successful, parameter, value)
@@ -2719,7 +2039,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.acceptSessionParamsComplete
+		mMainCharacteristic.acceptSessionParamsComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaAcceptSessionParamsComplete?(self.id, status.successful)
@@ -2727,7 +2047,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.resetSessionParamsComplete
+		mMainCharacteristic.resetSessionParamsComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaResetSessionParamsComplete?(self.id, status.successful)
@@ -2735,7 +2055,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.readCanLogDiagnosticsComplete
+		mMainCharacteristic.readCanLogDiagnosticsComplete
             .receive(on: DispatchQueue.main)
             .sink { status, allow in
                 self.lambdaReadCanLogDiagnosticsComplete?(self.id, status.successful, allow)
@@ -2744,7 +2064,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.updateCanLogDiagnosticsComplete
+		mMainCharacteristic.updateCanLogDiagnosticsComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, status.successful)
@@ -2752,7 +2072,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getPacketCountComplete
+		mMainCharacteristic.getPacketCountComplete
             .receive(on: DispatchQueue.main)
             .sink { status, count in
                 self.lambdaGetPacketCountComplete?(self.id, status.successful, count)
@@ -2760,7 +2080,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getAllPacketsComplete
+		mMainCharacteristic.getAllPacketsComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaGetAllPacketsComplete?(self.id, status.successful)
@@ -2768,7 +2088,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getAllPacketsAcknowledgeComplete
+		mMainCharacteristic.getAllPacketsAcknowledgeComplete
             .receive(on: DispatchQueue.main)
             .sink { status, ack in
                 self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, status.successful, ack)
@@ -2776,7 +2096,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setPairedComplete
+		mMainCharacteristic.setPairedComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaSetPairedComplete?(self.id, status.successful)
@@ -2784,7 +2104,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setUnpairedComplete
+		mMainCharacteristic.setUnpairedComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaSetUnpairedComplete?(self.id, status.successful)
@@ -2792,7 +2112,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.getPairedComplete
+		mMainCharacteristic.getPairedComplete
             .receive(on: DispatchQueue.main)
             .sink { status, paired in
                 self.lambdaGetPairedComplete?(self.id, status.successful, paired)
@@ -2805,7 +2125,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setPageThresholdComplete
+		mMainCharacteristic.setPageThresholdComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaSetPageThresholdComplete?(self.id, status.successful)
@@ -2813,7 +2133,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.getPageThresholdComplete
+		mMainCharacteristic.getPageThresholdComplete
             .receive(on: DispatchQueue.main)
             .sink { status, threshold in
                 self.lambdaGetPageThresholdComplete?(self.id, status.successful, threshold)
@@ -2826,7 +2146,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.deletePageThresholdComplete
+		mMainCharacteristic.deletePageThresholdComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaDeletePageThresholdComplete?(self.id, status.successful)
@@ -2834,7 +2154,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.enterShipModeComplete
+		mMainCharacteristic.enterShipModeComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaEnterShipModeComplete?(self.id, status.successful)
@@ -2842,7 +2162,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.resetComplete
+		mMainCharacteristic.resetComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaResetComplete?(self.id, status.successful)
@@ -2850,7 +2170,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.airplaneModeComplete
+		mMainCharacteristic.airplaneModeComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaAirplaneModeComplete?(self.id, status.successful)
@@ -2858,7 +2178,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.manufacturingTestComplete
+		mMainCharacteristic.manufacturingTestComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaManufacturingTestComplete?(self.id, status.successful)
@@ -2866,7 +2186,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.rawLoggingComplete
+		mMainCharacteristic.rawLoggingComplete
             .receive(on: DispatchQueue.main)
             .sink { status in
                 self.lambdaRawLoggingComplete?(self.id, status.successful)
@@ -2875,7 +2195,7 @@ public class Device: NSObject, ObservableObject {
             .store(in: &subscriptions)
 		
 		// MARK: Notifications
-		mMainCharacteristic?.manufacturingTestResult
+		mMainCharacteristic.manufacturingTestResult
             .receive(on: DispatchQueue.main)
             .sink { valid, result in
 				self.lambdaManufacturingTestResult?(self.id, valid, result)
@@ -2883,7 +2203,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.ppgMetrics
+		mMainCharacteristic.ppgMetrics
             .receive(on: DispatchQueue.main)
             .sink { successful, packet in
 				self.lambdaPPGMetrics?(self.id, successful, packet)
@@ -2891,7 +2211,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mMainCharacteristic?.ppgFailed
+		mMainCharacteristic.ppgFailed
             .receive(on: DispatchQueue.main)
             .sink { code in
 				self.lambdaPPGFailed?(self.id, code)
@@ -2900,14 +2220,14 @@ public class Device: NSObject, ObservableObject {
             .store(in: &subscriptions)
 		
         // Do not push to main dispatch queue
-		mMainCharacteristic?.dataPackets
+		mMainCharacteristic.dataPackets
             .sink { sequence_number, packets in
                 self.lambdaDataPackets?(self.id, sequence_number, packets)
                 self.dataPackets.send((sequence_number, packets))
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.dataComplete
+		mMainCharacteristic.dataComplete
             .receive(on: DispatchQueue.main)
             .sink { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
 				self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate)
@@ -2915,7 +2235,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mMainCharacteristic?.dataFailure
+		mMainCharacteristic.dataFailure
             .sink { self.lambdaDataFailure?(self.id) }
             .store(in: &subscriptions)
 	}
@@ -2929,14 +2249,14 @@ public class Device: NSObject, ObservableObject {
 	//--------------------------------------------------------------------------------
 	private func subscribeDataCharacteristic() {
         // Do not push to main dispatch queue
-		mDataCharacteristic?.dataPackets
+		mDataCharacteristic.dataPackets
             .sink { sequence_number, packets in
 				self.lambdaDataPackets?(self.id, sequence_number, packets)
 				self.dataPackets.send((sequence_number, packets))
 			}
             .store(in: &subscriptions)
 		
-		mDataCharacteristic?.dataComplete
+		mDataCharacteristic.dataComplete
             .receive(on: DispatchQueue.main)
             .sink {bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
 				self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate)
@@ -2953,7 +2273,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	private func subscribeStreamingCharacteristic() {
-		mStreamingCharacteristic?.deviceWornStatus
+		mStreamingCharacteristic.deviceWornStatus
             .receive(on: DispatchQueue.main)
             .sink { isWorn in
                 self.lambdaWornStatus?(self.id, isWorn)
@@ -2961,7 +2281,7 @@ public class Device: NSObject, ObservableObject {
             }
             .store(in: &subscriptions)
     
-		mStreamingCharacteristic?.deviceChargingStatus
+		mStreamingCharacteristic.deviceChargingStatus
 	        .receive(on: DispatchQueue.main)
 	        .sink { charging, on_charger, error in
 	            self.lambdaChargingStatus?(self.id, charging, on_charger, error)
@@ -2971,7 +2291,7 @@ public class Device: NSObject, ObservableObject {
 	        }
 	        .store(in: &subscriptions)
 		
-		mStreamingCharacteristic?.endSleepStatus
+		mStreamingCharacteristic.endSleepStatus
             .receive(on: DispatchQueue.main)
             .sink { enable in
 				self.lambdaEndSleepStatus?(self.id, enable)
@@ -2979,7 +2299,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mStreamingCharacteristic?.buttonClicked
+		mStreamingCharacteristic.buttonClicked
             .receive(on: DispatchQueue.main)
             .sink { presses in
 				self.lambdaButtonClicked?(self.id, presses)
@@ -2987,7 +2307,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mStreamingCharacteristic?.manufacturingTestResult
+		mStreamingCharacteristic.manufacturingTestResult
             .receive(on: DispatchQueue.main)
             .sink { valid, result in
 				self.lambdaManufacturingTestResult?(self.id, valid, result)
@@ -2995,7 +2315,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mStreamingCharacteristic?.ppgMetrics
+		mStreamingCharacteristic.ppgMetrics
             .receive(on: DispatchQueue.main)
             .sink { successful, packet in
 				self.lambdaPPGMetrics?(self.id, successful, packet)
@@ -3003,7 +2323,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mStreamingCharacteristic?.ppgFailed
+		mStreamingCharacteristic.ppgFailed
             .receive(on: DispatchQueue.main)
             .sink { code in
 				self.lambdaPPGFailed?(self.id, code)
@@ -3011,7 +2331,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mStreamingCharacteristic?.streamingPacket
+		mStreamingCharacteristic.streamingPacket
             .receive(on: DispatchQueue.main)
             .sink { packet in
 				self.lambdaStreamingPacket?(self.id, packet)
@@ -3019,7 +2339,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mStreamingCharacteristic?.dataAvailable
+		mStreamingCharacteristic.dataAvailable
             .receive(on: DispatchQueue.main)
             .sink {
                 self.lambdaDataAvailable?(self.id)
@@ -3217,54 +2537,42 @@ public class Device: NSObject, ObservableObject {
                 
 			#if UNIVERSAL || ALTER
             case .alterMainCharacteristic:
-                mMainCharacteristic = customMainCharacteristic()
-                mMainCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
+                mMainCharacteristic.didDiscover(characteristic, commandQ: commandQ)
 				#if UNIVERSAL
-                mMainCharacteristic?.type	= .alter
+                mMainCharacteristic.type	= .alter
 				#endif
-                attachMainCharacteristicLambdas()
-                mMainCharacteristic?.discoverDescriptors()
+                mMainCharacteristic.discoverDescriptors()
                 
             case .alterDataCharacteristic:
-                mDataCharacteristic = customDataCharacteristic()
-                mDataCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
-                subscribeDataCharacteristic()
-                mDataCharacteristic?.discoverDescriptors()
+                mDataCharacteristic.didDiscover(characteristic, commandQ: commandQ)
+                mDataCharacteristic.discoverDescriptors()
                 
             case .alterStrmCharacteristic:
-                mStreamingCharacteristic = customStreamingCharacteristic()
-                mStreamingCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
+                mStreamingCharacteristic.didDiscover(characteristic, commandQ: commandQ)
 				#if UNIVERSAL
-                mStreamingCharacteristic?.type	= .alter
+                mStreamingCharacteristic.type	= .alter
 				#endif
-                subscribeStreamingCharacteristic()
-                mStreamingCharacteristic?.discoverDescriptors()
+                mStreamingCharacteristic.discoverDescriptors()
             #endif
                 
 			#if UNIVERSAL || KAIROS
             case .kairosMainCharacteristic:
-                mMainCharacteristic = customMainCharacteristic()
-                mMainCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
+                mMainCharacteristic.didDiscover(characteristic, commandQ: commandQ)
 				#if UNIVERSAL
-                mMainCharacteristic?.type	= .kairos
+                mMainCharacteristic.type	= .kairos
 				#endif
-                attachMainCharacteristicLambdas()
-                mMainCharacteristic?.discoverDescriptors()
+                mMainCharacteristic.discoverDescriptors()
                 
             case .kairosDataCharacteristic:
-                mDataCharacteristic = customDataCharacteristic()
-                mDataCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
-                subscribeDataCharacteristic()
-                mDataCharacteristic?.discoverDescriptors()
+                mDataCharacteristic.didDiscover(characteristic, commandQ: commandQ)
+                mDataCharacteristic.discoverDescriptors()
                 
             case .kairosStrmCharacteristic:
-                mStreamingCharacteristic = customStreamingCharacteristic()
-                mStreamingCharacteristic?.didDiscover(	characteristic, commandQ: commandQ)
+                mStreamingCharacteristic.didDiscover(characteristic, commandQ: commandQ)
 				#if UNIVERSAL
-                mStreamingCharacteristic?.type	= .kairos
+                mStreamingCharacteristic.type	= .kairos
 				#endif
-                subscribeStreamingCharacteristic()
-                mStreamingCharacteristic?.discoverDescriptors()
+                mStreamingCharacteristic.discoverDescriptors()
 				#endif
             }
         }
@@ -3309,15 +2617,15 @@ public class Device: NSObject, ObservableObject {
 					globals.log.v ("\(self.id): \(standardDescriptor.title) '\(enumerated.title)'")
 					switch (enumerated) {
 					#if UNIVERSAL || ALTER
-					case .alterMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
-					case .alterDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
-					case .alterStrmCharacteristic		: mStreamingCharacteristic?.didDiscoverDescriptor()
+					case .alterMainCharacteristic		: mMainCharacteristic.didDiscoverDescriptor()
+					case .alterDataCharacteristic		: mDataCharacteristic.didDiscoverDescriptor()
+					case .alterStrmCharacteristic		: mStreamingCharacteristic.didDiscoverDescriptor()
 					#endif
 
 					#if UNIVERSAL || KAIROS
-					case .kairosMainCharacteristic		: mMainCharacteristic?.didDiscoverDescriptor()
-					case .kairosDataCharacteristic		: mDataCharacteristic?.didDiscoverDescriptor()
-					case .kairosStrmCharacteristic		: mStreamingCharacteristic?.didDiscoverDescriptor()
+					case .kairosMainCharacteristic		: mMainCharacteristic.didDiscoverDescriptor()
+					case .kairosDataCharacteristic		: mDataCharacteristic.didDiscoverDescriptor()
+					case .kairosStrmCharacteristic		: mStreamingCharacteristic.didDiscoverDescriptor()
 					#endif
 					}
 				}
@@ -3348,7 +2656,7 @@ public class Device: NSObject, ObservableObject {
     //
     //--------------------------------------------------------------------------------
     func didUpdateValue(_ data: Data, offset: Int) {
-        mDataCharacteristic?.didUpdateValue(true, data: data, offset: offset)
+        mDataCharacteristic.didUpdateValue(true, data: data, offset: offset)
     }
 
 	//--------------------------------------------------------------------------------
@@ -3389,15 +2697,15 @@ public class Device: NSObject, ObservableObject {
 		else if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
 			switch (enumerated) {
 			#if UNIVERSAL || ALTER
-			case .alterMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
-			case .alterDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
-			case .alterStrmCharacteristic		: mStreamingCharacteristic?.didUpdateValue()
+			case .alterMainCharacteristic		: mMainCharacteristic.didUpdateValue()
+			case .alterDataCharacteristic		: mDataCharacteristic.didUpdateValue()
+			case .alterStrmCharacteristic		: mStreamingCharacteristic.didUpdateValue()
 			#endif
 
 			#if UNIVERSAL || KAIROS
-			case .kairosMainCharacteristic		: mMainCharacteristic?.didUpdateValue()
-			case .kairosDataCharacteristic		: mDataCharacteristic?.didUpdateValue()
-			case .kairosStrmCharacteristic		: mStreamingCharacteristic?.didUpdateValue()
+			case .kairosMainCharacteristic		: mMainCharacteristic.didUpdateValue()
+			case .kairosDataCharacteristic		: mDataCharacteristic.didUpdateValue()
+			case .kairosStrmCharacteristic		: mStreamingCharacteristic.didUpdateValue()
 			#endif
 			}
 		}
@@ -3437,15 +2745,15 @@ public class Device: NSObject, ObservableObject {
 					
 					switch (enumerated) {
 					#if UNIVERSAL || ALTER
-					case .alterMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
-					case .alterDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
-					case .alterStrmCharacteristic			: mStreamingCharacteristic?.didUpdateNotificationState()
+					case .alterMainCharacteristic			: mMainCharacteristic.didUpdateNotificationState()
+					case .alterDataCharacteristic			: mDataCharacteristic.didUpdateNotificationState()
+					case .alterStrmCharacteristic			: mStreamingCharacteristic.didUpdateNotificationState()
 					#endif
 
 					#if UNIVERSAL || KAIROS
-					case .kairosMainCharacteristic			: mMainCharacteristic?.didUpdateNotificationState()
-					case .kairosDataCharacteristic			: mDataCharacteristic?.didUpdateNotificationState()
-					case .kairosStrmCharacteristic			: mStreamingCharacteristic?.didUpdateNotificationState()
+					case .kairosMainCharacteristic			: mMainCharacteristic.didUpdateNotificationState()
+					case .kairosDataCharacteristic			: mDataCharacteristic.didUpdateNotificationState()
+					case .kairosStrmCharacteristic			: mStreamingCharacteristic.didUpdateNotificationState()
 					#endif
 					}
 				}
