@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreBluetooth
+import Combine
 import zlib
 
 class customMainCharacteristic: Characteristic {
@@ -73,80 +74,80 @@ class customMainCharacteristic: Characteristic {
 	}
 	
 	// MARK: Callbacks
-	var writeEpochComplete: ((_ successful: Bool)->())?
-	var getAllPacketsComplete: ((_ successful: Bool)->())?
-	var getAllPacketsAcknowledgeComplete: ((_ successful: Bool, _ ack: Bool)->())?
-	var getNextPacketComplete: ((_ successful: Bool, _ error: nextPacketStatusType, _ caughtUp: Bool, _ packet: String)->())?
-	var getPacketCountComplete: ((_ successful: Bool, _ count: Int)->())?
-	var startManualComplete: ((_ successful: Bool)->())?
-	var stopManualComplete: ((_ successful: Bool)->())?
-	var ledComplete: ((_ successful: Bool)->())?
-	var enterShipModeComplete: ((_ successful: Bool)->())?
+    let writeEpochComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let getAllPacketsComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let getAllPacketsAcknowledgeComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
+    let getNextPacketComplete = PassthroughSubject<(DeviceCommandCompletionStatus, nextPacketStatusType, Bool, String), Never>()
+    let getPacketCountComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Int), Never>()
+    let startManualComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let stopManualComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let ledComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let enterShipModeComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
-	var writeSerialNumberComplete: ((_ successful: Bool)->())?
-	var readSerialNumberComplete: ((_ successful: Bool, _ partID: String)->())?
-	var deleteSerialNumberComplete: ((_ successful: Bool)->())?
-	var writeAdvIntervalComplete: ((_ successful: Bool)->())?
-	var readAdvIntervalComplete: ((_ successful: Bool, _ seconds: Int)->())?
-	var deleteAdvIntervalComplete: ((_ successful: Bool)->())?
-	var clearChargeCyclesComplete: ((_ successful: Bool)->())?
-	var readCanLogDiagnosticsComplete: ((_ successful: Bool, _ allow: Bool)->())?
-	var updateCanLogDiagnosticsComplete: ((_ successful: Bool)->())?
+    let writeSerialNumberComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let readSerialNumberComplete = PassthroughSubject<(DeviceCommandCompletionStatus, String), Never>()
+    let deleteSerialNumberComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let writeAdvIntervalComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let readAdvIntervalComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Int), Never>()
+    let deleteAdvIntervalComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let clearChargeCyclesComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let readCanLogDiagnosticsComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
+    let updateCanLogDiagnosticsComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
-	var readChargeCyclesComplete: ((_ successful: Bool, _ cycles: Float)->())?
-	var rawLoggingComplete: ((_ successful: Bool)->())?
-	var allowPPGComplete: ((_ successful: Bool)->())?
-	var wornCheckComplete: ((_ successful: Bool, _ type: String, _ value: Int)->())?
-	var resetComplete: ((_ successful: Bool)->())?
-	var readEpochComplete: ((_ successful: Bool, _ value: Int)->())?
-	var disableWornDetectComplete: ((_ successful: Bool)->())?
-	var enableWornDetectComplete: ((_ successful: Bool)->())?
-	var endSleepComplete: ((_ successful: Bool)->())?
-	var manufacturingTestComplete: ((_ successful: Bool)->())?
+    let readChargeCyclesComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Float), Never>()
+    let rawLoggingComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let allowPPGComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let wornCheckComplete = PassthroughSubject<(DeviceCommandCompletionStatus, String, Int), Never>()
+    let resetComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let readEpochComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Int), Never>()
+    let disableWornDetectComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let enableWornDetectComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let endSleepComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let manufacturingTestComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
-	var deviceWornStatus: ((_ isWorn: Bool)->())?
-	var deviceChargingStatus: ((_ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
-	var ppgMetrics: ((_ successful: Bool, _ packet: String)->())?
-	var ppgFailed: ((_ code: Int)->())?
-	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
+    let deviceWornStatus = PassthroughSubject<Bool, Never>()
+    let deviceChargingStatus = PassthroughSubject<(Bool, Bool, Bool), Never>()
+    let ppgMetrics = PassthroughSubject<(Bool, String), Never>()
+    let ppgFailed = PassthroughSubject<Int, Never>()
+    let manufacturingTestResult = PassthroughSubject<(Bool, String), Never>()
 
-	var endSleepStatus: ((_ hasSleep: Bool)->())?
-	var buttonClicked: ((_ presses: Int)->())?
-	
-	var setAskForButtonResponseComplete: ((_ successful: Bool, _ enable: Bool)->())?
-	var getAskForButtonResponseComplete: ((_ successful: Bool, _ enable: Bool)->())?
-	var setHRZoneColorComplete: ((_ successful: Bool, _ type: hrZoneRangeType)->())?
-	var getHRZoneColorComplete: ((_ successful: Bool, _ type: hrZoneRangeType, _ red: Bool, _ green: Bool, _ blue: Bool, _ on_ms: Int, _ off_ms: Int)->())?
-	var setHRZoneRangeComplete: ((_ successful: Bool)->())?
-	var getHRZoneRangeComplete: ((_ successful: Bool, _ enabled: Bool, _ high_value: Int, _ low_value: Int)->())?
-	var getPPGAlgorithmComplete: ((_ successful: Bool, _ algorithm: ppgAlgorithmConfiguration, _ state: eventType)->())?
-	var setAdvertiseAsHRMComplete: ((_ successful: Bool, _ asHRM: Bool)->())?
-	var getAdvertiseAsHRMComplete: ((_ successful: Bool, _ asHRM: Bool)->())?
-	var setButtonCommandComplete: ((_ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
-	var getButtonCommandComplete: ((_ successful: Bool, _ tap: buttonTapType, _ command: buttonCommandType)->())?
-	var getPairedComplete: ((_ successful: Bool, _ paired: Bool)->())?
-	var setPairedComplete: ((_ successful: Bool)->())?
-	var setUnpairedComplete: ((_ successful: Bool)->())?
-	var getPageThresholdComplete: ((_ successful: Bool, _ threshold: Int)->())?
-	var setPageThresholdComplete: ((_ successful: Bool)->())?
-	var deletePageThresholdComplete: ((_ successful: Bool)->())?
-	
-	var dataPackets: ((_ packets: String)->())?
-	var dataComplete: ((_ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int)->())?
-	var dataFailure: (()->())?
-		
-	var recalibratePPGComplete: ((_ successful: Bool)->())?
+    let endSleepStatus = PassthroughSubject<Bool, Never>()
+    let buttonClicked = PassthroughSubject<Int, Never>()
+    
+    let setAskForButtonResponseComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
+    let getAskForButtonResponseComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
+    let setHRZoneColorComplete = PassthroughSubject<(DeviceCommandCompletionStatus, hrZoneRangeType), Never>()
+    let getHRZoneColorComplete = PassthroughSubject<(DeviceCommandCompletionStatus, hrZoneRangeType, Bool, Bool, Bool, Int, Int), Never>()
+    let setHRZoneRangeComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let getHRZoneRangeComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool, Int, Int), Never>()
+    let getPPGAlgorithmComplete = PassthroughSubject<(DeviceCommandCompletionStatus, ppgAlgorithmConfiguration, eventType), Never>()
+    let setAdvertiseAsHRMComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
+    let getAdvertiseAsHRMComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
+    let setButtonCommandComplete = PassthroughSubject<(DeviceCommandCompletionStatus, buttonTapType, buttonCommandType), Never>()
+    let getButtonCommandComplete = PassthroughSubject<(DeviceCommandCompletionStatus, buttonTapType, buttonCommandType), Never>()
+    let getPairedComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
+    let setPairedComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let setUnpairedComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let getPageThresholdComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Int), Never>()
+    let setPageThresholdComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let deletePageThresholdComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    
+    let dataPackets = PassthroughSubject<(Int, String), Never>()
+    let dataComplete = PassthroughSubject<(Int, Int, Int, Int, Bool), Never>()
+    let dataFailure = PassthroughSubject<Void, Never>()
+        
+    let recalibratePPGComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
-	var setSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType)->())?
-	var getSessionParamComplete: ((_ successful: Bool, _ parameter: sessionParameterType, _ value: Int)->())?
-	var resetSessionParamsComplete: ((_ successful: Bool)->())?
-	var acceptSessionParamsComplete: ((_ successful: Bool)->())?
-	
-	var getRawLoggingStatusComplete: ((_ successful: Bool, _ enabled: Bool)->())?
-	var getWornOverrideStatusComplete: ((_ successful: Bool, _ overridden: Bool)->())?
-	
-	var airplaneModeComplete: ((_ successful: Bool)->())?
-		
+    let setSessionParamComplete = PassthroughSubject<(DeviceCommandCompletionStatus, sessionParameterType), Never>()
+    let getSessionParamComplete = PassthroughSubject<(DeviceCommandCompletionStatus, sessionParameterType, Int), Never>()
+    let resetSessionParamsComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    let acceptSessionParamsComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+    
+    let getRawLoggingStatusComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
+    let getWornOverrideStatusComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
+    
+    let airplaneModeComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
+
 	var firmwareVersion						: String = ""
 	
 	internal var mDataPackets				: [biostrapDataPacket]!
@@ -338,9 +339,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func getPacketCount() {
-		globals.log.v("\(pID)")
-
-		if (!mSimpleCommand(.getPacketCount)) { self.getPacketCountComplete?(false, 0) }
+        if (!mSimpleCommand(.getPacketCount)) { self.getPacketCountComplete.send((.not_configured, 0)) }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -351,9 +350,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func disableWornDetect() {
-		globals.log.v("\(pID)")
-
-		if (!mSimpleCommand(.disableWornDetect)) { self.disableWornDetectComplete?(false) }
+        if (!mSimpleCommand(.disableWornDetect)) { self.disableWornDetectComplete.send(.not_configured) }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -364,9 +361,7 @@ class customMainCharacteristic: Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func enableWornDetect() {
-		globals.log.v("\(pID)")
-
-		if (!mSimpleCommand(.enableWornDetect)) { self.enableWornDetectComplete?(false) }
+        if (!mSimpleCommand(.enableWornDetect)) { self.enableWornDetectComplete.send(.not_configured) }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -395,7 +390,7 @@ class customMainCharacteristic: Characteristic {
 	func stopManual() {
 		globals.log.v("\(pID)")
 		
-		if (!mSimpleCommand(.stopManual)) { self.stopManualComplete?(false) }
+        if (!mSimpleCommand(.stopManual)) { self.stopManualComplete.send(.not_configured) }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -689,7 +684,7 @@ class customMainCharacteristic: Characteristic {
 	func airplaneMode() {
 		globals.log.v("\(pID)")
 		
-		if (!mSimpleCommand(.airplaneMode)) { self.airplaneModeComplete?(false) }
+        if (!mSimpleCommand(.airplaneMode)) { self.airplaneModeComplete.send(.not_configured) }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -702,7 +697,7 @@ class customMainCharacteristic: Characteristic {
 	func reset() {
 		globals.log.v("\(pID)")
 
-		if (!mSimpleCommand(.reset)) { self.resetComplete?(false) }
+        if (!mSimpleCommand(.reset)) { self.resetComplete.send(.not_configured) }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1108,7 +1103,7 @@ class customMainCharacteristic: Characteristic {
 		
 		if (mCRCOK == false) {
 			mCRCFailCount	= mCRCFailCount + 1
-			if (mCRCFailCount == 10) { dataFailure?() }
+            if (mCRCFailCount == 10) { dataFailure.send() }
 		}
 		else { mCRCFailCount	= 0 }
 		
@@ -1137,26 +1132,26 @@ class customMainCharacteristic: Characteristic {
 						let successful = (data[2] == 0x01)
 						//globals.log.v ("\(pID): Got completion for '\(command)' with \(successful) status: Bytes = \(data.hexString)")
 						switch (command) {
-						case .writeEpoch	: self.writeEpochComplete?(successful)
+                        case .writeEpoch	: self.writeEpochComplete.send(successful ? .successful : .device_error)
 						case .readEpoch		:
 							if (data.count == 7) {
 								let epoch = data.subdata(in: Range(3...6)).leInt32
-								self.readEpochComplete?(successful, epoch)
+                                self.readEpochComplete.send((successful ? .successful : .device_error, epoch))
 							}
 							else {
-								self.readEpochComplete?(false, 0)
+                                self.readEpochComplete.send((.device_error, 0))
 							}
-						case .endSleep		: self.endSleepComplete?(successful)
+                        case .endSleep		: self.endSleepComplete.send(successful ? .successful : .device_error)
 						case .getAllPackets	:
 							mCRCOK					= true
 							mExpectedSequenceNumber	= 0
-							self.getAllPacketsComplete?(successful)
+                            self.getAllPacketsComplete.send(successful ? .successful : .device_error)
 						case .getAllPacketsAcknowledge	:
 							if (data.count == 4) {
-								self.getAllPacketsAcknowledgeComplete?(successful, (data[3] == 0x01))
+                                self.getAllPacketsAcknowledgeComplete.send((successful ? .successful : .device_error, (data[3] == 0x01)))
 							}
 							else {
-								self.getAllPacketsAcknowledgeComplete?(false, false)
+                                self.getAllPacketsAcknowledgeComplete.send((.device_error, false))
 							}
 						case .getNextPacket :
 							if (data.count >= 5) {
@@ -1169,58 +1164,55 @@ class customMainCharacteristic: Characteristic {
 										let jsonData = try JSONEncoder().encode(dataPackets)
 										if let jsonString = String(data: jsonData, encoding: .utf8) {
 											if let code = error_code {
-												self.getNextPacketComplete?(true, code, caughtUp, jsonString)
+                                                self.getNextPacketComplete.send((.successful, code, caughtUp, jsonString))
 											}
 											else {
-												self.getNextPacketComplete?(true, .unknown, caughtUp, jsonString)
+                                                self.getNextPacketComplete.send((.successful, .unknown, caughtUp, jsonString))
 											}
 										}
-										else { self.getNextPacketComplete?(false, .badJSON, caughtUp, "") }
+                                        else { self.getNextPacketComplete.send((.device_error, .badJSON, caughtUp, "")) }
 									}
-									catch { self.getNextPacketComplete?(false, .badSDKDecode, caughtUp, "") }
+                                    catch { self.getNextPacketComplete.send((.device_error, .badSDKDecode, caughtUp, "")) }
 								}
 								else {
 									if let code = error_code {
-										self.getNextPacketComplete?(false, code, caughtUp, "")
-									}
-									else {
-										self.getNextPacketComplete?(false, .unknown, caughtUp, "")
+                                        self.getNextPacketComplete.send((.device_error, code, caughtUp, ""))
+									} else {
+                                        self.getNextPacketComplete.send((.device_error, .unknown, caughtUp, ""))
 									}
 								}
 							}
 							else {
-								self.getNextPacketComplete?(false, .unknown, false, "")
+                                self.getNextPacketComplete.send((.device_error, .unknown, false, ""))
 							}
 						case .getPacketCount:
 							if (successful) {
 								if (data.count == 7) {
 									let count = data.subdata(in: Range(3...6)).leInt32
-									self.getPacketCountComplete?(true, count)
+                                    self.getPacketCountComplete.send((.successful, count))
+								} else {
+                                    self.getPacketCountComplete.send((.device_error, 0))
 								}
-								else {
-									self.getPacketCountComplete?(false, 0)
-								}
-							}
-							else {
-								self.getPacketCountComplete?(false, 0)
+							} else {
+                                self.getPacketCountComplete.send((.device_error, 0))
 							}
 
-						case .disableWornDetect	: self.disableWornDetectComplete?(successful)
-						case .enableWornDetect	: self.enableWornDetectComplete?(successful)
-						case .startManual		: self.startManualComplete?(successful)
-						case .stopManual		: self.stopManualComplete?(successful)
-						case .led				: self.ledComplete?(successful)
+                        case .disableWornDetect	: self.disableWornDetectComplete.send(successful ? .successful : .device_error)
+                        case .enableWornDetect	: self.enableWornDetectComplete.send(successful ? .successful : .device_error)
+                        case .startManual		: self.startManualComplete.send(successful ? .successful : .device_error)
+                        case .stopManual		: self.stopManualComplete.send(successful ? .successful : .device_error)
+                        case .led				: self.ledComplete.send(successful ? .successful : .device_error)
 
-						case .enterShipMode		: self.enterShipModeComplete?(successful)
+                        case .enterShipMode		: self.enterShipModeComplete.send(successful ? .successful : .device_error)
 						case .setDeviceParam	:
 							if let parameter = deviceParameterType(rawValue: data[3]) {
 								switch (parameter) {
-								case .advertisingInterval	: self.writeAdvIntervalComplete?(successful)
-								case .serialNumber			: self.writeSerialNumberComplete?(successful)
-								case .chargeCycle			: self.clearChargeCyclesComplete?(successful)
-								case .canLogDiagnostics		: self.updateCanLogDiagnosticsComplete?(successful)
-								case .paired				: self.setPairedComplete?(successful)
-								case .pageThreshold			: self.setPageThresholdComplete?(successful)
+                                case .advertisingInterval	: self.writeAdvIntervalComplete.send(successful ? .successful : .device_error)
+                                case .serialNumber			: self.writeSerialNumberComplete.send(successful ? .successful : .device_error)
+                                case .chargeCycle			: self.clearChargeCyclesComplete.send(successful ? .successful : .device_error)
+                                case .canLogDiagnostics		: self.updateCanLogDiagnosticsComplete.send(successful ? .successful : .device_error)
+                                case .paired				: self.setPairedComplete.send(successful ? .successful : .device_error)
+                                case .pageThreshold			: self.setPageThresholdComplete.send(successful ? .successful : .device_error)
 								}
 							}
 							else {
@@ -1232,34 +1224,34 @@ class customMainCharacteristic: Characteristic {
 									switch (parameter) {
 									case .advertisingInterval	:
 										let seconds = data.subdata(in: Range(4...7)).leInt32
-										self.readAdvIntervalComplete?(successful, seconds)
+                                        self.readAdvIntervalComplete.send((successful ? .successful : .device_error, seconds))
 									case .serialNumber			:
 										let snData		= String(decoding: data.subdata(in: Range(4...19)), as: UTF8.self)
 										let nulls		= CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"]))
 										let snString	= snData.trimmingCharacters(in: nulls)
-										self.readSerialNumberComplete?(successful, snString)
+                                        self.readSerialNumberComplete.send((successful ? .successful : .device_error, snString))
 									case .chargeCycle			:
 										let cycles = data.subdata(in: Range(4...7)).leFloat
-										self.readChargeCyclesComplete?(successful, cycles)
+                                        self.readChargeCyclesComplete.send((successful ? .successful : .device_error, cycles))
 									case .canLogDiagnostics		:
 										let canLog = (data[4] != 0x00)
-										self.readCanLogDiagnosticsComplete?(successful, canLog)
+                                        self.readCanLogDiagnosticsComplete.send((successful ? .successful : .device_error, canLog))
 									case .paired:
 										let paired = (data[4] != 0x00)
-										self.getPairedComplete?(successful, paired)
+                                        self.getPairedComplete.send((successful ? .successful : .device_error, paired))
 									case .pageThreshold:
 										globals.log.v ("\(pID): \(response): Data: \(data.hexString)")
-										self.getPageThresholdComplete?(successful, Int(data[4]))
+                                        self.getPageThresholdComplete.send((successful ? .successful : .device_error, Int(data[4])))
 									}
 								}
 								else {
 									switch (parameter) {
-									case .advertisingInterval	: self.readAdvIntervalComplete?(false, 0)
-									case .serialNumber			: self.readSerialNumberComplete?(false, "")
-									case .chargeCycle			: self.readChargeCyclesComplete?(false, 0.0)
-									case .canLogDiagnostics		: self.readCanLogDiagnosticsComplete?(false, false)
-									case .paired				: self.getPairedComplete?(false, false)
-									case .pageThreshold			: self.getPageThresholdComplete?(false, 1)
+                                    case .advertisingInterval	: self.readAdvIntervalComplete.send((.device_error, 0))
+                                    case .serialNumber			: self.readSerialNumberComplete.send((.device_error, ""))
+                                    case .chargeCycle			: self.readChargeCyclesComplete.send((.device_error, 0.0))
+                                    case .canLogDiagnostics		: self.readCanLogDiagnosticsComplete.send((.device_error, false))
+                                    case .paired				: self.getPairedComplete.send((.device_error, false))
+                                    case .pageThreshold			: self.getPageThresholdComplete.send((.device_error, 1))
 									}
 								}
 							}
@@ -1269,12 +1261,12 @@ class customMainCharacteristic: Characteristic {
 						case .delDeviceParam	:
 							if let parameter = deviceParameterType(rawValue: data[3]) {
 								switch (parameter) {
-								case .advertisingInterval	: self.deleteAdvIntervalComplete?(successful)
-								case .serialNumber			: self.deleteSerialNumberComplete?(successful)
+                                case .advertisingInterval	: self.deleteAdvIntervalComplete.send(successful ? .successful : .device_error)
+                                case .serialNumber			: self.deleteSerialNumberComplete.send(successful ? .successful : .device_error)
 								case .chargeCycle			: globals.log.e ("\(pID): Should not have been able to delete \(parameter.title)")
 								case .canLogDiagnostics		: globals.log.e ("\(pID): Should not have been able to delete \(parameter.title)")
-								case .paired				: self.setUnpairedComplete?(successful)
-								case .pageThreshold			: self.deletePageThresholdComplete?(successful)
+                                case .paired				: self.setUnpairedComplete.send(successful ? .successful : .device_error)
+                                case .pageThreshold			: self.deletePageThresholdComplete.send(successful ? .successful : .device_error)
 								}
 							}
 							else {
@@ -1285,12 +1277,11 @@ class customMainCharacteristic: Characteristic {
 								switch (enumParameter) {
 								case .ppgCapturePeriod,
 									 .ppgCaptureDuration,
-									 .tag		: setSessionParamComplete?(successful, enumParameter)
-								case .reset		: resetSessionParamsComplete?(successful)
-								case .accept	: acceptSessionParamsComplete?(successful)
-								case .unknown			:
-									setSessionParamComplete?(false, enumParameter)					// Shouldn't get this ever!
-									break
+                                     .tag: setSessionParamComplete.send((successful ? .successful : .device_error, enumParameter))
+                                case .reset: resetSessionParamsComplete.send(successful ? .successful : .device_error)
+                                case .accept: acceptSessionParamsComplete.send((successful ? .successful : .device_error))
+                                case .unknown:
+                                    setSessionParamComplete.send((.device_error, enumParameter)) // Shouldn't get this ever!)
 								}
 							}
 							else {
@@ -1304,12 +1295,12 @@ class customMainCharacteristic: Characteristic {
 									 .ppgCaptureDuration,
 									 .tag		:
 									let value = data.subdata(in: Range(4...7)).leInt32
-									getSessionParamComplete?(successful, enumParameter, value)
+                                    getSessionParamComplete.send((successful ? .successful : .device_error, enumParameter, value))
 									break
-								case .reset		: resetSessionParamsComplete?(false)		// Shouldn't get this on a get
-								case .accept	: acceptSessionParamsComplete?(false)		// Shouldn't get this on a get
+                                case .reset		: resetSessionParamsComplete.send(successful ? .successful : .device_error) // Shouldn't get this on a get
+                                case .accept	: acceptSessionParamsComplete.send(successful ? .successful : .device_error) // Shouldn't get this on a get
 								case .unknown	:
-									getSessionParamComplete?(false, enumParameter, 0)				// Shouldn't get this ever!
+                                    getSessionParamComplete.send((successful ? .successful : .device_error, enumParameter, 0)) // Shouldn't get this ever!
 									break
 								}
 
@@ -1318,35 +1309,35 @@ class customMainCharacteristic: Characteristic {
 								globals.log.e ("\(pID): Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
 							}
 
-						case .manufacturingTest	: self.manufacturingTestComplete?(successful)
-						case .recalibratePPG	: self.recalibratePPGComplete?(successful)
+                        case .manufacturingTest	: self.manufacturingTestComplete.send(successful ? .successful : .device_error)
+                        case .recalibratePPG	: self.recalibratePPGComplete.send(successful ? .successful : .device_error)
 							
 						case .setAskForButtonResponse:
 							if (data.count == 4) {
 								let enable		= data[3] == 0x01 ? true : false
-								self.setAskForButtonResponseComplete?(successful, enable)
+								self.setAskForButtonResponseComplete.send((successful ? .successful : .device_error, enable))
 							}
 							else {
-								self.setAskForButtonResponseComplete?(false, false)
+                                self.setAskForButtonResponseComplete.send((.device_error, false))
 							}
 							
 						case .getAskForButtonResponse:
 							if (data.count == 4) {
 								let enable		= data[3] == 0x01 ? true : false
-								self.getAskForButtonResponseComplete?(successful, enable)
+                                self.getAskForButtonResponseComplete.send((successful ? .successful : .device_error, enable))
 							}
 							else {
-								self.getAskForButtonResponseComplete?(false, false)
+								self.getAskForButtonResponseComplete.send((.device_error, false))
 							}
 							
 						case .setHRZoneColor:
 							if (data.count == 4) {
 								if let zone = hrZoneRangeType(rawValue: data[3]) {
-									self.setHRZoneColorComplete?(successful, zone)
+                                    self.setHRZoneColorComplete.send((successful ? .successful : .device_error, zone))
 								}
-								else { self.setHRZoneColorComplete?(false, .unknown) }
+								else { self.setHRZoneColorComplete.send((.device_error, .unknown)) }
 							}
-							else { self.setHRZoneColorComplete?(false, .unknown) }
+                            else { self.setHRZoneColorComplete.send((.device_error, .unknown)) }
 							
 						case .getHRZoneColor:
 							if (data.count == 11) {
@@ -1356,126 +1347,126 @@ class customMainCharacteristic: Characteristic {
 									let blue	= (data[6] != 0x00)
 									let on_ms	= data.subdata(in: Range(7...8)).leInt16
 									let off_ms	= data.subdata(in: Range(9...10)).leInt16
-									self.getHRZoneColorComplete?(successful, zone, red, green, blue, on_ms, off_ms)
+                                    self.getHRZoneColorComplete.send((successful ? .successful : .device_error, zone, red, green, blue, on_ms, off_ms))
 								}
-								else { self.getHRZoneColorComplete?(false, .unknown, false, false, false, 0, 0) }
+                                else { self.getHRZoneColorComplete.send((.device_error, .unknown, false, false, false, 0, 0)) }
 							}
-							else { self.getHRZoneColorComplete?(false, .unknown, false, false, false, 0, 0) }
+                            else { self.getHRZoneColorComplete.send((.device_error, .unknown, false, false, false, 0, 0)) }
 							
 						case .setHRZoneRange:
-							if (data.count == 3) { self.setHRZoneRangeComplete?(successful) }
-							else { self.setHRZoneRangeComplete?(false) }
+                            if (data.count == 3) { self.setHRZoneRangeComplete.send(successful ? .successful : .device_error) }
+                            else { self.setHRZoneRangeComplete.send(.device_error) }
 							
 						case .getHRZoneRange:
 							if (data.count == 6) {
 								let enable		= (data[3] != 0x00)
 								let high_value	= Int(data[4])
 								let low_value	= Int(data[5])
-								self.getHRZoneRangeComplete?(successful, enable, high_value, low_value)
+                                self.getHRZoneRangeComplete.send((successful ? .successful : .device_error, enable, high_value, low_value))
 							}
 							else {
-								self.getHRZoneRangeComplete?(false, false, 0, 0)
+                                self.getHRZoneRangeComplete.send((.device_error, false, 0, 0))
 							}
 						case .getPPGAlgorithm:
 							if (data.count == 5) {
 								let algorithm	= ppgAlgorithmConfiguration(data[3])
 								
 								if let type = eventType(rawValue: data[4]) {
-									self.getPPGAlgorithmComplete?(successful, algorithm, type)
+                                    self.getPPGAlgorithmComplete.send((successful ? .successful : .device_error, algorithm, type))
 								}
 								else {
-									self.getPPGAlgorithmComplete?(successful, algorithm, eventType.unknown)
+                                    self.getPPGAlgorithmComplete.send((successful ? .successful : .device_error, algorithm, eventType.unknown))
 								}
 							}
 							else if (data.count == 4) {
 								let algorithm	= ppgAlgorithmConfiguration(data[3])
-								self.getPPGAlgorithmComplete?(successful, algorithm, eventType.unknown)
+                                self.getPPGAlgorithmComplete.send((successful ? .successful : .device_error, algorithm, eventType.unknown))
 							}
 							else {
-								self.getPPGAlgorithmComplete?(false, ppgAlgorithmConfiguration(), eventType.unknown)
+                                self.getPPGAlgorithmComplete.send((.device_error, ppgAlgorithmConfiguration(), eventType.unknown))
 							}
 							
 						case .setAdvertiseAsHRM:
 							if (data.count == 4) {
 								let asHRM		= data[3] != 0x00
-								self.setAdvertiseAsHRMComplete?(successful, asHRM)
+                                self.setAdvertiseAsHRMComplete.send((successful ? .successful : .device_error, asHRM))
 							}
 							else {
-								self.setAdvertiseAsHRMComplete?(false, false)
+                                self.setAdvertiseAsHRMComplete.send((.device_error, false))
 							}
 
 						case .getAdvertiseAsHRM:
 							if (data.count == 4) {
 								let asHRM		= data[3] != 0x00
-								self.getAdvertiseAsHRMComplete?(successful, asHRM)
+                                self.getAdvertiseAsHRMComplete.send((successful ? .successful : .device_error, asHRM))
 							}
 							else {
-								self.getAdvertiseAsHRMComplete?(false, false)
+								self.getAdvertiseAsHRMComplete.send((.device_error, false))
 							}
 							
 						case .setButtonCommand:
 							if (data.count == 5) {
 								if let tap = buttonTapType(rawValue: data[3]), let command = buttonCommandType(rawValue: data[4]) {
-									self.setButtonCommandComplete?(true, tap, command)
+                                    self.setButtonCommandComplete.send((successful ? .successful : .device_error, tap, command))
 								}
 								else {
-									self.setButtonCommandComplete?(false, .unknown, .unknown)
+									self.setButtonCommandComplete.send((.device_error, .unknown, .unknown))
 								}
 							}
 							else {
-								self.setButtonCommandComplete?(false, .unknown, .unknown)
+                                self.setButtonCommandComplete.send((.device_error, .unknown, .unknown))
 							}
 
 						case .getButtonCommand:
 							if (data.count == 5) {
 								if let tap = buttonTapType(rawValue: data[3]), let command = buttonCommandType(rawValue: data[4]) {
-									self.getButtonCommandComplete?(true, tap, command)
+                                    self.getButtonCommandComplete.send((successful ? .successful : .device_error, tap, command))
 								}
 								else {
-									self.getButtonCommandComplete?(false, .unknown, .unknown)
+									self.getButtonCommandComplete.send((.device_error, .unknown, .unknown))
 								}
 							}
 							else {
-								self.getButtonCommandComplete?(false, .unknown, .unknown)
+								self.getButtonCommandComplete.send((.device_error, .unknown, .unknown))
 							}
 
-						case .allowPPG			: self.allowPPGComplete?(successful)
+                        case .allowPPG			: self.allowPPGComplete.send(successful ? .successful : .device_error)
 						case .wornCheck			:
 							if (data.count == 8) {
 								if let code = wornResult(rawValue: data[3]) {
 									let value = data.subdata(in: Range(4...7)).leInt32
 								
 									if code == .ran {
-										self.wornCheckComplete?(true, code.message, value)
+                                        self.wornCheckComplete.send((successful ? .successful : .device_error, code.message, value))
 									}
 									else {
-										self.wornCheckComplete?(false, code.message, 0)
+                                        self.wornCheckComplete.send((.device_error, code.message, 0))
 									}
 								}
 								else {
-									self.wornCheckComplete?(false, "Unknown code: \(String(format: "0x%02X", data[3]))", 0)
+                                    self.wornCheckComplete.send((.device_error, "Unknown code: \(String(format: "0x%02X", data[3]))", 0))
 								}
 							}
 							
-						case .logRaw			: self.rawLoggingComplete?(successful)
+                        case .logRaw			: self.rawLoggingComplete.send(successful ? .successful : .device_error)
 						case .getRawLoggingStatus	:
 							if (data.count == 4) {
-								self.getRawLoggingStatusComplete?(successful, (data[3] != 0x00))
+                                self.getRawLoggingStatusComplete.send((successful ? .successful : .device_error, (data[3] != 0x00)))
 							}
 							else {
-								self.getRawLoggingStatusComplete?(false, false)
+                                self.getRawLoggingStatusComplete.send((.device_error, false))
 							}
 							
 						case .getWornOverrideStatus	:
 							if (data.count == 4) {
-								self.getWornOverrideStatusComplete?(successful, (data[3] != 0x00))
+                                self.getWornOverrideStatusComplete.send((successful ? .successful : .device_error, (data[3] != 0x00)))
 							}
 							else {
-								self.getWornOverrideStatusComplete?(false, false)
+                                self.getWornOverrideStatusComplete.send((.device_error, false))
 							}
 							
-						case .airplaneMode		: self.airplaneModeComplete?(successful)
-						case .reset				: self.resetComplete?(successful)
+                        case .airplaneMode		: self.airplaneModeComplete.send(successful ? .successful : .device_error)
+                        case .reset				: self.resetComplete.send(successful ? .successful : .device_error)
 						case .validateCRC		: break
 							//globals.log.v ("\(pID): Got Validate CRC completion: \(data.hexString)")
 						}
@@ -1517,8 +1508,8 @@ class customMainCharacteristic: Characteristic {
 				}
 				
 			case .worn:
-				if      (data[1] == 0x00) { deviceWornStatus?(false) }
-				else if (data[1] == 0x01) { deviceWornStatus?(true)  }
+                if      (data[1] == 0x00) { deviceWornStatus.send(false) }
+                else if (data[1] == 0x01) { deviceWornStatus.send(true)  }
 				else {
 					globals.log.e ("\(pID): Cannot parse worn status: \(data[1])")
 				}
@@ -1529,19 +1520,19 @@ class customMainCharacteristic: Characteristic {
 					do {
 						let jsonData = try JSONEncoder().encode(packet)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.ppgMetrics?(true, jsonString)
+                            self.ppgMetrics.send((true, jsonString))
 						}
-						else { self.ppgMetrics?(false, "") }
+                        else { self.ppgMetrics.send((false, "")) }
 					}
-					catch { self.ppgMetrics?(false, "") }
+                    catch { self.ppgMetrics.send((false, "")) }
 				}
 				
 			case .ppgFailed:
 				if (data.count > 1) {
-					self.ppgFailed?(Int(data[1]))
+                    self.ppgFailed.send(Int(data[1]))
 				}
 				else {
-					self.ppgFailed?(999)
+                    self.ppgFailed.send(999)
 				}
 				
 			case .dataCaughtUp:
@@ -1549,16 +1540,16 @@ class customMainCharacteristic: Characteristic {
 					let bad_read_count	= Int(data.subdata(in: Range(1...2)).leUInt16)
 					let bad_parse_count	= Int(data.subdata(in: Range(3...4)).leUInt16)
 					let overflow_count	= Int(data.subdata(in: Range(5...6)).leUInt16)
-					self.dataComplete?(bad_read_count, bad_parse_count, overflow_count, self.pFailedDecodeCount)
+                    self.dataComplete.send((bad_read_count, bad_parse_count, overflow_count, self.pFailedDecodeCount, false))
 				}
 				else {
-					self.dataComplete?(-1, -1, -1, self.pFailedDecodeCount)
+                    self.dataComplete.send((-1, -1, -1, self.pFailedDecodeCount, false))
 				}
 				
 			case .endSleepStatus:
 				if (data.count == 2) {
 					let hasSleep	= data[1] == 0x01 ? true : false
-					self.endSleepStatus?(hasSleep)
+                    self.endSleepStatus.send(hasSleep)
 				}
 				else {
 					globals.log.e ("\(pID): Cannot parse 'endSleepStatus': \(data.hexString)")
@@ -1567,7 +1558,7 @@ class customMainCharacteristic: Characteristic {
 			case .buttonResponse:
 				if (data.count == 2) {
 					let presses	= Int(data[1])
-					self.buttonClicked?(presses)
+                    self.buttonClicked.send(presses)
 				}
 				else {
 					globals.log.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
@@ -1597,11 +1588,9 @@ class customMainCharacteristic: Characteristic {
 								do {
 									let jsonData = try JSONEncoder().encode(mDataPackets)
 									if let jsonString = String(data: jsonData, encoding: .utf8) {
-									self.dataPackets?(jsonString)
-								}
-									else { globals.log.e ("\(pID): Cannot make string from json data") }
-								}
-								catch { globals.log.e ("\(pID): Cannot make JSON data") }
+                                        self.dataPackets.send((-1, jsonString))
+									} else { globals.log.e ("\(pID): Cannot make string from json data") }
+								} catch { globals.log.e ("\(pID): Cannot make JSON data") }
 						   }
 						}
 						else {
@@ -1675,20 +1664,20 @@ class customMainCharacteristic: Characteristic {
 						do {
 							let jsonData = try JSONEncoder().encode(testResult)
 							if let jsonString = String(data: jsonData, encoding: .utf8) {
-								self.manufacturingTestResult?(true, jsonString)
+                                self.manufacturingTestResult.send((true, jsonString))
 							}
 							else {
 								globals.log.e ("\(pID): Result jsonString Failed")
-								self.manufacturingTestResult?(false, "")
+                                self.manufacturingTestResult.send((false, ""))
 							}
 						}
 						catch {
 							globals.log.e ("\(pID): Result jsonData Failed")
-							self.manufacturingTestResult?(false, "")
+                            self.manufacturingTestResult.send((false, ""))
 						}
 					}
 					else {
-						self.manufacturingTestResult?(false, "")
+                        self.manufacturingTestResult.send((false, ""))
 					}
 
 				case .kairos		:
@@ -1697,20 +1686,20 @@ class customMainCharacteristic: Characteristic {
 						do {
 							let jsonData = try JSONEncoder().encode(testResult)
 							if let jsonString = String(data: jsonData, encoding: .utf8) {
-								self.manufacturingTestResult?(true, jsonString)
+                                self.manufacturingTestResult.send((true, jsonString))
 							}
 							else {
 								globals.log.e ("\(pID): Result jsonString Failed")
-								self.manufacturingTestResult?(false, "")
+                                self.manufacturingTestResult.send((false, ""))
 							}
 						}
 						catch {
 							globals.log.e ("\(pID): Result jsonData Failed")
-							self.manufacturingTestResult?(false, "")
+                            self.manufacturingTestResult.send((false, ""))
 						}
 					}
 					else {
-						self.manufacturingTestResult?(false, "")
+                        self.manufacturingTestResult.send((false, ""))
 					}
 
 				case .unknown	: break
@@ -1722,7 +1711,7 @@ class customMainCharacteristic: Characteristic {
 				let charging	= (data[2] == 0x01)
 				let error		= (data[3] == 0x01)
 				
-				self.deviceChargingStatus?(charging, on_charger, error)
+                self.deviceChargingStatus.send((charging, on_charger, error))
 				
 			case .streamPacket: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")
 			case .dataAvailable: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")

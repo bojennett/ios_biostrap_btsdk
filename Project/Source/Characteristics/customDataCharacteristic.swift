@@ -7,12 +7,13 @@
 
 import Foundation
 import CoreBluetooth
+import Combine
 import zlib
 
 class customDataCharacteristic: Characteristic {
 	
-	var dataPackets: ((_ sequence_number: Int, _ packets: String)->())?
-	var dataComplete: ((_ bad_fw_read_count: Int, _ bad_fw_parse_count: Int, _ overflow_count: Int, _ bad_sdk_parse_count: Int, _ intermediate: Bool)->())?
+    let dataPackets = PassthroughSubject<(Int, String), Never>()
+    let dataComplete = PassthroughSubject<(Int, Int, Int, Int, Bool), Never>()
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -33,7 +34,7 @@ class customDataCharacteristic: Characteristic {
 					do {
 						let jsonData = try JSONEncoder().encode(dataPackets)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.dataPackets?(sequence_number, jsonString)
+                            self.dataPackets.send((sequence_number, jsonString))
 						}
 						else { globals.log.e ("\(pID): Cannot make string from json data") }
 					}
@@ -51,12 +52,12 @@ class customDataCharacteristic: Characteristic {
 					let bad_parse_count	= Int(data.subdata(in: Range(3...4)).leUInt16)
 					let overflow_count	= Int(data.subdata(in: Range(5...6)).leUInt16)
 					let intermediate	= (data[7] == 0x01)
-					self.dataComplete?(bad_read_count, bad_parse_count, overflow_count, self.pFailedDecodeCount, intermediate)
+                    self.dataComplete.send((bad_read_count, bad_parse_count, overflow_count, self.pFailedDecodeCount, intermediate))
 					
 					self.pFailedDecodeCount			= 0
 				}
 				else {
-					self.dataComplete?(-1, -1, -1, self.pFailedDecodeCount, false)
+                    self.dataComplete.send((-1, -1, -1, self.pFailedDecodeCount, false))
 				}
 				
 			default:

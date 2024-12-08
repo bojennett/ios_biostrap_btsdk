@@ -199,7 +199,7 @@ public class Device: NSObject, ObservableObject {
 	public let getHRZoneColorComplete = PassthroughSubject<(DeviceCommandCompletionStatus, hrZoneRangeType), Never>()
 	public let setHRZoneRangeComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 	public let getHRZoneRangeComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
-	public let getPPGAlgorithmComplete = PassthroughSubject<(Bool, ppgAlgorithmConfiguration, eventType), Never>()
+	public let getPPGAlgorithmComplete = PassthroughSubject<(DeviceCommandCompletionStatus, ppgAlgorithmConfiguration, eventType), Never>()
 	
 	public let endSleepComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
@@ -1702,14 +1702,14 @@ public class Device: NSObject, ObservableObject {
 	
 	public func getPPGAlgorithm() {
         if preview {
-            self.getPPGAlgorithmComplete.send((true, ppgAlgorithmConfiguration(), eventType.unknown))
+            self.getPPGAlgorithmComplete.send((previewCommandStatus, ppgAlgorithmConfiguration(), eventType.unknown))
             return
         }
 
 		if let mainCharacteristic = mMainCharacteristic { mainCharacteristic.getPPGAlgorithm() }
 		else {
 			DispatchQueue.main.async {
-				self.getPPGAlgorithmComplete.send((false, ppgAlgorithmConfiguration(), eventType.unknown))
+                self.getPPGAlgorithmComplete.send((.not_configured, ppgAlgorithmConfiguration(), eventType.unknown))
 			}
 		}
 	}
@@ -2354,313 +2354,352 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	private func attachMainCharacteristicLambdas() {
-		mMainCharacteristic?.writeEpochComplete = { successful in
-			self.lambdaWriteEpochComplete?(self.id, successful)
-			DispatchQueue.main.async { self.writeEpochComplete.send(successful ? .successful : .device_error) }
-		}
-		
-		mMainCharacteristic?.readEpochComplete = { successful, value in
-			self.lambdaReadEpochComplete?(self.id, successful,  value)
-			DispatchQueue.main.async {
-				self.epoch = value
-				self.readEpochComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.writeEpochComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaWriteEpochComplete?(self.id, status.successful)
+				self.writeEpochComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.deviceWornStatus = { isWorn in
-			self.lambdaWornStatus?(self.id, isWorn)
-			DispatchQueue.main.async {
+		mMainCharacteristic?.readEpochComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, value in
+                self.lambdaReadEpochComplete?(self.id, status.successful,  value)
+				self.epoch = value
+				self.readEpochComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+		mMainCharacteristic?.deviceWornStatus
+            .receive(on: DispatchQueue.main)
+            .sink { isWorn in
+				self.lambdaWornStatus?(self.id, isWorn)
 				self.worn = isWorn
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.deviceChargingStatus			= { charging, on_charger, error in
-			self.lambdaChargingStatus?(self.id, charging, on_charger, error)
-			DispatchQueue.main.async {
+		mMainCharacteristic?.deviceChargingStatus
+            .receive(on: DispatchQueue.main)
+            .sink { charging, on_charger, error in
+				self.lambdaChargingStatus?(self.id, charging, on_charger, error)
 				self.charging = charging
 				self.on_charger = on_charger
 				self.charge_error = error
 			}
-		}
+            .store(in: &subscriptions)
 
-		mMainCharacteristic?.startManualComplete = { successful in
-			self.lambdaStartManualComplete?(self.id, successful)
-			DispatchQueue.main.async { self.startManualComplete.send(successful ? .successful : .device_error) }
-		}
+		mMainCharacteristic?.startManualComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaStartManualComplete?(self.id, status.successful)
+				self.startManualComplete.send(status)
+			}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.stopManualComplete = { successful in
-			self.lambdaStopManualComplete?(self.id, successful)
-			DispatchQueue.main.async { self.stopManualComplete.send(successful ? .successful : .device_error) }
-		}
+		mMainCharacteristic?.stopManualComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaStopManualComplete?(self.id, status.successful)
+                self.stopManualComplete.send(status)
+            }
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.ledComplete = { successful in
-			self.lambdaLEDComplete?(self.id, successful)
-			DispatchQueue.main.async { self.ledComplete.send(successful ? .successful : .device_error) }
-		}
+		mMainCharacteristic?.ledComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaLEDComplete?(self.id, status.successful)
+				self.ledComplete.send(status)
+			}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getRawLoggingStatusComplete = { successful, enabled in
-			self.lambdaGetRawLoggingStatusComplete?(self.id, successful, enabled)
-			DispatchQueue.main.async {
-				if successful {
+		mMainCharacteristic?.getRawLoggingStatusComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, enabled in
+                self.lambdaGetRawLoggingStatusComplete?(self.id, status.successful, enabled)
+                if status.successful {
 					self.rawLogging = enabled
-				}
-				else {
+				} else {
 					self.rawLogging = nil
 				}
-				self.getRawLoggingStatusComplete.send(successful ? .successful : .device_error)
+				self.getRawLoggingStatusComplete.send(status)
 			}
-		}
-		
-		mMainCharacteristic?.getWornOverrideStatusComplete = { successful, overridden in
-			self.lambdaGetWornOverrideStatusComplete?(self.id, successful, overridden)
-			DispatchQueue.main.async {
-				if successful {
+            .store(in: &subscriptions)
+        
+		mMainCharacteristic?.getWornOverrideStatusComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, overridden in
+                self.lambdaGetWornOverrideStatusComplete?(self.id, status.successful, overridden)
+                if status.successful {
 					self.wornOverridden = overridden
-				}
-				else {
+				} else {
 					self.wornOverridden = nil
 				}
-				self.getWornOverrideStatusComplete.send(successful ? .successful : .device_error)
+				self.getWornOverrideStatusComplete.send(status)
 			}
-		}
-		
-		mMainCharacteristic?.writeSerialNumberComplete = { successful in
-			self.lamdaWriteSerialNumberComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.writeSerialNumberComplete.send(successful ? .successful : .device_error)
-			}
-		}
+            .store(in: &subscriptions)
 
-		mMainCharacteristic?.readSerialNumberComplete = { successful, partID in
-			self.lambdaReadSerialNumberComplete?(self.id, successful, partID)
-			DispatchQueue.main.async {
-				if successful { self.serialNumber = partID }
-				self.readSerialNumberComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.writeSerialNumberComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lamdaWriteSerialNumberComplete?(self.id, status.successful)
+				self.writeSerialNumberComplete.send(status)
 			}
-		}
-		
-		mMainCharacteristic?.deleteSerialNumberComplete = { successful in
-			self.lambdaDeleteSerialNumberComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.deleteSerialNumberComplete.send(successful ? .successful : .device_error)
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.readSerialNumberComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, partID in
+            	self.lambdaReadSerialNumberComplete?(self.id, status.successful, partID)
+                if status.successful { self.serialNumber = partID }
+				self.readSerialNumberComplete.send(status)
 			}
-		}
-		
-		mMainCharacteristic?.writeAdvIntervalComplete = { successful in
-			self.lambdaWriteAdvIntervalComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.writeAdvIntervalComplete.send(successful ? .successful : .device_error)
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.deleteSerialNumberComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+            	self.lambdaDeleteSerialNumberComplete?(self.id, status.successful)
+				self.deleteSerialNumberComplete.send(status)
 			}
-		}
-		
-		mMainCharacteristic?.readAdvIntervalComplete = { successful, seconds in
-			self.lambdaReadAdvIntervalComplete?(self.id, successful, seconds)
-			DispatchQueue.main.async {
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.writeAdvIntervalComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+	            self.lambdaWriteAdvIntervalComplete?(self.id, status.successful)
+				self.writeAdvIntervalComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.readAdvIntervalComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, seconds in
+                self.lambdaReadAdvIntervalComplete?(self.id, status.successful, seconds)
 				self.advertisingInterval = seconds
-				self.readAdvIntervalComplete.send(successful ? .successful : .device_error)
+				self.readAdvIntervalComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.deleteAdvIntervalComplete = { successful in
-			self.lambdaDeleteAdvIntervalComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				if successful { self.advertisingInterval = nil }
-				self.deleteAdvIntervalComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.deleteAdvIntervalComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaDeleteAdvIntervalComplete?(self.id, status.successful)
+                if status.successful { self.advertisingInterval = nil }
+				self.deleteAdvIntervalComplete.send(status)
 			}
-		}
-		
-		mMainCharacteristic?.clearChargeCyclesComplete = { successful in
-			self.lambdaClearChargeCyclesComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				if successful { self.chargeCycles = nil }
-				self.clearChargeCyclesComplete.send(successful ? .successful : .device_error)
-			}
-		}
-		
-		mMainCharacteristic?.readChargeCyclesComplete = { successful, cycles in
-			self.lambdaReadChargeCyclesComplete?(self.id, successful, cycles)
-			DispatchQueue.main.async {
-				self.chargeCycles = cycles
-				self.readChargeCyclesComplete.send(successful ? .successful : .device_error)
-			}
-		}
+            .store(in: &subscriptions)
 
-		mMainCharacteristic?.setAdvertiseAsHRMComplete	= { successful, asHRM in
-			self.lambdaSetAdvertiseAsHRMComplete?(self.id, successful, asHRM)
-			DispatchQueue.main.async {
-				if successful {
+		mMainCharacteristic?.clearChargeCyclesComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaClearChargeCyclesComplete?(self.id, status.successful)
+                if status.successful { self.chargeCycles = nil }
+				self.clearChargeCyclesComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.readChargeCyclesComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, cycles in
+                self.lambdaReadChargeCyclesComplete?(self.id, status.successful, cycles)
+				self.chargeCycles = cycles
+				self.readChargeCyclesComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.setAdvertiseAsHRMComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, asHRM in
+                self.lambdaSetAdvertiseAsHRMComplete?(self.id, status.successful, asHRM)
+                if status.successful {
 					self.advertiseAsHRM = asHRM
-				}
-				else {
+				} else {
 					self.advertiseAsHRM = nil
 				}
-				self.setAdvertiseAsHRMComplete.send(successful ? .successful : .device_error)
+				self.setAdvertiseAsHRMComplete.send(status)
 			}
-		}
-		mMainCharacteristic?.getAdvertiseAsHRMComplete	= { successful, asHRM in
-			self.lambdaGetAdvertiseAsHRMComplete?(self.id, successful, asHRM)
-			DispatchQueue.main.async {
-				if successful {
+            .store(in: &subscriptions)
+    
+		mMainCharacteristic?.getAdvertiseAsHRMComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, asHRM in
+                self.lambdaGetAdvertiseAsHRMComplete?(self.id, status.successful, asHRM)
+                if status.successful {
 					self.advertiseAsHRM = asHRM
-				}
-				else {
+				} else {
 					self.advertiseAsHRM = nil
 				}
-				self.getAdvertiseAsHRMComplete.send(successful ? .successful : .device_error)
+				self.getAdvertiseAsHRMComplete.send(status)
 			}
-		}
-		mMainCharacteristic?.setButtonCommandComplete	= { successful, tap, command in
-			self.lambdaSetButtonCommandComplete?(self.id, successful, tap, command)
-			DispatchQueue.main.async {
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.setButtonCommandComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, tap, command in
+				self.lambdaSetButtonCommandComplete?(self.id, status.successful, tap, command)
 				switch tap {
-				case .single: self.singleButtonPressAction = successful ? command : nil
-				case .double: self.doubleButtonPressAction = successful ? command : nil
-				case .triple: self.tripleButtonPressAction = successful ? command : nil
-				case .long: self.longButtonPressAction = successful ? command : nil
+				case .single: self.singleButtonPressAction = status.successful ? command : nil
+				case .double: self.doubleButtonPressAction = status.successful ? command : nil
+				case .triple: self.tripleButtonPressAction = status.successful ? command : nil
+				case .long: self.longButtonPressAction = status.successful ? command : nil
 				default: break
 				}
-				self.setButtonCommandComplete.send((successful ? .successful : .device_error, tap))
+				self.setButtonCommandComplete.send((status, tap))
 			}
-		}
-		mMainCharacteristic?.getButtonCommandComplete	= { successful, tap, command in
-			self.lambdaGetButtonCommandComplete?(self.id, successful, tap, command)
-			DispatchQueue.main.async {
+            .store(in: &subscriptions)
+        
+		mMainCharacteristic?.getButtonCommandComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, tap, command in
+                self.lambdaGetButtonCommandComplete?(self.id, status.successful, tap, command)
 				switch tap {
-				case .single: self.singleButtonPressAction = successful ? command : nil
-				case .double: self.doubleButtonPressAction = successful ? command : nil
-				case .triple: self.tripleButtonPressAction = successful ? command : nil
-				case .long: self.longButtonPressAction = successful ? command : nil
+                case .single: self.singleButtonPressAction = status.successful ? command : nil
+                case .double: self.doubleButtonPressAction = status.successful ? command : nil
+                case .triple: self.tripleButtonPressAction = status.successful ? command : nil
+                case .long: self.longButtonPressAction = status.successful ? command : nil
 				default: break
 				}
-				self.getButtonCommandComplete.send((successful ? .successful : .device_error, tap))
+				self.getButtonCommandComplete.send((status, tap))
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setAskForButtonResponseComplete = { successful, enable in
-			self.lambdaSetAskForButtonResponseComplete?(self.id, successful, enable)
-			DispatchQueue.main.async {
-				if successful {
+		mMainCharacteristic?.setAskForButtonResponseComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, enable in
+                self.lambdaSetAskForButtonResponseComplete?(self.id, status.successful, enable)
+                if status.successful {
 					self.buttonResponseEnabled = enable
-				}
-				else {
+				} else {
 					self.buttonResponseEnabled = false
 				}
-				self.setAskForButtonResponseComplete.send(successful ? .successful : .device_error)
+				self.setAskForButtonResponseComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getAskForButtonResponseComplete = { successful, enable in
-			self.lambdaGetAskForButtonResponseComplete?(self.id, successful, enable)
-			DispatchQueue.main.async {
-				if successful {
+		mMainCharacteristic?.getAskForButtonResponseComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, enable in
+                self.lambdaGetAskForButtonResponseComplete?(self.id, status.successful, enable)
+                if status.successful {
 					self.buttonResponseEnabled = enable
-				}
-				else {
+				} else {
 					self.buttonResponseEnabled = false
 				}
-				self.getAskForButtonResponseComplete.send(successful ? .successful : .device_error)
+				self.getAskForButtonResponseComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setHRZoneColorComplete		= { successful, type in
-			self.lambdaSetHRZoneColorComplete?(self.id, successful, type)
-			DispatchQueue.main.async {
-				self.setHRZoneColorComplete.send((successful ? .successful : .device_error, type))
+		mMainCharacteristic?.setHRZoneColorComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, type in
+                self.lambdaSetHRZoneColorComplete?(self.id, status.successful, type)
+				self.setHRZoneColorComplete.send((status, type))
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getHRZoneColorComplete		= { successful, type, red, green, blue, on_ms, off_ms in
-			self.lambdaGetHRZoneColorComplete?(self.id, successful, type, red, green, blue, on_ms, off_ms)
-			DispatchQueue.main.async {
+		mMainCharacteristic?.getHRZoneColorComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, type, red, green, blue, on_ms, off_ms in
+                self.lambdaGetHRZoneColorComplete?(self.id, status.successful, type, red, green, blue, on_ms, off_ms)
 				switch (type) {
 				case .below: self.hrZoneLEDBelow = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
 				case .within: self.hrZoneLEDWithin = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
 				case .above: self.hrZoneLEDAbove = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
 				default: break
 				}
-				self.getHRZoneColorComplete.send((successful ? .successful : .device_error, type))
+				self.getHRZoneColorComplete.send((status, type))
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setHRZoneRangeComplete		= { successful in
-			self.lambdaSetHRZoneRangeComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.setHRZoneRangeComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.setHRZoneRangeComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaSetHRZoneRangeComplete?(self.id, status.successful)
+				self.setHRZoneRangeComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getHRZoneRangeComplete		= { successful, enabled, high_value, low_value in
-			self.lambdaGetHRZoneRangeComplete?(self.id, successful, enabled, high_value, low_value)
-			DispatchQueue.main.async {
-				if successful {
+		mMainCharacteristic?.getHRZoneRangeComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, enabled, high_value, low_value in
+                self.lambdaGetHRZoneRangeComplete?(self.id, status.successful, enabled, high_value, low_value)
+                if status.successful {
 					self.hrZoneRange = hrZoneRangeValueType(enabled: enabled, lower: low_value, upper: high_value)
 				}
-				self.getHRZoneRangeComplete.send(successful ? .successful : .device_error)
+				self.getHRZoneRangeComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getPPGAlgorithmComplete	= { successful, algorithm, state in
-			self.lambdaGetPPGAlgorithmComplete?(self.id, successful, algorithm, state)
-			DispatchQueue.main.async {
-				self.getPPGAlgorithmComplete.send((successful, algorithm, state))
+		mMainCharacteristic?.getPPGAlgorithmComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, algorithm, state in
+                self.lambdaGetPPGAlgorithmComplete?(self.id, status.successful, algorithm, state)
+				self.getPPGAlgorithmComplete.send((status, algorithm, state))
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.endSleepComplete = { successful in
-			self.lambdaEndSleepComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.endSleepComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.endSleepComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaEndSleepComplete?(self.id, status.successful)
+				self.endSleepComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.endSleepStatus = { enable in
-			self.lambdaEndSleepStatus?(self.id, enable)
-			DispatchQueue.main.async {
+		mMainCharacteristic?.endSleepStatus
+            .receive(on: DispatchQueue.main)
+            .sink { enable in
+				self.lambdaEndSleepStatus?(self.id, enable)
 				self.endSleepStatus.send(enable)
 			}
-		}
-		
-		mMainCharacteristic?.disableWornDetectComplete = { successful in
-			self.lambdaDisableWornDetectComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.disableWornDetectComplete.send(successful ? .successful : .device_error)
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.disableWornDetectComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaDisableWornDetectComplete?(self.id, status.successful)
+				self.disableWornDetectComplete.send(status)
 			}
-		}
-		
-		mMainCharacteristic?.enableWornDetectComplete = { successful in
-			self.lambdaEnableWornDetectComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.enableWornDetectComplete.send(successful ? .successful : .device_error)
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.enableWornDetectComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaEnableWornDetectComplete?(self.id, status.successful)
+				self.enableWornDetectComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.buttonClicked = { presses in
-			self.lambdaButtonClicked?(self.id, presses)
-			DispatchQueue.main.async {
+		mMainCharacteristic?.buttonClicked
+            .receive(on: DispatchQueue.main)
+            .sink { presses in
+				self.lambdaButtonClicked?(self.id, presses)
 				self.buttonTaps = presses
 			}
-		}
-		
-		mMainCharacteristic?.wornCheckComplete = { successful, code, value in
-			self.lambdaWornCheckComplete?(self.id, successful, code, value )
-			DispatchQueue.main.async {
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.wornCheckComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, code, value in
+                self.lambdaWornCheckComplete?(self.id, status.successful, code, value )
 				self.wornCheckResult = DeviceWornCheckResultType(code: code, value: value)
-				self.wornCheckResultComplete.send(successful ? .successful : .device_error)
+				self.wornCheckResultComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setSessionParamComplete = { successful, parameter in
-			globals.log.v ("setSessionParamComplete: \(successful), \(parameter)")
-			self.lambdaSetSessionParamComplete?(self.id, successful, parameter)
-			DispatchQueue.main.async {
-				self.setSessionParamComplete.send((successful ? .successful : .device_error, parameter))
+		mMainCharacteristic?.setSessionParamComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, parameter in
+                self.lambdaSetSessionParamComplete?(self.id, status.successful, parameter)
+				self.setSessionParamComplete.send((status, parameter))
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getSessionParamComplete = { successful, parameter, value in
-			globals.log.v ("getSessionParamComplete: \(successful), \(parameter), \(value)")
-			self.lambdaGetSessionParamComplete?(self.id, successful, parameter, value)
-			DispatchQueue.main.async {
+		mMainCharacteristic?.getSessionParamComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, parameter, value in
+                self.lambdaGetSessionParamComplete?(self.id, status.successful, parameter, value)
 				switch parameter {
 				case .tag:
 					var data = Data()
@@ -2676,209 +2715,209 @@ public class Device: NSObject, ObservableObject {
 				case .ppgCaptureDuration: self.ppgCaptureDuration = value
 				default: break
 				}
-				self.getSessionParamComplete.send((successful ? .successful : .device_error, parameter))
+				self.getSessionParamComplete.send((status, parameter))
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.acceptSessionParamsComplete	= { successful in
-			self.lambdaAcceptSessionParamsComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.acceptSessionParamsComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.acceptSessionParamsComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaAcceptSessionParamsComplete?(self.id, status.successful)
+				self.acceptSessionParamsComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.resetSessionParamsComplete	= { successful in
-			self.lambdaResetSessionParamsComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.resetSessionParamsComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.resetSessionParamsComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaResetSessionParamsComplete?(self.id, status.successful)
+				self.resetSessionParamsComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.readCanLogDiagnosticsComplete = { successful, allow in
-			self.lambdaReadCanLogDiagnosticsComplete?(self.id, successful, allow)
-			DispatchQueue.main.async {
+		mMainCharacteristic?.readCanLogDiagnosticsComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, allow in
+                self.lambdaReadCanLogDiagnosticsComplete?(self.id, status.successful, allow)
 				self.canLogDiagnostics = allow
-				self.readCanLogDiagnosticsComplete.send(successful ? .successful : .device_error)
+				self.readCanLogDiagnosticsComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.updateCanLogDiagnosticsComplete = { successful in
-			self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.updateCanLogDiagnosticsComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.updateCanLogDiagnosticsComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, status.successful)
+				self.updateCanLogDiagnosticsComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getPacketCountComplete = { successful, count in
-			self.lambdaGetPacketCountComplete?(self.id, successful, count)
-			DispatchQueue.main.async {
-				self.getPacketCountComplete.send((successful ? .successful : .device_error, count))
+		mMainCharacteristic?.getPacketCountComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, count in
+                self.lambdaGetPacketCountComplete?(self.id, status.successful, count)
+				self.getPacketCountComplete.send((status, count))
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getAllPacketsComplete = { successful in
-			self.lambdaGetAllPacketsComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.getAllPacketsComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.getAllPacketsComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaGetAllPacketsComplete?(self.id, status.successful)
+				self.getAllPacketsComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.getAllPacketsAcknowledgeComplete = { successful, ack in
-			self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, successful, ack)
-			DispatchQueue.main.async {
-				self.getAllPacketsAcknowledgeComplete.send((successful ? .successful : .device_error, ack))
+		mMainCharacteristic?.getAllPacketsAcknowledgeComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, ack in
+                self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, status.successful, ack)
+				self.getAllPacketsAcknowledgeComplete.send((status, ack))
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setPairedComplete			= { successful in
-			self.lambdaSetPairedComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.setPairedComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.setPairedComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaSetPairedComplete?(self.id, status.successful)
+				self.setPairedComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setUnpairedComplete		= { successful in
-			self.lambdaSetUnpairedComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.setUnpairedComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.setUnpairedComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaSetUnpairedComplete?(self.id, status.successful)
+				self.setUnpairedComplete.send(status)
 			}
-		}
-		
-		mMainCharacteristic?.getPairedComplete			= { successful, paired in
-			self.lambdaGetPairedComplete?(self.id, successful, paired)
-			DispatchQueue.main.async {
-				if successful {
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.getPairedComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, paired in
+                self.lambdaGetPairedComplete?(self.id, status.successful, paired)
+                if status.successful {
 					self.paired = paired
-				}
-				else {
+				} else {
 					self.paired = nil
 				}
-				self.getPairedComplete.send(successful ? .successful : .device_error)
+				self.getPairedComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.setPageThresholdComplete	= { successful in
-			self.lambdaSetPageThresholdComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.setPageThresholdComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.setPageThresholdComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaSetPageThresholdComplete?(self.id, status.successful)
+				self.setPageThresholdComplete.send(status)
 			}
-		}
-		
-		mMainCharacteristic?.getPageThresholdComplete	= { successful, threshold in
-			self.lambdaGetPageThresholdComplete?(self.id, successful, threshold)
-			DispatchQueue.main.async {
-				if successful {
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.getPageThresholdComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, threshold in
+                self.lambdaGetPageThresholdComplete?(self.id, status.successful, threshold)
+                if status.successful {
 					self.advertisingPageThreshold = threshold
-				}
-				else {
+				} else {
 					self.advertisingPageThreshold = nil
 				}
-				self.getPageThresholdComplete.send(successful ? .successful : .device_error)
+                self.getPageThresholdComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.deletePageThresholdComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaDeletePageThresholdComplete?(self.id, status.successful)
+				self.deletePageThresholdComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.enterShipModeComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaEnterShipModeComplete?(self.id, status.successful)
+				self.enterShipModeComplete.send(status)
+			}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.deletePageThresholdComplete	= { successful in
-			self.lambdaDeletePageThresholdComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.deletePageThresholdComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.resetComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaResetComplete?(self.id, status.successful)
+				self.resetComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.enterShipModeComplete = { successful in
-			self.lambdaEnterShipModeComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.enterShipModeComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.airplaneModeComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaAirplaneModeComplete?(self.id, status.successful)
+				self.airplaneModeComplete.send(status)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.resetComplete = { successful in
-			self.lambdaResetComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.resetComplete.send(successful ? .successful : .device_error)
+		mMainCharacteristic?.manufacturingTestComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaManufacturingTestComplete?(self.id, status.successful)
+				self.manufacturingTestComplete.send(status)
 			}
-		}
-		
-		mMainCharacteristic?.airplaneModeComplete		= { successful in
-			self.lambdaAirplaneModeComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.airplaneModeComplete.send(successful ? .successful : .device_error)
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.rawLoggingComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaRawLoggingComplete?(self.id, status.successful)
+				self.rawLoggingComplete.send(status)
 			}
-		}
-		
-		mMainCharacteristic?.manufacturingTestComplete	= { successful in
-			self.lambdaManufacturingTestComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.manufacturingTestComplete.send(successful ? .successful : .device_error)
-			}
-		}
-		
-		mMainCharacteristic?.rawLoggingComplete = { successful in
-			self.lambdaRawLoggingComplete?(self.id, successful)
-			DispatchQueue.main.async {
-				self.rawLoggingComplete.send(successful ? .successful : .device_error)
-			}
-		}
+            .store(in: &subscriptions)
 		
 		// MARK: Notifications
-		mMainCharacteristic?.manufacturingTestResult	= { valid, result in
-			self.lambdaManufacturingTestResult?(self.id, valid, result)
-			DispatchQueue.main.async {
+		mMainCharacteristic?.manufacturingTestResult
+            .receive(on: DispatchQueue.main)
+            .sink { valid, result in
+				self.lambdaManufacturingTestResult?(self.id, valid, result)
 				self.manufacturingTestResult.send((valid, result))
 			}
-		}
-		
-		mMainCharacteristic?.ppgMetrics = { successful, packet in
-			self.lambdaPPGMetrics?(self.id, successful, packet)
-			DispatchQueue.main.async {
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.ppgMetrics
+            .receive(on: DispatchQueue.main)
+            .sink { successful, packet in
+				self.lambdaPPGMetrics?(self.id, successful, packet)
 				self.ppgMetrics = ppgMetricsType(packet)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.ppgFailed = { code in
-			self.lambdaPPGFailed?(self.id, code)
-			DispatchQueue.main.async {
+		mMainCharacteristic?.ppgFailed
+            .receive(on: DispatchQueue.main)
+            .sink { code in
+				self.lambdaPPGFailed?(self.id, code)
 				self.ppgFailed.send(code)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mMainCharacteristic?.dataPackets = { packets in
-			self.lambdaDataPackets?(self.id, -1, packets)
-			DispatchQueue.main.async {
-				self.dataPackets.send((-1, packets))
+        // Do not push to main dispatch queue
+		mMainCharacteristic?.dataPackets
+            .sink { sequence_number, packets in
+                self.lambdaDataPackets?(self.id, sequence_number, packets)
+                self.dataPackets.send((sequence_number, packets))
 			}
-		}
-		
-		mMainCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count in
-			self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false)
-			DispatchQueue.main.async {
-				self.dataComplete.send((bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, false))
-			}
-		}
-		
-		mMainCharacteristic?.dataFailure = { self.lambdaDataFailure?(self.id) }
-	}
+            .store(in: &subscriptions)
 
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	private func attachDataCharacteristicLambdas() {
-		mDataCharacteristic?.dataPackets = { sequence_number, packets in
-			self.lambdaDataPackets?(self.id, sequence_number, packets)
-			DispatchQueue.main.async {
-				self.dataPackets.send((sequence_number, packets))
-			}
-		}
-		
-		mDataCharacteristic?.dataComplete = { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
-			self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate)
-			DispatchQueue.main.async {
+		mMainCharacteristic?.dataComplete
+            .receive(on: DispatchQueue.main)
+            .sink { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
+				self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate)
 				self.dataComplete.send((bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate))
 			}
-		}
+            .store(in: &subscriptions)
+
+		mMainCharacteristic?.dataFailure
+            .sink { self.lambdaDataFailure?(self.id) }
+            .store(in: &subscriptions)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2888,67 +2927,105 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	private func attachStreamingCharacteristicLambdas() {
-		mStreamingCharacteristic?.deviceWornStatus			= { isWorn in
-			self.lambdaWornStatus?(self.id, isWorn)
-			DispatchQueue.main.async {
-				self.worn = isWorn
+	private func subscribeDataCharacteristic() {
+        // Do not push to main dispatch queue
+		mDataCharacteristic?.dataPackets
+            .sink { sequence_number, packets in
+				self.lambdaDataPackets?(self.id, sequence_number, packets)
+				self.dataPackets.send((sequence_number, packets))
 			}
-		}
-		mStreamingCharacteristic?.deviceChargingStatus		= { charging, on_charger, error in
-			self.lambdaChargingStatus?(self.id, charging, on_charger, error)
-			DispatchQueue.main.async {
-				self.charging = charging
-				self.on_charger = on_charger
-				self.charge_error = error
-			}
-		}
+            .store(in: &subscriptions)
 		
-		mStreamingCharacteristic?.endSleepStatus = { enable in
-			self.lambdaEndSleepStatus?(self.id, enable)
-			DispatchQueue.main.async {
+		mDataCharacteristic?.dataComplete
+            .receive(on: DispatchQueue.main)
+            .sink {bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
+				self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate)
+				self.dataComplete.send((bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate))
+			}
+            .store(in: &subscriptions)
+	}
+
+	//--------------------------------------------------------------------------------
+	// Function Name:
+	//--------------------------------------------------------------------------------
+	//
+	//
+	//
+	//--------------------------------------------------------------------------------
+	private func subscribeStreamingCharacteristic() {
+		mStreamingCharacteristic?.deviceWornStatus
+            .receive(on: DispatchQueue.main)
+            .sink { isWorn in
+                self.lambdaWornStatus?(self.id, isWorn)
+                self.worn = isWorn
+            }
+            .store(in: &subscriptions)
+    
+		mStreamingCharacteristic?.deviceChargingStatus
+	        .receive(on: DispatchQueue.main)
+	        .sink { charging, on_charger, error in
+	            self.lambdaChargingStatus?(self.id, charging, on_charger, error)
+                self.charging = charging
+                self.on_charger = on_charger
+                self.charge_error = error
+	        }
+	        .store(in: &subscriptions)
+		
+		mStreamingCharacteristic?.endSleepStatus
+            .receive(on: DispatchQueue.main)
+            .sink { enable in
+				self.lambdaEndSleepStatus?(self.id, enable)
 				self.endSleepStatus.send(enable)
 			}
-		}
-		
-		mStreamingCharacteristic?.buttonClicked = { presses in
-			self.lambdaButtonClicked?(self.id, presses)
-			DispatchQueue.main.async {
+            .store(in: &subscriptions)
+
+		mStreamingCharacteristic?.buttonClicked
+            .receive(on: DispatchQueue.main)
+            .sink { presses in
+				self.lambdaButtonClicked?(self.id, presses)
 				self.buttonTaps = presses
 			}
-		}
-		
-		mStreamingCharacteristic?.manufacturingTestResult	= { valid, result in
-			self.lambdaManufacturingTestResult?(self.id, valid, result)
-			DispatchQueue.main.async {
+            .store(in: &subscriptions)
+
+		mStreamingCharacteristic?.manufacturingTestResult
+            .receive(on: DispatchQueue.main)
+            .sink { valid, result in
+				self.lambdaManufacturingTestResult?(self.id, valid, result)
 				self.manufacturingTestResult.send((valid, result))
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mStreamingCharacteristic?.ppgMetrics = { successful, packet in
-			self.lambdaPPGMetrics?(self.id, successful, packet)
-			DispatchQueue.main.async {
+		mStreamingCharacteristic?.ppgMetrics
+            .receive(on: DispatchQueue.main)
+            .sink { successful, packet in
+				self.lambdaPPGMetrics?(self.id, successful, packet)
 				self.ppgMetrics = ppgMetricsType(packet)
 			}
-		}
+            .store(in: &subscriptions)
 		
-		mStreamingCharacteristic?.ppgFailed = { code in
-			self.lambdaPPGFailed?(self.id, code)
-			DispatchQueue.main.async {
+		mStreamingCharacteristic?.ppgFailed
+            .receive(on: DispatchQueue.main)
+            .sink { code in
+				self.lambdaPPGFailed?(self.id, code)
 				self.ppgFailed.send(code)
 			}
-		}
-		
-		mStreamingCharacteristic?.streamingPacket = { packet in
-			self.lambdaStreamingPacket?(self.id, packet)
-			DispatchQueue.main.async {
+            .store(in: &subscriptions)
+
+		mStreamingCharacteristic?.streamingPacket
+            .receive(on: DispatchQueue.main)
+            .sink { packet in
+				self.lambdaStreamingPacket?(self.id, packet)
 				self.streamingPacket.send(packet)
 			}
-		}
-		
-		mStreamingCharacteristic?.dataAvailable = { self.lambdaDataAvailable?(self.id) }
+            .store(in: &subscriptions)
+
+		mStreamingCharacteristic?.dataAvailable
+            .receive(on: DispatchQueue.main)
+            .sink {
+                self.lambdaDataAvailable?(self.id)
+            }
+            .store(in: &subscriptions)
 	}
-	
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -2973,11 +3050,7 @@ public class Device: NSObject, ObservableObject {
                         }
                     }
                     .store(in: &subscriptions)
-                
-                //mBAS?.lambdaUpdated = { [weak self] id, percentage in
-                //    self?.lambdaBatteryLevelUpdated?(id, percentage)
-                //}
-                
+                                
                 // Heart Rate Service
                 mHRS?.didConnect(peripheral)
                 mHRS?.updated
@@ -2988,10 +3061,6 @@ public class Device: NSObject, ObservableObject {
                         self?.lambdaHeartRateUpdated?(self!.id, epoch, hr, rr)
                     }
                     .store(in: &subscriptions)
-                
-                //mHRS?.lambdaUpdated = { [weak self] id, epoch, hr, rr in
-                //    self?.lambdaHeartRateUpdated?(id, epoch, hr, rr)
-                //}
                 
                 // Device Information Service
                 mDIS?.didConnect(peripheral)
@@ -3053,24 +3122,6 @@ public class Device: NSObject, ObservableObject {
                 
                 // AMBIQ OTA
                 mAmbiqOTAService?.didConnect(peripheral)
-
-                /*
-                mAmbiqOTAService?.lambdaStarted    = {
-                    self.lambdaUpdateFirmwareStarted?(self.id)
-                }
-                
-                mAmbiqOTAService?.lambdaFinished = {
-                    self.lambdaUpdateFirmwareFinished?(self.id)
-                }
-                
-                mAmbiqOTAService?.lambdaFailed    = { code, message in
-                    self.lambdaUpdateFirmwareFailed?(self.id, code, message)
-                }
-                
-                mAmbiqOTAService?.lambdaProgress    = { percent in
-                    self.lambdaUpdateFirmwareProgress?(self.id, percent)
-                }
-                 */
                 
                 mAmbiqOTAService?.started
                     .receive(on: DispatchQueue.main)
@@ -3150,87 +3201,81 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let peripheral = peripheral {
-			if let testCharacteristic = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
-				switch (testCharacteristic) {
-				default:
-					if let service = characteristic.service {
-						globals.log.e ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)' - do not know what to do")
-					}
-					else {
-						globals.log.e ("\(self.id) for nil service - '\(testCharacteristic.title)' - do not know what to do")
-					}
-				}
-			}
-			else if let testCharacteristic = Device.characteristics(rawValue: characteristic.prettyID) {
-				switch (testCharacteristic) {
-					
-				#if UNIVERSAL || ALTER
-				case .alterMainCharacteristic:
-					mMainCharacteristic = customMainCharacteristic()
-					mMainCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
-					#if UNIVERSAL
-					mMainCharacteristic?.type	= .alter
-					#endif
-					attachMainCharacteristicLambdas()
-					mMainCharacteristic?.discoverDescriptors()
-					
-				case .alterDataCharacteristic:
-					mDataCharacteristic = customDataCharacteristic()
-					mDataCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
-					attachDataCharacteristicLambdas()
-					mDataCharacteristic?.discoverDescriptors()
-					
-				case .alterStrmCharacteristic:
-					mStreamingCharacteristic = customStreamingCharacteristic()
-					mStreamingCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
-					#if UNIVERSAL
-					mStreamingCharacteristic?.type	= .alter
-					#endif
-					attachStreamingCharacteristicLambdas()
-					mStreamingCharacteristic?.discoverDescriptors()
-
+        if let testCharacteristic = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
+            switch (testCharacteristic) {
+            default:
+                if let service = characteristic.service {
+                    globals.log.e ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)' - do not know what to do")
+                }
+                else {
+                    globals.log.e ("\(self.id) for nil service - '\(testCharacteristic.title)' - do not know what to do")
+                }
+            }
+        }
+        else if let testCharacteristic = Device.characteristics(rawValue: characteristic.prettyID) {
+            switch (testCharacteristic) {
+                
+			#if UNIVERSAL || ALTER
+            case .alterMainCharacteristic:
+                mMainCharacteristic = customMainCharacteristic()
+                mMainCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
+				#if UNIVERSAL
+                mMainCharacteristic?.type	= .alter
 				#endif
-
-				#if UNIVERSAL || KAIROS
-				case .kairosMainCharacteristic:
-					mMainCharacteristic = customMainCharacteristic()
-					mMainCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
-					#if UNIVERSAL
-					mMainCharacteristic?.type	= .kairos
-					#endif
-					attachMainCharacteristicLambdas()
-					mMainCharacteristic?.discoverDescriptors()
-
-				case .kairosDataCharacteristic:
-					mDataCharacteristic = customDataCharacteristic()
-					mDataCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
-					attachDataCharacteristicLambdas()
-					mDataCharacteristic?.discoverDescriptors()
-					
-				case .kairosStrmCharacteristic:
-					mStreamingCharacteristic = customStreamingCharacteristic()
-					mStreamingCharacteristic?.didDiscover(	characteristic, commandQ: commandQ)
-					#if UNIVERSAL
-					mStreamingCharacteristic?.type	= .kairos
-					#endif
-					attachStreamingCharacteristicLambdas()
-					mStreamingCharacteristic?.discoverDescriptors()
+                attachMainCharacteristicLambdas()
+                mMainCharacteristic?.discoverDescriptors()
+                
+            case .alterDataCharacteristic:
+                mDataCharacteristic = customDataCharacteristic()
+                mDataCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
+                subscribeDataCharacteristic()
+                mDataCharacteristic?.discoverDescriptors()
+                
+            case .alterStrmCharacteristic:
+                mStreamingCharacteristic = customStreamingCharacteristic()
+                mStreamingCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
+				#if UNIVERSAL
+                mStreamingCharacteristic?.type	= .alter
 				#endif
-				}
-			}
-			else {
-				if let service = characteristic.service {
-					globals.log.e ("\(self.id) for service: \(service.prettyID) - \(characteristic.prettyID) - UNKNOWN")
-				}
-				else {
-					globals.log.e ("\(self.id) for nil service - \(characteristic.prettyID) - UNKNOWN")
-				}
-			}
-		}
-		else {
-			globals.log.e ("Peripheral object is nil - do nothing")
-		}
+                subscribeStreamingCharacteristic()
+                mStreamingCharacteristic?.discoverDescriptors()
+            #endif
+                
+			#if UNIVERSAL || KAIROS
+            case .kairosMainCharacteristic:
+                mMainCharacteristic = customMainCharacteristic()
+                mMainCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
+				#if UNIVERSAL
+                mMainCharacteristic?.type	= .kairos
+				#endif
+                attachMainCharacteristicLambdas()
+                mMainCharacteristic?.discoverDescriptors()
+                
+            case .kairosDataCharacteristic:
+                mDataCharacteristic = customDataCharacteristic()
+                mDataCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
+                subscribeDataCharacteristic()
+                mDataCharacteristic?.discoverDescriptors()
+                
+            case .kairosStrmCharacteristic:
+                mStreamingCharacteristic = customStreamingCharacteristic()
+                mStreamingCharacteristic?.didDiscover(	characteristic, commandQ: commandQ)
+				#if UNIVERSAL
+                mStreamingCharacteristic?.type	= .kairos
+				#endif
+                subscribeStreamingCharacteristic()
+                mStreamingCharacteristic?.discoverDescriptors()
+				#endif
+            }
+        }
+        else {
+            if let service = characteristic.service {
+                globals.log.e ("\(self.id) for service: \(service.prettyID) - \(characteristic.prettyID) - UNKNOWN")
+            }
+            else {
+                globals.log.e ("\(self.id) for nil service - \(characteristic.prettyID) - UNKNOWN")
+            }
+        }
 	}
 	
 	//--------------------------------------------------------------------------------

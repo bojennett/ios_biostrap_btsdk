@@ -190,79 +190,79 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 			}
 		}
 		
-		device.lambdaBatteryLevelUpdated = { id, percentage in DispatchQueue.main.async { self.batteryLevel?(id, percentage) } }
-		device.lambdaHeartRateUpdated = { id, epoch, hr, rr in DispatchQueue.main.async { self.heartRate?(id, epoch, hr, rr) } }
-		device.lambdaWriteEpochComplete = { id, successful in DispatchQueue.main.async { self.writeEpochComplete?(id, successful) } }
-		device.lambdaReadEpochComplete = { id, successful, value in DispatchQueue.main.async { self.readEpochComplete?(id, successful, value) } }
-		device.lambdaEndSleepComplete = { id, successful in DispatchQueue.main.async { self.endSleepComplete?(id, successful) } }
-		device.lambdaGetAllPacketsComplete = { id, successful in DispatchQueue.main.async { self.getAllPacketsComplete?(id, successful) } }
-		device.lambdaGetAllPacketsAcknowledgeComplete = { id, successful, ack in DispatchQueue.main.async { self.getAllPacketsAcknowledgeComplete?(id, successful, ack) } }
-		device.lambdaGetPacketCountComplete = { id, successful, count in DispatchQueue.main.async { self.getPacketCountComplete?(id, successful, count) } }
-		device.lambdaStartManualComplete  = { id, successful in DispatchQueue.main.async { self.startManualComplete?(id, successful) } }
-		device.lambdaStopManualComplete  = { id, successful in DispatchQueue.main.async { self.stopManualComplete?(id, successful) } }
-		device.lambdaLEDComplete = { id, successful in DispatchQueue.main.async { self.ledComplete?(id, successful) } }
-		device.lambdaEnterShipModeComplete = { id, successful in DispatchQueue.main.async { self.enterShipModeComplete?(id, successful) } }
-		device.lamdaWriteSerialNumberComplete = { id, successful in DispatchQueue.main.async { self.writeSerialNumberComplete?(id, successful) } }
-		device.lambdaReadSerialNumberComplete = { id, successful, partID in DispatchQueue.main.async { self.readSerialNumberComplete?(id, successful, partID) } }
-		device.lambdaDeleteSerialNumberComplete = { id, successful in DispatchQueue.main.async { self.deleteSerialNumberComplete?(id, successful) } }
-		device.lambdaWriteAdvIntervalComplete = { id, successful in DispatchQueue.main.async { self.writeAdvIntervalComplete?(id, successful) } }
-		device.lambdaReadAdvIntervalComplete = { id, successful, seconds in DispatchQueue.main.async { self.readAdvIntervalComplete?(id, successful, seconds) } }
-		device.lambdaDeleteAdvIntervalComplete  = { id, successful in DispatchQueue.main.async { self.deleteAdvIntervalComplete?(id, successful) } }
-		device.lambdaClearChargeCyclesComplete = { id, successful in DispatchQueue.main.async { self.clearChargeCyclesComplete?(id, successful) } }
-		device.lambdaReadChargeCyclesComplete = { id, successful, cycles in DispatchQueue.main.async { self.readChargeCyclesComplete?(id, successful, cycles) } }
-		device.lambdaReadCanLogDiagnosticsComplete  = { id, successful, allow in DispatchQueue.main.async { self.readCanLogDiagnosticsComplete?(id, successful, allow) } }
-		device.lambdaUpdateCanLogDiagnosticsComplete  = { id, successful in DispatchQueue.main.async { self.updateCanLogDiagnosticsComplete?(id, successful) } }
-		device.lambdaWornCheckComplete = { id, successful, code, value in DispatchQueue.main.async { self.wornCheckComplete?(id, successful, code, value) } }
-		device.lambdaRawLoggingComplete = { id, successful in DispatchQueue.main.async { self.rawLoggingComplete?(id, successful) } }
-		device.lambdaGetRawLoggingStatusComplete  = { id, successful, enabled in DispatchQueue.main.async { self.getRawLoggingStatusComplete?(id, successful, enabled) } }
-		device.lambdaGetWornOverrideStatusComplete  = { id, successful, overridden in DispatchQueue.main.async { self.getWornOverrideStatusComplete?(id, successful, overridden) } }
-		device.lambdaAirplaneModeComplete = { id, successful in DispatchQueue.main.async { self.airplaneModeComplete?(id, successful) } }
-		device.lambdaResetComplete = { id, successful in DispatchQueue.main.async { self.resetComplete?(id, successful) } }
-		device.lambdaDisableWornDetectComplete = { id, successful in DispatchQueue.main.async { self.disableWornDetectComplete?(id, successful) } }
-		device.lambdaEnableWornDetectComplete = { id, successful in DispatchQueue.main.async { self.enableWornDetectComplete?(id, successful) } }
-		device.lambdaPPGMetrics      = { id, successful, packet in DispatchQueue.main.async { self.ppgMetrics?(id, successful, packet) } }
-		device.lambdaPPGFailed = { id, code in DispatchQueue.main.async { self.ppgFailed?(id, code) } }
-		
-		device.lambdaDataPackets = { id, sequence_number, packets in
-			if (self.dataPacketsOnBackgroundThread) { self.dataPackets?(id, sequence_number, packets) }
-			else { DispatchQueue.main.async { self.dataPackets?(id, sequence_number, packets) } }
-		}
-		
-		device.lambdaStreamingPacket = { id, packet in DispatchQueue.main.async { self.streamingPacket?(id, packet) } }
-		device.lambdaDataAvailable = { id in DispatchQueue.main.async { self.dataAvailable?(id) }}
-		device.lambdaDataComplete = { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in DispatchQueue.main.async { self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) } }
-		device.lambdaDataFailure = { id in DispatchQueue.main.async { self.dataFailure?(id) } }
-		device.lambdaWornStatus = { id, isWorn in DispatchQueue.main.async { self.deviceWornStatus?(id, isWorn) } }
-		device.lambdaUpdateFirmwareFailed = { id, code, message in DispatchQueue.main.async { self.updateFirmwareFailed?(id, code, message) } }
-		device.lambdaUpdateFirmwareFinished = { id in DispatchQueue.main.async { self.updateFirmwareFinished?(id) } }
-		device.lambdaUpdateFirmwareStarted = { id in DispatchQueue.main.async { self.updateFirmwareStarted?(id) } }
-		device.lambdaUpdateFirmwareProgress = { id, percentage in DispatchQueue.main.async { self.updateFirmwareProgress?(id, percentage) } }
-		device.lambdaSetSessionParamComplete = { id, successful, parameter in DispatchQueue.main.async { self.setSessionParamComplete?(id, successful, parameter) } }
-		device.lambdaGetSessionParamComplete = { id, successful, parameter, value in DispatchQueue.main.async { self.getSessionParamComplete?(id, successful, parameter, value) } }
-		device.lambdaResetSessionParamsComplete = { id, successful in DispatchQueue.main.async { self.resetSessionParamsComplete?(id, successful) } }
-		device.lambdaAcceptSessionParamsComplete = { id, successful in DispatchQueue.main.async { self.acceptSessionParamsComplete?(id, successful) } }
-		device.lambdaManufacturingTestComplete = { id, successful in DispatchQueue.main.async { self.manufacturingTestComplete?(id, successful) } }
-		device.lambdaManufacturingTestResult = { id, valid, result in DispatchQueue.main.async { self.manufacturingTestResult?(id, valid, result) } }
-		device.lambdaChargingStatus = { id, charging, on_charger, error in DispatchQueue.main.async { self.deviceChargingStatus?(id, charging, on_charger, error) } }
-		device.lambdaSetHRZoneColorComplete = { id, successful, type in DispatchQueue.main.async { self.setHRZoneColorComplete?(id, successful, type) } }
-		device.lambdaGetHRZoneColorComplete = { id, successful, type, red, green, blue, on_ms, off_ms in DispatchQueue.main.async { self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) } }
-		device.lambdaSetHRZoneRangeComplete = { id, successful in DispatchQueue.main.async { self.setHRZoneRangeComplete?(id, successful) } }
-		device.lambdaGetHRZoneRangeComplete = { id, successful, enabled, high_value, low_value in DispatchQueue.main.async { self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) } }
-		device.lambdaGetPPGAlgorithmComplete = { id, successful, algorithm, state in DispatchQueue.main.async { self.getPPGAlgorithmComplete?(id, successful, algorithm, state) } }
-		device.lambdaSetAdvertiseAsHRMComplete = { id, successful, asHRM in DispatchQueue.main.async { self.setAdvertiseAsHRMComplete?(id, successful, asHRM) } }
-		device.lambdaGetAdvertiseAsHRMComplete = { id, successful, asHRM in DispatchQueue.main.async { self.getAdvertiseAsHRMComplete?(id, successful, asHRM) } }
-		device.lambdaSetButtonCommandComplete = { id, successful, tap, command in DispatchQueue.main.async { self.setButtonCommandComplete?(id, successful, tap, command) } }
-		device.lambdaGetButtonCommandComplete = { id, successful, tap, command in DispatchQueue.main.async { self.getButtonCommandComplete?(id, successful, tap, command) } }
-		device.lambdaSetPairedComplete = { id, successful in DispatchQueue.main.async { self.setPairedComplete?(id, successful) } }
-		device.lambdaSetUnpairedComplete = { id, successful in DispatchQueue.main.async { self.setUnpairedComplete?(id, successful) } }
-		device.lambdaGetPairedComplete = { id, successful, paired in DispatchQueue.main.async { self.getPairedComplete?(id, successful, paired) } }
-		device.lambdaSetPageThresholdComplete = { id, successful in DispatchQueue.main.async { self.setPageThresholdComplete?(id, successful) } }
-		device.lambdaGetPageThresholdComplete = { id, successful, threshold in DispatchQueue.main.async { self.getPageThresholdComplete?(id, successful, threshold) } }
-		device.lambdaDeletePageThresholdComplete = { id, successful in DispatchQueue.main.async { self.deletePageThresholdComplete?(id, successful) } }
-		device.lambdaSetAskForButtonResponseComplete = { id, successful, enable in DispatchQueue.main.async { self.setAskForButtonResponseComplete?(id, successful, enable) } }
-		device.lambdaGetAskForButtonResponseComplete = { id, successful, enable in DispatchQueue.main.async { self.getAskForButtonResponseComplete?(id, successful, enable) } }
-		device.lambdaEndSleepStatus  = { id, hasSleep in DispatchQueue.main.async { self.endSleepStatus?(id, hasSleep) } }
-		device.lambdaButtonClicked  = { id, presses in DispatchQueue.main.async { self.buttonClicked?(id, presses) } }
+        device.lambdaBatteryLevelUpdated = { id, percentage in self.batteryLevel?(id, percentage) }
+        device.lambdaHeartRateUpdated = { id, epoch, hr, rr in self.heartRate?(id, epoch, hr, rr) }
+        device.lambdaWriteEpochComplete = { id, successful in self.writeEpochComplete?(id, successful) }
+        device.lambdaReadEpochComplete = { id, successful, value in self.readEpochComplete?(id, successful, value) }
+        device.lambdaEndSleepComplete = { id, successful in self.endSleepComplete?(id, successful) }
+        device.lambdaGetAllPacketsComplete = { id, successful in self.getAllPacketsComplete?(id, successful) }
+        device.lambdaGetAllPacketsAcknowledgeComplete = { id, successful, ack in self.getAllPacketsAcknowledgeComplete?(id, successful, ack) }
+        device.lambdaGetPacketCountComplete = { id, successful, count in self.getPacketCountComplete?(id, successful, count) }
+        device.lambdaStartManualComplete  = { id, successful in self.startManualComplete?(id, successful) }
+        device.lambdaStopManualComplete  = { id, successful in self.stopManualComplete?(id, successful) }
+        device.lambdaLEDComplete = { id, successful in self.ledComplete?(id, successful) }
+        device.lambdaEnterShipModeComplete = { id, successful in self.enterShipModeComplete?(id, successful) }
+        device.lamdaWriteSerialNumberComplete = { id, successful in self.writeSerialNumberComplete?(id, successful) }
+        device.lambdaReadSerialNumberComplete = { id, successful, partID in self.readSerialNumberComplete?(id, successful, partID) }
+        device.lambdaDeleteSerialNumberComplete = { id, successful in self.deleteSerialNumberComplete?(id, successful) }
+        device.lambdaWriteAdvIntervalComplete = { id, successful in self.writeAdvIntervalComplete?(id, successful) }
+        device.lambdaReadAdvIntervalComplete = { id, successful, seconds in self.readAdvIntervalComplete?(id, successful, seconds) }
+        device.lambdaDeleteAdvIntervalComplete  = { id, successful in self.deleteAdvIntervalComplete?(id, successful) }
+        device.lambdaClearChargeCyclesComplete = { id, successful in self.clearChargeCyclesComplete?(id, successful) }
+        device.lambdaReadChargeCyclesComplete = { id, successful, cycles in self.readChargeCyclesComplete?(id, successful, cycles) }
+        device.lambdaReadCanLogDiagnosticsComplete  = { id, successful, allow in self.readCanLogDiagnosticsComplete?(id, successful, allow) }
+        device.lambdaUpdateCanLogDiagnosticsComplete  = { id, successful in self.updateCanLogDiagnosticsComplete?(id, successful) }
+        device.lambdaWornCheckComplete = { id, successful, code, value in self.wornCheckComplete?(id, successful, code, value) }
+        device.lambdaRawLoggingComplete = { id, successful in self.rawLoggingComplete?(id, successful) }
+        device.lambdaGetRawLoggingStatusComplete  = { id, successful, enabled in self.getRawLoggingStatusComplete?(id, successful, enabled) }
+        device.lambdaGetWornOverrideStatusComplete  = { id, successful, overridden in self.getWornOverrideStatusComplete?(id, successful, overridden) }
+        device.lambdaAirplaneModeComplete = { id, successful in self.airplaneModeComplete?(id, successful) }
+        device.lambdaResetComplete = { id, successful in self.resetComplete?(id, successful) }
+        device.lambdaDisableWornDetectComplete = { id, successful in self.disableWornDetectComplete?(id, successful) }
+        device.lambdaEnableWornDetectComplete = { id, successful in self.enableWornDetectComplete?(id, successful) }
+        device.lambdaPPGMetrics      = { id, successful, packet in self.ppgMetrics?(id, successful, packet) }
+        device.lambdaPPGFailed = { id, code in self.ppgFailed?(id, code) }
+        
+        device.lambdaDataPackets = { id, sequence_number, packets in
+            if (self.dataPacketsOnBackgroundThread) { self.dataPackets?(id, sequence_number, packets) }
+            else { self.dataPackets?(id, sequence_number, packets) }
+        }
+        
+        device.lambdaStreamingPacket = { id, packet in self.streamingPacket?(id, packet) }
+        device.lambdaDataAvailable = { id in self.dataAvailable?(id) }
+        device.lambdaDataComplete = { id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate in self.dataComplete?(id, bad_fw_read_count, bad_fw_packet_count, overflow_count, bad_sdk_parse_count, intermediate) }
+        device.lambdaDataFailure = { id in self.dataFailure?(id) }
+        device.lambdaWornStatus = { id, isWorn in self.deviceWornStatus?(id, isWorn) }
+        device.lambdaUpdateFirmwareFailed = { id, code, message in self.updateFirmwareFailed?(id, code, message) }
+        device.lambdaUpdateFirmwareFinished = { id in self.updateFirmwareFinished?(id) }
+        device.lambdaUpdateFirmwareStarted = { id in self.updateFirmwareStarted?(id) }
+        device.lambdaUpdateFirmwareProgress = { id, percentage in self.updateFirmwareProgress?(id, percentage) }
+        device.lambdaSetSessionParamComplete = { id, successful, parameter in self.setSessionParamComplete?(id, successful, parameter) }
+        device.lambdaGetSessionParamComplete = { id, successful, parameter, value in self.getSessionParamComplete?(id, successful, parameter, value) }
+        device.lambdaResetSessionParamsComplete = { id, successful in self.resetSessionParamsComplete?(id, successful) }
+        device.lambdaAcceptSessionParamsComplete = { id, successful in self.acceptSessionParamsComplete?(id, successful) }
+        device.lambdaManufacturingTestComplete = { id, successful in self.manufacturingTestComplete?(id, successful) }
+        device.lambdaManufacturingTestResult = { id, valid, result in self.manufacturingTestResult?(id, valid, result) }
+        device.lambdaChargingStatus = { id, charging, on_charger, error in self.deviceChargingStatus?(id, charging, on_charger, error) }
+        device.lambdaSetHRZoneColorComplete = { id, successful, type in self.setHRZoneColorComplete?(id, successful, type) }
+        device.lambdaGetHRZoneColorComplete = { id, successful, type, red, green, blue, on_ms, off_ms in self.getHRZoneColorComplete?(id, successful, type, red, green, blue, on_ms, off_ms) }
+        device.lambdaSetHRZoneRangeComplete = { id, successful in self.setHRZoneRangeComplete?(id, successful) }
+        device.lambdaGetHRZoneRangeComplete = { id, successful, enabled, high_value, low_value in self.getHRZoneRangeComplete?(id, successful, enabled, high_value, low_value) }
+        device.lambdaGetPPGAlgorithmComplete = { id, successful, algorithm, state in self.getPPGAlgorithmComplete?(id, successful, algorithm, state) }
+        device.lambdaSetAdvertiseAsHRMComplete = { id, successful, asHRM in self.setAdvertiseAsHRMComplete?(id, successful, asHRM) }
+        device.lambdaGetAdvertiseAsHRMComplete = { id, successful, asHRM in self.getAdvertiseAsHRMComplete?(id, successful, asHRM) }
+        device.lambdaSetButtonCommandComplete = { id, successful, tap, command in self.setButtonCommandComplete?(id, successful, tap, command) }
+        device.lambdaGetButtonCommandComplete = { id, successful, tap, command in self.getButtonCommandComplete?(id, successful, tap, command) }
+        device.lambdaSetPairedComplete = { id, successful in self.setPairedComplete?(id, successful) }
+        device.lambdaSetUnpairedComplete = { id, successful in self.setUnpairedComplete?(id, successful) }
+        device.lambdaGetPairedComplete = { id, successful, paired in self.getPairedComplete?(id, successful, paired) }
+        device.lambdaSetPageThresholdComplete = { id, successful in self.setPageThresholdComplete?(id, successful) }
+        device.lambdaGetPageThresholdComplete = { id, successful, threshold in self.getPageThresholdComplete?(id, successful, threshold) }
+        device.lambdaDeletePageThresholdComplete = { id, successful in self.deletePageThresholdComplete?(id, successful) }
+        device.lambdaSetAskForButtonResponseComplete = { id, successful, enable in self.setAskForButtonResponseComplete?(id, successful, enable) }
+        device.lambdaGetAskForButtonResponseComplete = { id, successful, enable in self.getAskForButtonResponseComplete?(id, successful, enable) }
+        device.lambdaEndSleepStatus  = { id, hasSleep in self.endSleepStatus?(id, hasSleep) }
+        device.lambdaButtonClicked  = { id, presses in self.buttonClicked?(id, presses) }
 	}
 	
 	//--------------------------------------------------------------------------------

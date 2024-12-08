@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 class customStreamingCharacteristic: Characteristic {
 	
@@ -13,16 +14,16 @@ class customStreamingCharacteristic: Characteristic {
 	var type:	biostrapDeviceSDK.biostrapDeviceType	= .unknown
 	#endif
 
-	var deviceWornStatus: ((_ isWorn: Bool)->())?
-	var deviceChargingStatus: ((_ charging: Bool, _ on_charger: Bool, _ error: Bool)->())?
-	var ppgMetrics: ((_ successful: Bool, _ packet: String)->())?
-	var ppgFailed: ((_ code: Int)->())?
-	var manufacturingTestResult: ((_ valid: Bool, _ result: String)->())?
-	var streamingPacket: ((_ packet: String)->())?
-	var dataAvailable: (()->())?
+    let deviceWornStatus = PassthroughSubject<Bool, Never>()
+    let deviceChargingStatus = PassthroughSubject<(Bool, Bool, Bool), Never>()
+    let ppgMetrics = PassthroughSubject<(Bool, String), Never>()
+    let ppgFailed = PassthroughSubject<Int, Never>()
+    let manufacturingTestResult = PassthroughSubject<(Bool, String), Never>()
+    let streamingPacket = PassthroughSubject<String, Never>()
+    let dataAvailable = PassthroughSubject<Void, Never>()
 
-	var endSleepStatus: ((_ hasSleep: Bool)->())?
-	var buttonClicked: ((_ presses: Int)->())?
+    let endSleepStatus = PassthroughSubject<Bool, Never>()
+    let buttonClicked = PassthroughSubject<Int, Never>()
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -40,8 +41,8 @@ class customStreamingCharacteristic: Characteristic {
 			case .validateCRC: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")
 
 			case .worn:
-				if      (data[1] == 0x00) { deviceWornStatus?(false) }
-				else if (data[1] == 0x01) { deviceWornStatus?(true)  }
+                if      (data[1] == 0x00) { deviceWornStatus.send(false) }
+                else if (data[1] == 0x01) { deviceWornStatus.send(true)  }
 				else {
 					globals.log.e ("\(pID): Cannot parse worn status: \(data[1])")
 				}
@@ -52,25 +53,25 @@ class customStreamingCharacteristic: Characteristic {
 					do {
 						let jsonData = try JSONEncoder().encode(packet)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.ppgMetrics?(true, jsonString)
+                            self.ppgMetrics.send((true, jsonString))
 						}
-						else { self.ppgMetrics?(false, "") }
+                        else { self.ppgMetrics.send((false, "")) }
 					}
-					catch { self.ppgMetrics?(false, "") }
+                    catch { self.ppgMetrics.send((false, "")) }
 				}
 				
 			case .ppgFailed:
 				if (data.count > 1) {
-					self.ppgFailed?(Int(data[1]))
+                    self.ppgFailed.send(Int(data[1]))
 				}
 				else {
-					self.ppgFailed?(999)
+                    self.ppgFailed.send(999)
 				}
 								
 			case .endSleepStatus:
 				if (data.count == 2) {
 					let hasSleep	= data[1] == 0x01 ? true : false
-					self.endSleepStatus?(hasSleep)
+                    self.endSleepStatus.send(hasSleep)
 				}
 				else {
 					globals.log.e ("\(pID): Cannot parse 'endSleepStatus': \(data.hexString)")
@@ -79,7 +80,7 @@ class customStreamingCharacteristic: Characteristic {
 			case .buttonResponse:
 				if (data.count == 2) {
 					let presses	= Int(data[1])
-					self.buttonClicked?(presses)
+                    self.buttonClicked.send(presses)
 				}
 				else {
 					globals.log.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
@@ -92,20 +93,20 @@ class customStreamingCharacteristic: Characteristic {
 					do {
 						let jsonData = try JSONEncoder().encode(testResult)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
+                            self.manufacturingTestResult.send((true, jsonString))
 						}
 						else {
 							globals.log.e ("\(pID): Result jsonString Failed")
-							self.manufacturingTestResult?(false, "")
+                            self.manufacturingTestResult.send((false, ""))
 						}
 					}
 					catch {
 						globals.log.e ("\(pID): Result jsonData Failed")
-						self.manufacturingTestResult?(false, "")
+                        self.manufacturingTestResult.send((false, ""))
 					}
 				}
 				else {
-					self.manufacturingTestResult?(false, "")
+                    self.manufacturingTestResult.send((false, ""))
 				}
 				#endif
 				
@@ -115,20 +116,20 @@ class customStreamingCharacteristic: Characteristic {
 					do {
 						let jsonData = try JSONEncoder().encode(testResult)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
+                            self.manufacturingTestResult.send((true, jsonString))
 						}
 						else {
 							globals.log.e ("\(pID): Result jsonString Failed")
-							self.manufacturingTestResult?(false, "")
+                            self.manufacturingTestResult.send((false, ""))
 						}
 					}
 					catch {
 						globals.log.e ("\(pID): Result jsonData Failed")
-						self.manufacturingTestResult?(false, "")
+                        self.manufacturingTestResult.send((false, ""))
 					}
 				}
 				else {
-					self.manufacturingTestResult?(false, "")
+                    self.manufacturingTestResult.send((false, ""))
 				}
 				#endif
 				
@@ -140,20 +141,20 @@ class customStreamingCharacteristic: Characteristic {
 						do {
 							let jsonData = try JSONEncoder().encode(testResult)
 							if let jsonString = String(data: jsonData, encoding: .utf8) {
-								self.manufacturingTestResult?(true, jsonString)
+                                self.manufacturingTestResult.send((true, jsonString))
 							}
 							else {
 								globals.log.e ("\(pID): Result jsonString Failed")
-								self.manufacturingTestResult?(false, "")
+                                self.manufacturingTestResult.send((false, ""))
 							}
 						}
 						catch {
 							globals.log.e ("\(pID): Result jsonData Failed")
-							self.manufacturingTestResult?(false, "")
+                            self.manufacturingTestResult.send((false, ""))
 						}
 					}
 					else {
-						self.manufacturingTestResult?(false, "")
+                        self.manufacturingTestResult.send((false, ""))
 					}
 					
 				case .kairos		:
@@ -162,20 +163,20 @@ class customStreamingCharacteristic: Characteristic {
 						do {
 							let jsonData = try JSONEncoder().encode(testResult)
 							if let jsonString = String(data: jsonData, encoding: .utf8) {
-								self.manufacturingTestResult?(true, jsonString)
+                                self.manufacturingTestResult.send((true, jsonString))
 							}
 							else {
 								globals.log.e ("\(pID): Result jsonString Failed")
-								self.manufacturingTestResult?(false, "")
+                                self.manufacturingTestResult.send((false, ""))
 							}
 						}
 						catch {
 							globals.log.e ("\(pID): Result jsonData Failed")
-							self.manufacturingTestResult?(false, "")
+                            self.manufacturingTestResult.send((false, ""))
 						}
 					}
 					else {
-						self.manufacturingTestResult?(false, "")
+                        self.manufacturingTestResult.send((false, ""))
 					}
 					
 				case .unknown	: break
@@ -187,7 +188,7 @@ class customStreamingCharacteristic: Characteristic {
 				let charging	= (data[2] == 0x01)
 				let error		= (data[3] == 0x01)
 				
-				self.deviceChargingStatus?(charging, on_charger, error)
+                self.deviceChargingStatus.send((charging, on_charger, error))
 				
 			case .streamPacket:
 				let length = Int(data[2])
@@ -206,13 +207,13 @@ class customStreamingCharacteristic: Characteristic {
 				do {
 					let jsonData = try JSONEncoder().encode(packet)
 					if let jsonString = String(data: jsonData, encoding: .utf8) {
-						self.streamingPacket?(jsonString)
+                        self.streamingPacket.send(jsonString)
 					}
 					else { globals.log.e ("\(pID): Cannot make string from json data") }
 				}
 				catch { globals.log.e ("\(pID): Cannot make JSON data") }
 				
-			case .dataAvailable: dataAvailable?()
+            case .dataAvailable: dataAvailable.send()
 			}
 		}
 		else {
