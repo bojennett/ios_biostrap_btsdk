@@ -216,24 +216,6 @@ class customMainCharacteristic: Characteristic {
 	}
 	
 	//--------------------------------------------------------------------------------
-	//
-	// Constructor
-	//
-	//--------------------------------------------------------------------------------
-	/*
-	override func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
-		mCRCIgnoreTest	= testStruct(name: "CRC Ignore", enable: false, limit: 3)
-		mCRCFailTest	= testStruct(name: "CRC Fail", enable: false, limit: 3)
-		
-		mCRCOK					= false
-		mExpectedSequenceNumber	= 0
-		mCRCFailCount			= 0
-
-		mDataPackets = [biostrapDataPacket]()
-	}
-	 */
-	
-	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
 	//

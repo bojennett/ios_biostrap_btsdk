@@ -152,7 +152,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 		
 		var deviceMTU = 20
 		
-		if let peripheral = pPeripheral {
+		if let peripheral = pCharacteristic?.service?.peripheral {
 			deviceMTU = peripheral.maximumWriteValueLength(for: .withoutResponse)
 		}
 
@@ -210,8 +210,8 @@ class ambiqOTARXCharacteristic: Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	override func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
-		super.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
+	override func didDiscover(_ characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		super.didDiscover(characteristic, commandQ: commandQ)
 		configured = true
 	}
 
@@ -225,7 +225,7 @@ class ambiqOTARXCharacteristic: Characteristic {
 	func start(_ data: Data) {
 		mData = data
 		
-		if let _ = pPeripheral, let _ = pCharacteristic, let data = mData {
+		if let _ = pCharacteristic, let data = mData {
             self.started.send()
 			
 			if (data.count < ambiqOTARXCharacteristic.FILE_HEADER_BLOCK) {

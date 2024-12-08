@@ -532,14 +532,14 @@ public class Device: NSObject, ObservableObject {
 		self.id			= id
 		self.peripheral	= peripheral
 		self.centralManager = centralManager
-		self.type		= type
+		self.type = type
 		self.discovery_type = discoveryType
 		self.commandQ = CommandQ(peripheral)
         
-        self.mBAS = basService(commandQ)
-        self.mHRS = hrsService(commandQ)
-        self.mDIS = disService(commandQ, type: type)
-        self.mAmbiqOTAService = ambiqOTAService(commandQ)
+        self.mBAS = basService()
+        self.mHRS = hrsService()
+        self.mDIS = disService(type)
+        self.mAmbiqOTAService = ambiqOTAService()
 	}
 	#else
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
@@ -552,10 +552,10 @@ public class Device: NSObject, ObservableObject {
 		self.discovery_type = discoveryType
 		self.commandQ = CommandQ(peripheral)
         
-        self.mBAS = basService(commandQ)
-        self.mHRS = hrsService(commandQ)
-        self.mDIS = disService(commandQ)
-        self.mAmbiqOTAService = ambiqOTAService(commandQ)
+        self.mBAS = basService()
+        self.mHRS = hrsService()
+        self.mDIS = disService()
+        self.mAmbiqOTAService = ambiqOTAService()
 	}
 	#endif
 	
@@ -3131,22 +3131,22 @@ public class Device: NSObject, ObservableObject {
 	//--------------------------------------------------------------------------------
 	func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
         if basService.hit(characteristic) {
-            mBAS?.didDiscoverCharacteristic(characteristic)
+			mBAS?.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
             return
         }
         
         if hrsService.hit(characteristic) {
-            mHRS?.didDiscoverCharacteristic(characteristic)
+            mHRS?.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
             return
         }
         
         if disService.hit(characteristic) {
-            mDIS?.didDiscoverCharacteristic(characteristic)
+            mDIS?.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
             return
         }
         
         if ambiqOTAService.hit(characteristic) {
-            mAmbiqOTAService?.didDiscoverCharacteristic(characteristic)
+            mAmbiqOTAService?.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
             return
         }
         
@@ -3168,7 +3168,7 @@ public class Device: NSObject, ObservableObject {
 				#if UNIVERSAL || ALTER
 				case .alterMainCharacteristic:
 					mMainCharacteristic = customMainCharacteristic()
-					mMainCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mMainCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mMainCharacteristic?.type	= .alter
 					#endif
@@ -3177,13 +3177,13 @@ public class Device: NSObject, ObservableObject {
 					
 				case .alterDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic()
-					mDataCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mDataCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
 					attachDataCharacteristicLambdas()
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .alterStrmCharacteristic:
 					mStreamingCharacteristic = customStreamingCharacteristic()
-					mStreamingCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mStreamingCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .alter
 					#endif
@@ -3195,7 +3195,7 @@ public class Device: NSObject, ObservableObject {
 				#if UNIVERSAL || KAIROS
 				case .kairosMainCharacteristic:
 					mMainCharacteristic = customMainCharacteristic()
-					mMainCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mMainCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mMainCharacteristic?.type	= .kairos
 					#endif
@@ -3204,13 +3204,13 @@ public class Device: NSObject, ObservableObject {
 
 				case .kairosDataCharacteristic:
 					mDataCharacteristic = customDataCharacteristic()
-					mDataCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mDataCharacteristic?.didDiscover(characteristic, commandQ: commandQ)
 					attachDataCharacteristicLambdas()
 					mDataCharacteristic?.discoverDescriptors()
 					
 				case .kairosStrmCharacteristic:
 					mStreamingCharacteristic = customStreamingCharacteristic()
-					mStreamingCharacteristic?.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
+					mStreamingCharacteristic?.didDiscover(	characteristic, commandQ: commandQ)
 					#if UNIVERSAL
 					mStreamingCharacteristic?.type	= .kairos
 					#endif

@@ -74,11 +74,10 @@ class ambiqOTAService: ServiceTemplate {
     //
     //
     //--------------------------------------------------------------------------------
-    override init(_ commandQ: CommandQ?) {
+    override init() {
 		rxCharacteristic = ambiqOTARXCharacteristic()
 		txCharacteristic = ambiqOTATXCharacteristic()
-
-        super.init(commandQ)
+        super.init()
 		
 		setupSubscribers()
     }
@@ -90,13 +89,13 @@ class ambiqOTAService: ServiceTemplate {
     //
     //
     //--------------------------------------------------------------------------------
-    override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
+	override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic, commandQ: CommandQ?) {
         switch characteristic.uuid {
         case ambiqOTARXCharacteristic.uuid:
-			rxCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			rxCharacteristic.didDiscover(characteristic, commandQ: commandQ)
             
         case ambiqOTATXCharacteristic.uuid:
-			txCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			txCharacteristic.didDiscover(characteristic, commandQ: commandQ)
             
         default: return
         }

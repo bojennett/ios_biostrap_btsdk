@@ -37,8 +37,8 @@ class batteryLevelCharacteristic: Characteristic {
     //
     //
     //--------------------------------------------------------------------------------
-	override func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
-		super.didDiscover(peripheral, characteristic: characteristic, commandQ: commandQ)
+	override func didDiscover(_ characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		super.didDiscover(characteristic, commandQ: commandQ)
         read()
         discoverDescriptors()
     }

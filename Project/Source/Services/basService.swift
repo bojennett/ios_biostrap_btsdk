@@ -40,10 +40,9 @@ class basService: ServiceTemplate {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	override init(_ commandQ: CommandQ?) {
+	override init() {
 		mBatteryLevelCharacteristic = batteryLevelCharacteristic()
-
-		super.init(commandQ)
+		super.init()
 		
 		mBatteryLevelCharacteristic.$batteryLevel
 			.sink { [weak self] in
@@ -66,9 +65,9 @@ class basService: ServiceTemplate {
     //
     //
     //--------------------------------------------------------------------------------
-    override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
+	override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic, commandQ: CommandQ?) {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
-			mBatteryLevelCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			mBatteryLevelCharacteristic.didDiscover(characteristic, commandQ: commandQ)
         }
     }
     
@@ -109,7 +108,7 @@ class basService: ServiceTemplate {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
             mBatteryLevelCharacteristic.didUpdateValue()
         } else {
-            globals.log.e ("\(pID): Unhandled characteristic update: \(characteristic.uuid)")
+            globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)")
         }
     }
 

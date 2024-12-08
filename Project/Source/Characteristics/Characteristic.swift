@@ -27,7 +27,6 @@ class Characteristic {
 	}
 	
 	// MARK: Internal Variables
-	internal var pPeripheral: CBPeripheral?
 	internal var pCharacteristic: CBCharacteristic?
 	internal var pID: String = "UNKNOWN"
     @Published var configured: Bool = false
@@ -373,9 +372,10 @@ class Characteristic {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	func didDiscover(_ peripheral: CBPeripheral, characteristic: CBCharacteristic, commandQ: CommandQ?) {
-		pID = peripheral.prettyID
-		pPeripheral = peripheral
+	func didDiscover(_ characteristic: CBCharacteristic, commandQ: CommandQ?) {
+		if let peripheral = characteristic.service?.peripheral {
+			pID = peripheral.prettyID
+		}
 		pCharacteristic = characteristic
 		configured = false
 		pCommandQ = commandQ
@@ -433,8 +433,8 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func didDiscoverDescriptor() {
-		if let pPeripheral, let pCharacteristic {
-			pPeripheral.setNotifyValue(true, for: pCharacteristic)
+		if let peripheral = pCharacteristic?.service?.peripheral, let pCharacteristic {
+			peripheral.setNotifyValue(true, for: pCharacteristic)
 		}
 	}
 	
@@ -446,8 +446,8 @@ class Characteristic {
 	//
 	//--------------------------------------------------------------------------------
 	func discoverDescriptors() {
-		if let pPeripheral, let pCharacteristic {
-			pPeripheral.discoverDescriptors(for: pCharacteristic)
+		if let peripheral = pCharacteristic?.service?.peripheral, let pCharacteristic {
+			peripheral.discoverDescriptors(for: pCharacteristic)
 		}
 	}
 	

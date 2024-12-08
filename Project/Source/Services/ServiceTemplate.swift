@@ -9,17 +9,13 @@ import Foundation
 import CoreBluetooth
 import Combine
 
-open class ServiceTemplate: ObservableObject {
-    open var pPeripheral: CBPeripheral?
-    open var pID: String = "UNKNOWN"
+class ServiceTemplate: ObservableObject {
+    var pID: String = "UNKNOWN"
 
-    open var pAttributes: [ String : String ]
-    open var pSubscriptions = Set<AnyCancellable>()
+    var pSubscriptions = Set<AnyCancellable>()
 
     @Published var pConfigured: Bool = false
     
-    internal var pCommandQ: CommandQ?
-
     //--------------------------------------------------------------------------------
     //
     // Return the service UUID string -> This is a class var, so you do not
@@ -43,18 +39,6 @@ open class ServiceTemplate: ObservableObject {
     //
     //
     //--------------------------------------------------------------------------------
-    init(_ commandQ: CommandQ?) {
-        pAttributes = [ String : String ]()
-        pCommandQ = commandQ
-    }
-    
-    //--------------------------------------------------------------------------------
-    // Function Name:
-    //--------------------------------------------------------------------------------
-    //
-    //
-    //
-    //--------------------------------------------------------------------------------
     var isConfigured: Bool { return false }
 
     //--------------------------------------------------------------------------------
@@ -65,19 +49,9 @@ open class ServiceTemplate: ObservableObject {
     //
     //--------------------------------------------------------------------------------
     func didConnect(_ peripheral: CBPeripheral) {
-        pPeripheral = peripheral
         pID = peripheral.prettyID
     }
     
-    //--------------------------------------------------------------------------------
-    // Function Name:
-    //--------------------------------------------------------------------------------
-    //
-    //
-    //
-    //--------------------------------------------------------------------------------
-    func getAttributes() -> [ String : String ] { return (pAttributes) }
-
     //--------------------------------------------------------------------------------
     // Function Name:
     //--------------------------------------------------------------------------------
@@ -96,7 +70,7 @@ open class ServiceTemplate: ObservableObject {
     //
     //
     //--------------------------------------------------------------------------------
-    func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
+	func didDiscoverCharacteristic(_ characteristic: CBCharacteristic, commandQ: CommandQ?) {
         globals.log.e ("Don't know what to do here.  Perhaps this needs to override?")
     }
     

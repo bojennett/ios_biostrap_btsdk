@@ -41,12 +41,11 @@ class hrsService: ServiceTemplate {
     //
     //
     //--------------------------------------------------------------------------------
-    override init(_ commandQ: CommandQ?) {
+    override init() {
 		mHeartRateMeasurementCharacteristic = heartRateMeasurementCharacteristic()
 		mBodySensorLocationCharacteristic = bodySensorLocationCharacteristic()
-
-        super.init(commandQ)
-        
+		super.init()
+		
 		mHeartRateMeasurementCharacteristic.updated
 			.sink { [weak self] (epoch, hr, rr) in
 				self?.updated.send((epoch, hr, rr))
@@ -69,12 +68,12 @@ class hrsService: ServiceTemplate {
     //
     //
     //--------------------------------------------------------------------------------
-    override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
+	override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic, commandQ: CommandQ?) {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.heart_rate_measurement.UUID:
-			mHeartRateMeasurementCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			mHeartRateMeasurementCharacteristic.didDiscover(characteristic, commandQ: commandQ)
         case org_bluetooth_characteristic.body_sensor_location.UUID:
-			mBodySensorLocationCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			mBodySensorLocationCharacteristic.didDiscover(characteristic, commandQ: commandQ)
         default: return
         }
     }

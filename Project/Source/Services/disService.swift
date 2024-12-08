@@ -121,21 +121,21 @@ class disService: ServiceTemplate {
     //
     //--------------------------------------------------------------------------------
 	#if UNIVERSAL
-    init(_ commandQ: CommandQ?, type: biostrapDeviceSDK.biostrapDeviceType) {
+    init(_ type: biostrapDeviceSDK.biostrapDeviceType) {
 		mModelNumberCharacteristic = disStringCharacteristic()
 		mFirmwareRevisionCharacteristic = disFirmwareVersionCharacteristic()
 		mSoftwareRevisionCharacteristic = disSoftwareRevisionCharacteristic(type)
 		mHardwareRevisionCharacteristic = disStringCharacteristic()
 		mManufacturerNameCharacteristic = disStringCharacteristic()
 		mSerialNumberCharacteristic = disStringCharacteristic()
+        super.init()
 		
-        super .init(commandQ)
 		setupSubscribers()
     }
     #endif
 	
 	#if ALTER || KAIROS
-	init(_ commandQ: CommandQ?) {
+	init() {
 		mModelNumberCharacteristic = disStringCharacteristic()
 		mFirmwareRevisionCharacteristic = disFirmwareVersionCharacteristic()
 		mSoftwareRevisionCharacteristic = disSoftwareRevisionCharacteristic()
@@ -143,7 +143,7 @@ class disService: ServiceTemplate {
 		mManufacturerNameCharacteristic = disStringCharacteristic()
 		mSerialNumberCharacteristic = disStringCharacteristic()
 		
-		super .init(commandQ)
+		super.init()
 		setupSubscribers()
 	}
 	#endif
@@ -155,25 +155,25 @@ class disService: ServiceTemplate {
     //
     //
     //--------------------------------------------------------------------------------
-    override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
+	override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic, commandQ: CommandQ?) {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.model_number_string.UUID:
-			mModelNumberCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			mModelNumberCharacteristic.didDiscover(characteristic, commandQ: commandQ)
             
         case org_bluetooth_characteristic.hardware_revision_string.UUID:
-			mHardwareRevisionCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			mHardwareRevisionCharacteristic.didDiscover(characteristic, commandQ: commandQ)
             
         case org_bluetooth_characteristic.manufacturer_name_string.UUID:
-			mManufacturerNameCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			mManufacturerNameCharacteristic.didDiscover(characteristic, commandQ: commandQ)
             
         case org_bluetooth_characteristic.serial_number_string.UUID:
-			mSerialNumberCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			mSerialNumberCharacteristic.didDiscover(characteristic, commandQ: commandQ)
             
         case org_bluetooth_characteristic.firmware_revision_string.UUID:
-			mFirmwareRevisionCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			mFirmwareRevisionCharacteristic.didDiscover(characteristic, commandQ: commandQ)
             
         case org_bluetooth_characteristic.software_revision_string.UUID:
-			mSoftwareRevisionCharacteristic.didDiscover(pPeripheral!, characteristic: characteristic, commandQ: pCommandQ)
+			mSoftwareRevisionCharacteristic.didDiscover(characteristic, commandQ: commandQ)
 
         default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)")
         }
