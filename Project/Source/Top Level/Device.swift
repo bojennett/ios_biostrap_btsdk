@@ -1515,7 +1515,7 @@ public class Device: NSObject, ObservableObject {
         
         do {
             let contents = try Data(contentsOf: file)
-            mAmbiqOTAService.rxCharacteristic.start(contents)
+            mAmbiqOTAService.start(contents)
         }
         catch {
             globals.log.e ("Cannot open file")
@@ -1540,7 +1540,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		mAmbiqOTAService.rxCharacteristic.cancel()
+		mAmbiqOTAService.cancel()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2765,7 +2765,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func isReady() {
-		mAmbiqOTAService.rxCharacteristic.isReady()
+		mAmbiqOTAService.isReady()
 	}
 }
 
