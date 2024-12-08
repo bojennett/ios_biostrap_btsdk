@@ -285,10 +285,11 @@
 			isa = PBXGroup;
 			children = (
 				18ABB2CF2D041ABC00CD6726 /* ServiceTemplate.swift */,
-				18ABB2D32D041B8800CD6726 /* basService.swift */,
-				18ABB2DF2D042AC900CD6726 /* hrsService.swift */,
-				18ABB2F32D04C59B00CD6726 /* disService.swift */,
-				18ABB31B2D04E46D00CD6726 /* ambiqOTAService.swift */,
+				3B29C554264C5A5B006BC11B /* Characteristic.swift */,
+				3B63032E2D0573CF00971966 /* BAS */,
+				3B63032D2D0573AE00971966 /* DIS */,
+				3B63032F2D0573E700971966 /* HRS */,
+				3B2602D32890594400D5CAAA /* OTA */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -327,29 +328,23 @@
 			path = Alter;
 			sourceTree = "<group>";
 		};
-		3B2602D32890594400D5CAAA /* Alter and Kairos */ = {
+		3B2602D32890594400D5CAAA /* OTA */ = {
 			isa = PBXGroup;
 			children = (
+				18ABB31B2D04E46D00CD6726 /* ambiqOTAService.swift */,
 				3BF807EC27A2057400595493 /* CrcCalculator.swift */,
 				3BF807E627A201A500595493 /* ambiqOTARXCharacteristic.swift */,
 				3BF807E827A201AD00595493 /* ambiqOTATXCharacteristic.swift */,
 			);
-			path = "Alter and Kairos";
+			path = OTA;
 			sourceTree = "<group>";
 		};
 		3B29C592264C9638006BC11B /* Characteristics */ = {
 			isa = PBXGroup;
 			children = (
-				3B29C554264C5A5B006BC11B /* Characteristic.swift */,
-				3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */,
-				3BD10BD728BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift */,
-				3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */,
 				3B29C556264C5B53006BC11B /* customMainCharacteristic.swift */,
 				3BEE5C8A296502B0008798FC /* customDataCharacteristic.swift */,
 				3B1A3DE429F0563E00FCF0DF /* customStreamingCharacteristic.swift */,
-				3B29C560264C6C1A006BC11B /* batteryLevelCharacteristic.swift */,
-				3B29C566264C7033006BC11B /* heartRateMeasurementCharacteristic.swift */,
-				18ABB2EB2D04C10600CD6726 /* bodySensorLocationCharacteristic.swift */,
 				3B14EA2928EF3CF9000E85F2 /* pulseOxContinuousCharacteristic.swift */,
 			);
 			path = Characteristics;
@@ -383,6 +378,36 @@
 				3B8E1EE62A26BDBF000C2FDF /* biostrapStreamingPacket.swift */,
 			);
 			path = Packets;
+			sourceTree = "<group>";
+		};
+		3B63032D2D0573AE00971966 /* DIS */ = {
+			isa = PBXGroup;
+			children = (
+				18ABB2F32D04C59B00CD6726 /* disService.swift */,
+				3B29C56C264C7263006BC11B /* disStringCharacteristic.swift */,
+				3BD10BD728BFFB4D0098EF43 /* disFirmwareVersionCharacteristic.swift */,
+				3BFF754128F9FA920039D8CC /* disSoftwareRevisionCharacteristic.swift */,
+			);
+			path = DIS;
+			sourceTree = "<group>";
+		};
+		3B63032E2D0573CF00971966 /* BAS */ = {
+			isa = PBXGroup;
+			children = (
+				18ABB2D32D041B8800CD6726 /* basService.swift */,
+				3B29C560264C6C1A006BC11B /* batteryLevelCharacteristic.swift */,
+			);
+			path = BAS;
+			sourceTree = "<group>";
+		};
+		3B63032F2D0573E700971966 /* HRS */ = {
+			isa = PBXGroup;
+			children = (
+				18ABB2DF2D042AC900CD6726 /* hrsService.swift */,
+				3B29C566264C7033006BC11B /* heartRateMeasurementCharacteristic.swift */,
+				18ABB2EB2D04C10600CD6726 /* bodySensorLocationCharacteristic.swift */,
+			);
+			path = HRS;
 			sourceTree = "<group>";
 		};
 		3BC00B832981BCDE009F67CB /* Kairos */ = {
@@ -422,7 +447,6 @@
 				3B29C593264C9656006BC11B /* Delegates */,
 				3B2602CF2890591200D5CAAA /* Alter */,
 				3BC00B832981BCDE009F67CB /* Kairos */,
-				3B2602D32890594400D5CAAA /* Alter and Kairos */,
 				18ABB2CE2D0419D600CD6726 /* Services */,
 				3B29C592264C9638006BC11B /* Characteristics */,
 			);
