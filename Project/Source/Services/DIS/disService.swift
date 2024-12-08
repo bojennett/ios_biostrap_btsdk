@@ -27,10 +27,6 @@ class disService: ServiceTemplate {
     @Published var algorithmsSoftwareRevision: String?
     @Published var sleepSoftwareRevision: String?
 	
-	#if UNIVERSAL
-    var type = biostrapDeviceSDK.biostrapDeviceType.unknown
-    #endif
-
     //--------------------------------------------------------------------------------
     //
     //
@@ -120,22 +116,7 @@ class disService: ServiceTemplate {
     //
     //
     //--------------------------------------------------------------------------------
-	#if UNIVERSAL
-    init(_ type: biostrapDeviceSDK.biostrapDeviceType) {
-		mModelNumberCharacteristic = disStringCharacteristic()
-		mFirmwareRevisionCharacteristic = disFirmwareVersionCharacteristic()
-		mSoftwareRevisionCharacteristic = disSoftwareRevisionCharacteristic(type)
-		mHardwareRevisionCharacteristic = disStringCharacteristic()
-		mManufacturerNameCharacteristic = disStringCharacteristic()
-		mSerialNumberCharacteristic = disStringCharacteristic()
-        super.init()
-		
-		setupSubscribers()
-    }
-    #endif
-	
-	#if ALTER || KAIROS
-	init() {
+	override init() {
 		mModelNumberCharacteristic = disStringCharacteristic()
 		mFirmwareRevisionCharacteristic = disFirmwareVersionCharacteristic()
 		mSoftwareRevisionCharacteristic = disSoftwareRevisionCharacteristic()
@@ -146,7 +127,6 @@ class disService: ServiceTemplate {
 		super.init()
 		setupSubscribers()
 	}
-	#endif
 
     //--------------------------------------------------------------------------------
     // Function Name:

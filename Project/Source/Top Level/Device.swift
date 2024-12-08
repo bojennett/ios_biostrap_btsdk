@@ -353,10 +353,10 @@ public class Device: NSObject, ObservableObject {
 
 	internal var commandQ: CommandQ?
 	
-    internal var mBAS: basService?
-    internal var mHRS: hrsService?
-    internal var mDIS: disService?
-    internal var mAmbiqOTAService: ambiqOTAService?
+    internal var mBAS: basService
+    internal var mHRS: hrsService
+    internal var mDIS: disService
+    internal var mAmbiqOTAService: ambiqOTAService
 
 	internal var mMainCharacteristic: customMainCharacteristic
 	internal var mDataCharacteristic: customDataCharacteristic
@@ -522,6 +522,11 @@ public class Device: NSObject, ObservableObject {
         mDataCharacteristic = customDataCharacteristic()
         mStreamingCharacteristic = customStreamingCharacteristic()
         
+        mBAS = basService()
+        mHRS = hrsService()
+        mDIS = disService()
+        mAmbiqOTAService = ambiqOTAService()
+
 		self.name							= "UNKNOWN"
 		self.id								= "UNKNOWN"
 		self.discovery_type					= .unknown
@@ -546,11 +551,6 @@ public class Device: NSObject, ObservableObject {
 		self.type = type
 		self.discovery_type = discoveryType
 		self.commandQ = CommandQ(peripheral)
-        
-        self.mBAS = basService()
-        self.mHRS = hrsService()
-        self.mDIS = disService(type)
-        self.mAmbiqOTAService = ambiqOTAService()
 	}
 	#else
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
@@ -565,66 +565,53 @@ public class Device: NSObject, ObservableObject {
 		self.peripheral	= peripheral
 		self.centralManager = centralManager
 		self.discovery_type = discoveryType
-		self.commandQ = CommandQ(peripheral)
-        
-        self.mBAS = basService()
-        self.mHRS = hrsService()
-        self.mDIS = disService()
-        self.mAmbiqOTAService = ambiqOTAService()
+		self.commandQ = CommandQ(peripheral)        
 	}
 	#endif
 	
 	#if UNIVERSAL || ALTER
 	internal var mAlterConfigured: Bool {
-        if let mAmbiqOTAService, let mBAS, let mHRS, let mDIS {
-            
-			//globals.log.e ("\(mAmbiqOTAService.pConfigured):\(mBAS.pConfigured):\(mHRS.pConfigured):\(mDIS.isConfigured),\(mMainCharacteristic.configured):\(mStreamingCharacteristic.configured):\(mDataCharacteristic.configured)")
+        //globals.log.e ("\(mAmbiqOTAService.pConfigured):\(mBAS.pConfigured):\(mHRS.pConfigured):\(mDIS.isConfigured),\(mMainCharacteristic.configured):\(mStreamingCharacteristic.configured):\(mDataCharacteristic.configured)")
 			
-			if mDataCharacteristicDiscovered && mStreamingCharacteristicDiscovered {
-				return (mBAS.pConfigured &&
-                        mHRS.pConfigured &&
-                        mDIS.pConfigured &&
-                        mAmbiqOTAService.pConfigured &&
-						mMainCharacteristic.configured &&
-						mDataCharacteristic.configured &&
-                        mStreamingCharacteristic.configured
-				)
-			} else {
-				return (mBAS.pConfigured &&
-                        mHRS.pConfigured &&
-                        mDIS.pConfigured &&
-                        mAmbiqOTAService.pConfigured &&
-						mMainCharacteristic.configured
-				)
-			}
-		}
-		else { return (false) }
+        if mDataCharacteristicDiscovered && mStreamingCharacteristicDiscovered {
+            return (mBAS.pConfigured &&
+                    mHRS.pConfigured &&
+                    mDIS.pConfigured &&
+                    mAmbiqOTAService.pConfigured &&
+                    mMainCharacteristic.configured &&
+                    mDataCharacteristic.configured &&
+                    mStreamingCharacteristic.configured
+            )
+        } else {
+            return (mBAS.pConfigured &&
+                    mHRS.pConfigured &&
+                    mDIS.pConfigured &&
+                    mAmbiqOTAService.pConfigured &&
+                    mMainCharacteristic.configured
+            )
+        }
 	}
 	#endif
 
 	#if UNIVERSAL || KAIROS
 	internal var mKairosConfigured: Bool {
-        if let mAmbiqOTAService, let mBAS, let mHRS, let mDIS {
-			
-			if mDataCharacteristicDiscovered && mStreamingCharacteristicDiscovered {
-				return (mBAS.pConfigured &&
-                        mHRS.pConfigured &&
-                        mDIS.pConfigured &&
-                        mAmbiqOTAService.pConfigured &&
-						mMainCharacteristic.configured &&
-						mDataCharacteristic.configured &&
-                        mStreamingCharacteristic.configured
-				)
-			} else {
-				return (mBAS.pConfigured &&
-                        mHRS.pConfigured &&
-                        mDIS.pConfigured &&
-                        mAmbiqOTAService.pConfigured &&
-						mMainCharacteristic.configured
-				)
-			}
-		}
-		else { return (false) }
+        if mDataCharacteristicDiscovered && mStreamingCharacteristicDiscovered {
+            return (mBAS.pConfigured &&
+                    mHRS.pConfigured &&
+                    mDIS.pConfigured &&
+                    mAmbiqOTAService.pConfigured &&
+                    mMainCharacteristic.configured &&
+                    mDataCharacteristic.configured &&
+                    mStreamingCharacteristic.configured
+            )
+        } else {
+            return (mBAS.pConfigured &&
+                    mHRS.pConfigured &&
+                    mDIS.pConfigured &&
+                    mAmbiqOTAService.pConfigured &&
+                    mMainCharacteristic.configured
+            )
+        }
 	}
 	#endif
 
@@ -636,9 +623,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	internal func checkConfigured() {
-        if let mDIS {
-            mMainCharacteristic.firmwareVersion = mDIS.mFirmwareRevisionCharacteristic.value
-		}
+        mMainCharacteristic.firmwareVersion = mDIS.mFirmwareRevisionCharacteristic.value
 		
 		if connectionState == .configured { return } // If i was already configured, i don't need to tell the app this again
         if preview { return } // If i am mocked, i don't need to tell the app again
@@ -784,16 +769,12 @@ public class Device: NSObject, ObservableObject {
         
 		var newStyle	= false
 		
-        if let mDIS {
-            if (mDIS.mSoftwareRevisionCharacteristic.bluetoothGreaterThan("2.0.4")) {
-                globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use new style")
-                newStyle    = true
-            }
-            else {
-                globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use old style")
-            }
-        } else {
-            globals.log.e ("Can't find the software version, i guess i will use the old style")
+        if (mDIS.mSoftwareRevisionCharacteristic.bluetoothGreaterThan("2.0.4")) {
+            globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use new style")
+            newStyle    = true
+        }
+        else {
+            globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use old style")
         }
 
         mMainCharacteristic.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
@@ -1532,23 +1513,16 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        if let mAmbiqOTAService {
-			do {
-				let contents = try Data(contentsOf: file)
-				mAmbiqOTAService.rxCharacteristic.start(contents)
-			}
-			catch {
-				globals.log.e ("Cannot open file")
-				DispatchQueue.main.async {
-					self.updateFirmwareFailed.send((10001, "Cannot parse file for update"))
-				}
-			}
-		}
-		else {
-			DispatchQueue.main.async {
-				self.updateFirmwareFailed.send((10001, "No OTA RX characteristic to update"))
-			}
-		}
+        do {
+            let contents = try Data(contentsOf: file)
+            mAmbiqOTAService.rxCharacteristic.start(contents)
+        }
+        catch {
+            globals.log.e ("Cannot open file")
+            DispatchQueue.main.async {
+                self.updateFirmwareFailed.send((10001, "Cannot parse file for update"))
+            }
+        }
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1566,12 +1540,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let mAmbiqOTAService { mAmbiqOTAService.rxCharacteristic.cancel() }
-		else {
-			DispatchQueue.main.async {
-				self.updateFirmwareFailed.send((10001, "No characteristic to cancel"))
-			}
-		}
+		mAmbiqOTAService.rxCharacteristic.cancel()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2360,8 +2329,8 @@ public class Device: NSObject, ObservableObject {
 				peripheral.delegate = self
                 
                 // Battery Service
-                mBAS?.didConnect(peripheral)
-                mBAS?.$batteryLevel
+                mBAS.didConnect(peripheral)
+                mBAS.$batteryLevel
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] level in
                         self?.batteryLevel = level
@@ -2372,8 +2341,8 @@ public class Device: NSObject, ObservableObject {
                     .store(in: &subscriptions)
                                 
                 // Heart Rate Service
-                mHRS?.didConnect(peripheral)
-                mHRS?.updated
+                mHRS.didConnect(peripheral)
+                mHRS.updated
                     .compactMap { $0 }
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] (epoch, hr, rr) in
@@ -2383,57 +2352,57 @@ public class Device: NSObject, ObservableObject {
                     .store(in: &subscriptions)
                 
                 // Device Information Service
-                mDIS?.didConnect(peripheral)
-                mDIS?.$modelNumber
+                mDIS.didConnect(peripheral)
+                mDIS.$modelNumber
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] value in
                         self?.modelNumber = value
                     }
                     .store(in: &subscriptions)
                 
-                mDIS?.$serialNumber
+                mDIS.$serialNumber
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] value in
                         self?.serialNumber = value
                     }
                     .store(in: &subscriptions)
                 
-                mDIS?.$hardwareRevision
+                mDIS.$hardwareRevision
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] value in
                         self?.hardwareRevision = value
                     }
                     .store(in: &subscriptions)
                 
-                mDIS?.$manufacturerName
+                mDIS.$manufacturerName
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] value in
                         self?.manufacturerName = value
                     }
                     .store(in: &subscriptions)
 
-                mDIS?.$firmwareRevision
+                mDIS.$firmwareRevision
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] value in
                         self?.firmwareRevision = value
                     }
                     .store(in: &subscriptions)
 
-                mDIS?.$bluetoothSoftwareRevision
+                mDIS.$bluetoothSoftwareRevision
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] value in
                         self?.bluetoothSoftwareRevision = value
                     }
                     .store(in: &subscriptions)
 
-                mDIS?.$algorithmsSoftwareRevision
+                mDIS.$algorithmsSoftwareRevision
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] value in
                         self?.algorithmsSoftwareRevision = value
                     }
                     .store(in: &subscriptions)
 
-                mDIS?.$sleepSoftwareRevision
+                mDIS.$sleepSoftwareRevision
                     .receive(on: DispatchQueue.main)
                     .sink { [weak self] value in
                         self?.sleepSoftwareRevision = value
@@ -2441,9 +2410,9 @@ public class Device: NSObject, ObservableObject {
                     .store(in: &subscriptions)
                 
                 // AMBIQ OTA
-                mAmbiqOTAService?.didConnect(peripheral)
+                mAmbiqOTAService.didConnect(peripheral)
                 
-                mAmbiqOTAService?.started
+                mAmbiqOTAService.started
                     .receive(on: DispatchQueue.main)
                     .sink {
                         self.updateFirmwareStarted.send()
@@ -2451,7 +2420,7 @@ public class Device: NSObject, ObservableObject {
                     }
                     .store(in: &subscriptions)
 
-                mAmbiqOTAService?.finished
+                mAmbiqOTAService.finished
                     .receive(on: DispatchQueue.main)
                     .sink {
                         self.updateFirmwareFinished.send()
@@ -2459,7 +2428,7 @@ public class Device: NSObject, ObservableObject {
                     }
                     .store(in: &subscriptions)
                 
-                mAmbiqOTAService?.failed
+                mAmbiqOTAService.failed
                     .receive(on: DispatchQueue.main)
                     .sink { code, message in
                         self.updateFirmwareFailed.send((code, message))
@@ -2467,7 +2436,7 @@ public class Device: NSObject, ObservableObject {
                     }
                     .store(in: &subscriptions)
 
-                mAmbiqOTAService?.progress
+                mAmbiqOTAService.progress
                     .receive(on: DispatchQueue.main)
                     .sink { percent in
                         self.updateFirmwareProgress.send(percent)
@@ -2502,22 +2471,22 @@ public class Device: NSObject, ObservableObject {
 	//--------------------------------------------------------------------------------
 	func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
         if basService.hit(characteristic) {
-			mBAS?.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
+			mBAS.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
             return
         }
         
         if hrsService.hit(characteristic) {
-            mHRS?.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
+            mHRS.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
             return
         }
         
         if disService.hit(characteristic) {
-            mDIS?.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
+            mDIS.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
             return
         }
         
         if ambiqOTAService.hit(characteristic) {
-            mAmbiqOTAService?.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
+            mAmbiqOTAService.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
             return
         }
         
@@ -2596,17 +2565,17 @@ public class Device: NSObject, ObservableObject {
 	func didDiscoverDescriptor (_ descriptor: CBDescriptor, forCharacteristic characteristic: CBCharacteristic) {
         
         if basService.hit(characteristic) {
-            mBAS?.didDiscoverDescriptor(characteristic)
+            mBAS.didDiscoverDescriptor(characteristic)
             return
         }
         
         if hrsService.hit(characteristic) {
-            mHRS?.didDiscoverDescriptor(characteristic)
+            mHRS.didDiscoverDescriptor(characteristic)
             return
         }
         
         if ambiqOTAService.hit(characteristic) {
-            mAmbiqOTAService?.didDiscoverDescriptor(characteristic)
+            mAmbiqOTAService.didDiscoverDescriptor(characteristic)
             return
         }
         
@@ -2669,22 +2638,22 @@ public class Device: NSObject, ObservableObject {
 	func didUpdateValue(_ characteristic: CBCharacteristic) {
         
         if basService.hit(characteristic) {
-            mBAS?.didUpdateValue(characteristic)
+            mBAS.didUpdateValue(characteristic)
             return
         }
         
         if hrsService.hit(characteristic) {
-            mHRS?.didUpdateValue(characteristic)
+            mHRS.didUpdateValue(characteristic)
             return
         }
 
         if disService.hit(characteristic) {
-            mDIS?.didUpdateValue(characteristic)
+            mDIS.didUpdateValue(characteristic)
             return
         }
         
         if ambiqOTAService.hit(characteristic) {
-            mAmbiqOTAService?.didUpdateValue(characteristic)
+            mAmbiqOTAService.didUpdateValue(characteristic)
             return
         }
 
@@ -2725,17 +2694,17 @@ public class Device: NSObject, ObservableObject {
 		if let _ = peripheral {
             
             if basService.hit(characteristic) {
-                mBAS?.didUpdateNotificationState(characteristic)
+                mBAS.didUpdateNotificationState(characteristic)
                 return
             }
             
             if hrsService.hit(characteristic) {
-                mHRS?.didUpdateNotificationState(characteristic)
+                mHRS.didUpdateNotificationState(characteristic)
                 return
             }
             
             if ambiqOTAService.hit(characteristic) {
-                mAmbiqOTAService?.didUpdateNotificationState(characteristic)
+                mAmbiqOTAService.didUpdateNotificationState(characteristic)
                 return
             }
             
@@ -2796,9 +2765,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func isReady() {
-        if let mAmbiqOTAService {
-			mAmbiqOTAService.rxCharacteristic.isReady()
-        }
+		mAmbiqOTAService.rxCharacteristic.isReady()
 	}
 }
 

@@ -14,22 +14,6 @@ class disSoftwareRevisionCharacteristic: Characteristic {
     @Published var algorithms : String = ""
     @Published var sleep : String = ""
 	
-	#if UNIVERSAL
-	var type : biostrapDeviceSDK.biostrapDeviceType	= .unknown
-	#endif
-		
-	//--------------------------------------------------------------------------------
-	//
-	// Constructor
-	//
-	//--------------------------------------------------------------------------------
-	#if UNIVERSAL
-	init(_ type: biostrapDeviceSDK.biostrapDeviceType) {
-		super.init()
-		self.type	= type
-	}
-	#endif
-	
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------
