@@ -147,8 +147,6 @@ class customMainCharacteristic: Characteristic {
     let getWornOverrideStatusComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
     
     let airplaneModeComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
-
-	var firmwareVersion						: String = ""
 	
 	internal var mDataPackets				: [biostrapDataPacket]!
 	internal var mCRCOK						: Bool = true

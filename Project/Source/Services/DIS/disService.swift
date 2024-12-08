@@ -135,6 +135,17 @@ class disService: ServiceTemplate {
     //
     //
     //--------------------------------------------------------------------------------
+    func bluetoothRevisionGreaterThan(_ version: String) -> Bool {
+        return mSoftwareRevisionCharacteristic.bluetoothGreaterThan(version)
+    }
+
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
 	override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic, commandQ: CommandQ?) {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.model_number_string.UUID:

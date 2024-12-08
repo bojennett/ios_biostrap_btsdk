@@ -623,8 +623,6 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	internal func checkConfigured() {
-        mMainCharacteristic.firmwareVersion = mDIS.mFirmwareRevisionCharacteristic.value
-		
 		if connectionState == .configured { return } // If i was already configured, i don't need to tell the app this again
         if preview { return } // If i am mocked, i don't need to tell the app again
 		
@@ -769,12 +767,12 @@ public class Device: NSObject, ObservableObject {
         
 		var newStyle	= false
 		
-        if (mDIS.mSoftwareRevisionCharacteristic.bluetoothGreaterThan("2.0.4")) {
-            globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use new style")
+        if (mDIS.bluetoothRevisionGreaterThan("2.0.4")) {
+            globals.log.v ("Bluetooth library version: '\(bluetoothSoftwareRevision)' - Use new style")
             newStyle    = true
         }
         else {
-            globals.log.v ("Bluetooth library version: '\(mDIS.mSoftwareRevisionCharacteristic.bluetooth)' - Use old style")
+            globals.log.v ("Bluetooth library version: '\(bluetoothSoftwareRevision)' - Use old style")
         }
 
         mMainCharacteristic.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
