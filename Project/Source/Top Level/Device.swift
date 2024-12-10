@@ -408,7 +408,6 @@ public class Device: NSObject, ObservableObject {
                     return false
                 }
             } else if customService.scan_services.contains(service.uuid) {
-                globals.log.w ("*** \(peripheral.prettyID): FOUND")
                 return true
 			} else if let customService = Device.services(rawValue: service.prettyID) {
 				globals.log.v ("\(peripheral.prettyID): '\(customService.title)'")
@@ -2263,8 +2262,30 @@ public class Device: NSObject, ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { metrics in
                 if let metrics {
-                    //TODO: The packet is lost as it is now a ppg metrics object
-                    //self.lambdaPPGMetrics?(self.id, true, packet)
+                    let packet = biostrapDataPacket()
+                    if let hr = metrics.hr {
+                        packet.hr_valid = true
+                        packet.hr_result = hr
+                    }
+                    
+                    if let hrv = metrics.hrv {
+                        packet.hrv_valid = true
+                        packet.hrv_result = hrv
+                    }
+                    
+                    if let rr = metrics.rr {
+                        packet.rr_valid = true
+                        packet.rr_result = rr
+                    }
+                    
+                    do {
+                        let jsonData = try JSONEncoder().encode(packet)
+                        if let jsonString = String(data: jsonData, encoding: .utf8) {
+                            self.lambdaPPGMetrics?(self.id, true, jsonString)
+                        }
+                        else { self.lambdaPPGMetrics?(self.id, false, "") }
+                    }
+                    catch { self.lambdaPPGMetrics?(self.id, false, "") }
                 }
 				self.ppgMetrics = metrics
 			}
@@ -2601,8 +2622,7 @@ public class Device: NSObject, ObservableObject {
     //
     //--------------------------------------------------------------------------------
     func didUpdateValue(_ data: Data, offset: Int) {
-        //TODO: Put the update from file into the custom service
-        //mDataCharacteristic.didUpdateValue(true, data: data, offset: offset)
+        mCustomService.didUpdateValue(data, offset: offset)
     }
 
 	//--------------------------------------------------------------------------------
