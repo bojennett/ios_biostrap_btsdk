@@ -72,7 +72,9 @@ class customMainCharacteristic: CharacteristicTemplate {
 			}
 		}
 	}
-	
+    
+    @Published private(set) var ppgMetrics: ppgMetricsType?
+
 	// MARK: Callbacks
     let writeEpochComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
     let getAllPacketsComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
@@ -107,7 +109,6 @@ class customMainCharacteristic: CharacteristicTemplate {
 
     let deviceWornStatus = PassthroughSubject<Bool, Never>()
     let deviceChargingStatus = PassthroughSubject<(Bool, Bool, Bool), Never>()
-    let ppgMetrics = PassthroughSubject<(Bool, String), Never>()
     let ppgFailed = PassthroughSubject<Int, Never>()
     let manufacturingTestResult = PassthroughSubject<(Bool, String), Never>()
 
@@ -800,8 +801,6 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func setAskForButtonResponse(_ enable: Bool) {
-		globals.log.v("\(pID): Enabled = \(enable)")
-		
 		var data = Data()
 		data.append(commands.setAskForButtonResponse.rawValue)
 		data.append(enable ? 0x01 : 0x00)
@@ -816,8 +815,6 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getAskForButtonResponse() {
-		globals.log.v("\(pID)")
-		
 		var data = Data()
 		data.append(commands.getAskForButtonResponse.rawValue)
 		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
@@ -1515,14 +1512,13 @@ class customMainCharacteristic: CharacteristicTemplate {
 			case .ppg_metrics:
                 let (_, type, packet) = pParseSinglePacket(data, index: 1, offset: 0)
 				if (type == .ppg_metrics) {
-					do {
-						let jsonData = try JSONEncoder().encode(packet)
-						if let jsonString = String(data: jsonData, encoding: .utf8) {
-                            self.ppgMetrics.send((true, jsonString))
-						}
-                        else { self.ppgMetrics.send((false, "")) }
-					}
-                    catch { self.ppgMetrics.send((false, "")) }
+                    let metrics = ppgMetricsType()
+                    metrics.status = packet.ppg_metrics_status.title
+                    if packet.hr_valid { metrics.hr = packet.hr_result }
+                    if packet.hrv_valid { metrics.hrv = packet.hrv_result }
+                    if packet.rr_valid { metrics.rr = packet.rr_result }
+                    
+                    ppgMetrics = metrics
 				}
 				
 			case .ppgFailed:

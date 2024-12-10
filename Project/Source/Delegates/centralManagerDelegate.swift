@@ -109,14 +109,14 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 						#if UNIVERSAL || ALTER
 						if (deviceType == .alter) {
 							valid = true
-							service = Device.services.alter.UUID
+                            service = customService.services.alter.UUID
 						}
 						#endif
 												
 						#if UNIVERSAL || KAIROS
 						if (deviceType == .kairos) {
 							valid = true
-							service = Device.services.kairos.UUID
+							service = customService.services.kairos.UUID
 						}
 						#endif
 												
@@ -444,7 +444,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 							
 			for thisUUID in services {
 #if UNIVERSAL || ALTER
-				if (thisUUID == Device.services.alter.UUID) {
+				if (thisUUID == customService.services.alter.UUID) {
 					
 					if let device = self.discoveredDevices.first(where: { $0.id == peripheral.prettyID }) {
 						if valid { discovered?(peripheral.prettyID, device) }
@@ -483,7 +483,7 @@ extension biostrapDeviceSDK: CBCentralManagerDelegate {
 #endif
 				
 #if UNIVERSAL || KAIROS
-				if (thisUUID == Device.services.kairos.UUID) {
+				if (thisUUID == customService.services.kairos.UUID) {
 					
 					if let device = self.discoveredDevices.first(where: { $0.id == peripheral.prettyID }) {
 						if valid { discovered?(peripheral.prettyID, device) }

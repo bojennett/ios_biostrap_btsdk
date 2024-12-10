@@ -53,9 +53,13 @@ class customStreamingCharacteristic: CharacteristicTemplate {
 			case .ppg_metrics:
                 let (_, type, packet) = pParseSinglePacket(data, index: 1, offset: 0)
 				if (type == .ppg_metrics) {
-                    if packet.hr_valid { self.ppgMetrics?.hr = packet.hr_result }
-                    if packet.hrv_valid { self.ppgMetrics?.hrv = packet.hrv_result }
-                    if packet.rr_valid { self.ppgMetrics?.rr = packet.rr_result }
+                    let metrics = ppgMetricsType()
+                    metrics.status = packet.ppg_metrics_status.title
+                    if packet.hr_valid { metrics.hr = packet.hr_result }
+                    if packet.hrv_valid { metrics.hrv = packet.hrv_result }
+                    if packet.rr_valid { metrics.rr = packet.rr_result }
+                    
+                    ppgMetrics = metrics
 				}
 				
 			case .ppgFailed:

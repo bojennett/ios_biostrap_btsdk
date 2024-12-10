@@ -22,59 +22,7 @@ public class Device: NSObject, ObservableObject {
 				
 		case unknown = "UNK"
 	}
-		
-	enum services: String {
-		#if UNIVERSAL || ALTER
-		case alter			= "883BBA2C-8E31-40BB-A859-D59A2FB38EC0"
-		#endif
-		
-		#if UNIVERSAL || KAIROS
-		case kairos			= "140BB753-9845-4C0E-B61A-E6BAE41712F0"
-		#endif
-
-		var UUID: CBUUID {
-			return CBUUID(string: self.rawValue)
-		}
-		
-		var title: String {
-			switch (self) {
-			#if UNIVERSAL || ALTER
-			case .alter		: return "Alter Service"
-			#endif
-
-			#if UNIVERSAL || KAIROS
-			case .kairos	: return "Kairos Service"
-			#endif				
-			}
-		}
-	}
-
-	enum characteristics: String {
-		#if UNIVERSAL || ALTER
-		case alterMainCharacteristic	= "883BBA2C-8E31-40BB-A859-D59A2FB38EC1"
-		#endif
-
-		#if UNIVERSAL || KAIROS
-		case kairosMainCharacteristic	= "140BB753-9845-4C0E-B61A-E6BAE41712F1"
-		#endif
-
-		var UUID: CBUUID {
-			return CBUUID(string: self.rawValue)
-		}
-		
-		var title: String {
-			switch (self) {
-			#if UNIVERSAL || ALTER
-			case .alterMainCharacteristic	: return "Alter Command Characteristic"
-			#endif
-
-			#if UNIVERSAL || KAIROS
-			case .kairosMainCharacteristic	: return "Kairos Command Characteristic"
-			#endif
-			}
-		}
-	}
-
+		     
 	public enum ConnectionState {
 		case disconnected
 		case connecting
@@ -350,11 +298,6 @@ public class Device: NSObject, ObservableObject {
     internal var mDIS: disService
     internal var mAmbiqOTAService: ambiqOTAService
     internal var mCustomService: customService
-
-	internal var mMainCharacteristic: customMainCharacteristic
-    
-    internal var mDataCharacteristicDiscovered: Bool = false
-    internal var mStreamingCharacteristicDiscovered: Bool = false
     
     internal var subscriptions = Set<AnyCancellable>()
     
@@ -381,17 +324,7 @@ public class Device: NSObject, ObservableObject {
 	}
 	
 	class var scan_services: [CBUUID] {
-		#if UNIVERSAL
-		return [services.alter.UUID, services.kairos.UUID]
-		#endif
-				
-		#if ALTER
-		return [services.alter.UUID]
-		#endif
-		
-		#if KAIROS
-		return [services.kairos.UUID]
-		#endif
+        return customService.scan_services
 	}
 	
 	class func hit(_ service: CBService) -> Bool {
@@ -409,9 +342,6 @@ public class Device: NSObject, ObservableObject {
                 }
             } else if customService.scan_services.contains(service.uuid) {
                 return true
-			} else if let customService = Device.services(rawValue: service.prettyID) {
-				globals.log.v ("\(peripheral.prettyID): '\(customService.title)'")
-				return true
             } else if ambiqOTAService.scan_services.contains(service.uuid) {
                 globals.log.v ("\(peripheral.prettyID): 'Ambiq OTA'")
                 return true
@@ -511,8 +441,6 @@ public class Device: NSObject, ObservableObject {
 	override public init() {
 		self.connectionState = .disconnected
         
-        mMainCharacteristic = customMainCharacteristic()
-        
         mBAS = basService()
         mHRS = hrsService()
         mDIS = disService()
@@ -532,7 +460,6 @@ public class Device: NSObject, ObservableObject {
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, type: biostrapDeviceSDK.biostrapDeviceType, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
-        self.subscribeMainCharacteristic()
         self.subScribeCustomService()
         self.subscribeBAS()
         self.subscribeHRS()
@@ -551,7 +478,6 @@ public class Device: NSObject, ObservableObject {
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
-        self.subscribeMainCharacteristic()
         self.subScribeCustomService()
         self.subscribeBAS()
         self.subscribeHRS()
@@ -567,32 +493,6 @@ public class Device: NSObject, ObservableObject {
 	}
 	#endif
 	
-	#if UNIVERSAL || ALTER
-	internal var mAlterConfigured: Bool {
-        //globals.log.e ("\(mAmbiqOTAService.pConfigured):\(mBAS.pConfigured):\(mHRS.pConfigured):\(mDIS.isConfigured),\(mMainCharacteristic.configured):\(mStreamingCharacteristic.configured):\(mDataCharacteristic.configured)")
-			
-        return (mBAS.pConfigured &&
-                mHRS.pConfigured &&
-                mDIS.pConfigured &&
-                mAmbiqOTAService.pConfigured &&
-                mCustomService.pConfigured &&
-                mMainCharacteristic.configured
-        )
-	}
-	#endif
-
-	#if UNIVERSAL || KAIROS
-	internal var mKairosConfigured: Bool {
-        return (mBAS.pConfigured &&
-                mHRS.pConfigured &&
-                mDIS.pConfigured &&
-                mAmbiqOTAService.pConfigured &&
-                mCustomService.pConfigured &&
-                mMainCharacteristic.configured
-        )
-	}
-	#endif
-
 	//--------------------------------------------------------------------------------
 	// Function Name: checkConfigured
 	//--------------------------------------------------------------------------------
@@ -604,24 +504,12 @@ public class Device: NSObject, ObservableObject {
 		if connectionState == .configured { return } // If i was already configured, i don't need to tell the app this again
         if preview { return } // If i am mocked, i don't need to tell the app again
 		
-		var configured: Bool = false
+		let configured = mBAS.pConfigured &&
+        mHRS.pConfigured &&
+        mDIS.pConfigured &&
+        mAmbiqOTAService.pConfigured &&
+        mCustomService.pConfigured
 		
-		#if UNIVERSAL
-		switch type {
-		case .alter		: configured = mAlterConfigured
-		case .kairos	: configured = mKairosConfigured
-		case .unknown	: break
-		}
-		#endif
-				
-		#if ALTER
-		configured = mAlterConfigured
-		#endif
-		
-		#if KAIROS
-		configured = mKairosConfigured
-		#endif
-
 		if (configured) {
 			connectionState = .configured
 			if let peripheral {
@@ -646,12 +534,10 @@ public class Device: NSObject, ObservableObject {
 			
 			if let centralManager, let peripheral {
 				centralManager.connect(peripheral, options: nil)
-			}
-			else {
+			} else {
 				globals.log.e ("Either do not have a central manager or a peripheral")
 			}
-		}
-		else {
+		} else {
 			globals.log.e ("Device is not in a disconnected state")
 		}
 	}
@@ -667,12 +553,10 @@ public class Device: NSObject, ObservableObject {
 		if connectionState != .disconnected {
 			if let centralManager, let peripheral {
 				centralManager.cancelPeripheralConnection(peripheral)
-			}
-			else {
+			} else {
 				globals.log.e ("Either do not have a central manager or a peripheral")
 			}
-		}
-		else {
+		} else {
 			globals.log.e ("Device is not in a connecting or connected state")
 		}
 	}
@@ -692,7 +576,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.writeEpoch(newEpoch)
+        mCustomService.writeEpoch(newEpoch)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -709,7 +593,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.readEpoch()
+        mCustomService.readEpoch()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -726,7 +610,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.endSleep()
+        mCustomService.endSleep()
 	}
 
 
@@ -748,12 +632,11 @@ public class Device: NSObject, ObservableObject {
         if (mDIS.bluetoothRevisionGreaterThan("2.0.4")) {
             globals.log.v ("Bluetooth library version: '\(bluetoothSoftwareRevision ?? "unknown")' - Use new style")
             newStyle    = true
-        }
-        else {
+        } else {
             globals.log.v ("Bluetooth library version: '\(bluetoothSoftwareRevision ?? "unknown")' - Use old style")
         }
 
-        mMainCharacteristic.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
+        mCustomService.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -769,7 +652,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.getAllPacketsAcknowledge(ack)
+        mCustomService.getAllPacketsAcknowledge(ack)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -785,7 +668,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.getPacketCount()
+        mCustomService.getPacketCount()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -801,7 +684,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.disableWornDetect()
+        mCustomService.disableWornDetect()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -817,7 +700,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.enableWornDetect()
+        mCustomService.enableWornDetect()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -833,7 +716,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.startManual(algorithms)
+        mCustomService.startManual(algorithms)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -849,7 +732,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.stopManual()
+        mCustomService.stopManual()
 	}
 
     //--------------------------------------------------------------------------------
@@ -865,7 +748,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.userLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
+        mCustomService.userLED(red: red, green: green, blue: blue, blink: blink, seconds: seconds)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -881,7 +764,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.enterShipMode()
+        mCustomService.enterShipMode()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -897,7 +780,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.reset()
+        mCustomService.reset()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -913,7 +796,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.airplaneMode()
+        mCustomService.airplaneMode()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -930,7 +813,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.writeSerialNumber(partID)
+        mCustomService.writeSerialNumber(partID)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -946,7 +829,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.readSerialNumber()
+        mCustomService.readSerialNumber()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -963,7 +846,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.deleteSerialNumber()
+        mCustomService.deleteSerialNumber()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -980,7 +863,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.writeAdvInterval(seconds)
+        mCustomService.writeAdvInterval(seconds)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -996,7 +879,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.readAdvInterval()
+        mCustomService.readAdvInterval()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1013,7 +896,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.deleteAdvInterval()
+        mCustomService.deleteAdvInterval()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1030,7 +913,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.clearChargeCycles()
+        mCustomService.clearChargeCycles()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1046,7 +929,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.readChargeCycles()
+        mCustomService.readChargeCycles()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1062,7 +945,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
             
-        mMainCharacteristic.readCanLogDiagnostics()
+        mCustomService.readCanLogDiagnostics()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1079,7 +962,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.updateCanLogDiagnostics(allow)
+        mCustomService.updateCanLogDiagnostics(allow)
 	}
 		
 	//--------------------------------------------------------------------------------
@@ -1099,7 +982,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.alterManufacturingTest(test)
+        mCustomService.alterManufacturingTest(test)
 	}
 	#endif
 
@@ -1113,7 +996,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.kairosManufacturingTest(test)
+        mCustomService.kairosManufacturingTest(test)
 	}
 	#endif
 
@@ -1131,7 +1014,8 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.setAskForButtonResponse(enable)
+        globals.log.v("\(enable)")
+        mCustomService.setAskForButtonResponse(enable)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1147,7 +1031,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.getAskForButtonResponse()
+        mCustomService.getAskForButtonResponse()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1170,7 +1054,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
+        mCustomService.setHRZoneColor(type, red: red, green: green, blue: blue, on_milliseconds: on_milliseconds, off_milliseconds: off_milliseconds)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1186,7 +1070,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.getHRZoneColor(type)
+        mCustomService.getHRZoneColor(type)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1203,7 +1087,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
+        mCustomService.setHRZoneRange(enabled, high_value: high_value, low_value: low_value)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1219,7 +1103,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.getHRZoneRange()
+        mCustomService.getHRZoneRange()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1235,7 +1119,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.getPPGAlgorithm()
+        mCustomService.getPPGAlgorithm()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1252,7 +1136,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.setAdvertiseAsHRM(asHRM)
+        mCustomService.setAdvertiseAsHRM(asHRM)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1268,7 +1152,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.getAdvertiseAsHRM()
+        mCustomService.getAdvertiseAsHRM()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1291,7 +1175,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.setButtonCommand(tap, command: command)
+        mCustomService.setButtonCommand(tap, command: command)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1307,7 +1191,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.getButtonCommand(tap)
+        mCustomService.getButtonCommand(tap)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1318,7 +1202,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	public func setPaired() {
-        mMainCharacteristic.setPaired()
+        mCustomService.setPaired()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1329,7 +1213,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	public func setUnpaired() {
-        mMainCharacteristic.setUnpaired()
+        mCustomService.setUnpaired()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1340,7 +1224,7 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	public func getPaired() {
-        mMainCharacteristic.getPaired()
+        mCustomService.getPaired()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1357,7 +1241,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.setPageThreshold(threshold)
+        mCustomService.setPageThreshold(threshold)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1373,7 +1257,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.getPageThreshold()
+        mCustomService.getPageThreshold()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1390,7 +1274,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.deletePageThreshold()
+        mCustomService.deletePageThreshold()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1406,7 +1290,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-        mMainCharacteristic.rawLogging(enable)
+        mCustomService.rawLogging(enable)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1423,7 +1307,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.wornCheck()
+        mCustomService.wornCheck()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1439,7 +1323,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        mMainCharacteristic.getRawLoggingStatus()
+        mCustomService.getRawLoggingStatus()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1454,7 +1338,7 @@ public class Device: NSObject, ObservableObject {
             self.getWornOverrideStatusComplete.send(previewCommandStatus)
         }
         
-        mMainCharacteristic.getWornOverrideStatus()
+        mCustomService.getWornOverrideStatus()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1537,7 +1421,7 @@ public class Device: NSObject, ObservableObject {
             self.setSessionParamComplete.send((previewCommandStatus, parameter))
         }
 
-        mMainCharacteristic.setSessionParam(parameter, value: value)
+        mCustomService.setSessionParam(parameter, value: value)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1552,7 +1436,7 @@ public class Device: NSObject, ObservableObject {
             self.getSessionParamComplete.send((previewCommandStatus, parameter))
         }
 
-        mMainCharacteristic.getSessionParam(parameter)
+        mCustomService.getSessionParam(parameter)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1570,7 +1454,7 @@ public class Device: NSObject, ObservableObject {
             self.resetSessionParamsComplete.send(previewCommandStatus)
         }
 
-        mMainCharacteristic.resetSessionParams()
+        mCustomService.resetSessionParams()
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1588,7 +1472,7 @@ public class Device: NSObject, ObservableObject {
             self.acceptSessionParamsComplete.send(previewCommandStatus)
         }
 
-        mMainCharacteristic.acceptSessionParams()
+        mCustomService.acceptSessionParams()
 	}
     
     //--------------------------------------------------------------------------------
@@ -1618,596 +1502,117 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	private func subscribeMainCharacteristic() {
-		mMainCharacteristic.writeEpochComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaWriteEpochComplete?(self.id, status.successful)
-				self.writeEpochComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.readEpochComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, value in
-                self.lambdaReadEpochComplete?(self.id, status.successful,  value)
-				self.epoch = value
-				self.readEpochComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.deviceWornStatus
-            .receive(on: DispatchQueue.main)
-            .sink { isWorn in
-				self.lambdaWornStatus?(self.id, isWorn)
-				self.worn = isWorn
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.deviceChargingStatus
-            .receive(on: DispatchQueue.main)
-            .sink { charging, on_charger, error in
-				self.lambdaChargingStatus?(self.id, charging, on_charger, error)
-				self.charging = charging
-				self.on_charger = on_charger
-				self.charge_error = error
-			}
-            .store(in: &subscriptions)
+    private func subScribeCustomService() {
 
-		mMainCharacteristic.startManualComplete
+        // Published properties
+        mCustomService.$epoch
             .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaStartManualComplete?(self.id, status.successful)
-				self.startManualComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.stopManualComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaStopManualComplete?(self.id, status.successful)
-                self.stopManualComplete.send(status)
-            }
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.ledComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaLEDComplete?(self.id, status.successful)
-				self.ledComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.getRawLoggingStatusComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, enabled in
-                self.lambdaGetRawLoggingStatusComplete?(self.id, status.successful, enabled)
-                if status.successful {
-					self.rawLogging = enabled
-				} else {
-					self.rawLogging = nil
-				}
-				self.getRawLoggingStatusComplete.send(status)
-			}
+            .sink { [weak self] in self?.epoch = $0 }
             .store(in: &subscriptions)
         
-		mMainCharacteristic.getWornOverrideStatusComplete
+        mCustomService.$canLogDiagnostics
             .receive(on: DispatchQueue.main)
-            .sink { status, overridden in
-                self.lambdaGetWornOverrideStatusComplete?(self.id, status.successful, overridden)
-                if status.successful {
-					self.wornOverridden = overridden
-				} else {
-					self.wornOverridden = nil
-				}
-				self.getWornOverrideStatusComplete.send(status)
-			}
+            .sink { [weak self] in self?.canLogDiagnostics = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.writeSerialNumberComplete
+        mCustomService.$wornCheckResult
             .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lamdaWriteSerialNumberComplete?(self.id, status.successful)
-				self.writeSerialNumberComplete.send(status)
-			}
+            .sink { [weak self] in self?.wornCheckResult = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.readSerialNumberComplete
+        mCustomService.$advertisingInterval
             .receive(on: DispatchQueue.main)
-            .sink { status, partID in
-            	self.lambdaReadSerialNumberComplete?(self.id, status.successful, partID)
-                if status.successful { self.serialNumber = partID }
-				self.readSerialNumberComplete.send(status)
-			}
+            .sink { [weak self] in self?.advertisingInterval = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.deleteSerialNumberComplete
+        mCustomService.$chargeCycles
             .receive(on: DispatchQueue.main)
-            .sink { status in
-            	self.lambdaDeleteSerialNumberComplete?(self.id, status.successful)
-				self.deleteSerialNumberComplete.send(status)
-			}
+            .sink { [weak self] in self?.chargeCycles = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.writeAdvIntervalComplete
+        mCustomService.$advertiseAsHRM
             .receive(on: DispatchQueue.main)
-            .sink { status in
-	            self.lambdaWriteAdvIntervalComplete?(self.id, status.successful)
-				self.writeAdvIntervalComplete.send(status)
-			}
+            .sink { [weak self] in self?.advertiseAsHRM = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.readAdvIntervalComplete
+        mCustomService.$rawLogging
             .receive(on: DispatchQueue.main)
-            .sink { status, seconds in
-                self.lambdaReadAdvIntervalComplete?(self.id, status.successful, seconds)
-				self.advertisingInterval = seconds
-				self.readAdvIntervalComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.deleteAdvIntervalComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaDeleteAdvIntervalComplete?(self.id, status.successful)
-                if status.successful { self.advertisingInterval = nil }
-				self.deleteAdvIntervalComplete.send(status)
-			}
+            .sink { [weak self] in self?.rawLogging = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.clearChargeCyclesComplete
+        mCustomService.$wornOverridden
             .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaClearChargeCyclesComplete?(self.id, status.successful)
-                if status.successful { self.chargeCycles = nil }
-				self.clearChargeCyclesComplete.send(status)
-			}
+            .sink { [weak self] in self?.wornOverridden = $0 }
+            .store(in: &subscriptions)
+            
+        mCustomService.$buttonResponseEnabled
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.buttonResponseEnabled = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.readChargeCyclesComplete
+        mCustomService.$singleButtonPressAction
             .receive(on: DispatchQueue.main)
-            .sink { status, cycles in
-                self.lambdaReadChargeCyclesComplete?(self.id, status.successful, cycles)
-				self.chargeCycles = cycles
-				self.readChargeCyclesComplete.send(status)
-			}
+            .sink { [weak self] in self?.singleButtonPressAction = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.setAdvertiseAsHRMComplete
+        mCustomService.$doubleButtonPressAction
             .receive(on: DispatchQueue.main)
-            .sink { status, asHRM in
-                self.lambdaSetAdvertiseAsHRMComplete?(self.id, status.successful, asHRM)
-                if status.successful {
-					self.advertiseAsHRM = asHRM
-				} else {
-					self.advertiseAsHRM = nil
-				}
-				self.setAdvertiseAsHRMComplete.send(status)
-			}
-            .store(in: &subscriptions)
-    
-		mMainCharacteristic.getAdvertiseAsHRMComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, asHRM in
-                self.lambdaGetAdvertiseAsHRMComplete?(self.id, status.successful, asHRM)
-                if status.successful {
-					self.advertiseAsHRM = asHRM
-				} else {
-					self.advertiseAsHRM = nil
-				}
-				self.getAdvertiseAsHRMComplete.send(status)
-			}
+            .sink { [weak self] in self?.doubleButtonPressAction = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.setButtonCommandComplete
+        mCustomService.$tripleButtonPressAction
             .receive(on: DispatchQueue.main)
-            .sink { status, tap, command in
-				self.lambdaSetButtonCommandComplete?(self.id, status.successful, tap, command)
-				switch tap {
-				case .single: self.singleButtonPressAction = status.successful ? command : nil
-				case .double: self.doubleButtonPressAction = status.successful ? command : nil
-				case .triple: self.tripleButtonPressAction = status.successful ? command : nil
-				case .long: self.longButtonPressAction = status.successful ? command : nil
-				default: break
-				}
-				self.setButtonCommandComplete.send((status, tap))
-			}
-            .store(in: &subscriptions)
-        
-		mMainCharacteristic.getButtonCommandComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, tap, command in
-                self.lambdaGetButtonCommandComplete?(self.id, status.successful, tap, command)
-				switch tap {
-                case .single: self.singleButtonPressAction = status.successful ? command : nil
-                case .double: self.doubleButtonPressAction = status.successful ? command : nil
-                case .triple: self.tripleButtonPressAction = status.successful ? command : nil
-                case .long: self.longButtonPressAction = status.successful ? command : nil
-				default: break
-				}
-				self.getButtonCommandComplete.send((status, tap))
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.setAskForButtonResponseComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, enable in
-                self.lambdaSetAskForButtonResponseComplete?(self.id, status.successful, enable)
-                if status.successful {
-					self.buttonResponseEnabled = enable
-				} else {
-					self.buttonResponseEnabled = false
-				}
-				self.setAskForButtonResponseComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.getAskForButtonResponseComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, enable in
-                self.lambdaGetAskForButtonResponseComplete?(self.id, status.successful, enable)
-                if status.successful {
-					self.buttonResponseEnabled = enable
-				} else {
-					self.buttonResponseEnabled = false
-				}
-				self.getAskForButtonResponseComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.setHRZoneColorComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, type in
-                self.lambdaSetHRZoneColorComplete?(self.id, status.successful, type)
-				self.setHRZoneColorComplete.send((status, type))
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.getHRZoneColorComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, type, red, green, blue, on_ms, off_ms in
-                self.lambdaGetHRZoneColorComplete?(self.id, status.successful, type, red, green, blue, on_ms, off_ms)
-				switch (type) {
-				case .below: self.hrZoneLEDBelow = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
-				case .within: self.hrZoneLEDWithin = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
-				case .above: self.hrZoneLEDAbove = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
-				default: break
-				}
-				self.getHRZoneColorComplete.send((status, type))
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.setHRZoneRangeComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaSetHRZoneRangeComplete?(self.id, status.successful)
-				self.setHRZoneRangeComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.getHRZoneRangeComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, enabled, high_value, low_value in
-                self.lambdaGetHRZoneRangeComplete?(self.id, status.successful, enabled, high_value, low_value)
-                if status.successful {
-					self.hrZoneRange = hrZoneRangeValueType(enabled: enabled, lower: low_value, upper: high_value)
-				}
-				self.getHRZoneRangeComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.getPPGAlgorithmComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, algorithm, state in
-                self.lambdaGetPPGAlgorithmComplete?(self.id, status.successful, algorithm, state)
-				self.getPPGAlgorithmComplete.send((status, algorithm, state))
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.endSleepComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaEndSleepComplete?(self.id, status.successful)
-				self.endSleepComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.endSleepStatus
-            .receive(on: DispatchQueue.main)
-            .sink { enable in
-				self.lambdaEndSleepStatus?(self.id, enable)
-				self.endSleepStatus.send(enable)
-			}
+            .sink { [weak self] in self?.tripleButtonPressAction = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.disableWornDetectComplete
+        mCustomService.$longButtonPressAction
             .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaDisableWornDetectComplete?(self.id, status.successful)
-				self.disableWornDetectComplete.send(status)
-			}
+            .sink { [weak self] in self?.longButtonPressAction = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.enableWornDetectComplete
+        mCustomService.$hrZoneLEDBelow
             .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaEnableWornDetectComplete?(self.id, status.successful)
-				self.enableWornDetectComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.buttonClicked
-            .receive(on: DispatchQueue.main)
-            .sink { presses in
-				self.lambdaButtonClicked?(self.id, presses)
-				self.buttonTaps = presses
-			}
+            .sink { [weak self] in self?.hrZoneLEDBelow = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.wornCheckComplete
+        mCustomService.$hrZoneLEDWithin
             .receive(on: DispatchQueue.main)
-            .sink { status, code, value in
-                self.lambdaWornCheckComplete?(self.id, status.successful, code, value )
-				self.wornCheckResult = DeviceWornCheckResultType(code: code, value: value)
-				self.wornCheckResultComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.setSessionParamComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, parameter in
-                self.lambdaSetSessionParamComplete?(self.id, status.successful, parameter)
-				self.setSessionParamComplete.send((status, parameter))
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.getSessionParamComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, parameter, value in
-                self.lambdaGetSessionParamComplete?(self.id, status.successful, parameter, value)
-				switch parameter {
-				case .tag:
-					var data = Data()
-					data.append((UInt8((value >> 0) & 0xff)))
-					data.append((UInt8((value >> 8) & 0xff)))
-					if let strValue = String(data: data, encoding: .utf8) {
-						self.tag = strValue
-					}
-					else {
-						self.tag = "'\(String(format:"0x%04X", value))' - Could not make string"
-					}
-				case .ppgCapturePeriod: self.ppgCapturePeriod = value
-				case .ppgCaptureDuration: self.ppgCaptureDuration = value
-				default: break
-				}
-				self.getSessionParamComplete.send((status, parameter))
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.acceptSessionParamsComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaAcceptSessionParamsComplete?(self.id, status.successful)
-				self.acceptSessionParamsComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.resetSessionParamsComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaResetSessionParamsComplete?(self.id, status.successful)
-				self.resetSessionParamsComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.readCanLogDiagnosticsComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, allow in
-                self.lambdaReadCanLogDiagnosticsComplete?(self.id, status.successful, allow)
-				self.canLogDiagnostics = allow
-				self.readCanLogDiagnosticsComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.updateCanLogDiagnosticsComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, status.successful)
-				self.updateCanLogDiagnosticsComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.getPacketCountComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, count in
-                self.lambdaGetPacketCountComplete?(self.id, status.successful, count)
-				self.getPacketCountComplete.send((status, count))
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.getAllPacketsComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaGetAllPacketsComplete?(self.id, status.successful)
-				self.getAllPacketsComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.getAllPacketsAcknowledgeComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status, ack in
-                self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, status.successful, ack)
-				self.getAllPacketsAcknowledgeComplete.send((status, ack))
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.setPairedComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaSetPairedComplete?(self.id, status.successful)
-				self.setPairedComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.setUnpairedComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaSetUnpairedComplete?(self.id, status.successful)
-				self.setUnpairedComplete.send(status)
-			}
+            .sink { [weak self] in self?.hrZoneLEDWithin = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.getPairedComplete
+        mCustomService.$hrZoneLEDAbove
             .receive(on: DispatchQueue.main)
-            .sink { status, paired in
-                self.lambdaGetPairedComplete?(self.id, status.successful, paired)
-                if status.successful {
-					self.paired = paired
-				} else {
-					self.paired = nil
-				}
-				self.getPairedComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.setPageThresholdComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaSetPageThresholdComplete?(self.id, status.successful)
-				self.setPageThresholdComplete.send(status)
-			}
+            .sink { [weak self] in self?.hrZoneLEDAbove = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.getPageThresholdComplete
+        mCustomService.$hrZoneRange
             .receive(on: DispatchQueue.main)
-            .sink { status, threshold in
-                self.lambdaGetPageThresholdComplete?(self.id, status.successful, threshold)
-                if status.successful {
-					self.advertisingPageThreshold = threshold
-				} else {
-					self.advertisingPageThreshold = nil
-				}
-                self.getPageThresholdComplete.send(status)
-			}
+            .sink { [weak self] in self?.hrZoneRange = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.deletePageThresholdComplete
+        mCustomService.$paired
             .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaDeletePageThresholdComplete?(self.id, status.successful)
-				self.deletePageThresholdComplete.send(status)
-			}
+            .sink { [weak self] in self?.paired = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.enterShipModeComplete
+        mCustomService.$advertisingPageThreshold
             .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaEnterShipModeComplete?(self.id, status.successful)
-				self.enterShipModeComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.resetComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaResetComplete?(self.id, status.successful)
-				self.resetComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.airplaneModeComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaAirplaneModeComplete?(self.id, status.successful)
-				self.airplaneModeComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.manufacturingTestComplete
-            .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaManufacturingTestComplete?(self.id, status.successful)
-				self.manufacturingTestComplete.send(status)
-			}
+            .sink { [weak self] in self?.advertisingPageThreshold = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.rawLoggingComplete
+        mCustomService.$ppgCapturePeriod
             .receive(on: DispatchQueue.main)
-            .sink { status in
-                self.lambdaRawLoggingComplete?(self.id, status.successful)
-				self.rawLoggingComplete.send(status)
-			}
-            .store(in: &subscriptions)
-		
-		// MARK: Notifications
-		mMainCharacteristic.manufacturingTestResult
-            .receive(on: DispatchQueue.main)
-            .sink { valid, result in
-				self.lambdaManufacturingTestResult?(self.id, valid, result)
-				self.manufacturingTestResult.send((valid, result))
-			}
+            .sink { [weak self] in self?.ppgCapturePeriod = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.ppgMetrics
+        mCustomService.$ppgCaptureDuration
             .receive(on: DispatchQueue.main)
-            .sink { successful, packet in
-				self.lambdaPPGMetrics?(self.id, successful, packet)
-				self.ppgMetrics = ppgMetricsType(packet)
-			}
-            .store(in: &subscriptions)
-		
-		mMainCharacteristic.ppgFailed
-            .receive(on: DispatchQueue.main)
-            .sink { code in
-				self.lambdaPPGFailed?(self.id, code)
-				self.ppgFailed.send(code)
-			}
-            .store(in: &subscriptions)
-		
-        // Do not push to main dispatch queue
-		mMainCharacteristic.dataPackets
-            .sink { sequence_number, packets in
-                self.lambdaDataPackets?(self.id, sequence_number, packets)
-                self.dataPackets.send((sequence_number, packets))
-			}
+            .sink { [weak self] in self?.ppgCaptureDuration = $0 }
             .store(in: &subscriptions)
 
-		mMainCharacteristic.dataComplete
+        mCustomService.$tag
             .receive(on: DispatchQueue.main)
-            .sink { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
-				self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate)
-				self.dataComplete.send((bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate))
-			}
-            .store(in: &subscriptions)
-
-		mMainCharacteristic.dataFailure
-            .sink { self.lambdaDataFailure?(self.id) }
-            .store(in: &subscriptions)
-	}
-
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	private func subScribeCustomService() {
-        
-        // Do not push to main dispatch queue
-        mCustomService.dataPackets
-            .sink { sequence_number, packets in
-				self.lambdaDataPackets?(self.id, sequence_number, packets)
-				self.dataPackets.send((sequence_number, packets))
-			}
-            .store(in: &subscriptions)
-		
-        mCustomService.dataComplete
-            .receive(on: DispatchQueue.main)
-            .sink {bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
-				self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate)
-				self.dataComplete.send((bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate))
-			}
+            .sink { [weak self] in self?.tag = $0 }
             .store(in: &subscriptions)
 
         mCustomService.$worn
@@ -2221,23 +1626,15 @@ public class Device: NSObject, ObservableObject {
             .store(in: &subscriptions)
     
         Publishers.CombineLatest3(mCustomService.$charging, mCustomService.$on_charger, mCustomService.$charge_error)
-	        .receive(on: DispatchQueue.main)
-	        .sink { charging, on_charger, charge_error in
+            .receive(on: DispatchQueue.main)
+            .sink { charging, on_charger, charge_error in
                 if let charging, let on_charger, let charge_error {
                     self.lambdaChargingStatus?(self.id, charging, on_charger, charge_error)
                 }
                 self.charging = charging
                 self.on_charger = on_charger
                 self.charge_error = charge_error
-	        }
-	        .store(in: &subscriptions)
-		
-        mCustomService.endSleepStatus
-            .receive(on: DispatchQueue.main)
-            .sink { enable in
-				self.lambdaEndSleepStatus?(self.id, enable)
-				self.endSleepStatus.send(enable)
-			}
+            }
             .store(in: &subscriptions)
 
         mCustomService.$buttonTaps
@@ -2246,18 +1643,10 @@ public class Device: NSObject, ObservableObject {
                 if let taps {
                     self.lambdaButtonClicked?(self.id, taps)
                 }
-				self.buttonTaps = taps
-			}
+                self.buttonTaps = taps
+            }
             .store(in: &subscriptions)
 
-        mCustomService.manufacturingTestResult
-            .receive(on: DispatchQueue.main)
-            .sink { valid, result in
-				self.lambdaManufacturingTestResult?(self.id, valid, result)
-				self.manufacturingTestResult.send((valid, result))
-			}
-            .store(in: &subscriptions)
-		
         mCustomService.$ppgMetrics
             .receive(on: DispatchQueue.main)
             .sink { metrics in
@@ -2282,15 +1671,477 @@ public class Device: NSObject, ObservableObject {
                         let jsonData = try JSONEncoder().encode(packet)
                         if let jsonString = String(data: jsonData, encoding: .utf8) {
                             self.lambdaPPGMetrics?(self.id, true, jsonString)
-                        }
-                        else { self.lambdaPPGMetrics?(self.id, false, "") }
+                        } else { self.lambdaPPGMetrics?(self.id, false, "") }
                     }
                     catch { self.lambdaPPGMetrics?(self.id, false, "") }
                 }
-				self.ppgMetrics = metrics
+                
+                self.ppgMetrics = metrics
+            }
+            .store(in: &subscriptions)
+
+        // PassthroughSubjects
+        mCustomService.writeEpochComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaWriteEpochComplete?(self.id, status.successful)
+				self.writeEpochComplete.send(status)
 			}
             .store(in: &subscriptions)
 		
+        mCustomService.readEpochComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, value in
+                self.lambdaReadEpochComplete?(self.id, status.successful, value)
+			}
+            .store(in: &subscriptions)
+				
+        mCustomService.startManualComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaStartManualComplete?(self.id, status.successful)
+				self.startManualComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.stopManualComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaStopManualComplete?(self.id, status.successful)
+                self.stopManualComplete.send(status)
+            }
+            .store(in: &subscriptions)
+		
+        mCustomService.ledComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaLEDComplete?(self.id, status.successful)
+				self.ledComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.getRawLoggingStatusComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, enabled in
+                self.lambdaGetRawLoggingStatusComplete?(self.id, status.successful, enabled)
+				self.getRawLoggingStatusComplete.send(status)
+			}
+            .store(in: &subscriptions)
+        
+        mCustomService.getWornOverrideStatusComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, overridden in
+                self.lambdaGetWornOverrideStatusComplete?(self.id, status.successful, overridden)
+				self.getWornOverrideStatusComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.writeSerialNumberComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lamdaWriteSerialNumberComplete?(self.id, status.successful)
+				self.writeSerialNumberComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.readSerialNumberComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, partID in
+            	self.lambdaReadSerialNumberComplete?(self.id, status.successful, partID)
+                if status.successful { self.serialNumber = partID }
+				self.readSerialNumberComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.deleteSerialNumberComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+            	self.lambdaDeleteSerialNumberComplete?(self.id, status.successful)
+				self.deleteSerialNumberComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.writeAdvIntervalComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+	            self.lambdaWriteAdvIntervalComplete?(self.id, status.successful)
+				self.writeAdvIntervalComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.readAdvIntervalComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, seconds in
+                self.lambdaReadAdvIntervalComplete?(self.id, status.successful, seconds)
+				self.readAdvIntervalComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.deleteAdvIntervalComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaDeleteAdvIntervalComplete?(self.id, status.successful)
+				self.deleteAdvIntervalComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.clearChargeCyclesComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaClearChargeCyclesComplete?(self.id, status.successful)
+				self.clearChargeCyclesComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.readChargeCyclesComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, cycles in
+                self.lambdaReadChargeCyclesComplete?(self.id, status.successful, cycles)
+				self.readChargeCyclesComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.setAdvertiseAsHRMComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, asHRM in
+                self.lambdaSetAdvertiseAsHRMComplete?(self.id, status.successful, asHRM)
+				self.setAdvertiseAsHRMComplete.send(status)
+			}
+            .store(in: &subscriptions)
+    
+        mCustomService.getAdvertiseAsHRMComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, asHRM in
+                self.lambdaGetAdvertiseAsHRMComplete?(self.id, status.successful, asHRM)
+				self.getAdvertiseAsHRMComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.setButtonCommandComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, tap, command in
+				self.lambdaSetButtonCommandComplete?(self.id, status.successful, tap, command)
+				self.setButtonCommandComplete.send((status, tap))
+			}
+            .store(in: &subscriptions)
+        
+        mCustomService.getButtonCommandComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, tap, command in
+                self.lambdaGetButtonCommandComplete?(self.id, status.successful, tap, command)
+				self.getButtonCommandComplete.send((status, tap))
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.setAskForButtonResponseComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, enable in
+                self.lambdaSetAskForButtonResponseComplete?(self.id, status.successful, enable)
+				self.setAskForButtonResponseComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.getAskForButtonResponseComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, enable in
+                self.lambdaGetAskForButtonResponseComplete?(self.id, status.successful, enable)
+				self.getAskForButtonResponseComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.setHRZoneColorComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, type in
+                self.lambdaSetHRZoneColorComplete?(self.id, status.successful, type)
+				self.setHRZoneColorComplete.send((status, type))
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.getHRZoneColorComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, type, red, green, blue, on_ms, off_ms in
+                self.lambdaGetHRZoneColorComplete?(self.id, status.successful, type, red, green, blue, on_ms, off_ms)
+				self.getHRZoneColorComplete.send((status, type))
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.setHRZoneRangeComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaSetHRZoneRangeComplete?(self.id, status.successful)
+				self.setHRZoneRangeComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.getHRZoneRangeComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, enabled, high_value, low_value in
+                self.lambdaGetHRZoneRangeComplete?(self.id, status.successful, enabled, high_value, low_value)
+				self.getHRZoneRangeComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.getPPGAlgorithmComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, algorithm, state in
+                self.lambdaGetPPGAlgorithmComplete?(self.id, status.successful, algorithm, state)
+				self.getPPGAlgorithmComplete.send((status, algorithm, state))
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.endSleepComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaEndSleepComplete?(self.id, status.successful)
+				self.endSleepComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.endSleepStatus
+            .receive(on: DispatchQueue.main)
+            .sink { enable in
+				self.lambdaEndSleepStatus?(self.id, enable)
+				self.endSleepStatus.send(enable)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.disableWornDetectComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaDisableWornDetectComplete?(self.id, status.successful)
+				self.disableWornDetectComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.enableWornDetectComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaEnableWornDetectComplete?(self.id, status.successful)
+				self.enableWornDetectComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.wornCheckResultComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, code, value in
+                self.lambdaWornCheckComplete?(self.id, status.successful, code, value )
+				self.wornCheckResultComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.setSessionParamComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, parameter in
+                self.lambdaSetSessionParamComplete?(self.id, status.successful, parameter)
+				self.setSessionParamComplete.send((status, parameter))
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.getSessionParamComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, parameter, value in
+                self.lambdaGetSessionParamComplete?(self.id, status.successful, parameter, value)
+				self.getSessionParamComplete.send((status, parameter))
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.acceptSessionParamsComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaAcceptSessionParamsComplete?(self.id, status.successful)
+				self.acceptSessionParamsComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.resetSessionParamsComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaResetSessionParamsComplete?(self.id, status.successful)
+				self.resetSessionParamsComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.readCanLogDiagnosticsComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, allow in
+                self.lambdaReadCanLogDiagnosticsComplete?(self.id, status.successful, allow)
+				self.readCanLogDiagnosticsComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.updateCanLogDiagnosticsComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaUpdateCanLogDiagnosticsComplete?(self.id, status.successful)
+				self.updateCanLogDiagnosticsComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.getPacketCountComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, count in
+                self.lambdaGetPacketCountComplete?(self.id, status.successful, count)
+				self.getPacketCountComplete.send((status, count))
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.getAllPacketsComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaGetAllPacketsComplete?(self.id, status.successful)
+				self.getAllPacketsComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.getAllPacketsAcknowledgeComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, ack in
+                self.lambdaGetAllPacketsAcknowledgeComplete?(self.id, status.successful, ack)
+				self.getAllPacketsAcknowledgeComplete.send((status, ack))
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.setPairedComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaSetPairedComplete?(self.id, status.successful)
+				self.setPairedComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.setUnpairedComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaSetUnpairedComplete?(self.id, status.successful)
+				self.setUnpairedComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.getPairedComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, paired in
+                self.lambdaGetPairedComplete?(self.id, status.successful, paired)
+				self.getPairedComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.setPageThresholdComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaSetPageThresholdComplete?(self.id, status.successful)
+				self.setPageThresholdComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.getPageThresholdComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status, threshold in
+                self.lambdaGetPageThresholdComplete?(self.id, status.successful, threshold)
+                self.getPageThresholdComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.deletePageThresholdComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaDeletePageThresholdComplete?(self.id, status.successful)
+				self.deletePageThresholdComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.enterShipModeComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaEnterShipModeComplete?(self.id, status.successful)
+				self.enterShipModeComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.resetComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaResetComplete?(self.id, status.successful)
+				self.resetComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.airplaneModeComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaAirplaneModeComplete?(self.id, status.successful)
+				self.airplaneModeComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.manufacturingTestComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaManufacturingTestComplete?(self.id, status.successful)
+				self.manufacturingTestComplete.send(status)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.rawLoggingComplete
+            .receive(on: DispatchQueue.main)
+            .sink { status in
+                self.lambdaRawLoggingComplete?(self.id, status.successful)
+				self.rawLoggingComplete.send(status)
+			}
+            .store(in: &subscriptions)
+		
+		// MARK: Notifications
+        mCustomService.manufacturingTestResult
+            .receive(on: DispatchQueue.main)
+            .sink { valid, result in
+				self.lambdaManufacturingTestResult?(self.id, valid, result)
+				self.manufacturingTestResult.send((valid, result))
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.ppgFailed
+            .receive(on: DispatchQueue.main)
+            .sink { code in
+				self.lambdaPPGFailed?(self.id, code)
+				self.ppgFailed.send(code)
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.dataFailure
+            .sink { self.lambdaDataFailure?(self.id) }
+            .store(in: &subscriptions)
+        
+        // Do not push to main dispatch queue
+        mCustomService.dataPackets
+            .sink { sequence_number, packets in
+				self.lambdaDataPackets?(self.id, sequence_number, packets)
+				self.dataPackets.send((sequence_number, packets))
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.dataComplete
+            .receive(on: DispatchQueue.main)
+            .sink {bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
+				self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate)
+				self.dataComplete.send((bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate))
+			}
+            .store(in: &subscriptions)
+		
+        mCustomService.endSleepStatus
+            .receive(on: DispatchQueue.main)
+            .sink { enable in
+				self.lambdaEndSleepStatus?(self.id, enable)
+				self.endSleepStatus.send(enable)
+			}
+            .store(in: &subscriptions)
+
+        mCustomService.manufacturingTestResult
+            .receive(on: DispatchQueue.main)
+            .sink { valid, result in
+				self.lambdaManufacturingTestResult?(self.id, valid, result)
+				self.manufacturingTestResult.send((valid, result))
+			}
+            .store(in: &subscriptions)
+				
         mCustomService.ppgFailed
             .receive(on: DispatchQueue.main)
             .sink { code in
@@ -2461,13 +2312,11 @@ public class Device: NSObject, ObservableObject {
                 mCustomService.didConnect(peripheral)
 				connectionState = .configuring
 				peripheral.discoverServices(nil)
-			}
-			else {
+			} else {
 				globals.log.e ("\(peripheral.prettyID): Connected to a device that isn't requesting connection.  Weird!  Disconnect")
 				return false
 			}
-		}
-		else {
+		} else {
 			globals.log.e ("No peripheral")
 			return false
 		}
@@ -2507,48 +2356,8 @@ public class Device: NSObject, ObservableObject {
             mCustomService.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
             return
         }
-        
-        if let testCharacteristic = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
-            switch (testCharacteristic) {
-            default:
-                if let service = characteristic.service {
-                    globals.log.e ("\(self.id) for service: \(service.prettyID) - '\(testCharacteristic.title)' - do not know what to do")
-                }
-                else {
-                    globals.log.e ("\(self.id) for nil service - '\(testCharacteristic.title)' - do not know what to do")
-                }
-            }
-        }
-        else if let testCharacteristic = Device.characteristics(rawValue: characteristic.prettyID) {
-            switch (testCharacteristic) {
-                
-			#if UNIVERSAL || ALTER
-            case .alterMainCharacteristic:
-                mMainCharacteristic.didDiscover(characteristic, commandQ: commandQ)
-				#if UNIVERSAL
-                mMainCharacteristic.type	= .alter
-				#endif
-                mMainCharacteristic.discoverDescriptors()
-            #endif
-                
-			#if UNIVERSAL || KAIROS
-            case .kairosMainCharacteristic:
-                mMainCharacteristic.didDiscover(characteristic, commandQ: commandQ)
-				#if UNIVERSAL
-                mMainCharacteristic.type	= .kairos
-				#endif
-                mMainCharacteristic.discoverDescriptors()
-            #endif
-            }
-        }
-        else {
-            if let service = characteristic.service {
-                globals.log.e ("\(self.id) for service: \(service.prettyID) - \(characteristic.prettyID) - UNKNOWN")
-            }
-            else {
-                globals.log.e ("\(self.id) for nil service - \(characteristic.prettyID) - UNKNOWN")
-            }
-        }
+
+        globals.log.e ("\(self.id) - Unhandled: \(characteristic.prettyID)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -2580,38 +2389,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-		if let standardDescriptor = org_bluetooth_descriptor(rawValue: descriptor.prettyID) {
-			switch (standardDescriptor) {
-			case .client_characteristic_configuration:
-				if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
-					globals.log.v ("\(self.id): \(standardDescriptor.title) '\(enumerated.title)'")
-					switch (enumerated) {
-					#if UNIVERSAL || ALTER
-					case .alterMainCharacteristic		: mMainCharacteristic.didDiscoverDescriptor()
-					#endif
-
-					#if UNIVERSAL || KAIROS
-					case .kairosMainCharacteristic		: mMainCharacteristic.didDiscoverDescriptor()
-					#endif
-					}
-				}
-				else if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
-					switch (enumerated) {
-					default:
-						globals.log.e ("\(self.id) '\(enumerated.title)' - don't know what to do")
-					}
-				}
-				
-			case .characteristic_user_description:
-				break
-
-			default:
-				globals.log.e ("\(self.id) for characteristic: \(characteristic.prettyID) - '\(standardDescriptor.title)'.  Do not know what to do - skipping")
-			}
-		}
-		else {
-			globals.log.e ("\(self.id) for characteristic \(characteristic.prettyID): \(descriptor.prettyID) - do not know what to do")
-		}
+        globals.log.e ("\(self.id) - Unhandled: \(characteristic.prettyID)")
 	}
 
     //--------------------------------------------------------------------------------
@@ -2659,26 +2437,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
 
-		if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
-			switch (enumerated) {
-			default:
-				globals.log.e ("\(self.id) for characteristic: '\(enumerated.title)' - do not know what to do")
-			}
-		}
-		else if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
-			switch (enumerated) {
-			#if UNIVERSAL || ALTER
-			case .alterMainCharacteristic		: mMainCharacteristic.didUpdateValue()
-			#endif
-
-			#if UNIVERSAL || KAIROS
-			case .kairosMainCharacteristic		: mMainCharacteristic.didUpdateValue()
-			#endif
-			}
-		}
-		else {
-			globals.log.v ("\(self.id) for characteristic: \(characteristic.prettyID)")
-		}
+        globals.log.e ("\(self.id) - Unhandled: \(characteristic.prettyID)")
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2710,35 +2469,10 @@ public class Device: NSObject, ObservableObject {
                 mCustomService.didUpdateNotificationState(characteristic)
                 return
             }
-
-            if (characteristic.isNotifying) {
-				if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
-					globals.log.v ("\(self.id): '\(enumerated.title)'")
-					
-					switch (enumerated) {
-					#if UNIVERSAL || ALTER
-					case .alterMainCharacteristic			: mMainCharacteristic.didUpdateNotificationState()
-					#endif
-
-					#if UNIVERSAL || KAIROS
-					case .kairosMainCharacteristic			: mMainCharacteristic.didUpdateNotificationState()
-					#endif
-					}
-				}
-				else if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
-					globals.log.v ("\(self.id): '\(enumerated.title)'")
-					
-					switch (enumerated) {
-					default								: globals.log.e ("\(self.id): '\(enumerated.title)'.  Do not know what to do - skipping")
-					}
-				}
-				else {
-					globals.log.e ("\(self.id): \(characteristic.prettyID) - do not know what to do")
-				}
-			}
-		}
-		else {
-			globals.log.e ("Peripheral object is nil - do nothing")
+            
+            globals.log.e ("\(self.id) - Unhandled: \(characteristic.prettyID)")
+		} else {
+            globals.log.e ("\(self.id): Peripheral object is nil - do nothing")
 		}
 	}
 
