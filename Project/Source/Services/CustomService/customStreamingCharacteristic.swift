@@ -8,22 +8,25 @@
 import Foundation
 import Combine
 
-class customStreamingCharacteristic: Characteristic {
+class customStreamingCharacteristic: CharacteristicTemplate {
 	
 	#if UNIVERSAL
 	var type:	biostrapDeviceSDK.biostrapDeviceType	= .unknown
 	#endif
+    
+    @Published private(set) var worn: Bool?
+    @Published private(set) var charging: Bool?
+    @Published private(set) var on_charger: Bool?
+    @Published private(set) var charge_error: Bool?
+    @Published private(set) var buttonTaps: Int?
+    @Published private(set) var ppgMetrics: ppgMetricsType?
 
-    let deviceWornStatus = PassthroughSubject<Bool, Never>()
-    let deviceChargingStatus = PassthroughSubject<(Bool, Bool, Bool), Never>()
-    let ppgMetrics = PassthroughSubject<(Bool, String), Never>()
     let ppgFailed = PassthroughSubject<Int, Never>()
     let manufacturingTestResult = PassthroughSubject<(Bool, String), Never>()
     let streamingPacket = PassthroughSubject<String, Never>()
     let dataAvailable = PassthroughSubject<Void, Never>()
 
     let endSleepStatus = PassthroughSubject<Bool, Never>()
-    let buttonClicked = PassthroughSubject<Int, Never>()
 
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -41,8 +44,8 @@ class customStreamingCharacteristic: Characteristic {
 			case .validateCRC: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")
 
 			case .worn:
-                if      (data[1] == 0x00) { deviceWornStatus.send(false) }
-                else if (data[1] == 0x01) { deviceWornStatus.send(true)  }
+                if      (data[1] == 0x00) { worn = false }
+                else if (data[1] == 0x01) { worn = true  }
 				else {
 					globals.log.e ("\(pID): Cannot parse worn status: \(data[1])")
 				}
@@ -50,14 +53,9 @@ class customStreamingCharacteristic: Characteristic {
 			case .ppg_metrics:
                 let (_, type, packet) = pParseSinglePacket(data, index: 1, offset: 0)
 				if (type == .ppg_metrics) {
-					do {
-						let jsonData = try JSONEncoder().encode(packet)
-						if let jsonString = String(data: jsonData, encoding: .utf8) {
-                            self.ppgMetrics.send((true, jsonString))
-						}
-                        else { self.ppgMetrics.send((false, "")) }
-					}
-                    catch { self.ppgMetrics.send((false, "")) }
+                    if packet.hr_valid { self.ppgMetrics?.hr = packet.hr_result }
+                    if packet.hrv_valid { self.ppgMetrics?.hrv = packet.hrv_result }
+                    if packet.rr_valid { self.ppgMetrics?.rr = packet.rr_result }
 				}
 				
 			case .ppgFailed:
@@ -79,8 +77,7 @@ class customStreamingCharacteristic: Characteristic {
 				
 			case .buttonResponse:
 				if (data.count == 2) {
-					let presses	= Int(data[1])
-                    self.buttonClicked.send(presses)
+                    self.buttonTaps = Int(data[1])
 				}
 				else {
 					globals.log.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
@@ -184,12 +181,10 @@ class customStreamingCharacteristic: Characteristic {
 			#endif
 				
 			case .charging:
-				let on_charger	= (data[1] == 0x01)
-				let charging	= (data[2] == 0x01)
-				let error		= (data[3] == 0x01)
-				
-                self.deviceChargingStatus.send((charging, on_charger, error))
-				
+				on_charger = (data[1] == 0x01)
+				charging = (data[2] == 0x01)
+                charge_error = (data[3] == 0x01)
+								
 			case .streamPacket:
 				let length = Int(data[2])
 				var packet = biostrapStreamingPacket()

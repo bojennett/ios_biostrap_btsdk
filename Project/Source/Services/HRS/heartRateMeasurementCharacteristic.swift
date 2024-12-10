@@ -9,7 +9,7 @@ import Foundation
 import CoreBluetooth
 import Combine
 
-class heartRateMeasurementCharacteristic: Characteristic {
+class heartRateMeasurementCharacteristic: CharacteristicTemplate {
 	
 	// MARK: Callbacks
     let updated = PassthroughSubject<(Int, Int, [Double]), Never>()

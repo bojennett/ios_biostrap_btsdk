@@ -52,14 +52,10 @@ public class Device: NSObject, ObservableObject {
 	enum characteristics: String {
 		#if UNIVERSAL || ALTER
 		case alterMainCharacteristic	= "883BBA2C-8E31-40BB-A859-D59A2FB38EC1"
-		case alterDataCharacteristic	= "883BBA2C-8E31-40BB-A859-D59A2FB38EC2"
-		case alterStrmCharacteristic	= "883BBA2C-8E31-40BB-A859-D59A2FB38EC3"
 		#endif
 
 		#if UNIVERSAL || KAIROS
 		case kairosMainCharacteristic	= "140BB753-9845-4C0E-B61A-E6BAE41712F1"
-		case kairosDataCharacteristic	= "140BB753-9845-4C0E-B61A-E6BAE41712F2"
-		case kairosStrmCharacteristic	= "140BB753-9845-4C0E-B61A-E6BAE41712F3"
 		#endif
 
 		var UUID: CBUUID {
@@ -70,14 +66,10 @@ public class Device: NSObject, ObservableObject {
 			switch (self) {
 			#if UNIVERSAL || ALTER
 			case .alterMainCharacteristic	: return "Alter Command Characteristic"
-			case .alterDataCharacteristic	: return "Alter Data Characteristic"
-			case .alterStrmCharacteristic	: return "Alter Streaming Characteristic"
 			#endif
 
 			#if UNIVERSAL || KAIROS
 			case .kairosMainCharacteristic	: return "Kairos Command Characteristic"
-			case .kairosDataCharacteristic	: return "Kairos Data Characteristic"
-			case .kairosStrmCharacteristic	: return "Kairos Streaming Characteristic"
 			#endif
 			}
 		}
@@ -357,10 +349,9 @@ public class Device: NSObject, ObservableObject {
     internal var mHRS: hrsService
     internal var mDIS: disService
     internal var mAmbiqOTAService: ambiqOTAService
+    internal var mCustomService: customService
 
 	internal var mMainCharacteristic: customMainCharacteristic
-	internal var mDataCharacteristic: customDataCharacteristic
-	internal var mStreamingCharacteristic: customStreamingCharacteristic
     
     internal var mDataCharacteristicDiscovered: Bool = false
     internal var mStreamingCharacteristicDiscovered: Bool = false
@@ -405,21 +396,24 @@ public class Device: NSObject, ObservableObject {
 	
 	class func hit(_ service: CBService) -> Bool {
 		if let peripheral = service.peripheral {
-			if let standardService = org_bluetooth_service(rawValue: service.prettyID) {
-				globals.log.v ("\(peripheral.prettyID): '\(standardService.title)'")
-				switch standardService {
-				case .device_information,
-					 .battery_service,
-					 .pulse_oximeter,
-					 .heart_rate			: return true
-				default:
-					globals.log.e ("\(peripheral.prettyID): (unknown): '\(standardService.title)'")
-					return false
-				}
+            if let standardService = org_bluetooth_service(rawValue: service.prettyID) {
+                globals.log.v ("\(peripheral.prettyID): '\(standardService.title)'")
+                switch standardService {
+                case .device_information,
+                        .battery_service,
+                        .pulse_oximeter,
+                        .heart_rate			: return true
+                default:
+                    globals.log.e ("\(peripheral.prettyID): (unknown): '\(standardService.title)'")
+                    return false
+                }
+            } else if customService.scan_services.contains(service.uuid) {
+                globals.log.w ("*** \(peripheral.prettyID): FOUND")
+                return true
 			} else if let customService = Device.services(rawValue: service.prettyID) {
 				globals.log.v ("\(peripheral.prettyID): '\(customService.title)'")
 				return true
-			} else if service.uuid == ambiqOTAService.scan_service {
+            } else if ambiqOTAService.scan_services.contains(service.uuid) {
                 globals.log.v ("\(peripheral.prettyID): 'Ambiq OTA'")
                 return true
             } else {
@@ -519,13 +513,12 @@ public class Device: NSObject, ObservableObject {
 		self.connectionState = .disconnected
         
         mMainCharacteristic = customMainCharacteristic()
-        mDataCharacteristic = customDataCharacteristic()
-        mStreamingCharacteristic = customStreamingCharacteristic()
         
         mBAS = basService()
         mHRS = hrsService()
         mDIS = disService()
         mAmbiqOTAService = ambiqOTAService()
+        mCustomService = customService()
 
 		self.name							= "UNKNOWN"
 		self.id								= "UNKNOWN"
@@ -541,8 +534,11 @@ public class Device: NSObject, ObservableObject {
 		self.init()
 		
         self.subscribeMainCharacteristic()
-        self.subscribeDataCharacteristic()
-        self.subscribeStreamingCharacteristic()
+        self.subScribeCustomService()
+        self.subscribeBAS()
+        self.subscribeHRS()
+        self.subscribeDIS()
+        self.subscribeOTA()
 
 		self.name		= name
 		self.id			= id
@@ -557,8 +553,11 @@ public class Device: NSObject, ObservableObject {
 		self.init()
 		
         self.subscribeMainCharacteristic()
-        self.subscribeDataCharacteristic()
-        self.subscribeStreamingCharacteristic()
+        self.subScribeCustomService()
+        self.subscribeBAS()
+        self.subscribeHRS()
+        self.subscribeDIS()
+        self.subscribeOTA()
 
 		self.name		= name
 		self.id			= id
@@ -573,45 +572,25 @@ public class Device: NSObject, ObservableObject {
 	internal var mAlterConfigured: Bool {
         //globals.log.e ("\(mAmbiqOTAService.pConfigured):\(mBAS.pConfigured):\(mHRS.pConfigured):\(mDIS.isConfigured),\(mMainCharacteristic.configured):\(mStreamingCharacteristic.configured):\(mDataCharacteristic.configured)")
 			
-        if mDataCharacteristicDiscovered && mStreamingCharacteristicDiscovered {
-            return (mBAS.pConfigured &&
-                    mHRS.pConfigured &&
-                    mDIS.pConfigured &&
-                    mAmbiqOTAService.pConfigured &&
-                    mMainCharacteristic.configured &&
-                    mDataCharacteristic.configured &&
-                    mStreamingCharacteristic.configured
-            )
-        } else {
-            return (mBAS.pConfigured &&
-                    mHRS.pConfigured &&
-                    mDIS.pConfigured &&
-                    mAmbiqOTAService.pConfigured &&
-                    mMainCharacteristic.configured
-            )
-        }
+        return (mBAS.pConfigured &&
+                mHRS.pConfigured &&
+                mDIS.pConfigured &&
+                mAmbiqOTAService.pConfigured &&
+                mCustomService.pConfigured &&
+                mMainCharacteristic.configured
+        )
 	}
 	#endif
 
 	#if UNIVERSAL || KAIROS
 	internal var mKairosConfigured: Bool {
-        if mDataCharacteristicDiscovered && mStreamingCharacteristicDiscovered {
-            return (mBAS.pConfigured &&
-                    mHRS.pConfigured &&
-                    mDIS.pConfigured &&
-                    mAmbiqOTAService.pConfigured &&
-                    mMainCharacteristic.configured &&
-                    mDataCharacteristic.configured &&
-                    mStreamingCharacteristic.configured
-            )
-        } else {
-            return (mBAS.pConfigured &&
-                    mHRS.pConfigured &&
-                    mDIS.pConfigured &&
-                    mAmbiqOTAService.pConfigured &&
-                    mMainCharacteristic.configured
-            )
-        }
+        return (mBAS.pConfigured &&
+                mHRS.pConfigured &&
+                mDIS.pConfigured &&
+                mAmbiqOTAService.pConfigured &&
+                mCustomService.pConfigured &&
+                mMainCharacteristic.configured
+        )
 	}
 	#endif
 
@@ -768,11 +747,11 @@ public class Device: NSObject, ObservableObject {
 		var newStyle	= false
 		
         if (mDIS.bluetoothRevisionGreaterThan("2.0.4")) {
-            globals.log.v ("Bluetooth library version: '\(bluetoothSoftwareRevision)' - Use new style")
+            globals.log.v ("Bluetooth library version: '\(bluetoothSoftwareRevision ?? "unknown")' - Use new style")
             newStyle    = true
         }
         else {
-            globals.log.v ("Bluetooth library version: '\(bluetoothSoftwareRevision)' - Use old style")
+            globals.log.v ("Bluetooth library version: '\(bluetoothSoftwareRevision ?? "unknown")' - Use old style")
         }
 
         mMainCharacteristic.getAllPackets(pages: pages, delay: delay, newStyle: newStyle)
@@ -2214,51 +2193,47 @@ public class Device: NSObject, ObservableObject {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	private func subscribeDataCharacteristic() {
+	private func subScribeCustomService() {
+        
         // Do not push to main dispatch queue
-		mDataCharacteristic.dataPackets
+        mCustomService.dataPackets
             .sink { sequence_number, packets in
 				self.lambdaDataPackets?(self.id, sequence_number, packets)
 				self.dataPackets.send((sequence_number, packets))
 			}
             .store(in: &subscriptions)
 		
-		mDataCharacteristic.dataComplete
+        mCustomService.dataComplete
             .receive(on: DispatchQueue.main)
             .sink {bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
 				self.lambdaDataComplete?(self.id, bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate)
 				self.dataComplete.send((bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate))
 			}
             .store(in: &subscriptions)
-	}
 
-	//--------------------------------------------------------------------------------
-	// Function Name:
-	//--------------------------------------------------------------------------------
-	//
-	//
-	//
-	//--------------------------------------------------------------------------------
-	private func subscribeStreamingCharacteristic() {
-		mStreamingCharacteristic.deviceWornStatus
+        mCustomService.$worn
             .receive(on: DispatchQueue.main)
-            .sink { isWorn in
-                self.lambdaWornStatus?(self.id, isWorn)
-                self.worn = isWorn
+            .sink { worn in
+                if let worn {
+                    self.lambdaWornStatus?(self.id, worn)
+                }
+                self.worn = worn
             }
             .store(in: &subscriptions)
     
-		mStreamingCharacteristic.deviceChargingStatus
+        Publishers.CombineLatest3(mCustomService.$charging, mCustomService.$on_charger, mCustomService.$charge_error)
 	        .receive(on: DispatchQueue.main)
-	        .sink { charging, on_charger, error in
-	            self.lambdaChargingStatus?(self.id, charging, on_charger, error)
+	        .sink { charging, on_charger, charge_error in
+                if let charging, let on_charger, let charge_error {
+                    self.lambdaChargingStatus?(self.id, charging, on_charger, charge_error)
+                }
                 self.charging = charging
                 self.on_charger = on_charger
-                self.charge_error = error
+                self.charge_error = charge_error
 	        }
 	        .store(in: &subscriptions)
 		
-		mStreamingCharacteristic.endSleepStatus
+        mCustomService.endSleepStatus
             .receive(on: DispatchQueue.main)
             .sink { enable in
 				self.lambdaEndSleepStatus?(self.id, enable)
@@ -2266,15 +2241,17 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mStreamingCharacteristic.buttonClicked
+        mCustomService.$buttonTaps
             .receive(on: DispatchQueue.main)
-            .sink { presses in
-				self.lambdaButtonClicked?(self.id, presses)
-				self.buttonTaps = presses
+            .sink { taps in
+                if let taps {
+                    self.lambdaButtonClicked?(self.id, taps)
+                }
+				self.buttonTaps = taps
 			}
             .store(in: &subscriptions)
 
-		mStreamingCharacteristic.manufacturingTestResult
+        mCustomService.manufacturingTestResult
             .receive(on: DispatchQueue.main)
             .sink { valid, result in
 				self.lambdaManufacturingTestResult?(self.id, valid, result)
@@ -2282,15 +2259,18 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 		
-		mStreamingCharacteristic.ppgMetrics
+        mCustomService.$ppgMetrics
             .receive(on: DispatchQueue.main)
-            .sink { successful, packet in
-				self.lambdaPPGMetrics?(self.id, successful, packet)
-				self.ppgMetrics = ppgMetricsType(packet)
+            .sink { metrics in
+                if let metrics {
+                    //TODO: The packet is lost as it is now a ppg metrics object
+                    //self.lambdaPPGMetrics?(self.id, true, packet)
+                }
+				self.ppgMetrics = metrics
 			}
             .store(in: &subscriptions)
 		
-		mStreamingCharacteristic.ppgFailed
+        mCustomService.ppgFailed
             .receive(on: DispatchQueue.main)
             .sink { code in
 				self.lambdaPPGFailed?(self.id, code)
@@ -2298,7 +2278,7 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mStreamingCharacteristic.streamingPacket
+        mCustomService.streamingPacket
             .receive(on: DispatchQueue.main)
             .sink { packet in
 				self.lambdaStreamingPacket?(self.id, packet)
@@ -2306,13 +2286,140 @@ public class Device: NSObject, ObservableObject {
 			}
             .store(in: &subscriptions)
 
-		mStreamingCharacteristic.dataAvailable
+        mCustomService.dataAvailable
             .receive(on: DispatchQueue.main)
             .sink {
                 self.lambdaDataAvailable?(self.id)
             }
             .store(in: &subscriptions)
 	}
+    
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    func subscribeHRS() {
+        mHRS.updated
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] (epoch, hr, rr) in
+                self?.heartRateUpdated.send((epoch, hr, rr))
+                self?.lambdaHeartRateUpdated?(self!.id, epoch, hr, rr)
+            }
+            .store(in: &subscriptions)
+    }
+    
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    func subscribeBAS() {
+        mBAS.$batteryLevel
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] level in
+                self?.batteryLevel = level
+                if let level {
+                    self?.lambdaBatteryLevelUpdated?(self!.id, level)
+                }
+            }
+            .store(in: &subscriptions)
+    }
+    
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    func subscribeDIS() {
+        mDIS.$modelNumber
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.modelNumber = $0 }
+            .store(in: &subscriptions)
+        
+        mDIS.$serialNumber
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.serialNumber = $0 }
+            .store(in: &subscriptions)
+        
+        mDIS.$hardwareRevision
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.hardwareRevision = $0 }
+            .store(in: &subscriptions)
+        
+        mDIS.$manufacturerName
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.manufacturerName = $0 }
+            .store(in: &subscriptions)
+
+        mDIS.$firmwareRevision
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.firmwareRevision = $0 }
+            .store(in: &subscriptions)
+
+        mDIS.$bluetoothSoftwareRevision
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.bluetoothSoftwareRevision = $0 }
+            .store(in: &subscriptions)
+
+        mDIS.$algorithmsSoftwareRevision
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.algorithmsSoftwareRevision = $0 }
+            .store(in: &subscriptions)
+
+        mDIS.$sleepSoftwareRevision
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.sleepSoftwareRevision = $0 }
+            .store(in: &subscriptions)
+    }
+    
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    func subscribeOTA() {
+        mAmbiqOTAService.started
+            .receive(on: DispatchQueue.main)
+            .sink {
+                self.updateFirmwareStarted.send()
+                self.lambdaUpdateFirmwareStarted?(self.id)
+            }
+            .store(in: &subscriptions)
+
+        mAmbiqOTAService.finished
+            .receive(on: DispatchQueue.main)
+            .sink {
+                self.updateFirmwareFinished.send()
+                self.lambdaUpdateFirmwareFinished?(self.id)
+            }
+            .store(in: &subscriptions)
+        
+        mAmbiqOTAService.failed
+            .receive(on: DispatchQueue.main)
+            .sink { code, message in
+                self.updateFirmwareFailed.send((code, message))
+                self.lambdaUpdateFirmwareFailed?(self.id, code, message)
+            }
+            .store(in: &subscriptions)
+
+        mAmbiqOTAService.progress
+            .receive(on: DispatchQueue.main)
+            .sink { percent in
+                self.updateFirmwareProgress.send(percent)
+                self.lambdaUpdateFirmwareProgress?(self.id, percent)
+            }
+            .store(in: &subscriptions)
+    }
 	
 	//--------------------------------------------------------------------------------
 	// Function Name:
@@ -2326,124 +2433,11 @@ public class Device: NSObject, ObservableObject {
 			if connectionState == .connecting {
 				peripheral.delegate = self
                 
-                // Battery Service
                 mBAS.didConnect(peripheral)
-                mBAS.$batteryLevel
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] level in
-                        self?.batteryLevel = level
-                        if let level {
-                            self?.lambdaBatteryLevelUpdated?(self!.id, level)
-                        }
-                    }
-                    .store(in: &subscriptions)
-                                
-                // Heart Rate Service
                 mHRS.didConnect(peripheral)
-                mHRS.updated
-                    .compactMap { $0 }
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] (epoch, hr, rr) in
-                        self?.heartRateUpdated.send((epoch, hr, rr))
-                        self?.lambdaHeartRateUpdated?(self!.id, epoch, hr, rr)
-                    }
-                    .store(in: &subscriptions)
-                
-                // Device Information Service
                 mDIS.didConnect(peripheral)
-                mDIS.$modelNumber
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] value in
-                        self?.modelNumber = value
-                    }
-                    .store(in: &subscriptions)
-                
-                mDIS.$serialNumber
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] value in
-                        self?.serialNumber = value
-                    }
-                    .store(in: &subscriptions)
-                
-                mDIS.$hardwareRevision
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] value in
-                        self?.hardwareRevision = value
-                    }
-                    .store(in: &subscriptions)
-                
-                mDIS.$manufacturerName
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] value in
-                        self?.manufacturerName = value
-                    }
-                    .store(in: &subscriptions)
-
-                mDIS.$firmwareRevision
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] value in
-                        self?.firmwareRevision = value
-                    }
-                    .store(in: &subscriptions)
-
-                mDIS.$bluetoothSoftwareRevision
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] value in
-                        self?.bluetoothSoftwareRevision = value
-                    }
-                    .store(in: &subscriptions)
-
-                mDIS.$algorithmsSoftwareRevision
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] value in
-                        self?.algorithmsSoftwareRevision = value
-                    }
-                    .store(in: &subscriptions)
-
-                mDIS.$sleepSoftwareRevision
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] value in
-                        self?.sleepSoftwareRevision = value
-                    }
-                    .store(in: &subscriptions)
-                
-                // AMBIQ OTA
                 mAmbiqOTAService.didConnect(peripheral)
-                
-                mAmbiqOTAService.started
-                    .receive(on: DispatchQueue.main)
-                    .sink {
-                        self.updateFirmwareStarted.send()
-                        self.lambdaUpdateFirmwareStarted?(self.id)
-                    }
-                    .store(in: &subscriptions)
-
-                mAmbiqOTAService.finished
-                    .receive(on: DispatchQueue.main)
-                    .sink {
-                        self.updateFirmwareFinished.send()
-                        self.lambdaUpdateFirmwareFinished?(self.id)
-                    }
-                    .store(in: &subscriptions)
-                
-                mAmbiqOTAService.failed
-                    .receive(on: DispatchQueue.main)
-                    .sink { code, message in
-                        self.updateFirmwareFailed.send((code, message))
-                        self.lambdaUpdateFirmwareFailed?(self.id, code, message)
-                    }
-                    .store(in: &subscriptions)
-
-                mAmbiqOTAService.progress
-                    .receive(on: DispatchQueue.main)
-                    .sink { percent in
-                        self.updateFirmwareProgress.send(percent)
-                        self.lambdaUpdateFirmwareProgress?(self.id, percent)
-                    }
-                    .store(in: &subscriptions)
-
-
-                // Configure
+                mCustomService.didConnect(peripheral)
 				connectionState = .configuring
 				peripheral.discoverServices(nil)
 			}
@@ -2488,6 +2482,11 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
+        if customService.hit(characteristic) {
+            mCustomService.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
+            return
+        }
+        
         if let testCharacteristic = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
             switch (testCharacteristic) {
             default:
@@ -2509,17 +2508,6 @@ public class Device: NSObject, ObservableObject {
                 mMainCharacteristic.type	= .alter
 				#endif
                 mMainCharacteristic.discoverDescriptors()
-                
-            case .alterDataCharacteristic:
-                mDataCharacteristic.didDiscover(characteristic, commandQ: commandQ)
-                mDataCharacteristic.discoverDescriptors()
-                
-            case .alterStrmCharacteristic:
-                mStreamingCharacteristic.didDiscover(characteristic, commandQ: commandQ)
-				#if UNIVERSAL
-                mStreamingCharacteristic.type	= .alter
-				#endif
-                mStreamingCharacteristic.discoverDescriptors()
             #endif
                 
 			#if UNIVERSAL || KAIROS
@@ -2529,18 +2517,7 @@ public class Device: NSObject, ObservableObject {
                 mMainCharacteristic.type	= .kairos
 				#endif
                 mMainCharacteristic.discoverDescriptors()
-                
-            case .kairosDataCharacteristic:
-                mDataCharacteristic.didDiscover(characteristic, commandQ: commandQ)
-                mDataCharacteristic.discoverDescriptors()
-                
-            case .kairosStrmCharacteristic:
-                mStreamingCharacteristic.didDiscover(characteristic, commandQ: commandQ)
-				#if UNIVERSAL
-                mStreamingCharacteristic.type	= .kairos
-				#endif
-                mStreamingCharacteristic.discoverDescriptors()
-				#endif
+            #endif
             }
         }
         else {
@@ -2577,6 +2554,11 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
+        if customService.hit(characteristic) {
+            mCustomService.didDiscoverDescriptor(characteristic)
+            return
+        }
+        
 		if let standardDescriptor = org_bluetooth_descriptor(rawValue: descriptor.prettyID) {
 			switch (standardDescriptor) {
 			case .client_characteristic_configuration:
@@ -2585,14 +2567,10 @@ public class Device: NSObject, ObservableObject {
 					switch (enumerated) {
 					#if UNIVERSAL || ALTER
 					case .alterMainCharacteristic		: mMainCharacteristic.didDiscoverDescriptor()
-					case .alterDataCharacteristic		: mDataCharacteristic.didDiscoverDescriptor()
-					case .alterStrmCharacteristic		: mStreamingCharacteristic.didDiscoverDescriptor()
 					#endif
 
 					#if UNIVERSAL || KAIROS
 					case .kairosMainCharacteristic		: mMainCharacteristic.didDiscoverDescriptor()
-					case .kairosDataCharacteristic		: mDataCharacteristic.didDiscoverDescriptor()
-					case .kairosStrmCharacteristic		: mStreamingCharacteristic.didDiscoverDescriptor()
 					#endif
 					}
 				}
@@ -2623,7 +2601,8 @@ public class Device: NSObject, ObservableObject {
     //
     //--------------------------------------------------------------------------------
     func didUpdateValue(_ data: Data, offset: Int) {
-        mDataCharacteristic.didUpdateValue(true, data: data, offset: offset)
+        //TODO: Put the update from file into the custom service
+        //mDataCharacteristic.didUpdateValue(true, data: data, offset: offset)
     }
 
 	//--------------------------------------------------------------------------------
@@ -2654,6 +2633,11 @@ public class Device: NSObject, ObservableObject {
             mAmbiqOTAService.didUpdateValue(characteristic)
             return
         }
+        
+        if customService.hit(characteristic) {
+            mCustomService.didUpdateValue(characteristic)
+            return
+        }
 
 		if let enumerated = org_bluetooth_characteristic(rawValue: characteristic.prettyID) {
 			switch (enumerated) {
@@ -2665,14 +2649,10 @@ public class Device: NSObject, ObservableObject {
 			switch (enumerated) {
 			#if UNIVERSAL || ALTER
 			case .alterMainCharacteristic		: mMainCharacteristic.didUpdateValue()
-			case .alterDataCharacteristic		: mDataCharacteristic.didUpdateValue()
-			case .alterStrmCharacteristic		: mStreamingCharacteristic.didUpdateValue()
 			#endif
 
 			#if UNIVERSAL || KAIROS
 			case .kairosMainCharacteristic		: mMainCharacteristic.didUpdateValue()
-			case .kairosDataCharacteristic		: mDataCharacteristic.didUpdateValue()
-			case .kairosStrmCharacteristic		: mStreamingCharacteristic.didUpdateValue()
 			#endif
 			}
 		}
@@ -2706,21 +2686,22 @@ public class Device: NSObject, ObservableObject {
                 return
             }
             
-			if (characteristic.isNotifying) {
+            if customService.hit(characteristic) {
+                mCustomService.didUpdateNotificationState(characteristic)
+                return
+            }
+
+            if (characteristic.isNotifying) {
 				if let enumerated = Device.characteristics(rawValue: characteristic.prettyID) {
 					globals.log.v ("\(self.id): '\(enumerated.title)'")
 					
 					switch (enumerated) {
 					#if UNIVERSAL || ALTER
 					case .alterMainCharacteristic			: mMainCharacteristic.didUpdateNotificationState()
-					case .alterDataCharacteristic			: mDataCharacteristic.didUpdateNotificationState()
-					case .alterStrmCharacteristic			: mStreamingCharacteristic.didUpdateNotificationState()
 					#endif
 
 					#if UNIVERSAL || KAIROS
 					case .kairosMainCharacteristic			: mMainCharacteristic.didUpdateNotificationState()
-					case .kairosDataCharacteristic			: mDataCharacteristic.didUpdateNotificationState()
-					case .kairosStrmCharacteristic			: mStreamingCharacteristic.didUpdateNotificationState()
 					#endif
 					}
 				}

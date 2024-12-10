@@ -8,7 +8,7 @@
 import Foundation
 import CoreBluetooth
 
-class disFirmwareVersionCharacteristic: Characteristic {
+class disFirmwareVersionCharacteristic: CharacteristicTemplate {
 	
     @Published var value : String = ""
 	

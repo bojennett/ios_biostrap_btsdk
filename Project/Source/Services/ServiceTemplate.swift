@@ -22,9 +22,9 @@ class ServiceTemplate: ObservableObject {
     // need to create an instance of the object to use it
     //
     //--------------------------------------------------------------------------------
-    class var scan_service: CBUUID {
+    class var scan_services: [ CBUUID ] {
         globals.log.e ("Don't know what to do here.  Perhaps need to override?")
-        return org_bluetooth_service.generic_access.UUID
+        return [ org_bluetooth_service.generic_access.UUID ]
     }
     
     class func hit(_ characteristic: CBCharacteristic) -> Bool {

@@ -1322,7 +1322,7 @@ import Combine
                     if packet.count + bytes.count > 200 {
                         let sequence = packets.count.leData16
                         packet.insert(contentsOf: sequence, at: 0)
-                        packet.insert(Characteristic.notifications.dataPacket.rawValue, at: 0)
+                        packet.insert(CharacteristicTemplate.notifications.dataPacket.rawValue, at: 0)
                         packets.append(packet)
                         packet.removeAll()
                     }
@@ -1333,7 +1333,7 @@ import Combine
 
             // Build data caught up packet
             packet.removeAll()
-            packet.append(Characteristic.notifications.dataCaughtUp.rawValue)
+            packet.append(CharacteristicTemplate.notifications.dataCaughtUp.rawValue)
             packet.append(0x00) // Lower byte of bad_read_count
             packet.append(0x00) // Upper byte of bad_read_count
             packet.append(0x00) // Lower byte of bad_parse_count

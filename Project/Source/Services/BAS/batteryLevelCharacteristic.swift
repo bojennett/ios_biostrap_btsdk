@@ -8,7 +8,7 @@
 import Foundation
 import CoreBluetooth
 
-class batteryLevelCharacteristic: Characteristic {
+class batteryLevelCharacteristic: CharacteristicTemplate {
 	    
     @Published var batteryLevel: Int?
 

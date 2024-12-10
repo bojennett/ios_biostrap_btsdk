@@ -8,7 +8,7 @@
 import Foundation
 import CoreBluetooth
 
-class disSoftwareRevisionCharacteristic: Characteristic {
+class disSoftwareRevisionCharacteristic: CharacteristicTemplate {
 	
 	@Published var bluetooth : String = ""
     @Published var algorithms : String = ""

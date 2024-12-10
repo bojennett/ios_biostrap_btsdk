@@ -24,8 +24,8 @@ class ambiqOTAService: ServiceTemplate {
     //
     //
     //--------------------------------------------------------------------------------
-    override class var scan_service: CBUUID {
-        return CBUUID(string: "00002760-08C2-11E1-9073-0E8AC72E1001")
+    override class var scan_services: [ CBUUID ] {
+        return [ CBUUID(string: "00002760-08C2-11E1-9073-0E8AC72E1001") ]
     }
     
     override class func hit(_ characteristic: CBCharacteristic) -> Bool {

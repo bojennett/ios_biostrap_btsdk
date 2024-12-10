@@ -1,5 +1,5 @@
 //
-//  Characteristic.swift
+//  CharacteristicTemplate.swift
 //  biostrapDeviceSDK
 //
 //  Created by Joseph A. Bennett on 5/12/21.
@@ -8,7 +8,7 @@
 import Foundation
 import CoreBluetooth
 
-class Characteristic {
+class CharacteristicTemplate {
 	
 	enum notifications: UInt8 {
 		case completion			= 0x00

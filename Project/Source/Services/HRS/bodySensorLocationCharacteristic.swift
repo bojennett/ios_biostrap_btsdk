@@ -11,7 +11,7 @@ import Foundation
 import CoreBluetooth
 import Combine
 
-class bodySensorLocationCharacteristic: Characteristic {
+class bodySensorLocationCharacteristic: CharacteristicTemplate {
     
     // MARK: Callbacks
     var lambdaUpdated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?

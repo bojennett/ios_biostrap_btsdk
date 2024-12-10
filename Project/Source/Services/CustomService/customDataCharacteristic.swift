@@ -10,7 +10,7 @@ import CoreBluetooth
 import Combine
 import zlib
 
-class customDataCharacteristic: Characteristic {
+class customDataCharacteristic: CharacteristicTemplate {
 	
     let dataPackets = PassthroughSubject<(Int, String), Never>()
     let dataComplete = PassthroughSubject<(Int, Int, Int, Int, Bool), Never>()

@@ -8,7 +8,7 @@
 import Foundation
 import CoreBluetooth
 
-class pulseOxContinuousCharacteristic: Characteristic {
+class pulseOxContinuousCharacteristic: CharacteristicTemplate {
 	
 	// MARK: Callbacks
 	var updated: ((_ id: String, _ spo2: Float, _ hr: Float)->())?

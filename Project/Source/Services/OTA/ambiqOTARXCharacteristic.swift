@@ -48,7 +48,7 @@ internal enum amotaStatus: UInt8 {
 	}
 }
 
-class ambiqOTARXCharacteristic: Characteristic {
+class ambiqOTARXCharacteristic: CharacteristicTemplate {
 	internal var mData							: Data?
 
 	//--------------------------------------------------------------------------------

@@ -22,8 +22,8 @@ class hrsService: ServiceTemplate {
     //
     //
     //--------------------------------------------------------------------------------
-    override class var scan_service: CBUUID {
-        return org_bluetooth_service.heart_rate.UUID
+    override class var scan_services: [ CBUUID ] {
+        return [ org_bluetooth_service.heart_rate.UUID ]
     }
         
     override class func hit(_ characteristic: CBCharacteristic) -> Bool {

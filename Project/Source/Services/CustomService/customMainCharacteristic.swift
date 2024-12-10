@@ -10,7 +10,7 @@ import CoreBluetooth
 import Combine
 import zlib
 
-class customMainCharacteristic: Characteristic {
+class customMainCharacteristic: CharacteristicTemplate {
 	
 	#if UNIVERSAL
 	var type:	biostrapDeviceSDK.biostrapDeviceType	= .unknown
