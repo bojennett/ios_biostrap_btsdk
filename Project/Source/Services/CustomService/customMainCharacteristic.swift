@@ -75,6 +75,8 @@ class customMainCharacteristic: CharacteristicTemplate {
     
     @Published private(set) var epoch: Int?
     @Published private(set) var worn: Bool?
+    @Published private(set) var canLogDiagnostics: Bool?
+    @Published private(set) var wornCheckResult: DeviceWornCheckResultType?
     @Published private(set) var charging: Bool?
     @Published private(set) var on_charger: Bool?
     @Published private(set) var charge_error: Bool?
@@ -89,6 +91,16 @@ class customMainCharacteristic: CharacteristicTemplate {
     @Published private(set) var tag: String?
     @Published private(set) var paired: Bool?
     @Published private(set) var advertisingPageThreshold: Int?
+    @Published private(set) var singleButtonPressAction: buttonCommandType?
+    @Published private(set) var doubleButtonPressAction: buttonCommandType?
+    @Published private(set) var tripleButtonPressAction: buttonCommandType?
+    @Published private(set) var longButtonPressAction: buttonCommandType?
+    @Published private(set) var rawLogging: Bool?
+    @Published private(set) var wornOverridden: Bool?
+    @Published private(set) var advertisingInterval: Int?
+    @Published private(set) var chargeCycles: Float?
+    @Published private(set) var advertiseAsHRM: Bool?
+    @Published private(set) var buttonResponseEnabled: Bool?
 
 	// MARK: Callbacks
     let writeEpochComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
@@ -1214,7 +1226,9 @@ class customMainCharacteristic: CharacteristicTemplate {
 								switch (parameter) {
                                 case .advertisingInterval	: self.writeAdvIntervalComplete.send(successful ? .successful : .device_error)
                                 case .serialNumber			: self.writeSerialNumberComplete.send(successful ? .successful : .device_error)
-                                case .chargeCycle			: self.clearChargeCyclesComplete.send(successful ? .successful : .device_error)
+                                case .chargeCycle			:
+                                    if successful { self.chargeCycles = nil }
+                                    self.clearChargeCyclesComplete.send(successful ? .successful : .device_error)
                                 case .canLogDiagnostics		: self.updateCanLogDiagnosticsComplete.send(successful ? .successful : .device_error)
                                 case .paired				:
                                     self.setPairedComplete.send(successful ? .successful : .device_error)
@@ -1229,6 +1243,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 									switch (parameter) {
 									case .advertisingInterval	:
 										let seconds = data.subdata(in: Range(4...7)).leInt32
+                                        if successful { self.advertisingInterval = seconds }
                                         self.readAdvIntervalComplete.send((successful ? .successful : .device_error, seconds))
 									case .serialNumber			:
 										let snData		= String(decoding: data.subdata(in: Range(4...19)), as: UTF8.self)
@@ -1237,10 +1252,12 @@ class customMainCharacteristic: CharacteristicTemplate {
                                         self.readSerialNumberComplete.send((successful ? .successful : .device_error, snString))
 									case .chargeCycle			:
 										let cycles = data.subdata(in: Range(4...7)).leFloat
+                                        if successful { self.chargeCycles = cycles }
                                         self.readChargeCyclesComplete.send((successful ? .successful : .device_error, cycles))
 									case .canLogDiagnostics		:
-										let canLog = (data[4] != 0x00)
-                                        self.readCanLogDiagnosticsComplete.send((successful ? .successful : .device_error, canLog))
+										let allow = (data[4] != 0x00)
+                                        if successful { self.canLogDiagnostics = allow }
+                                        self.readCanLogDiagnosticsComplete.send((successful ? .successful : .device_error, allow))
 									case .paired:
 										let paired = (data[4] != 0x00)
                                         if successful {
@@ -1274,7 +1291,9 @@ class customMainCharacteristic: CharacteristicTemplate {
 						case .delDeviceParam	:
 							if let parameter = deviceParameterType(rawValue: data[3]) {
 								switch (parameter) {
-                                case .advertisingInterval	: self.deleteAdvIntervalComplete.send(successful ? .successful : .device_error)
+                                case .advertisingInterval	:
+                                    if successful { self.advertisingInterval = nil }
+                                    self.deleteAdvIntervalComplete.send(successful ? .successful : .device_error)
                                 case .serialNumber			: self.deleteSerialNumberComplete.send(successful ? .successful : .device_error)
 								case .chargeCycle			: globals.log.e ("\(pID): Should not have been able to delete \(parameter.title)")
 								case .canLogDiagnostics		: globals.log.e ("\(pID): Should not have been able to delete \(parameter.title)")
@@ -1342,6 +1361,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 						case .setAskForButtonResponse:
 							if (data.count == 4) {
 								let enable		= data[3] == 0x01 ? true : false
+                                if successful { self.buttonResponseEnabled = enable }
 								self.setAskForButtonResponseComplete.send((successful ? .successful : .device_error, enable))
 							} else {
                                 self.setAskForButtonResponseComplete.send((.device_error, false))
@@ -1350,6 +1370,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 						case .getAskForButtonResponse:
 							if (data.count == 4) {
 								let enable		= data[3] == 0x01 ? true : false
+                                if successful { self.buttonResponseEnabled = enable }
                                 self.getAskForButtonResponseComplete.send((successful ? .successful : .device_error, enable))
 							} else {
 								self.getAskForButtonResponseComplete.send((.device_error, false))
@@ -1433,6 +1454,9 @@ class customMainCharacteristic: CharacteristicTemplate {
 						case .setAdvertiseAsHRM:
 							if (data.count == 4) {
 								let asHRM		= data[3] != 0x00
+                                if successful {
+                                    self.advertiseAsHRM = asHRM
+                                }
                                 self.setAdvertiseAsHRMComplete.send((successful ? .successful : .device_error, asHRM))
 							} else {
                                 self.setAdvertiseAsHRMComplete.send((.device_error, false))
@@ -1441,6 +1465,9 @@ class customMainCharacteristic: CharacteristicTemplate {
 						case .getAdvertiseAsHRM:
 							if (data.count == 4) {
 								let asHRM		= data[3] != 0x00
+                                if successful {
+                                    self.advertiseAsHRM = asHRM
+                                }
                                 self.getAdvertiseAsHRMComplete.send((successful ? .successful : .device_error, asHRM))
 							} else {
 								self.getAdvertiseAsHRMComplete.send((.device_error, false))
@@ -1449,6 +1476,16 @@ class customMainCharacteristic: CharacteristicTemplate {
 						case .setButtonCommand:
 							if (data.count == 5) {
 								if let tap = buttonTapType(rawValue: data[3]), let command = buttonCommandType(rawValue: data[4]) {
+                                    if successful {
+                                        switch tap {
+                                        case .single: self.singleButtonPressAction = command
+                                        case .double: self.doubleButtonPressAction = command
+                                        case .triple: self.tripleButtonPressAction = command
+                                        case .long: self.longButtonPressAction = command
+                                        default: break
+                                        }
+                                    }
+
                                     self.setButtonCommandComplete.send((successful ? .successful : .device_error, tap, command))
 								} else {
 									self.setButtonCommandComplete.send((.device_error, .unknown, .unknown))
@@ -1460,6 +1497,16 @@ class customMainCharacteristic: CharacteristicTemplate {
 						case .getButtonCommand:
 							if (data.count == 5) {
 								if let tap = buttonTapType(rawValue: data[3]), let command = buttonCommandType(rawValue: data[4]) {
+                                    if successful {
+                                        switch tap {
+                                        case .single: self.singleButtonPressAction = command
+                                        case .double: self.doubleButtonPressAction = command
+                                        case .triple: self.tripleButtonPressAction = command
+                                        case .long: self.longButtonPressAction = command
+                                        default: break
+                                        }
+                                    }
+
                                     self.getButtonCommandComplete.send((successful ? .successful : .device_error, tap, command))
 								} else {
 									self.getButtonCommandComplete.send((.device_error, .unknown, .unknown))
@@ -1475,8 +1522,10 @@ class customMainCharacteristic: CharacteristicTemplate {
 									let value = data.subdata(in: Range(4...7)).leInt32
 								
 									if code == .ran {
+                                        self.wornCheckResult = DeviceWornCheckResultType(code: code.message, value: value)
                                         self.wornCheckComplete.send((successful ? .successful : .device_error, code.message, value))
 									} else {
+                                        self.wornCheckResult = DeviceWornCheckResultType(code: code.message, value: 0)
                                         self.wornCheckComplete.send((.device_error, code.message, 0))
 									}
 								} else {
@@ -1487,14 +1536,27 @@ class customMainCharacteristic: CharacteristicTemplate {
                         case .logRaw			: self.rawLoggingComplete.send(successful ? .successful : .device_error)
 						case .getRawLoggingStatus	:
 							if (data.count == 4) {
-                                self.getRawLoggingStatusComplete.send((successful ? .successful : .device_error, (data[3] != 0x00)))
+                                let enabled = (data[3] != 0x00)
+                                if successful {
+                                    self.rawLogging = enabled
+                                } else {
+                                    self.rawLogging = nil
+                                }
+
+                                self.getRawLoggingStatusComplete.send((successful ? .successful : .device_error, enabled))
 							} else {
                                 self.getRawLoggingStatusComplete.send((.device_error, false))
 							}
 							
 						case .getWornOverrideStatus	:
 							if (data.count == 4) {
-                                self.getWornOverrideStatusComplete.send((successful ? .successful : .device_error, (data[3] != 0x00)))
+                                let overridden = (data[3] != 0x00)
+                                if successful {
+                                    self.wornOverridden = overridden
+                                } else {
+                                    self.wornOverridden = nil
+                                }
+                                self.getWornOverrideStatusComplete.send((successful ? .successful : .device_error, overridden))
 							} else {
                                 self.getWornOverrideStatusComplete.send((.device_error, false))
 							}
