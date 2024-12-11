@@ -1699,17 +1699,17 @@ class customMainCharacteristic: CharacteristicTemplate {
 					do {
 						let jsonData = try JSONEncoder().encode(testResult)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
+                            self.manufacturingTestResult.send((true, jsonString))
 						} else {
 							globals.log.e ("\(pID): Result jsonString Failed")
-							self.manufacturingTestResult?(false, "")
+                            self.manufacturingTestResult.send((false, ""))
 						}
 					} catch {
 						globals.log.e ("\(pID): Result jsonData Failed")
-						self.manufacturingTestResult?(false, "")
+                        self.manufacturingTestResult.send((false, ""))
 					}
 				} else {
-					self.manufacturingTestResult?(false, "")
+                    self.manufacturingTestResult.send((false, ""))
 				}
 				#endif
 
@@ -1719,17 +1719,17 @@ class customMainCharacteristic: CharacteristicTemplate {
 					do {
 						let jsonData = try JSONEncoder().encode(testResult)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
-							self.manufacturingTestResult?(true, jsonString)
+                            self.manufacturingTestResult.send((true, jsonString))
 						} else {
 							globals.log.e ("\(pID): Result jsonString Failed")
-							self.manufacturingTestResult?(false, "")
+                            self.manufacturingTestResult.send((false, ""))
 						}
 					} catch {
 						globals.log.e ("\(pID): Result jsonData Failed")
-						self.manufacturingTestResult?(false, "")
+                        self.manufacturingTestResult.send((false, ""))
 					}
 				} else {
-					self.manufacturingTestResult?(false, "")
+                    self.manufacturingTestResult.send((false, ""))
 				}
 				#endif
 

@@ -29,7 +29,7 @@ public class Device: NSObject, ObservableObject {
 		case configuring
 		case configured
         
-        var title: String {
+        public var title: String {
             switch self {
             case .disconnected: return "Disconnected"
             case .connecting: return "Connecting"
