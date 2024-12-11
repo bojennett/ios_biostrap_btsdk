@@ -73,7 +73,22 @@ class customMainCharacteristic: CharacteristicTemplate {
 		}
 	}
     
+    @Published private(set) var epoch: Int?
+    @Published private(set) var worn: Bool?
+    @Published private(set) var charging: Bool?
+    @Published private(set) var on_charger: Bool?
+    @Published private(set) var charge_error: Bool?
+    @Published private(set) var buttonTaps: Int?
     @Published private(set) var ppgMetrics: ppgMetricsType?
+    @Published private(set) var hrZoneLEDBelow: hrZoneLEDValueType?
+    @Published private(set) var hrZoneLEDWithin: hrZoneLEDValueType?
+    @Published private(set) var hrZoneLEDAbove: hrZoneLEDValueType?
+    @Published private(set) var hrZoneRange: hrZoneRangeValueType?
+    @Published private(set) var ppgCapturePeriod: Int?
+    @Published private(set) var ppgCaptureDuration: Int?
+    @Published private(set) var tag: String?
+    @Published private(set) var paired: Bool?
+    @Published private(set) var advertisingPageThreshold: Int?
 
 	// MARK: Callbacks
     let writeEpochComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
@@ -107,13 +122,10 @@ class customMainCharacteristic: CharacteristicTemplate {
     let endSleepComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
     let manufacturingTestComplete = PassthroughSubject<DeviceCommandCompletionStatus, Never>()
 
-    let deviceWornStatus = PassthroughSubject<Bool, Never>()
-    let deviceChargingStatus = PassthroughSubject<(Bool, Bool, Bool), Never>()
     let ppgFailed = PassthroughSubject<Int, Never>()
     let manufacturingTestResult = PassthroughSubject<(Bool, String), Never>()
 
     let endSleepStatus = PassthroughSubject<Bool, Never>()
-    let buttonClicked = PassthroughSubject<Int, Never>()
     
     let setAskForButtonResponseComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
     let getAskForButtonResponseComplete = PassthroughSubject<(DeviceCommandCompletionStatus, Bool), Never>()
@@ -191,8 +203,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 				globals.log.v ("\(name): At limit - allow")
 				count	= 0
 				return true
-			}
-			else {
+			} else {
 				globals.log.v ("\(name): Not at limit - disallow \(count) != \(limit)")
 				return false
 			}
@@ -1099,8 +1110,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 		if (mCRCOK == false) {
 			mCRCFailCount	= mCRCFailCount + 1
             if (mCRCFailCount == 10) { dataFailure.send() }
-		}
-		else { mCRCFailCount	= 0 }
+		} else { mCRCFailCount	= 0 }
 		
 		var data = Data()
 		data.append(commands.validateCRC.rawValue)
@@ -1131,9 +1141,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 						case .readEpoch		:
 							if (data.count == 7) {
 								let epoch = data.subdata(in: Range(3...6)).leInt32
+                                if successful {
+                                    self.epoch = epoch
+                                }
                                 self.readEpochComplete.send((successful ? .successful : .device_error, epoch))
-							}
-							else {
+							} else {
                                 self.readEpochComplete.send((.device_error, 0))
 							}
                         case .endSleep		: self.endSleepComplete.send(successful ? .successful : .device_error)
@@ -1144,8 +1156,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 						case .getAllPacketsAcknowledge	:
 							if (data.count == 4) {
                                 self.getAllPacketsAcknowledgeComplete.send((successful ? .successful : .device_error, (data[3] == 0x01)))
-							}
-							else {
+							} else {
                                 self.getAllPacketsAcknowledgeComplete.send((.device_error, false))
 							}
 						case .getNextPacket :
@@ -1160,24 +1171,23 @@ class customMainCharacteristic: CharacteristicTemplate {
 										if let jsonString = String(data: jsonData, encoding: .utf8) {
 											if let code = error_code {
                                                 self.getNextPacketComplete.send((.successful, code, caughtUp, jsonString))
-											}
-											else {
+											} else {
                                                 self.getNextPacketComplete.send((.successful, .unknown, caughtUp, jsonString))
 											}
-										}
-                                        else { self.getNextPacketComplete.send((.device_error, .badJSON, caughtUp, "")) }
-									}
-                                    catch { self.getNextPacketComplete.send((.device_error, .badSDKDecode, caughtUp, "")) }
-								}
-								else {
+                                        } else {
+                                            self.getNextPacketComplete.send((.device_error, .badJSON, caughtUp, ""))
+                                        }
+                                    } catch {
+                                        self.getNextPacketComplete.send((.device_error, .badSDKDecode, caughtUp, ""))
+                                    }
+								} else {
 									if let code = error_code {
                                         self.getNextPacketComplete.send((.device_error, code, caughtUp, ""))
 									} else {
                                         self.getNextPacketComplete.send((.device_error, .unknown, caughtUp, ""))
 									}
 								}
-							}
-							else {
+							} else {
                                 self.getNextPacketComplete.send((.device_error, .unknown, false, ""))
 							}
 						case .getPacketCount:
@@ -1206,11 +1216,11 @@ class customMainCharacteristic: CharacteristicTemplate {
                                 case .serialNumber			: self.writeSerialNumberComplete.send(successful ? .successful : .device_error)
                                 case .chargeCycle			: self.clearChargeCyclesComplete.send(successful ? .successful : .device_error)
                                 case .canLogDiagnostics		: self.updateCanLogDiagnosticsComplete.send(successful ? .successful : .device_error)
-                                case .paired				: self.setPairedComplete.send(successful ? .successful : .device_error)
+                                case .paired				:
+                                    self.setPairedComplete.send(successful ? .successful : .device_error)
                                 case .pageThreshold			: self.setPageThresholdComplete.send(successful ? .successful : .device_error)
 								}
-							}
-							else {
+							} else {
 								globals.log.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
 						case .getDeviceParam	:
@@ -1233,13 +1243,22 @@ class customMainCharacteristic: CharacteristicTemplate {
                                         self.readCanLogDiagnosticsComplete.send((successful ? .successful : .device_error, canLog))
 									case .paired:
 										let paired = (data[4] != 0x00)
+                                        if successful {
+                                            self.paired = paired
+                                        } else {
+                                            self.paired = nil
+                                        }
                                         self.getPairedComplete.send((successful ? .successful : .device_error, paired))
 									case .pageThreshold:
-										globals.log.v ("\(pID): \(response): Data: \(data.hexString)")
-                                        self.getPageThresholdComplete.send((successful ? .successful : .device_error, Int(data[4])))
+                                        let threshold = Int(data[4])
+                                        if successful {
+                                            self.advertisingPageThreshold = threshold
+                                        } else {
+                                            self.advertisingPageThreshold = nil
+                                        }
+                                        self.getPageThresholdComplete.send((successful ? .successful : .device_error, threshold))
 									}
-								}
-								else {
+								} else {
 									switch (parameter) {
                                     case .advertisingInterval	: self.readAdvIntervalComplete.send((.device_error, 0))
                                     case .serialNumber			: self.readSerialNumberComplete.send((.device_error, ""))
@@ -1249,8 +1268,7 @@ class customMainCharacteristic: CharacteristicTemplate {
                                     case .pageThreshold			: self.getPageThresholdComplete.send((.device_error, 1))
 									}
 								}
-							}
-							else {
+							} else {
 								globals.log.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
 						case .delDeviceParam	:
@@ -1263,8 +1281,7 @@ class customMainCharacteristic: CharacteristicTemplate {
                                 case .paired				: self.setUnpairedComplete.send(successful ? .successful : .device_error)
                                 case .pageThreshold			: self.deletePageThresholdComplete.send(successful ? .successful : .device_error)
 								}
-							}
-							else {
+							} else {
 								globals.log.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
 						case .setSessionParam		:
@@ -1272,14 +1289,14 @@ class customMainCharacteristic: CharacteristicTemplate {
 								switch (enumParameter) {
 								case .ppgCapturePeriod,
 									 .ppgCaptureDuration,
-                                     .tag: setSessionParamComplete.send((successful ? .successful : .device_error, enumParameter))
+                                     .tag:
+                                    setSessionParamComplete.send((successful ? .successful : .device_error, enumParameter))
                                 case .reset: resetSessionParamsComplete.send(successful ? .successful : .device_error)
                                 case .accept: acceptSessionParamsComplete.send((successful ? .successful : .device_error))
                                 case .unknown:
                                     setSessionParamComplete.send((.device_error, enumParameter)) // Shouldn't get this ever!)
 								}
-							}
-							else {
+							} else {
 								globals.log.e ("\(pID): Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
 							}
 
@@ -1290,6 +1307,22 @@ class customMainCharacteristic: CharacteristicTemplate {
 									 .ppgCaptureDuration,
 									 .tag		:
 									let value = data.subdata(in: Range(4...7)).leInt32
+                                    
+                                    switch enumParameter {
+                                    case .tag:
+                                        var data = Data()
+                                        data.append((UInt8((value >> 0) & 0xff)))
+                                        data.append((UInt8((value >> 8) & 0xff)))
+                                        if let strValue = String(data: data, encoding: .utf8) {
+                                            self.tag = strValue
+                                        } else {
+                                            self.tag = "'\(String(format:"0x%04X", value))' - Could not make string"
+                                        }
+                                    case .ppgCapturePeriod: self.ppgCapturePeriod = value
+                                    case .ppgCaptureDuration: self.ppgCaptureDuration = value
+                                    default: break
+                                    }
+
                                     getSessionParamComplete.send((successful ? .successful : .device_error, enumParameter, value))
 									break
                                 case .reset		: resetSessionParamsComplete.send(successful ? .successful : .device_error) // Shouldn't get this on a get
@@ -1299,8 +1332,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 									break
 								}
 
-							}
-							else {
+							} else {
 								globals.log.e ("\(pID): Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
 							}
 
@@ -1311,8 +1343,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 							if (data.count == 4) {
 								let enable		= data[3] == 0x01 ? true : false
 								self.setAskForButtonResponseComplete.send((successful ? .successful : .device_error, enable))
-							}
-							else {
+							} else {
                                 self.setAskForButtonResponseComplete.send((.device_error, false))
 							}
 							
@@ -1320,8 +1351,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 							if (data.count == 4) {
 								let enable		= data[3] == 0x01 ? true : false
                                 self.getAskForButtonResponseComplete.send((successful ? .successful : .device_error, enable))
-							}
-							else {
+							} else {
 								self.getAskForButtonResponseComplete.send((.device_error, false))
 							}
 							
@@ -1329,10 +1359,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 							if (data.count == 4) {
 								if let zone = hrZoneRangeType(rawValue: data[3]) {
                                     self.setHRZoneColorComplete.send((successful ? .successful : .device_error, zone))
-								}
-								else { self.setHRZoneColorComplete.send((.device_error, .unknown)) }
-							}
-                            else { self.setHRZoneColorComplete.send((.device_error, .unknown)) }
+                                } else {
+                                    self.setHRZoneColorComplete.send((.device_error, .unknown))
+                                }
+                            } else {
+                                self.setHRZoneColorComplete.send((.device_error, .unknown))
+                            }
 							
 						case .getHRZoneColor:
 							if (data.count == 11) {
@@ -1342,24 +1374,43 @@ class customMainCharacteristic: CharacteristicTemplate {
 									let blue	= (data[6] != 0x00)
 									let on_ms	= data.subdata(in: Range(7...8)).leInt16
 									let off_ms	= data.subdata(in: Range(9...10)).leInt16
+                                    
+                                    if successful {
+                                        switch (zone) {
+                                        case .below: self.hrZoneLEDBelow = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
+                                        case .within: self.hrZoneLEDWithin = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
+                                        case .above: self.hrZoneLEDAbove = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
+                                        default: break
+                                        }
+                                    }
+
                                     self.getHRZoneColorComplete.send((successful ? .successful : .device_error, zone, red, green, blue, on_ms, off_ms))
-								}
-                                else { self.getHRZoneColorComplete.send((.device_error, .unknown, false, false, false, 0, 0)) }
-							}
-                            else { self.getHRZoneColorComplete.send((.device_error, .unknown, false, false, false, 0, 0)) }
+                                } else {
+                                    self.getHRZoneColorComplete.send((.device_error, .unknown, false, false, false, 0, 0))
+                                }
+                            } else {
+                                self.getHRZoneColorComplete.send((.device_error, .unknown, false, false, false, 0, 0))
+                            }
 							
 						case .setHRZoneRange:
-                            if (data.count == 3) { self.setHRZoneRangeComplete.send(successful ? .successful : .device_error) }
-                            else { self.setHRZoneRangeComplete.send(.device_error) }
+                            if (data.count == 3) {
+                                self.setHRZoneRangeComplete.send(successful ? .successful : .device_error)
+                            } else {
+                                self.setHRZoneRangeComplete.send(.device_error)
+                            }
 							
 						case .getHRZoneRange:
 							if (data.count == 6) {
-								let enable		= (data[3] != 0x00)
+								let enabled		= (data[3] != 0x00)
 								let high_value	= Int(data[4])
 								let low_value	= Int(data[5])
-                                self.getHRZoneRangeComplete.send((successful ? .successful : .device_error, enable, high_value, low_value))
-							}
-							else {
+                                
+                                if successful {
+                                    self.hrZoneRange = hrZoneRangeValueType(enabled: enabled, lower: low_value, upper: high_value)
+                                }
+
+                                self.getHRZoneRangeComplete.send((successful ? .successful : .device_error, enabled, high_value, low_value))
+							} else {
                                 self.getHRZoneRangeComplete.send((.device_error, false, 0, 0))
 							}
 						case .getPPGAlgorithm:
@@ -1368,16 +1419,14 @@ class customMainCharacteristic: CharacteristicTemplate {
 								
 								if let type = eventType(rawValue: data[4]) {
                                     self.getPPGAlgorithmComplete.send((successful ? .successful : .device_error, algorithm, type))
-								}
-								else {
+								} else {
                                     self.getPPGAlgorithmComplete.send((successful ? .successful : .device_error, algorithm, eventType.unknown))
 								}
 							}
 							else if (data.count == 4) {
 								let algorithm	= ppgAlgorithmConfiguration(data[3])
                                 self.getPPGAlgorithmComplete.send((successful ? .successful : .device_error, algorithm, eventType.unknown))
-							}
-							else {
+							} else {
                                 self.getPPGAlgorithmComplete.send((.device_error, ppgAlgorithmConfiguration(), eventType.unknown))
 							}
 							
@@ -1385,8 +1434,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 							if (data.count == 4) {
 								let asHRM		= data[3] != 0x00
                                 self.setAdvertiseAsHRMComplete.send((successful ? .successful : .device_error, asHRM))
-							}
-							else {
+							} else {
                                 self.setAdvertiseAsHRMComplete.send((.device_error, false))
 							}
 
@@ -1394,8 +1442,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 							if (data.count == 4) {
 								let asHRM		= data[3] != 0x00
                                 self.getAdvertiseAsHRMComplete.send((successful ? .successful : .device_error, asHRM))
-							}
-							else {
+							} else {
 								self.getAdvertiseAsHRMComplete.send((.device_error, false))
 							}
 							
@@ -1403,12 +1450,10 @@ class customMainCharacteristic: CharacteristicTemplate {
 							if (data.count == 5) {
 								if let tap = buttonTapType(rawValue: data[3]), let command = buttonCommandType(rawValue: data[4]) {
                                     self.setButtonCommandComplete.send((successful ? .successful : .device_error, tap, command))
-								}
-								else {
+								} else {
 									self.setButtonCommandComplete.send((.device_error, .unknown, .unknown))
 								}
-							}
-							else {
+							} else {
                                 self.setButtonCommandComplete.send((.device_error, .unknown, .unknown))
 							}
 
@@ -1416,12 +1461,10 @@ class customMainCharacteristic: CharacteristicTemplate {
 							if (data.count == 5) {
 								if let tap = buttonTapType(rawValue: data[3]), let command = buttonCommandType(rawValue: data[4]) {
                                     self.getButtonCommandComplete.send((successful ? .successful : .device_error, tap, command))
-								}
-								else {
+								} else {
 									self.getButtonCommandComplete.send((.device_error, .unknown, .unknown))
 								}
-							}
-							else {
+							} else {
 								self.getButtonCommandComplete.send((.device_error, .unknown, .unknown))
 							}
 
@@ -1433,12 +1476,10 @@ class customMainCharacteristic: CharacteristicTemplate {
 								
 									if code == .ran {
                                         self.wornCheckComplete.send((successful ? .successful : .device_error, code.message, value))
-									}
-									else {
+									} else {
                                         self.wornCheckComplete.send((.device_error, code.message, 0))
 									}
-								}
-								else {
+								} else {
                                     self.wornCheckComplete.send((.device_error, "Unknown code: \(String(format: "0x%02X", data[3]))", 0))
 								}
 							}
@@ -1447,16 +1488,14 @@ class customMainCharacteristic: CharacteristicTemplate {
 						case .getRawLoggingStatus	:
 							if (data.count == 4) {
                                 self.getRawLoggingStatusComplete.send((successful ? .successful : .device_error, (data[3] != 0x00)))
-							}
-							else {
+							} else {
                                 self.getRawLoggingStatusComplete.send((.device_error, false))
 							}
 							
 						case .getWornOverrideStatus	:
 							if (data.count == 4) {
                                 self.getWornOverrideStatusComplete.send((successful ? .successful : .device_error, (data[3] != 0x00)))
-							}
-							else {
+							} else {
                                 self.getWornOverrideStatusComplete.send((.device_error, false))
 							}
 							
@@ -1465,12 +1504,10 @@ class customMainCharacteristic: CharacteristicTemplate {
 						case .validateCRC		: break
 							//globals.log.v ("\(pID): Got Validate CRC completion: \(data.hexString)")
 						}
-					}
-					else {
+					} else {
 						globals.log.e ("\(pID): Unknown command: \(data.hexString)")
 					}
-				}
-				else {
+				} else {
 					globals.log.e ("\(pID): Incorrect length for completion: \(data.hexString)")
 				}
 				
@@ -1485,8 +1522,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 					let sequence_number = data.subdata(in: Range(1...2)).leUInt16
 					if (sequence_number == mExpectedSequenceNumber) {
 						//globals.log.v ("\(pID): Sequence Number Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")
-					}
-					else {
+					} else {
 						globals.log.e ("\(pID): \(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
 						mCRCOK	= false
 					}
@@ -1496,15 +1532,14 @@ class customMainCharacteristic: CharacteristicTemplate {
                         let dataPackets = self.pParseDataPackets(data.subdata(in: Range(3...(data.count - 1))), offset: 0)
 						mDataPackets.append(contentsOf: dataPackets)
 					}
-				}
-				else {
+				} else {
 					globals.log.e ("\(pID): Bad data length for data packet: \(data.hexString)")
 					mCRCOK	= false
 				}
 				
 			case .worn:
-                if      (data[1] == 0x00) { deviceWornStatus.send(false) }
-                else if (data[1] == 0x01) { deviceWornStatus.send(true)  }
+                if      (data[1] == 0x00) { self.worn = false }
+                else if (data[1] == 0x01) { self.worn = true  }
 				else {
 					globals.log.e ("\(pID): Cannot parse worn status: \(data[1])")
 				}
@@ -1524,8 +1559,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 			case .ppgFailed:
 				if (data.count > 1) {
                     self.ppgFailed.send(Int(data[1]))
-				}
-				else {
+				} else {
                     self.ppgFailed.send(999)
 				}
 				
@@ -1535,8 +1569,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 					let bad_parse_count	= Int(data.subdata(in: Range(3...4)).leUInt16)
 					let overflow_count	= Int(data.subdata(in: Range(5...6)).leUInt16)
                     self.dataComplete.send((bad_read_count, bad_parse_count, overflow_count, self.pFailedDecodeCount, false))
-				}
-				else {
+				} else {
                     self.dataComplete.send((-1, -1, -1, self.pFailedDecodeCount, false))
 				}
 				
@@ -1544,17 +1577,14 @@ class customMainCharacteristic: CharacteristicTemplate {
 				if (data.count == 2) {
 					let hasSleep	= data[1] == 0x01 ? true : false
                     self.endSleepStatus.send(hasSleep)
-				}
-				else {
+				} else {
 					globals.log.e ("\(pID): Cannot parse 'endSleepStatus': \(data.hexString)")
 				}
 				
 			case .buttonResponse:
 				if (data.count == 2) {
-					let presses	= Int(data[1])
-                    self.buttonClicked.send(presses)
-				}
-				else {
+                    self.buttonTaps	= Int(data[1])
+				} else {
 					globals.log.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
 				}
 				
@@ -1564,8 +1594,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 				let sequence_number = data.subdata(in: Range(1...2)).leUInt16
 				if (sequence_number == mExpectedSequenceNumber) {
 					//globals.log.v ("\(pID): SN Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")
-				}
-				else {
+				} else {
 					globals.log.e ("\(pID): \(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
 					mCRCOK	= false
 				}
@@ -1586,12 +1615,10 @@ class customMainCharacteristic: CharacteristicTemplate {
 									} else { globals.log.e ("\(pID): Cannot make string from json data") }
 								} catch { globals.log.e ("\(pID): Cannot make JSON data") }
 						   }
-						}
-						else {
+						} else {
 							globals.log.v ("\(pID): \(response) Failed: Do not let packets through")
 						}
-					}
-					else {
+					} else {
 						mCRCOK	= false
 					}
 
@@ -1611,18 +1638,15 @@ class customMainCharacteristic: CharacteristicTemplate {
 						let jsonData = try JSONEncoder().encode(testResult)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
 							self.manufacturingTestResult?(true, jsonString)
-						}
-						else {
+						} else {
 							globals.log.e ("\(pID): Result jsonString Failed")
 							self.manufacturingTestResult?(false, "")
 						}
-					}
-					catch {
+					} catch {
 						globals.log.e ("\(pID): Result jsonData Failed")
 						self.manufacturingTestResult?(false, "")
 					}
-				}
-				else {
+				} else {
 					self.manufacturingTestResult?(false, "")
 				}
 				#endif
@@ -1634,18 +1658,15 @@ class customMainCharacteristic: CharacteristicTemplate {
 						let jsonData = try JSONEncoder().encode(testResult)
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
 							self.manufacturingTestResult?(true, jsonString)
-						}
-						else {
+						} else {
 							globals.log.e ("\(pID): Result jsonString Failed")
 							self.manufacturingTestResult?(false, "")
 						}
-					}
-					catch {
+					} catch {
 						globals.log.e ("\(pID): Result jsonData Failed")
 						self.manufacturingTestResult?(false, "")
 					}
-				}
-				else {
+				} else {
 					self.manufacturingTestResult?(false, "")
 				}
 				#endif
@@ -1659,18 +1680,15 @@ class customMainCharacteristic: CharacteristicTemplate {
 							let jsonData = try JSONEncoder().encode(testResult)
 							if let jsonString = String(data: jsonData, encoding: .utf8) {
                                 self.manufacturingTestResult.send((true, jsonString))
-							}
-							else {
+							} else {
 								globals.log.e ("\(pID): Result jsonString Failed")
                                 self.manufacturingTestResult.send((false, ""))
 							}
-						}
-						catch {
+						} catch {
 							globals.log.e ("\(pID): Result jsonData Failed")
                             self.manufacturingTestResult.send((false, ""))
 						}
-					}
-					else {
+					} else {
                         self.manufacturingTestResult.send((false, ""))
 					}
 
@@ -1681,18 +1699,15 @@ class customMainCharacteristic: CharacteristicTemplate {
 							let jsonData = try JSONEncoder().encode(testResult)
 							if let jsonString = String(data: jsonData, encoding: .utf8) {
                                 self.manufacturingTestResult.send((true, jsonString))
-							}
-							else {
+							} else {
 								globals.log.e ("\(pID): Result jsonString Failed")
                                 self.manufacturingTestResult.send((false, ""))
 							}
-						}
-						catch {
+						} catch {
 							globals.log.e ("\(pID): Result jsonData Failed")
                             self.manufacturingTestResult.send((false, ""))
 						}
-					}
-					else {
+					} else {
                         self.manufacturingTestResult.send((false, ""))
 					}
 
@@ -1701,17 +1716,14 @@ class customMainCharacteristic: CharacteristicTemplate {
 				#endif
 				
 			case .charging:
-				let on_charger	= (data[1] == 0x01)
-				let charging	= (data[2] == 0x01)
-				let error		= (data[3] == 0x01)
-				
-                self.deviceChargingStatus.send((charging, on_charger, error))
+                self.on_charger	= (data[1] == 0x01)
+                self.charging = (data[2] == 0x01)
+                self.charge_error = (data[3] == 0x01)
 				
 			case .streamPacket: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")
 			case .dataAvailable: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")
 			}
-		}
-		else {
+		} else {
 			globals.log.e ("\(pID): Unknown update: \(data.hexString)")
 		}
 	}
@@ -1741,18 +1753,17 @@ class customMainCharacteristic: CharacteristicTemplate {
 					}
 
 					mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
-				}
-				else {
+				} else {
 					globals.log.e ("\(pID): Cannot calculate packet CRC: Not enough data.  Length = \(data.count): \(data.hexString)")
 					return
 				}
 				
-			}
-			else {
+			} else {
 				globals.log.e ("\(pID): Missing data")
 			}
-		}
-		else { globals.log.e ("\(pID): Missing characteristic") }
+        } else {
+            globals.log.e ("\(pID): Missing characteristic")
+        }
 	}
 
 	//--------------------------------------------------------------------------------

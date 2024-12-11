@@ -261,33 +261,29 @@ class customService: ServiceTemplate {
             .store(in: &pSubscriptions)
 
         // Main characteristic
-        mainCharacteristic.writeEpochComplete
-            .sink { status in
-                self.writeEpochComplete.send(status)
-            }
-            .store(in: &pSubscriptions)
+        mainCharacteristic.$worn.sink { [weak self] in self?.worn = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$epoch.sink { [weak self] in self?.epoch = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$charging.sink { self.charging = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$on_charger.sink { self.on_charger = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$charge_error.sink { self.charge_error = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$buttonTaps.sink { self.buttonTaps = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$hrZoneLEDBelow.sink { [weak self] in self?.hrZoneLEDBelow = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$hrZoneLEDWithin.sink { [weak self] in self?.hrZoneLEDWithin = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$hrZoneLEDAbove.sink { [weak self] in self?.hrZoneLEDAbove = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$hrZoneRange.sink { [weak self] in self?.hrZoneRange = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$ppgCapturePeriod.sink { [weak self] in self?.ppgCapturePeriod = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$ppgCaptureDuration.sink { [weak self] in self?.ppgCaptureDuration = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$tag.sink { [weak self] in self?.tag = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$paired.sink { [weak self] in self?.paired = $0 }.store(in: &pSubscriptions)
+
+        mainCharacteristic.writeEpochComplete.sink { self.writeEpochComplete.send($0) }.store(in: &pSubscriptions)
         
         mainCharacteristic.readEpochComplete
             .sink { status, value in
-                self.epoch = value
                 self.readEpochComplete.send((status, value))
             }
             .store(in: &pSubscriptions)
-        
-        mainCharacteristic.deviceWornStatus
-            .sink { isWorn in
-                self.worn = isWorn
-            }
-            .store(in: &pSubscriptions)
-        
-        mainCharacteristic.deviceChargingStatus
-            .sink { charging, on_charger, error in
-                self.charging = charging
-                self.on_charger = on_charger
-                self.charge_error = error
-            }
-            .store(in: &pSubscriptions)
-
+                
         mainCharacteristic.startManualComplete
             .sink { status in
                 self.startManualComplete.send(status)
@@ -445,12 +441,6 @@ class customService: ServiceTemplate {
         
         mainCharacteristic.getHRZoneColorComplete
             .sink { status, type, red, green, blue, on_ms, off_ms in
-                switch (type) {
-                case .below: self.hrZoneLEDBelow = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
-                case .within: self.hrZoneLEDWithin = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
-                case .above: self.hrZoneLEDAbove = hrZoneLEDValueType(red: red, green: green, blue: blue, on_ms: on_ms, off_ms: off_ms)
-                default: break
-                }
                 self.getHRZoneColorComplete.send((status, type, red, green, blue, on_ms, off_ms))
             }
             .store(in: &pSubscriptions)
@@ -461,9 +451,6 @@ class customService: ServiceTemplate {
         
         mainCharacteristic.getHRZoneRangeComplete
             .sink { status, enabled, high_value, low_value in
-                if status.successful {
-                    self.hrZoneRange = hrZoneRangeValueType(enabled: enabled, lower: low_value, upper: high_value)
-                }
                 self.getHRZoneRangeComplete.send((status, enabled, high_value, low_value))
             }
             .store(in: &pSubscriptions)
@@ -480,12 +467,6 @@ class customService: ServiceTemplate {
         mainCharacteristic.disableWornDetectComplete.sink { self.disableWornDetectComplete.send($0) }.store(in: &pSubscriptions)
         mainCharacteristic.enableWornDetectComplete.sink { self.enableWornDetectComplete.send($0) }.store(in: &pSubscriptions)
         
-        mainCharacteristic.buttonClicked
-            .sink { presses in
-                self.buttonTaps = presses
-            }
-            .store(in: &pSubscriptions)
-
         mainCharacteristic.wornCheckComplete
             .sink { status, code, value in
                 self.wornCheckResult = DeviceWornCheckResultType(code: code, value: value)
@@ -501,20 +482,6 @@ class customService: ServiceTemplate {
         
         mainCharacteristic.getSessionParamComplete
             .sink { status, parameter, value in
-                switch parameter {
-                case .tag:
-                    var data = Data()
-                    data.append((UInt8((value >> 0) & 0xff)))
-                    data.append((UInt8((value >> 8) & 0xff)))
-                    if let strValue = String(data: data, encoding: .utf8) {
-                        self.tag = strValue
-                    } else {
-                        self.tag = "'\(String(format:"0x%04X", value))' - Could not make string"
-                    }
-                case .ppgCapturePeriod: self.ppgCapturePeriod = value
-                case .ppgCaptureDuration: self.ppgCaptureDuration = value
-                default: break
-                }
                 self.getSessionParamComplete.send((status, parameter, value))
             }
             .store(in: &pSubscriptions)
@@ -529,8 +496,7 @@ class customService: ServiceTemplate {
             }
             .store(in: &pSubscriptions)
         
-        mainCharacteristic.updateCanLogDiagnosticsComplete
-            .sink { self.updateCanLogDiagnosticsComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.updateCanLogDiagnosticsComplete.sink { self.updateCanLogDiagnosticsComplete.send($0) }.store(in: &pSubscriptions)
         
         mainCharacteristic.getPacketCountComplete
             .sink { status, count in
@@ -551,11 +517,6 @@ class customService: ServiceTemplate {
 
         mainCharacteristic.getPairedComplete
             .sink { status, paired in
-                if status.successful {
-                    self.paired = paired
-                } else {
-                    self.paired = nil
-                }
                 self.getPairedComplete.send((status, paired))
             }
             .store(in: &pSubscriptions)
@@ -564,11 +525,6 @@ class customService: ServiceTemplate {
 
         mainCharacteristic.getPageThresholdComplete
             .sink { status, threshold in
-                if status.successful {
-                    self.advertisingPageThreshold = threshold
-                } else {
-                    self.advertisingPageThreshold = nil
-                }
                 self.getPageThresholdComplete.send((status, threshold))
             }
             .store(in: &pSubscriptions)
