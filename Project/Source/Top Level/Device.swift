@@ -38,6 +38,15 @@ public class Device: NSObject, ObservableObject {
             }
         }
 	}
+    
+    private enum services {
+        case bas
+        case dis
+        case hrs
+        case ota
+        case custom
+        case unknown(CBUUID)
+    }
 		
 	#if UNIVERSAL
 	@objc public var type	: biostrapDeviceSDK.biostrapDeviceType
@@ -494,6 +503,22 @@ public class Device: NSObject, ObservableObject {
 		self.commandQ = CommandQ(peripheral)        
 	}
 	#endif
+    
+    //--------------------------------------------------------------------------------
+    // Function Name: hit
+    //--------------------------------------------------------------------------------
+    //
+    // Sees which service a characteristic is for
+    //
+    //--------------------------------------------------------------------------------
+    private func hit(_ characteristic: CBCharacteristic) -> services {
+        if basService.hit(characteristic) { return .bas }
+        if hrsService.hit(characteristic) { return .hrs }
+        if disService.hit(characteristic) { return .dis }
+        if ambiqOTAService.hit(characteristic) { return .ota }
+        if customService.hit(characteristic) { return .custom }
+        return .unknown(characteristic.uuid)
+    }
 		
 	//--------------------------------------------------------------------------------
 	// Function Name: connect
@@ -2344,32 +2369,15 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func didDiscoverCharacteristic(_ characteristic: CBCharacteristic) {
-        if basService.hit(characteristic) {
-			mBAS.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
-            return
+        switch hit(characteristic) {
+        case .bas: mBAS.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
+        case .dis: mDIS.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
+        case .hrs: mHRS.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
+        case .ota: mAmbiqOTAService.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
+        case .custom: mCustomService.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
+        case .unknown(let uuid):
+            globals.log.e ("\(self.id) - Unhandled: \(uuid)")
         }
-        
-        if hrsService.hit(characteristic) {
-            mHRS.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
-            return
-        }
-        
-        if disService.hit(characteristic) {
-            mDIS.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
-            return
-        }
-        
-        if ambiqOTAService.hit(characteristic) {
-            mAmbiqOTAService.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
-            return
-        }
-        
-        if customService.hit(characteristic) {
-            mCustomService.didDiscoverCharacteristic(characteristic, commandQ: commandQ)
-            return
-        }
-
-        globals.log.e ("\(self.id) - Unhandled: \(characteristic.prettyID)")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -2380,28 +2388,15 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func didDiscoverDescriptor (_ descriptor: CBDescriptor, forCharacteristic characteristic: CBCharacteristic) {
-        
-        if basService.hit(characteristic) {
-            mBAS.didDiscoverDescriptor(characteristic)
-            return
+        switch hit(characteristic) {
+        case .bas: mBAS.didDiscoverDescriptor(characteristic)
+        case .dis: globals.log.e("\(self.id) - DIS should not see this")
+        case .hrs: mHRS.didDiscoverDescriptor(characteristic)
+        case .ota: mAmbiqOTAService.didDiscoverDescriptor(characteristic)
+        case .custom: mCustomService.didDiscoverDescriptor(characteristic)
+        case .unknown(let uuid):
+            globals.log.e ("\(self.id) - Unhandled: \(uuid)")
         }
-        
-        if hrsService.hit(characteristic) {
-            mHRS.didDiscoverDescriptor(characteristic)
-            return
-        }
-        
-        if ambiqOTAService.hit(characteristic) {
-            mAmbiqOTAService.didDiscoverDescriptor(characteristic)
-            return
-        }
-        
-        if customService.hit(characteristic) {
-            mCustomService.didDiscoverDescriptor(characteristic)
-            return
-        }
-        
-        globals.log.e ("\(self.id) - Unhandled: \(characteristic.prettyID)")
 	}
 
     //--------------------------------------------------------------------------------
@@ -2423,33 +2418,15 @@ public class Device: NSObject, ObservableObject {
 	//
 	//--------------------------------------------------------------------------------
 	func didUpdateValue(_ characteristic: CBCharacteristic) {
-        
-        if basService.hit(characteristic) {
-            mBAS.didUpdateValue(characteristic)
-            return
+        switch hit(characteristic) {
+        case .bas: mBAS.didUpdateValue(characteristic)
+        case .dis: mDIS.didUpdateValue(characteristic)
+        case .hrs: mHRS.didUpdateValue(characteristic)
+        case .ota: mAmbiqOTAService.didUpdateValue(characteristic)
+        case .custom: mCustomService.didUpdateValue(characteristic)
+        case .unknown(let uuid):
+            globals.log.e ("\(self.id) - Unhandled: \(uuid)")
         }
-        
-        if hrsService.hit(characteristic) {
-            mHRS.didUpdateValue(characteristic)
-            return
-        }
-
-        if disService.hit(characteristic) {
-            mDIS.didUpdateValue(characteristic)
-            return
-        }
-        
-        if ambiqOTAService.hit(characteristic) {
-            mAmbiqOTAService.didUpdateValue(characteristic)
-            return
-        }
-        
-        if customService.hit(characteristic) {
-            mCustomService.didUpdateValue(characteristic)
-            return
-        }
-
-        globals.log.e ("\(self.id) - Unhandled: \(characteristic.prettyID)")
 	}
 
 	//--------------------------------------------------------------------------------
@@ -2461,28 +2438,15 @@ public class Device: NSObject, ObservableObject {
 	//--------------------------------------------------------------------------------
 	func didUpdateNotificationState(_ characteristic: CBCharacteristic) {
 		if let _ = peripheral {
-            
-            if basService.hit(characteristic) {
-                mBAS.didUpdateNotificationState(characteristic)
-                return
+            switch hit(characteristic) {
+            case .bas: mBAS.didUpdateNotificationState(characteristic)
+            case .dis: globals.log.e("\(self.id) - DIS should not see this")
+            case .hrs: mHRS.didUpdateNotificationState(characteristic)
+            case .ota: mAmbiqOTAService.didUpdateNotificationState(characteristic)
+            case .custom: mCustomService.didUpdateNotificationState(characteristic)
+            case .unknown(let uuid):
+                globals.log.e ("\(self.id) - Unhandled: \(uuid)")
             }
-            
-            if hrsService.hit(characteristic) {
-                mHRS.didUpdateNotificationState(characteristic)
-                return
-            }
-            
-            if ambiqOTAService.hit(characteristic) {
-                mAmbiqOTAService.didUpdateNotificationState(characteristic)
-                return
-            }
-            
-            if customService.hit(characteristic) {
-                mCustomService.didUpdateNotificationState(characteristic)
-                return
-            }
-            
-            globals.log.e ("\(self.id) - Unhandled: \(characteristic.prettyID)")
 		} else {
             globals.log.e ("\(self.id): Peripheral object is nil - do nothing")
 		}

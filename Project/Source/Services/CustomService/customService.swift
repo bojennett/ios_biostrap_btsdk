@@ -276,6 +276,7 @@ class customService: ServiceTemplate {
         mainCharacteristic.$ppgCaptureDuration.sink { [weak self] in self?.ppgCaptureDuration = $0 }.store(in: &pSubscriptions)
         mainCharacteristic.$tag.sink { [weak self] in self?.tag = $0 }.store(in: &pSubscriptions)
         mainCharacteristic.$paired.sink { [weak self] in self?.paired = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$buttonResponseEnabled.sink { [weak self] in self?.buttonResponseEnabled = $0 }.store(in: &pSubscriptions)
         mainCharacteristic.$singleButtonPressAction.sink { [weak self] in self?.singleButtonPressAction = $0 }.store(in: &pSubscriptions)
         mainCharacteristic.$doubleButtonPressAction.sink { [weak self] in self?.doubleButtonPressAction = $0 }.store(in: &pSubscriptions)
         mainCharacteristic.$tripleButtonPressAction.sink { [weak self] in self?.tripleButtonPressAction = $0 }.store(in: &pSubscriptions)
