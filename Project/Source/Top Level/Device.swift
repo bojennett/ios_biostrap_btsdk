@@ -446,7 +446,7 @@ public class Device: NSObject, ObservableObject {
         mDIS = disService()
         mAmbiqOTAService = ambiqOTAService()
         mCustomService = customService()
-
+        
 		self.name							= "UNKNOWN"
 		self.id								= "UNKNOWN"
 		self.discovery_type					= .unknown
@@ -455,11 +455,12 @@ public class Device: NSObject, ObservableObject {
 		self.type							= .unknown
 		#endif
 	}
-    
+        
 	#if UNIVERSAL
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, type: biostrapDeviceSDK.biostrapDeviceType, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
+        self.subscribeConfigured()
         self.subScribeCustomService()
         self.subscribeBAS()
         self.subscribeHRS()
@@ -478,6 +479,7 @@ public class Device: NSObject, ObservableObject {
 	convenience public init(_ name: String, id: String, centralManager: CBCentralManager?, peripheral: CBPeripheral?, discoveryType: biostrapDeviceSDK.biostrapDiscoveryType) {
 		self.init()
 		
+        self.subscribeConfigured()
         self.subScribeCustomService()
         self.subscribeBAS()
         self.subscribeHRS()
@@ -492,35 +494,7 @@ public class Device: NSObject, ObservableObject {
 		self.commandQ = CommandQ(peripheral)        
 	}
 	#endif
-	
-	//--------------------------------------------------------------------------------
-	// Function Name: checkConfigured
-	//--------------------------------------------------------------------------------
-	//
-	// See if everything has been configured
-	//
-	//--------------------------------------------------------------------------------
-	internal func checkConfigured() {
-		if connectionState == .configured { return } // If i was already configured, i don't need to tell the app this again
-        if preview { return } // If i am mocked, i don't need to tell the app again
 		
-		let configured = mBAS.pConfigured &&
-        mHRS.pConfigured &&
-        mDIS.pConfigured &&
-        mAmbiqOTAService.pConfigured &&
-        mCustomService.pConfigured
-		
-		if (configured) {
-			connectionState = .configured
-			if let peripheral {
-				lambdaConfigured?(peripheral.prettyID)
-			}
-			else {
-				globals.log.e ("Do not have a peripheral, why am I signaling configured?")
-			}
-		}
-	}
-	
 	//--------------------------------------------------------------------------------
 	// Function Name: connect
 	//--------------------------------------------------------------------------------
@@ -1494,7 +1468,45 @@ public class Device: NSObject, ObservableObject {
             self.signalStrength = nil
         }
     }
-	
+
+    //--------------------------------------------------------------------------------
+    // Function Name:
+    //--------------------------------------------------------------------------------
+    //
+    //
+    //
+    //--------------------------------------------------------------------------------
+    private func subscribeConfigured() {
+        // Get Configured - 2 step process as so many characteristics
+        let partialConfigured1 = Publishers.CombineLatest3(
+            mBAS.$pConfigured,
+            mHRS.$pConfigured,
+            mDIS.$pConfigured
+        ).map { $0 && $1 && $2 }
+        
+        let partialConfigured2 = Publishers.CombineLatest(
+            mAmbiqOTAService.$pConfigured,
+            mCustomService.$pConfigured
+        ).map { $0 && $1 }
+
+        Publishers.CombineLatest(partialConfigured1, partialConfigured2)
+            .sink { [weak self] partial1, partial2 in
+                if self?.connectionState == .configured { return } // If i was already configured, i don't need to tell the app this again
+                //if self?.preview { return } // If i am mocked, i don't need to tell the app again
+                                
+                if partial1 && partial2 {
+                    self?.connectionState = .configured
+                    if let peripheral = self?.peripheral {
+                        self?.lambdaConfigured?(peripheral.prettyID)
+                    }
+                    else {
+                        globals.log.e ("Do not have a peripheral, why am I signaling configured?")
+                    }
+                }
+           }
+            .store(in: &subscriptions)
+    }
+
 	//--------------------------------------------------------------------------------
 	// Function Name:
 	//--------------------------------------------------------------------------------

@@ -135,7 +135,6 @@ extension Device: CBPeripheralDelegate {
 			if let characteristics = service.characteristics {
 				for characteristic in characteristics {
 					self.didDiscoverCharacteristic(characteristic)
-					self.checkConfigured()
 				}
 			}
 		}
@@ -167,7 +166,6 @@ extension Device: CBPeripheralDelegate {
 		}
 
 		self.didUpdateValue(characteristic)
-		self.checkConfigured()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -226,7 +224,6 @@ extension Device: CBPeripheralDelegate {
 			}
 
 			self.didUpdateNotificationState(characteristic)
-			self.checkConfigured()
 		}
 	}
 	

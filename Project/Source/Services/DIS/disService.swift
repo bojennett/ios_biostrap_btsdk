@@ -106,7 +106,6 @@ class disService: ServiceTemplate {
 				self?.pConfigured = $0 && $1
 			}
 			.store(in: &pSubscriptions)
-
 	}
 	
     //--------------------------------------------------------------------------------
