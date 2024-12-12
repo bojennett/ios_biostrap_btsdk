@@ -50,15 +50,15 @@ class hrsService: ServiceTemplate {
 			.sink { [weak self] (epoch, hr, rr) in
 				self?.updated.send((epoch, hr, rr))
 			}
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 		
         Publishers.CombineLatest(
 			mHeartRateMeasurementCharacteristic.$configured,
 			mBodySensorLocationCharacteristic.$configured)
             .sink { [weak self] hrmConfigured, bslConfigured in
-                self?.pConfigured = hrmConfigured && bslConfigured
+                self?.configured = hrmConfigured && bslConfigured
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
     }
 
     //--------------------------------------------------------------------------------

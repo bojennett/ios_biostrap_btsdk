@@ -58,35 +58,35 @@ class disService: ServiceTemplate {
 	internal func setupSubscribers() {
 		mModelNumberCharacteristic.$value
 			.sink { [weak self] in self?.modelNumber = $0 }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 
 		mHardwareRevisionCharacteristic.$value
 			.sink { [weak self] in self?.hardwareRevision = $0 }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 
 		mManufacturerNameCharacteristic.$value
 			.sink { [weak self] in self?.manufacturerName = $0 }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 
 		mSerialNumberCharacteristic.$value
 			.sink { [weak self] in self?.serialNumber = $0 }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 
 		mFirmwareRevisionCharacteristic.$value
 			.sink { [weak self] in self?.firmwareRevision = $0 }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 		
 		mSoftwareRevisionCharacteristic.$bluetooth
 			.sink { [weak self] in self?.bluetoothSoftwareRevision = $0 }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 
 		mSoftwareRevisionCharacteristic.$algorithms
 			.sink { [weak self] in self?.algorithmsSoftwareRevision = $0 }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 
 		mSoftwareRevisionCharacteristic.$sleep
 			.sink { [weak self] in self?.sleepSoftwareRevision = $0 }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 		
 		// Get Configured - 2 step process as so many characteristics
 		let partialConfigured1 = Publishers.CombineLatest3(
@@ -103,9 +103,9 @@ class disService: ServiceTemplate {
 
 		Publishers.CombineLatest(partialConfigured1, partialConfigured2)
 			.sink { [weak self] in
-				self?.pConfigured = $0 && $1
+				self?.configured = $0 && $1
 			}
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 	}
 	
     //--------------------------------------------------------------------------------

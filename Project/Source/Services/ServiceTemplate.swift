@@ -10,11 +10,10 @@ import CoreBluetooth
 import Combine
 
 class ServiceTemplate: ObservableObject {
-    var pID: String = "UNKNOWN"
+    internal var pID: String = "UNKNOWN"
+    internal var subscriptions = Set<AnyCancellable>()
 
-    var pSubscriptions = Set<AnyCancellable>()
-
-    @Published var pConfigured: Bool = false
+    @Published var configured: Bool = false
     
     //--------------------------------------------------------------------------------
     //
@@ -36,20 +35,11 @@ class ServiceTemplate: ObservableObject {
     // Function Name:
     //--------------------------------------------------------------------------------
     //
-    //
-    //
-    //--------------------------------------------------------------------------------
-    var isConfigured: Bool { return false }
-
-    //--------------------------------------------------------------------------------
-    // Function Name:
-    //--------------------------------------------------------------------------------
-    //
     // Write without response is done.
     //
     //--------------------------------------------------------------------------------
     func isReady() {
-        globals.log.e ("\(pID): Did you mean to override?")
+        globals.log.e ("Don't know what to do here.  Perhaps this needs to override?")
     }
 
     //--------------------------------------------------------------------------------

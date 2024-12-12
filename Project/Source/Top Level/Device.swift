@@ -1504,14 +1504,14 @@ public class Device: NSObject, ObservableObject {
     private func subscribeConfigured() {
         // Get Configured - 2 step process as so many characteristics
         let partialConfigured1 = Publishers.CombineLatest3(
-            mBAS.$pConfigured,
-            mHRS.$pConfigured,
-            mDIS.$pConfigured
+            mBAS.$configured,
+            mHRS.$configured,
+            mDIS.$configured
         ).map { $0 && $1 && $2 }
         
         let partialConfigured2 = Publishers.CombineLatest(
-            mAmbiqOTAService.$pConfigured,
-            mCustomService.$pConfigured
+            mAmbiqOTAService.$configured,
+            mCustomService.$configured
         ).map { $0 && $1 }
 
         Publishers.CombineLatest(partialConfigured1, partialConfigured2)

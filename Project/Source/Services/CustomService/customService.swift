@@ -255,283 +255,283 @@ class customService: ServiceTemplate {
             dataCharacteristic.$configured,
             strmCharacteristic.$configured)
             .sink { [weak self] mainConfigured, dataConfigured, strmConfigured in
-                self?.pConfigured = mainConfigured && dataConfigured && strmConfigured
+                self?.configured = mainConfigured && dataConfigured && strmConfigured
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
 
         // Main characteristic
-        mainCharacteristic.$worn.sink { [weak self] in self?.worn = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$epoch.sink { [weak self] in self?.epoch = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$canLogDiagnostics.sink { [weak self] in self?.canLogDiagnostics = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$wornCheckResult.sink { [weak self] in self?.wornCheckResult = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$charging.sink { self.charging = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$on_charger.sink { self.on_charger = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$charge_error.sink { self.charge_error = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$buttonTaps.sink { self.buttonTaps = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$hrZoneLEDBelow.sink { [weak self] in self?.hrZoneLEDBelow = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$hrZoneLEDWithin.sink { [weak self] in self?.hrZoneLEDWithin = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$hrZoneLEDAbove.sink { [weak self] in self?.hrZoneLEDAbove = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$hrZoneRange.sink { [weak self] in self?.hrZoneRange = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$ppgCapturePeriod.sink { [weak self] in self?.ppgCapturePeriod = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$ppgCaptureDuration.sink { [weak self] in self?.ppgCaptureDuration = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$tag.sink { [weak self] in self?.tag = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$paired.sink { [weak self] in self?.paired = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$buttonResponseEnabled.sink { [weak self] in self?.buttonResponseEnabled = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$singleButtonPressAction.sink { [weak self] in self?.singleButtonPressAction = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$doubleButtonPressAction.sink { [weak self] in self?.doubleButtonPressAction = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$tripleButtonPressAction.sink { [weak self] in self?.tripleButtonPressAction = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$longButtonPressAction.sink { [weak self] in self?.longButtonPressAction = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$rawLogging.sink { [weak self] in self?.rawLogging = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$wornOverridden.sink { [weak self] in self?.wornOverridden = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$advertisingInterval.sink { [weak self] in self?.advertisingInterval = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$chargeCycles.sink { [weak self] in self?.chargeCycles = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$advertiseAsHRM.sink { [weak self] in self?.advertiseAsHRM = $0 }.store(in: &pSubscriptions)
-        mainCharacteristic.$ppgMetrics.sink { self.ppgMetrics = $0 }.store(in: &pSubscriptions)
+        mainCharacteristic.$worn.sink { [weak self] in self?.worn = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$epoch.sink { [weak self] in self?.epoch = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$canLogDiagnostics.sink { [weak self] in self?.canLogDiagnostics = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$wornCheckResult.sink { [weak self] in self?.wornCheckResult = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$charging.sink { self.charging = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$on_charger.sink { self.on_charger = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$charge_error.sink { self.charge_error = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$buttonTaps.sink { self.buttonTaps = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$hrZoneLEDBelow.sink { [weak self] in self?.hrZoneLEDBelow = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$hrZoneLEDWithin.sink { [weak self] in self?.hrZoneLEDWithin = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$hrZoneLEDAbove.sink { [weak self] in self?.hrZoneLEDAbove = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$hrZoneRange.sink { [weak self] in self?.hrZoneRange = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$ppgCapturePeriod.sink { [weak self] in self?.ppgCapturePeriod = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$ppgCaptureDuration.sink { [weak self] in self?.ppgCaptureDuration = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$tag.sink { [weak self] in self?.tag = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$paired.sink { [weak self] in self?.paired = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$buttonResponseEnabled.sink { [weak self] in self?.buttonResponseEnabled = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$singleButtonPressAction.sink { [weak self] in self?.singleButtonPressAction = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$doubleButtonPressAction.sink { [weak self] in self?.doubleButtonPressAction = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$tripleButtonPressAction.sink { [weak self] in self?.tripleButtonPressAction = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$longButtonPressAction.sink { [weak self] in self?.longButtonPressAction = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$rawLogging.sink { [weak self] in self?.rawLogging = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$wornOverridden.sink { [weak self] in self?.wornOverridden = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$advertisingInterval.sink { [weak self] in self?.advertisingInterval = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$chargeCycles.sink { [weak self] in self?.chargeCycles = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$advertiseAsHRM.sink { [weak self] in self?.advertiseAsHRM = $0 }.store(in: &subscriptions)
+        mainCharacteristic.$ppgMetrics.sink { self.ppgMetrics = $0 }.store(in: &subscriptions)
         
-        mainCharacteristic.writeEpochComplete.sink { self.writeEpochComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.writeEpochComplete.sink { self.writeEpochComplete.send($0) }.store(in: &subscriptions)
         
         mainCharacteristic.readEpochComplete
             .sink { status, value in
                 self.readEpochComplete.send((status, value))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
                 
-        mainCharacteristic.startManualComplete.sink { self.startManualComplete.send($0) }.store(in: &pSubscriptions)
-        mainCharacteristic.stopManualComplete.sink { self.stopManualComplete.send($0) }.store(in: &pSubscriptions)
-        mainCharacteristic.ledComplete.sink { self.ledComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.startManualComplete.sink { self.startManualComplete.send($0) }.store(in: &subscriptions)
+        mainCharacteristic.stopManualComplete.sink { self.stopManualComplete.send($0) }.store(in: &subscriptions)
+        mainCharacteristic.ledComplete.sink { self.ledComplete.send($0) }.store(in: &subscriptions)
         
         mainCharacteristic.getRawLoggingStatusComplete
             .sink { status, enabled in
                 self.getRawLoggingStatusComplete.send((status, enabled))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         mainCharacteristic.getWornOverrideStatusComplete
             .sink { status, overridden in
                 self.getWornOverrideStatusComplete.send((status, overridden))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
 
-        mainCharacteristic.writeSerialNumberComplete.sink { self.writeSerialNumberComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.writeSerialNumberComplete.sink { self.writeSerialNumberComplete.send($0) }.store(in: &subscriptions)
 
         mainCharacteristic.readSerialNumberComplete
             .sink { status, partID in
                 self.readSerialNumberComplete.send((status, partID))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
 
-        mainCharacteristic.deleteSerialNumberComplete.sink { self.deleteSerialNumberComplete.send($0) }.store(in: &pSubscriptions)
-        mainCharacteristic.writeAdvIntervalComplete.sink { self.writeAdvIntervalComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.deleteSerialNumberComplete.sink { self.deleteSerialNumberComplete.send($0) }.store(in: &subscriptions)
+        mainCharacteristic.writeAdvIntervalComplete.sink { self.writeAdvIntervalComplete.send($0) }.store(in: &subscriptions)
 
         mainCharacteristic.readAdvIntervalComplete
             .sink { status, seconds in
                 self.readAdvIntervalComplete.send((status, seconds))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
-        mainCharacteristic.deleteAdvIntervalComplete.sink { self.deleteAdvIntervalComplete.send($0) }.store(in: &pSubscriptions)
-        mainCharacteristic.clearChargeCyclesComplete.sink { self.clearChargeCyclesComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.deleteAdvIntervalComplete.sink { self.deleteAdvIntervalComplete.send($0) }.store(in: &subscriptions)
+        mainCharacteristic.clearChargeCyclesComplete.sink { self.clearChargeCyclesComplete.send($0) }.store(in: &subscriptions)
 
         mainCharacteristic.readChargeCyclesComplete
             .sink { status, cycles in
                 self.readChargeCyclesComplete.send((status, cycles))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
 
         mainCharacteristic.setAdvertiseAsHRMComplete
             .sink { status, asHRM in
                 self.setAdvertiseAsHRMComplete.send((status, asHRM))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
     
         mainCharacteristic.getAdvertiseAsHRMComplete
             .sink { status, asHRM in
                 self.getAdvertiseAsHRMComplete.send((status, asHRM))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
 
         mainCharacteristic.setButtonCommandComplete
             .sink { status, tap, command in
                 self.setButtonCommandComplete.send((status, tap, command))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         mainCharacteristic.getButtonCommandComplete
             .sink { status, tap, command in
                 self.getButtonCommandComplete.send((status, tap, command))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         mainCharacteristic.setAskForButtonResponseComplete
             .sink { status, enable in
                 self.setAskForButtonResponseComplete.send((status, enable))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         mainCharacteristic.getAskForButtonResponseComplete
             .sink { status, enable in
                 self.getAskForButtonResponseComplete.send((status, enable))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         mainCharacteristic.setHRZoneColorComplete
             .sink { status, type in
                 self.setHRZoneColorComplete.send((status, type))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         mainCharacteristic.getHRZoneColorComplete
             .sink { status, type, red, green, blue, on_ms, off_ms in
                 self.getHRZoneColorComplete.send((status, type, red, green, blue, on_ms, off_ms))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         mainCharacteristic.setHRZoneRangeComplete
             .sink { self.setHRZoneRangeComplete.send($0) }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         mainCharacteristic.getHRZoneRangeComplete
             .sink { status, enabled, high_value, low_value in
                 self.getHRZoneRangeComplete.send((status, enabled, high_value, low_value))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         mainCharacteristic.getPPGAlgorithmComplete
             .sink { status, algorithm, state in
                 self.getPPGAlgorithmComplete.send((status, algorithm, state))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
-        mainCharacteristic.endSleepComplete.sink { self.endSleepComplete.send($0) }.store(in: &pSubscriptions)
-        mainCharacteristic.endSleepStatus.sink { self.endSleepStatus.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.endSleepComplete.sink { self.endSleepComplete.send($0) }.store(in: &subscriptions)
+        mainCharacteristic.endSleepStatus.sink { self.endSleepStatus.send($0) }.store(in: &subscriptions)
         
-        mainCharacteristic.disableWornDetectComplete.sink { self.disableWornDetectComplete.send($0) }.store(in: &pSubscriptions)
-        mainCharacteristic.enableWornDetectComplete.sink { self.enableWornDetectComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.disableWornDetectComplete.sink { self.disableWornDetectComplete.send($0) }.store(in: &subscriptions)
+        mainCharacteristic.enableWornDetectComplete.sink { self.enableWornDetectComplete.send($0) }.store(in: &subscriptions)
         
         mainCharacteristic.wornCheckComplete
             .sink { status, code, value in
                 self.wornCheckResultComplete.send((status, code, value))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         mainCharacteristic.setSessionParamComplete
             .sink { status, parameter in
                 self.setSessionParamComplete.send((status, parameter))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         mainCharacteristic.getSessionParamComplete
             .sink { status, parameter, value in
                 self.getSessionParamComplete.send((status, parameter, value))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
-        mainCharacteristic.acceptSessionParamsComplete.sink { self.acceptSessionParamsComplete.send($0) }.store(in: &pSubscriptions)
-        mainCharacteristic.resetSessionParamsComplete.sink { self.resetSessionParamsComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.acceptSessionParamsComplete.sink { self.acceptSessionParamsComplete.send($0) }.store(in: &subscriptions)
+        mainCharacteristic.resetSessionParamsComplete.sink { self.resetSessionParamsComplete.send($0) }.store(in: &subscriptions)
         
         mainCharacteristic.readCanLogDiagnosticsComplete
             .sink { status, allow in
                 self.readCanLogDiagnosticsComplete.send((status, allow))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
-        mainCharacteristic.updateCanLogDiagnosticsComplete.sink { self.updateCanLogDiagnosticsComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.updateCanLogDiagnosticsComplete.sink { self.updateCanLogDiagnosticsComplete.send($0) }.store(in: &subscriptions)
         
         mainCharacteristic.getPacketCountComplete
             .sink { status, count in
                 self.getPacketCountComplete.send((status, count))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
-        mainCharacteristic.getAllPacketsComplete.sink { self.getAllPacketsComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.getAllPacketsComplete.sink { self.getAllPacketsComplete.send($0) }.store(in: &subscriptions)
         
         mainCharacteristic.getAllPacketsAcknowledgeComplete
             .sink { status, ack in
                 self.getAllPacketsAcknowledgeComplete.send((status, ack))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
-        mainCharacteristic.setPairedComplete.sink { self.setPairedComplete.send($0) }.store(in: &pSubscriptions)
-        mainCharacteristic.setUnpairedComplete.sink { self.setUnpairedComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.setPairedComplete.sink { self.setPairedComplete.send($0) }.store(in: &subscriptions)
+        mainCharacteristic.setUnpairedComplete.sink { self.setUnpairedComplete.send($0) }.store(in: &subscriptions)
 
         mainCharacteristic.getPairedComplete
             .sink { status, paired in
                 self.getPairedComplete.send((status, paired))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
-        mainCharacteristic.setPageThresholdComplete.sink { self.setPageThresholdComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.setPageThresholdComplete.sink { self.setPageThresholdComplete.send($0) }.store(in: &subscriptions)
 
         mainCharacteristic.getPageThresholdComplete
             .sink { status, threshold in
                 self.getPageThresholdComplete.send((status, threshold))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
 
-        mainCharacteristic.deletePageThresholdComplete.sink { self.deletePageThresholdComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.deletePageThresholdComplete.sink { self.deletePageThresholdComplete.send($0) }.store(in: &subscriptions)
 
-        mainCharacteristic.enterShipModeComplete.sink { self.enterShipModeComplete.send($0)}.store(in: &pSubscriptions)
-        mainCharacteristic.resetComplete.sink { self.resetComplete.send($0) }.store(in: &pSubscriptions)
-        mainCharacteristic.airplaneModeComplete.sink { self.airplaneModeComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.enterShipModeComplete.sink { self.enterShipModeComplete.send($0)}.store(in: &subscriptions)
+        mainCharacteristic.resetComplete.sink { self.resetComplete.send($0) }.store(in: &subscriptions)
+        mainCharacteristic.airplaneModeComplete.sink { self.airplaneModeComplete.send($0) }.store(in: &subscriptions)
         
-        mainCharacteristic.manufacturingTestComplete.sink { self.manufacturingTestComplete.send($0) }.store(in: &pSubscriptions)
-        mainCharacteristic.rawLoggingComplete.sink { self.rawLoggingComplete.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.manufacturingTestComplete.sink { self.manufacturingTestComplete.send($0) }.store(in: &subscriptions)
+        mainCharacteristic.rawLoggingComplete.sink { self.rawLoggingComplete.send($0) }.store(in: &subscriptions)
         
         // MARK: Notifications
         mainCharacteristic.manufacturingTestResult
             .sink { valid, result in
                 self.manufacturingTestResult.send((valid, result))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
 
-        mainCharacteristic.ppgFailed.sink { self.ppgFailed.send($0) }.store(in: &pSubscriptions)
+        mainCharacteristic.ppgFailed.sink { self.ppgFailed.send($0) }.store(in: &subscriptions)
         
         mainCharacteristic.dataPackets
             .sink { sequence_number, packets in
                 self.dataPackets.send((sequence_number, packets))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
 
         mainCharacteristic.dataComplete
             .sink { bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
                 self.dataComplete.send((bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
 
         mainCharacteristic.dataFailure
             .sink { self.dataFailure.send() }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
 
         // Data characteristic
         dataCharacteristic.dataPackets
             .sink { sequence_number, packets in
                 self.dataPackets.send((sequence_number, packets))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         dataCharacteristic.dataComplete
             .sink {bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate in
                 self.dataComplete.send((bad_fw_read_count, bad_fw_parse_count, overflow_count, bad_sdk_parse_count, intermediate))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
         
         // Streaming Characteristic
-        strmCharacteristic.$worn.sink { self.worn = $0 }.store(in: &pSubscriptions)
-        strmCharacteristic.$charging.sink { self.charging = $0 }.store(in: &pSubscriptions)
-        strmCharacteristic.$on_charger.sink { self.on_charger = $0 }.store(in: &pSubscriptions)
-        strmCharacteristic.$charge_error.sink { self.charge_error = $0 }.store(in: &pSubscriptions)
-        strmCharacteristic.$buttonTaps.sink { self.buttonTaps = $0 }.store(in: &pSubscriptions)
-        strmCharacteristic.$ppgMetrics.sink { self.ppgMetrics = $0 }.store(in: &pSubscriptions)
+        strmCharacteristic.$worn.sink { self.worn = $0 }.store(in: &subscriptions)
+        strmCharacteristic.$charging.sink { self.charging = $0 }.store(in: &subscriptions)
+        strmCharacteristic.$on_charger.sink { self.on_charger = $0 }.store(in: &subscriptions)
+        strmCharacteristic.$charge_error.sink { self.charge_error = $0 }.store(in: &subscriptions)
+        strmCharacteristic.$buttonTaps.sink { self.buttonTaps = $0 }.store(in: &subscriptions)
+        strmCharacteristic.$ppgMetrics.sink { self.ppgMetrics = $0 }.store(in: &subscriptions)
 
-        strmCharacteristic.endSleepStatus.sink { self.endSleepStatus.send($0) }.store(in: &pSubscriptions)
-        strmCharacteristic.ppgFailed.sink { self.ppgFailed.send($0) }.store(in: &pSubscriptions)
-        strmCharacteristic.streamingPacket.sink { self.streamingPacket.send($0) }.store(in: &pSubscriptions)
-        strmCharacteristic.dataAvailable.sink { self.dataAvailable.send() }.store(in: &pSubscriptions)
+        strmCharacteristic.endSleepStatus.sink { self.endSleepStatus.send($0) }.store(in: &subscriptions)
+        strmCharacteristic.ppgFailed.sink { self.ppgFailed.send($0) }.store(in: &subscriptions)
+        strmCharacteristic.streamingPacket.sink { self.streamingPacket.send($0) }.store(in: &subscriptions)
+        strmCharacteristic.dataAvailable.sink { self.dataAvailable.send() }.store(in: &subscriptions)
         strmCharacteristic.manufacturingTestResult
             .sink { valid, result in
                 self.manufacturingTestResult.send((valid, result))
             }
-            .store(in: &pSubscriptions)
+            .store(in: &subscriptions)
     }
 
     //--------------------------------------------------------------------------------

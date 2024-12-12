@@ -29,10 +29,11 @@ class CharacteristicTemplate {
 	// MARK: Internal Variables
 	internal var pCharacteristic: CBCharacteristic?
 	internal var pID: String = "UNKNOWN"
+    internal var pCommandQ: CommandQ?
+    internal var pFailedDecodeCount: Int = 0
+    
+    // MARK: Published properties
     @Published var configured: Bool = false
-	internal var pCommandQ: CommandQ?
-
-	internal var pFailedDecodeCount: Int = 0
 
 	//--------------------------------------------------------------------------------
 	// Function Name:

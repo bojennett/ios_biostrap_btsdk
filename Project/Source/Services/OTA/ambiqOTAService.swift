@@ -46,25 +46,25 @@ class ambiqOTAService: ServiceTemplate {
 	private func setupSubscribers() {
 		rxCharacteristic.started
 			.sink { self.started.send() }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 
 		rxCharacteristic.finished
 			.sink { self.finished.send() }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 		
 		rxCharacteristic.failed
 			.sink { code, message in self.failed.send((code, message)) }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 
 		rxCharacteristic.progress
 			.sink { percent in self.progress.send(percent) }
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 				
 		Publishers.CombineLatest(txCharacteristic.$configured, rxCharacteristic.$configured)
 			.sink { [weak self] txConfigured, rxConfigured in
-				self?.pConfigured = txConfigured && rxConfigured
+				self?.configured = txConfigured && rxConfigured
 			}
-			.store(in: &pSubscriptions)
+			.store(in: &subscriptions)
 	}
 
     //--------------------------------------------------------------------------------
