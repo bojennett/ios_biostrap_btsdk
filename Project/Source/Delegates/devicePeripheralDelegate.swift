@@ -29,7 +29,7 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) {
-		isReady()
+        didWriteWithoutResponseReady()
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -66,10 +66,12 @@ extension Device: CBPeripheralDelegate {
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
 		globals.log.v ("\(peripheral.prettyID): didModifyServices (do nothing)")
-		globals.log.v ("Invalidated services: \(invalidatedServices.count)")
-		for service in invalidatedServices {
-			globals.log.v ("\(service.prettyID)")
-		}
+        if !invalidatedServices.isEmpty {
+            globals.log.v ("Invalidated services: \(invalidatedServices.count)")
+            for service in invalidatedServices {
+                globals.log.v ("\(service.prettyID)")
+            }
+        }
 		centralManager?.cancelPeripheralConnection(peripheral)
 	}
 	

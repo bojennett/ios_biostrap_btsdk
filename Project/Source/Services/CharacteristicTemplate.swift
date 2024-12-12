@@ -460,7 +460,7 @@ class CharacteristicTemplate {
 	// write without responses
 	//
 	//--------------------------------------------------------------------------------
-	func isReady() {
+	func didWriteWithoutResponseReady() {
 		globals.log.e ("\(pID): Did you mean to override?")
 	}
 }

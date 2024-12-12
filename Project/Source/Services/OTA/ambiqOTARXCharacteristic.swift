@@ -372,7 +372,7 @@ class ambiqOTARXCharacteristic: CharacteristicTemplate {
 	//
 	//
 	//--------------------------------------------------------------------------------
-	override func isReady() {
+	override func didWriteWithoutResponseReady() {
 		switch (mState) {
 		case .IDLE: break
 

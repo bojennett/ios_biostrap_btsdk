@@ -358,8 +358,7 @@ public class Device: NSObject, ObservableObject {
 				globals.log.e ("\(peripheral.prettyID): \(service.prettyID) - don't know what to do!!!!")
 				return false
 			}
-		}
-		else {
+		} else {
 			return (false)
 		}
 	}
@@ -2473,8 +2472,8 @@ public class Device: NSObject, ObservableObject {
 	// write without responses
 	//
 	//--------------------------------------------------------------------------------
-	func isReady() {
-		mAmbiqOTAService.isReady()
+	func didWriteWithoutResponseReady() {
+		mAmbiqOTAService.didWriteWithoutResponseReady()
 	}
 }
 

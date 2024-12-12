@@ -10,7 +10,6 @@ import CoreBluetooth
 import Combine
 
 class basService: ServiceTemplate {
-    
     internal var mBatteryLevelCharacteristic: batteryLevelCharacteristic
     
     @Published var batteryLevel: Int?
@@ -64,6 +63,8 @@ class basService: ServiceTemplate {
 	override func didDiscoverCharacteristic(_ characteristic: CBCharacteristic, commandQ: CommandQ?) {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
 			mBatteryLevelCharacteristic.didDiscover(characteristic, commandQ: commandQ)
+        } else {
+            globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)")
         }
     }
     
@@ -77,6 +78,8 @@ class basService: ServiceTemplate {
     override func didDiscoverDescriptor(_ characteristic: CBCharacteristic) {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
             mBatteryLevelCharacteristic.didDiscoverDescriptor()
+        } else {
+            globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)")
         }
     }
 
@@ -90,6 +93,8 @@ class basService: ServiceTemplate {
     override func didUpdateNotificationState(_ characteristic: CBCharacteristic) {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
             mBatteryLevelCharacteristic.didUpdateNotificationState()
+        } else {
+            globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)")
         }
     }
 

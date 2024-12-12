@@ -111,8 +111,8 @@ class ambiqOTAService: ServiceTemplate {
     //
     //
     //--------------------------------------------------------------------------------
-    override func isReady() {
-        rxCharacteristic.isReady()
+    override func didWriteWithoutResponseReady() {
+        rxCharacteristic.didWriteWithoutResponseReady()
     }
     
     //--------------------------------------------------------------------------------

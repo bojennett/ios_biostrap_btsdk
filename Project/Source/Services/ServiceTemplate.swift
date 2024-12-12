@@ -9,7 +9,7 @@ import Foundation
 import CoreBluetooth
 import Combine
 
-class ServiceTemplate: ObservableObject {
+class ServiceTemplate {
     internal var pID: String = "UNKNOWN"
     internal var subscriptions = Set<AnyCancellable>()
 
@@ -38,7 +38,7 @@ class ServiceTemplate: ObservableObject {
     // Write without response is done.
     //
     //--------------------------------------------------------------------------------
-    func isReady() {
+    func didWriteWithoutResponseReady() {
         globals.log.e ("Don't know what to do here.  Perhaps this needs to override?")
     }
 
