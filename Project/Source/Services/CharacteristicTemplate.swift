@@ -27,9 +27,9 @@ class CharacteristicTemplate {
 	}
 	
 	// MARK: Internal Variables
-	internal var pCharacteristic: CBCharacteristic?
-	internal var pID: String = "UNKNOWN"
-    internal var pCommandQ: CommandQ?
+	internal var id: String = "UNKNOWN"
+    internal var characteristic: CBCharacteristic?
+    internal var commandQ: CommandQ?
     internal var pFailedDecodeCount: Int = 0
     
     // MARK: Published properties
@@ -55,12 +55,12 @@ class CharacteristicTemplate {
 						return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
-						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						globals.log.e ("\(id): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+					globals.log.e ("\(id): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
@@ -74,12 +74,12 @@ class CharacteristicTemplate {
 						return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
-						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						globals.log.e ("\(id): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+					globals.log.e ("\(id): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 								
@@ -93,12 +93,12 @@ class CharacteristicTemplate {
 						return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
-						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						globals.log.e ("\(id): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+					globals.log.e ("\(id): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
@@ -111,12 +111,12 @@ class CharacteristicTemplate {
 						return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
-						globals.log.e ("\(pID): \(type.title): (Out of range) Index: \(index), packets: \(packets), final index: \(final_index), full packet: \(data.hexString)")
+						globals.log.e ("\(id): \(type.title): (Out of range) Index: \(index), packets: \(packets), final index: \(final_index), full packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					globals.log.e ("\(pID): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
+					globals.log.e ("\(id): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
@@ -129,12 +129,12 @@ class CharacteristicTemplate {
 						return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
-						globals.log.e ("\(pID): \(type.title): (Out of range) Index: \(index), packets: \(packets), final index: \(final_index), full packet: \(data.hexString)")
+						globals.log.e ("\(id): \(type.title): (Out of range) Index: \(index), packets: \(packets), final index: \(final_index), full packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					globals.log.e ("\(pID): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
+					globals.log.e ("\(id): \(type.title): (Not enough bytes) Index: \(index), full packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
@@ -147,17 +147,17 @@ class CharacteristicTemplate {
                         return (true, type, biostrapDataPacket(packetData, offset: offset))
 					}
 					else {
-						globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+						globals.log.e ("\(id): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 						return (false, .unknown, biostrapDataPacket())
 					}
 				}
 				else {
-					globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+					globals.log.e ("\(id): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 					return (false, .unknown, biostrapDataPacket())
 				}
 				
 			case .unknown:
-				globals.log.e ("\(pID): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
+				globals.log.e ("\(id): \(type.title): Index: \(index), Full Packet: \(data.hexString)")
 				return (false, .unknown, biostrapDataPacket())
 				
 			default:
@@ -166,14 +166,14 @@ class CharacteristicTemplate {
 					return (true, type, biostrapDataPacket(packetData, offset: offset))
 				}
 				else {
-					globals.log.e ("\(pID): \(type.title): '\(type.length)' from '\(index)' exceeds length of data '\(data.count)'")
+					globals.log.e ("\(id): \(type.title): '\(type.length)' from '\(index)' exceeds length of data '\(data.count)'")
 					return (false, .unknown, biostrapDataPacket())
 				}
 			}
 			
 		}
 		else {
-			globals.log.e ("\(pID): Could not parse type: Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
+			globals.log.e ("\(id): Could not parse type: Remaining bytes: \(data.subdata(in: Range(index...(data.count - 1))).hexString)")
 			return (false, .unknown, biostrapDataPacket())
 		}
 	}
@@ -374,12 +374,10 @@ class CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func didDiscover(_ characteristic: CBCharacteristic, commandQ: CommandQ?) {
-		if let peripheral = characteristic.service?.peripheral {
-			pID = peripheral.prettyID
-		}
-		pCharacteristic = characteristic
-		configured = false
-		pCommandQ = commandQ
+        self.id = characteristic.deviceID
+        self.characteristic = characteristic
+        self.configured = false
+        self.commandQ = commandQ
 	}
 
 	//--------------------------------------------------------------------------------
@@ -390,7 +388,7 @@ class CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func read() {
-		pCommandQ?.read(pCharacteristic)
+		commandQ?.read(characteristic)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -401,7 +399,7 @@ class CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func didWrite() {
-		globals.log.e ("\(pID): Did you mean to override?")
+		globals.log.e ("\(id): Did you mean to override?")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -412,7 +410,7 @@ class CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func didUpdateValue() {
-		globals.log.e ("\(pID): Did you mean to override?")
+		globals.log.e ("\(id): Did you mean to override?")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -423,7 +421,7 @@ class CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func didUpdateNotificationState() {
-		globals.log.e ("\(pID): Did you mean to override?")
+		globals.log.e ("\(id): Did you mean to override?")
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -434,8 +432,8 @@ class CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func didDiscoverDescriptor() {
-		if let peripheral = pCharacteristic?.service?.peripheral, let pCharacteristic {
-			peripheral.setNotifyValue(true, for: pCharacteristic)
+		if let peripheral = characteristic?.service?.peripheral, let characteristic {
+			peripheral.setNotifyValue(true, for: characteristic)
 		}
 	}
 	
@@ -447,8 +445,8 @@ class CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func discoverDescriptors() {
-		if let peripheral = pCharacteristic?.service?.peripheral, let pCharacteristic {
-			peripheral.discoverDescriptors(for: pCharacteristic)
+		if let peripheral = characteristic?.service?.peripheral, let characteristic {
+			peripheral.discoverDescriptors(for: characteristic)
 		}
 	}
 	
@@ -461,6 +459,6 @@ class CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func didWriteWithoutResponseReady() {
-		globals.log.e ("\(pID): Did you mean to override?")
+		globals.log.e ("\(id): Did you mean to override?")
 	}
 }

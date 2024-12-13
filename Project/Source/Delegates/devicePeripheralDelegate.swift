@@ -40,21 +40,19 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-		DispatchQueue.main.async {
-			if let error = error {
-				globals.log.e ("\(peripheral.prettyID): didDiscoverServices: Error: \(error.localizedDescription).  Disconnecting")
-				self.centralManager?.cancelPeripheralConnection(peripheral)
-				return
-			}
-			
-			if let services = peripheral.services {
-				for service in services {
-					if (Device.hit(service)) {
-						peripheral.discoverCharacteristics(nil, for: service)
-					}
-				}
-			}
-		}
+        if let error = error {
+            globals.log.e ("\(peripheral.prettyID): didDiscoverServices: Error: \(error.localizedDescription).  Disconnecting")
+            self.centralManager?.cancelPeripheralConnection(peripheral)
+            return
+        }
+        
+        if let services = peripheral.services {
+            for service in services {
+                if (Device.hit(service)) {
+                    peripheral.discoverCharacteristics(nil, for: service)
+                }
+            }
+        }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -127,19 +125,17 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-		DispatchQueue.main.async {
-			if let error = error {
-				globals.log.e ("\(peripheral.prettyID): didDiscoverCharacteristics for service: \(service.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
-				self.centralManager?.cancelPeripheralConnection(peripheral)
-				return
-			}
-			
-			if let characteristics = service.characteristics {
-				for characteristic in characteristics {
-					self.didDiscoverCharacteristic(characteristic)
-				}
-			}
-		}
+        if let error = error {
+            globals.log.e ("\(peripheral.prettyID): didDiscoverCharacteristics for service: \(service.prettyID) - Error: \(error.localizedDescription).  Disconnecting")
+            self.centralManager?.cancelPeripheralConnection(peripheral)
+            return
+        }
+        
+        if let characteristics = service.characteristics {
+            for characteristic in characteristics {
+                self.didDiscoverCharacteristic(characteristic)
+            }
+        }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -178,24 +174,19 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didDiscoverDescriptorsFor characteristic: CBCharacteristic, error: Error?) {
-		globals.log.v ("\(peripheral.prettyID): didDiscoverDescriptorsFor characteristic: \(characteristic.prettyID)")
-		
-		DispatchQueue.main.async {
-			if let error = error {
-				globals.log.e ("\(peripheral.prettyID): didDiscoverDescriptors for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Skipping")
-				self.centralManager?.cancelPeripheralConnection(peripheral)
-				return
-			}
-			
-			if let descriptors = characteristic.descriptors {
-				for descriptor in descriptors {
-					self.didDiscoverDescriptor(descriptor, forCharacteristic: characteristic)
-				}
-			}
-			else {
-				globals.log.e ("\(peripheral.prettyID): didDiscoverDescriptor for characteristic \(characteristic.prettyID): No descriptors - do not know what to do")
-			}
-		}
+        if let error = error {
+            globals.log.e ("\(peripheral.prettyID): didDiscoverDescriptors for characteristic: \(characteristic.prettyID) - Error: \(error.localizedDescription).  Skipping")
+            self.centralManager?.cancelPeripheralConnection(peripheral)
+            return
+        }
+        
+        if let descriptors = characteristic.descriptors {
+            for descriptor in descriptors {
+                self.didDiscoverDescriptor(descriptor, forCharacteristic: characteristic)
+            }
+        } else {
+            globals.log.e ("\(peripheral.prettyID): didDiscoverDescriptor for characteristic \(characteristic.prettyID): No descriptors - do not know what to do")
+        }
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -217,16 +208,13 @@ extension Device: CBPeripheralDelegate {
 	//
 	//--------------------------------------------------------------------------------
 	public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
-		
-		DispatchQueue.main.async {
-			if let error = error {
-				globals.log.e ("\(peripheral.prettyID): didUpdateNotificationState for characteristic: \(characteristic.prettyID) - Error: '\(error.localizedDescription)'  Skipping")
-				self.centralManager?.cancelPeripheralConnection(peripheral)
-				return
-			}
-
-			self.didUpdateNotificationState(characteristic)
-		}
+        if let error = error {
+            globals.log.e ("\(peripheral.prettyID): didUpdateNotificationState for characteristic: \(characteristic.prettyID) - Error: '\(error.localizedDescription)'  Skipping")
+            self.centralManager?.cancelPeripheralConnection(peripheral)
+            return
+        }
+        
+        self.didUpdateNotificationState(characteristic)
 	}
 	
 	//--------------------------------------------------------------------------------

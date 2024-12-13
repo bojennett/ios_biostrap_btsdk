@@ -152,7 +152,7 @@ class ambiqOTARXCharacteristic: CharacteristicTemplate {
 		
 		var deviceMTU = 20
 		
-		if let peripheral = pCharacteristic?.service?.peripheral {
+		if let peripheral = characteristic?.service?.peripheral {
 			deviceMTU = peripheral.maximumWriteValueLength(for: .withoutResponse)
 		}
 
@@ -182,7 +182,7 @@ class ambiqOTARXCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mSendFrame(data: Data) {
-		pCommandQ?.write(pCharacteristic, data: data, type: .withoutResponse)
+		commandQ?.write(characteristic, data: data, type: .withoutResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -225,7 +225,7 @@ class ambiqOTARXCharacteristic: CharacteristicTemplate {
 	func start(_ data: Data) {
 		mData = data
 		
-		if let _ = pCharacteristic, let data = mData {
+		if let _ = characteristic, let data = mData {
             self.started.send()
 			
 			if (data.count < ambiqOTARXCharacteristic.FILE_HEADER_BLOCK) {

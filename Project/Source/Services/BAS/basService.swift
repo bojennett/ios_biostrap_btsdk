@@ -39,18 +39,8 @@ class basService: ServiceTemplate {
 		mBatteryLevelCharacteristic = batteryLevelCharacteristic()
 		super.init()
 		
-		mBatteryLevelCharacteristic.$batteryLevel
-			.sink { [weak self] in
-				self?.batteryLevel = $0
-			}
-			.store(in: &subscriptions)
-		
-		mBatteryLevelCharacteristic.$configured
-			.sink { [weak self] in
-				self?.configured = $0
-			}
-			.store(in: &subscriptions)
-
+		mBatteryLevelCharacteristic.$batteryLevel.sink { [weak self] in self?.batteryLevel = $0 }.store(in: &subscriptions)
+		mBatteryLevelCharacteristic.$configured.sink { [weak self] in self?.configured = $0 }.store(in: &subscriptions)
 	}
 
     //--------------------------------------------------------------------------------
@@ -64,7 +54,7 @@ class basService: ServiceTemplate {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
 			mBatteryLevelCharacteristic.didDiscover(characteristic, commandQ: commandQ)
         } else {
-            globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)")
+            globals.log.e ("\(id): Unhandled: \(characteristic.uuid)")
         }
     }
     
@@ -79,7 +69,7 @@ class basService: ServiceTemplate {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
             mBatteryLevelCharacteristic.didDiscoverDescriptor()
         } else {
-            globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)")
+            globals.log.e ("\(id): Unhandled: \(characteristic.uuid)")
         }
     }
 
@@ -94,7 +84,7 @@ class basService: ServiceTemplate {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
             mBatteryLevelCharacteristic.didUpdateNotificationState()
         } else {
-            globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)")
+            globals.log.e ("\(id): Unhandled: \(characteristic.uuid)")
         }
     }
 
@@ -109,7 +99,7 @@ class basService: ServiceTemplate {
         if characteristic.uuid == org_bluetooth_characteristic.battery_level.UUID {
             mBatteryLevelCharacteristic.didUpdateValue()
         } else {
-            globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)")
+            globals.log.e ("\(id): Unhandled: \(characteristic.uuid)")
         }
     }
 

@@ -10,7 +10,7 @@ import CoreBluetooth
 import Combine
 
 class ServiceTemplate {
-    internal var pID: String = "UNKNOWN"
+    internal var id: String = "UNKNOWN"
     internal var subscriptions = Set<AnyCancellable>()
 
     @Published var configured: Bool = false
@@ -50,7 +50,7 @@ class ServiceTemplate {
     //
     //--------------------------------------------------------------------------------
     func didConnect(_ peripheral: CBPeripheral) {
-        pID = peripheral.prettyID
+        id = peripheral.prettyID
     }
     
     //--------------------------------------------------------------------------------

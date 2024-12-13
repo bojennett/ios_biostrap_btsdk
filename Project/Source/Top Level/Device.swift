@@ -69,6 +69,8 @@ public class Device: NSObject, ObservableObject {
 	@Published public private(set) var on_charger: Bool?
 	@Published public private(set) var charge_error: Bool?
 
+    @Published public private(set) var bodySensorLocation: BodySensorLocation?
+
 	@Published public private(set) var modelNumber: String?
 	@Published public private(set) var firmwareRevision: String?
 	@Published public private(set) var hardwareRevision: String?
@@ -2218,6 +2220,13 @@ public class Device: NSObject, ObservableObject {
                 self?.lambdaHeartRateUpdated?(self!.id, epoch, hr, rr)
             }
             .store(in: &subscriptions)
+        
+        mHRS.$bodySensorLocation
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] location in
+                self?.bodySensorLocation = location
+            }
+            .store(in: &subscriptions)
     }
     
     //--------------------------------------------------------------------------------
@@ -2487,6 +2496,7 @@ extension Device {
     private func updatePreview(battery: Int? = nil,
                                charging: Bool? = nil,
                                on_charger: Bool? = nil,
+                               bodySensorLocation: BodySensorLocation? = nil,
                                worn: Bool? = nil,
                                modelNumber: String? = nil,
                                firmwareRevision: String? = nil,
@@ -2508,6 +2518,7 @@ extension Device {
         self.charging = false
         self.on_charger = false
         self.charge_error = false
+        self.bodySensorLocation = .wrist
         self.modelNumber = "modelNumber"
         self.firmwareRevision = "2.2.2"
         self.hardwareRevision = "0.0.3"

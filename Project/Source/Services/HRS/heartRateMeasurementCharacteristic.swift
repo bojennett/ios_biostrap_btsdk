@@ -78,16 +78,12 @@ class heartRateMeasurementCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateValue() {
-		if let characteristic = pCharacteristic {
-			if let data = characteristic.value {
-				let (epoch, hr, rr) = mParse(data)
-                self.updated.send((epoch, hr, rr))
-			}
-			else {
-				globals.log.e ("\(pID): Missing data")
-			}
-		}
-		else { globals.log.e ("\(pID): Missing characteristic") }
+		if let characteristic, let data = characteristic.value {
+            let (epoch, hr, rr) = mParse(data)
+            self.updated.send((epoch, hr, rr))
+        } else {
+            globals.log.e ("\(id): Missing characteristic and/or data")
+        }
 	}
 
 	//--------------------------------------------------------------------------------

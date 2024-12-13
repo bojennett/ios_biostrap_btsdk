@@ -165,15 +165,15 @@ class customService: ServiceTemplate {
 
     enum characteristics: String {
         #if UNIVERSAL || ALTER
-        case alterMainCharacteristic    = "883BBA2C-8E31-40BB-A859-D59A2FB38EC1"
-        case alterDataCharacteristic    = "883BBA2C-8E31-40BB-A859-D59A2FB38EC2"
-        case alterStrmCharacteristic    = "883BBA2C-8E31-40BB-A859-D59A2FB38EC3"
+        case alterMainCharacteristic = "883BBA2C-8E31-40BB-A859-D59A2FB38EC1"
+        case alterDataCharacteristic = "883BBA2C-8E31-40BB-A859-D59A2FB38EC2"
+        case alterStrmCharacteristic = "883BBA2C-8E31-40BB-A859-D59A2FB38EC3"
         #endif
 
-        #if UNIVERSAL || KAIROS
-        case kairosMainCharacteristic    = "140BB753-9845-4C0E-B61A-E6BAE41712F1"
-        case kairosDataCharacteristic    = "140BB753-9845-4C0E-B61A-E6BAE41712F2"
-        case kairosStrmCharacteristic    = "140BB753-9845-4C0E-B61A-E6BAE41712F3"
+		#if UNIVERSAL || KAIROS
+        case kairosMainCharacteristic = "140BB753-9845-4C0E-B61A-E6BAE41712F1"
+        case kairosDataCharacteristic = "140BB753-9845-4C0E-B61A-E6BAE41712F2"
+        case kairosStrmCharacteristic = "140BB753-9845-4C0E-B61A-E6BAE41712F3"
         #endif
 
         var UUID: CBUUID {
@@ -183,15 +183,15 @@ class customService: ServiceTemplate {
         var title: String {
             switch (self) {
             #if UNIVERSAL || ALTER
-            case .alterMainCharacteristic    : return "Alter Command Characteristic"
-            case .alterDataCharacteristic    : return "Alter Data Characteristic"
-            case .alterStrmCharacteristic    : return "Alter Streaming Characteristic"
+            case .alterMainCharacteristic : return "Alter Command Characteristic"
+            case .alterDataCharacteristic : return "Alter Data Characteristic"
+            case .alterStrmCharacteristic : return "Alter Streaming Characteristic"
             #endif
 
             #if UNIVERSAL || KAIROS
-            case .kairosMainCharacteristic    : return "Kairos Command Characteristic"
-            case .kairosDataCharacteristic    : return "Kairos Data Characteristic"
-            case .kairosStrmCharacteristic    : return "Kairos Streaming Characteristic"
+            case .kairosMainCharacteristic : return "Kairos Command Characteristic"
+            case .kairosDataCharacteristic : return "Kairos Data Characteristic"
+            case .kairosStrmCharacteristic : return "Kairos Streaming Characteristic"
             #endif
             }
         }
@@ -601,7 +601,7 @@ class customService: ServiceTemplate {
             strmCharacteristic.discoverDescriptors()
 		#endif
 
-        default: globals.log.e ("Unhandled: \(characteristic.uuid)")
+        default: globals.log.e ("\(id): Unhandled: \(characteristic.uuid)")
         }
     }
     
@@ -620,13 +620,13 @@ class customService: ServiceTemplate {
         case characteristics.alterStrmCharacteristic.UUID: strmCharacteristic.didDiscoverDescriptor()
         #endif
             
-        #if UNIVERAL || KAIROS
+        #if UNIVERSAL || KAIROS
         case characteristics.kairosMainCharacteristic.UUID: mainCharacteristic.didDiscoverDescriptor()
         case characteristics.kairosDataCharacteristic.UUID: dataCharacteristic.didDiscoverDescriptor()
         case characteristics.kairosStrmCharacteristic.UUID: strmCharacteristic.didDiscoverDescriptor()
 		#endif
             
-        default: globals.log.e ("Unhandled: \(characteristic.uuid)")
+        default: globals.log.e ("\(id): Unhandled: \(characteristic.uuid)")
         }
     }
     
@@ -645,12 +645,12 @@ class customService: ServiceTemplate {
         case characteristics.alterStrmCharacteristic.UUID: strmCharacteristic.didUpdateNotificationState()
         #endif
             
-        #if UNIVERAL || KAIROS
+        #if UNIVERSAL || KAIROS
         case characteristics.kairosMainCharacteristic.UUID: mainCharacteristic.didUpdateNotificationState()
         case characteristics.kairosDataCharacteristic.UUID: dataCharacteristic.didUpdateNotificationState()
         case characteristics.kairosStrmCharacteristic.UUID: strmCharacteristic.didUpdateNotificationState()
         #endif
-        default: globals.log.e ("Unhandled: \(characteristic.uuid)")
+        default: globals.log.e ("\(id): Unhandled: \(characteristic.uuid)")
         }
     }
     
@@ -669,13 +669,13 @@ class customService: ServiceTemplate {
         case characteristics.alterStrmCharacteristic.UUID: strmCharacteristic.didUpdateValue()
         #endif
             
-        #if UNIVERAL || KAIROS
+        #if UNIVERSAL || KAIROS
         case characteristics.kairosMainCharacteristic.UUID: mainCharacteristic.didUpdateValue()
         case characteristics.kairosDataCharacteristic.UUID: dataCharacteristic.didUpdateValue()
         case characteristics.kairosStrmCharacteristic.UUID: strmCharacteristic.didUpdateValue()
 		#endif
             
-        default: globals.log.e ("Unhandled: \(characteristic.uuid)")
+        default: globals.log.e ("\(id): Unhandled: \(characteristic.uuid)")
         }
     }
 

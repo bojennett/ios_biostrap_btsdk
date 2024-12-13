@@ -38,16 +38,16 @@ class customStreamingCharacteristic: CharacteristicTemplate {
 	internal func mProcessUpdateValue(_ data: Data) {
 		if let response = notifications(rawValue: data[0]) {
 			switch (response) {
-			case .completion: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")
-			case .dataPacket: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")
-			case .dataCaughtUp: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")
-			case .validateCRC: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")
+			case .completion: globals.log.e ("\(id): Should not get '\(response)' on this characteristic!")
+			case .dataPacket: globals.log.e ("\(id): Should not get '\(response)' on this characteristic!")
+			case .dataCaughtUp: globals.log.e ("\(id): Should not get '\(response)' on this characteristic!")
+			case .validateCRC: globals.log.e ("\(id): Should not get '\(response)' on this characteristic!")
 
 			case .worn:
                 if      (data[1] == 0x00) { worn = false }
                 else if (data[1] == 0x01) { worn = true  }
 				else {
-					globals.log.e ("\(pID): Cannot parse worn status: \(data[1])")
+					globals.log.e ("\(id): Cannot parse worn status: \(data[1])")
 				}
 				
 			case .ppg_metrics:
@@ -76,7 +76,7 @@ class customStreamingCharacteristic: CharacteristicTemplate {
                     self.endSleepStatus.send(hasSleep)
 				}
 				else {
-					globals.log.e ("\(pID): Cannot parse 'endSleepStatus': \(data.hexString)")
+					globals.log.e ("\(id): Cannot parse 'endSleepStatus': \(data.hexString)")
 				}
 				
 			case .buttonResponse:
@@ -84,7 +84,7 @@ class customStreamingCharacteristic: CharacteristicTemplate {
                     self.buttonTaps = Int(data[1])
 				}
 				else {
-					globals.log.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
+					globals.log.e ("\(id): Cannot parse 'buttonResponse': \(data.hexString)")
 				}
 								
 			case .manufacturingTest:
@@ -97,12 +97,12 @@ class customStreamingCharacteristic: CharacteristicTemplate {
                             self.manufacturingTestResult.send((true, jsonString))
 						}
 						else {
-							globals.log.e ("\(pID): Result jsonString Failed")
+							globals.log.e ("\(id): Result jsonString Failed")
                             self.manufacturingTestResult.send((false, ""))
 						}
 					}
 					catch {
-						globals.log.e ("\(pID): Result jsonData Failed")
+						globals.log.e ("\(id): Result jsonData Failed")
                         self.manufacturingTestResult.send((false, ""))
 					}
 				}
@@ -120,12 +120,12 @@ class customStreamingCharacteristic: CharacteristicTemplate {
                             self.manufacturingTestResult.send((true, jsonString))
 						}
 						else {
-							globals.log.e ("\(pID): Result jsonString Failed")
+							globals.log.e ("\(id): Result jsonString Failed")
                             self.manufacturingTestResult.send((false, ""))
 						}
 					}
 					catch {
-						globals.log.e ("\(pID): Result jsonData Failed")
+						globals.log.e ("\(id): Result jsonData Failed")
                         self.manufacturingTestResult.send((false, ""))
 					}
 				}
@@ -145,12 +145,12 @@ class customStreamingCharacteristic: CharacteristicTemplate {
                                 self.manufacturingTestResult.send((true, jsonString))
 							}
 							else {
-								globals.log.e ("\(pID): Result jsonString Failed")
+								globals.log.e ("\(id): Result jsonString Failed")
                                 self.manufacturingTestResult.send((false, ""))
 							}
 						}
 						catch {
-							globals.log.e ("\(pID): Result jsonData Failed")
+							globals.log.e ("\(id): Result jsonData Failed")
                             self.manufacturingTestResult.send((false, ""))
 						}
 					}
@@ -167,12 +167,12 @@ class customStreamingCharacteristic: CharacteristicTemplate {
                                 self.manufacturingTestResult.send((true, jsonString))
 							}
 							else {
-								globals.log.e ("\(pID): Result jsonString Failed")
+								globals.log.e ("\(id): Result jsonString Failed")
                                 self.manufacturingTestResult.send((false, ""))
 							}
 						}
 						catch {
-							globals.log.e ("\(pID): Result jsonData Failed")
+							globals.log.e ("\(id): Result jsonData Failed")
                             self.manufacturingTestResult.send((false, ""))
 						}
 					}
@@ -200,7 +200,7 @@ class customStreamingCharacteristic: CharacteristicTemplate {
 					packet.type				= .unknown
 					packet.raw_data_string	= data.hexString.replacingOccurrences(of: "[ ", with: "").replacingOccurrences(of: " ]", with: "")
 
-					globals.log.e ("\(pID): Bad streaming packet: \(data.hexString)")
+					globals.log.e ("\(id): Bad streaming packet: \(data.hexString)")
 				}
 				
 				do {
@@ -208,15 +208,15 @@ class customStreamingCharacteristic: CharacteristicTemplate {
 					if let jsonString = String(data: jsonData, encoding: .utf8) {
                         self.streamingPacket.send(jsonString)
 					}
-					else { globals.log.e ("\(pID): Cannot make string from json data") }
+					else { globals.log.e ("\(id): Cannot make string from json data") }
 				}
-				catch { globals.log.e ("\(pID): Cannot make JSON data") }
+				catch { globals.log.e ("\(id): Cannot make JSON data") }
 				
             case .dataAvailable: dataAvailable.send()
 			}
 		}
 		else {
-			globals.log.e ("\(pID): Unknown update: \(data.hexString)")
+			globals.log.e ("\(id): Unknown update: \(data.hexString)")
 		}
 	}
 
@@ -228,13 +228,10 @@ class customStreamingCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateValue() {
-		if let characteristic = pCharacteristic {
-			if let data = characteristic.value {
-				mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
-			}
-			else {
-				globals.log.e ("\(pID): Missing data")
-			}
+		if let characteristic, let data = characteristic.value {
+			mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
+		} else {
+			globals.log.e ("\(id): Missing charcteristic and/or data")
 		}
 	}
 	

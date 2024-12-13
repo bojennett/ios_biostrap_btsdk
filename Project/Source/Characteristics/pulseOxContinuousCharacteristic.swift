@@ -21,22 +21,21 @@ class pulseOxContinuousCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateValue() {
-		if let characteristic = pCharacteristic {
-			if let data = characteristic.value {
-				if (data.count >= 5) {
-					//let flags		= data[0]	// TODO: this would need to be checked for 'fast', 'slow', other fields
-
-					let spo2		= data.subdata(in: Range(NSMakeRange( 1, 2))!).leFloat16
-					let hr			= data.subdata(in: Range(NSMakeRange( 3, 2))!).leFloat16
-					
-					self.updated?(pID, spo2, hr)
-				}
-				else {
-					globals.log.e ("\(pID): Need at least 5 bytes (flags + spo2 + hr).  Only have \(data.count)")
-				}				
-			}
-		}
-		else { globals.log.e ("\(pID): Missing characteristic") }
+        if let characteristic, let data = characteristic.value {
+            if (data.count >= 5) {
+                //let flags		= data[0]	// TODO: this would need to be checked for 'fast', 'slow', other fields
+                
+                let spo2		= data.subdata(in: Range(NSMakeRange( 1, 2))!).leFloat16
+                let hr			= data.subdata(in: Range(NSMakeRange( 3, 2))!).leFloat16
+                
+                self.updated?(id, spo2, hr)
+            }
+            else {
+                globals.log.e ("\(id): Need at least 5 bytes (flags + spo2 + hr).  Only have \(data.count)")
+            }
+        } else {
+            globals.log.e ("\(id): Missing characteristic and/or data")
+        }
 	}
 
 	//--------------------------------------------------------------------------------

@@ -11,11 +11,29 @@ import Foundation
 import CoreBluetooth
 import Combine
 
-class bodySensorLocationCharacteristic: CharacteristicTemplate {
+public enum BodySensorLocation: UInt8 {
+    case chest = 0x01
+    case wrist = 0x02
+    case ankle = 0x04
+    case wristWrist = 0x08
+    case wristAnkle = 0x10
+    case ankleAnkle = 0x20
     
-    // MARK: Callbacks
-    var lambdaUpdated: ((_ id: String, _ epoch: Int, _ hr: Int, _ rr: [Double])->())?
-    let updated = PassthroughSubject<(Int, Int, [Double]), Never>()
+    public var title: String {
+        switch self {
+        case .chest: return "Chest"
+        case .wrist: return "Wrist"
+        case .ankle: return "Ankle"
+        case .wristWrist: return "Wrist Wrist"
+        case .wristAnkle: return "Wrist Ankle"
+        case .ankleAnkle: return "Ankle Ankle"
+        }
+    }
+}
+
+class bodySensorLocationCharacteristic: CharacteristicTemplate {
+
+    @Published var location: BodySensorLocation?
 
     //--------------------------------------------------------------------------------
     // Function Name:
@@ -37,15 +55,16 @@ class bodySensorLocationCharacteristic: CharacteristicTemplate {
     //
     //--------------------------------------------------------------------------------
     override func didUpdateValue() {
-        if let characteristic = pCharacteristic {
-            if let data = characteristic.value {
-                globals.log.v ("\(pID): \(data.hexString)")
+        if let characteristic, let data = characteristic.value {
+            if let location = BodySensorLocation(rawValue: data[0]) {
+                globals.log.v ("\(id): Body sensor location: \(location.title)")
+                self.location = location
+            } else {
+                globals.log.e ("\(id): Unknown body sensor location: \(data.hexString)")
             }
-            else {
-                globals.log.e ("\(pID): Missing data")
-            }
+        } else {
+            globals.log.e ("\(id): Missing characteristic and/or data")
         }
-        else { globals.log.e ("\(pID): Missing characteristic") }
 		
 		configured = true
     }

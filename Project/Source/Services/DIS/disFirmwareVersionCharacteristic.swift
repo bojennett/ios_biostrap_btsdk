@@ -26,20 +26,18 @@ class disFirmwareVersionCharacteristic: CharacteristicTemplate {
 	override func didUpdateValue() {
 		configured = true
 		
-		if let characteristic = pCharacteristic {
-			if let data = characteristic.value {
-				value = String(decoding: data, as: UTF8.self).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"])))
-				let values = value.split(separator: ".")
-				
-				if (values.count == 3) {
-					if let test = Int(values[0]) { mMajor = test }
-					if let test = Int(values[1]) { mMinor = test }
-					if let test = Int(values[2]) { mBuild = test }
-				}
-			}
-			else { globals.log.e ("\(pID): Missing data") }
-		}
-		else { globals.log.e ("\(pID): Missing characteristic") }
+		if let characteristic, let data = characteristic.value {
+            value = String(decoding: data, as: UTF8.self).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"])))
+            let values = value.split(separator: ".")
+            
+            if (values.count == 3) {
+                if let test = Int(values[0]) { mMajor = test }
+                if let test = Int(values[1]) { mMinor = test }
+                if let test = Int(values[2]) { mBuild = test }
+            }
+        } else {
+            globals.log.e ("\(id): Missing characteristic and/or data")
+        }
 	}
 	
     //--------------------------------------------------------------------------------

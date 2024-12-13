@@ -14,7 +14,7 @@ class hrsService: ServiceTemplate {
     internal var mHeartRateMeasurementCharacteristic: heartRateMeasurementCharacteristic
     internal var mBodySensorLocationCharacteristic: bodySensorLocationCharacteristic
 
-    @Published var batteryLevel: Int?
+    @Published var bodySensorLocation: BodySensorLocation?
     let updated = PassthroughSubject<(Int, Int, [Double]), Never>()
     
     //--------------------------------------------------------------------------------
@@ -51,6 +51,8 @@ class hrsService: ServiceTemplate {
 				self?.updated.send((epoch, hr, rr))
 			}
 			.store(in: &subscriptions)
+        
+        mBodySensorLocationCharacteristic.$location.sink { [weak self] location in self?.bodySensorLocation = location }.store(in: &subscriptions)            
 		
         Publishers.CombineLatest(
 			mHeartRateMeasurementCharacteristic.$configured,
@@ -89,7 +91,7 @@ class hrsService: ServiceTemplate {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.heart_rate_measurement.UUID:
             mHeartRateMeasurementCharacteristic.didDiscoverDescriptor()
-        default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
+        default: globals.log.e ("\(id): Unhandled: \(characteristic.uuid)");
         }
     }
 
@@ -104,7 +106,7 @@ class hrsService: ServiceTemplate {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.heart_rate_measurement.UUID:
             mHeartRateMeasurementCharacteristic.didUpdateNotificationState()
-        default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
+        default: globals.log.e ("\(id): Unhandled: \(characteristic.uuid)");
         }
     }
 
@@ -119,7 +121,7 @@ class hrsService: ServiceTemplate {
         switch characteristic.uuid {
         case org_bluetooth_characteristic.heart_rate_measurement.UUID: mHeartRateMeasurementCharacteristic.didUpdateValue()
         case org_bluetooth_characteristic.body_sensor_location.UUID: mBodySensorLocationCharacteristic.didUpdateValue()
-        default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
+        default: globals.log.e ("\(id): Unhandled: \(characteristic.uuid)");
         }
     }
 }

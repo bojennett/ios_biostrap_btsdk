@@ -20,14 +20,12 @@ class batteryLevelCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateValue() {
-		if let characteristic = pCharacteristic {
-            if let data = characteristic.value {
-                batteryLevel = Int(data[0])
-            } else {
-				globals.log.e ("\(pID): Missing data")
-			}
+		if let characteristic, let data = characteristic.value {
+            batteryLevel = Int(data[0])
 		}
-		else { globals.log.e ("\(pID): Missing characteristic") }
+        else {
+            globals.log.e ("\(id): Missing characteristic and/or data")
+        }
 	}
     
     //--------------------------------------------------------------------------------

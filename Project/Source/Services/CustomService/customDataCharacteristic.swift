@@ -23,7 +23,7 @@ class customDataCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
     internal func mProcessUpdateValue(_ data: Data, offset: Int) {
-		globals.log.v ("\(pID): \(data.count) bytes - \(data.hexString)")
+		globals.log.v ("\(id): \(data.count) bytes - \(data.hexString)")
 		if let response = notifications(rawValue: data[0]) {
 			switch (response) {
 			case .dataPacket:
@@ -36,13 +36,13 @@ class customDataCharacteristic: CharacteristicTemplate {
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
                             self.dataPackets.send((sequence_number, jsonString))
 						}
-						else { globals.log.e ("\(pID): Cannot make string from json data") }
+						else { globals.log.e ("\(id): Cannot make string from json data") }
 					}
-					catch { globals.log.e ("\(pID): Cannot make JSON data") }
+					catch { globals.log.e ("\(id): Cannot make JSON data") }
 
 				}
 				else {
-					globals.log.e ("\(pID): Bad data length for data packet: \(data.hexString)")
+					globals.log.e ("\(id): Bad data length for data packet: \(data.hexString)")
 					//mCRCOK	= false
 				}
 				
@@ -61,11 +61,11 @@ class customDataCharacteristic: CharacteristicTemplate {
 				}
 				
 			default:
-				globals.log.e ("\(pID): Should not get a packet here of type: \(response)")
+				globals.log.e ("\(id): Should not get a packet here of type: \(response)")
 			}
 		}
 		else {
-			globals.log.e ("\(pID): Unknown update: \(data.hexString)")
+			globals.log.e ("\(id): Unknown update: \(data.hexString)")
 		}
 	}
 
@@ -77,13 +77,13 @@ class customDataCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateValue() {
-        guard let characteristic = pCharacteristic else {
-            globals.log.e ("\(pID): Missing characteristic")
+        guard let characteristic = characteristic else {
+            globals.log.e ("\(id): Missing characteristic")
             return
         }
         
         guard let data = characteristic.value else {
-            globals.log.e ("\(pID): Missing data")
+            globals.log.e ("\(id): Missing data")
             return
         }
 
@@ -121,13 +121,13 @@ class customDataCharacteristic: CharacteristicTemplate {
                 let crc_calculated  = crc32(uLong(0), &input_bytes, uInt(input_bytes.count))
                 
                 if (crc_received != crc_calculated) {
-                    globals.log.e ("\(pID): Hmmm..... Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
+                    globals.log.e ("\(id): Hmmm..... Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
                     self.pFailedDecodeCount = self.pFailedDecodeCount + 1
                 }
                 
                 mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))), offset: offset)
             } else {
-                globals.log.e ("\(pID): Not enough data.  Length = \(data.count): \(data.hexString)")
+                globals.log.e ("\(id): Not enough data.  Length = \(data.count): \(data.hexString)")
             }
         }
     }

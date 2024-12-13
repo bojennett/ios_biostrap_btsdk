@@ -24,27 +24,25 @@ class disSoftwareRevisionCharacteristic: CharacteristicTemplate {
 	override func didUpdateValue() {
 		configured = true
 		
-		if let characteristic = pCharacteristic {
-			if let data = characteristic.value {
-				bluetooth = ""
-				algorithms = ""
-				sleep = ""
-
-				let dataString = String(decoding: data, as: UTF8.self).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"])))
-				let components = dataString.split(separator: "_")
-				
-				var index = 0
-				for component in components {
-					if (index == 0) { bluetooth = String(component) }
-					if (index == 1) { algorithms = String(component) }
-					if (index == 2) { sleep = String(component) }
-
-					index = index + 1
-				}
-			}
-			else { globals.log.e ("\(pID): Missing data") }
-		}
-		else { globals.log.e ("\(pID): Missing characteristic") }
+		if let characteristic, let data = characteristic.value {
+            bluetooth = ""
+            algorithms = ""
+            sleep = ""
+            
+            let dataString = String(decoding: data, as: UTF8.self).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(CharacterSet(["\0"])))
+            let components = dataString.split(separator: "_")
+            
+            var index = 0
+            for component in components {
+                if (index == 0) { bluetooth = String(component) }
+                if (index == 1) { algorithms = String(component) }
+                if (index == 2) { sleep = String(component) }
+                
+                index = index + 1
+            }
+        } else {
+            globals.log.e ("\(id): Missing characteristic and/or data")
+        }
 	}
 
     //--------------------------------------------------------------------------------

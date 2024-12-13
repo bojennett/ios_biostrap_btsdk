@@ -246,12 +246,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func writeEpoch(_ newEpoch: Int) {
-		globals.log.v("\(pID): \(newEpoch)")
+		globals.log.v("\(id): \(newEpoch)")
 
 		var data = Data()
 		data.append(commands.writeEpoch.rawValue)
 		data.append(newEpoch.leData32)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -262,11 +262,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func readEpoch() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 
 		var data = Data()
 		data.append(commands.readEpoch.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -277,11 +277,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func endSleep() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 
 		var data = Data()
 		data.append(commands.endSleep.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -294,7 +294,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 	internal func mSimpleCommand(_ command: commands) -> Bool {
 		var data = Data()
 		data.append(command.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 		return (true)
 	}
 
@@ -306,12 +306,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getNextPacket(_ single: Bool) {
-		globals.log.v("\(pID): Single? \(single)")
+		globals.log.v("\(id): Single? \(single)")
 
 		var data = Data()
 		data.append(commands.getNextPacket.rawValue)
 		data.append(single ? 0x01 : 0x00)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -322,7 +322,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getAllPackets(pages: Int, delay: Int, newStyle: Bool) {
-		globals.log.v("\(pID): Pages: \(pages), delay: \(delay) ms")
+		globals.log.v("\(id): Pages: \(pages), delay: \(delay) ms")
 
 		self.pFailedDecodeCount	= 0
 		
@@ -334,7 +334,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 			data.append(contentsOf: delay.leData16)
 		}
 
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -345,12 +345,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getAllPacketsAcknowledge(_ ack: Bool) {
-		globals.log.v("\(pID): Ack: \(ack)")
+		globals.log.v("\(id): Ack: \(ack)")
 		
 		var data = Data()
 		data.append(commands.getAllPacketsAcknowledge.rawValue)
 		data.append(ack ? 0x01 : 0x00)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -394,12 +394,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func startManual(_ algorithms: ppgAlgorithmConfiguration) {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.startManual.rawValue)
 		data.append(algorithms.commandByte)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -410,7 +410,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func stopManual() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
         if (!mSimpleCommand(.stopManual)) { self.stopManualComplete.send(.not_configured) }
 	}
@@ -423,7 +423,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func userLED(red: Bool, green: Bool, blue: Bool, blink: Bool, seconds: Int) {
-		globals.log.v("\(pID): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
+		globals.log.v("\(id): Red: \(red), Green: \(green), Blue: \(blue), Blink: \(blink), Seconds: \(seconds)")
 		
 		var data = Data()
 		data.append(commands.led.rawValue)
@@ -433,7 +433,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 		data.append(blink ? 0x01 : 0x00)	// Blink
 		data.append(UInt8(seconds & 0xff))	// Seconds
 
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -444,11 +444,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func enterShipMode() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.enterShipMode.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -459,14 +459,14 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func writeSerialNumber(_ partID: String) {
-		globals.log.v("\(pID): \(partID)")
+		globals.log.v("\(id): \(partID)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
 		data.append(deviceParameterType.serialNumber.rawValue)
 		data.append(contentsOf: [UInt8](partID.utf8))
 		
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -477,12 +477,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func readSerialNumber() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
 		data.append(deviceParameterType.serialNumber.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -493,12 +493,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func deleteSerialNumber() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.delDeviceParam.rawValue)
 		data.append(deviceParameterType.serialNumber.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -509,7 +509,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func writeAdvInterval(_ seconds: Int) {
-		globals.log.v("\(pID): \(seconds)")
+		globals.log.v("\(id): \(seconds)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
@@ -518,7 +518,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 		
 		globals.log.v ("\(data.hexString)")
 
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -529,12 +529,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func readAdvInterval() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
 		data.append(deviceParameterType.advertisingInterval.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -545,12 +545,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func deleteAdvInterval() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.delDeviceParam.rawValue)
 		data.append(deviceParameterType.advertisingInterval.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -561,12 +561,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func clearChargeCycles() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
 		data.append(deviceParameterType.chargeCycle.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -577,12 +577,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func readChargeCycles() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
 		data.append(deviceParameterType.chargeCycle.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -593,12 +593,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func readCanLogDiagnostics() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
 		data.append(deviceParameterType.canLogDiagnostics.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -609,14 +609,14 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func updateCanLogDiagnostics(_ allow: Bool) {
-		globals.log.v("\(pID): Allow Diagnostics? \(allow)")
+		globals.log.v("\(id): Allow Diagnostics? \(allow)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
 		data.append(deviceParameterType.canLogDiagnostics.rawValue)
 		data.append(allow ? 0x01 : 0x00)
 		
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -627,12 +627,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func allowPPG(_ allow: Bool) {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.allowPPG.rawValue)
 		data.append(allow ? 0x01 : 0x00)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -643,11 +643,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func wornCheck() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.wornCheck.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -658,12 +658,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func rawLogging(_ enable: Bool) {
-		globals.log.v("\(pID): \(enable)")
+		globals.log.v("\(id): \(enable)")
 		
 		var data = Data()
 		data.append(commands.logRaw.rawValue)
 		data.append(enable ? 0x01 : 0x00)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -674,11 +674,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getRawLoggingStatus() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.getRawLoggingStatus.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -689,11 +689,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getWornOverrideStatus() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.getWornOverrideStatus.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -704,7 +704,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func airplaneMode() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
         if (!mSimpleCommand(.airplaneMode)) { self.airplaneModeComplete.send(.not_configured) }
 	}
@@ -717,7 +717,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func reset() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 
         if (!mSimpleCommand(.reset)) { self.resetComplete.send(.not_configured) }
 	}
@@ -730,13 +730,13 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func setSessionParam(_ parameter: sessionParameterType, value: Int) {
-		globals.log.v("\(pID): \(parameter) - \(value)")
+		globals.log.v("\(id): \(parameter) - \(value)")
 		
 		var data = Data()
 		data.append(commands.setSessionParam.rawValue)
 		data.append(parameter.rawValue)
 		data.append(value.leData32)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -747,12 +747,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getSessionParam(_ parameter: sessionParameterType) {
-		globals.log.v("\(pID): \(parameter)")
+		globals.log.v("\(id): \(parameter)")
 		
 		var data = Data()
 		data.append(commands.getSessionParam.rawValue)
 		data.append(parameter.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -763,12 +763,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func resetSessionParams() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.setSessionParam.rawValue)
 		data.append(sessionParameterType.reset.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -779,12 +779,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func acceptSessionParams() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.setSessionParam.rawValue)
 		data.append(sessionParameterType.accept.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -796,23 +796,23 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//--------------------------------------------------------------------------------
 	#if UNIVERSAL || ALTER
 	func alterManufacturingTest(_ test: alterManufacturingTestType) {
-		globals.log.v("\(pID): \(test.title)")
+		globals.log.v("\(id): \(test.title)")
 		
 		var data = Data()
 		data.append(commands.manufacturingTest.rawValue)
 		data.append(test.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	#endif
 
 	#if UNIVERSAL || KAIROS
 	func kairosManufacturingTest(_ test: kairosManufacturingTestType) {
-		globals.log.v("\(pID): \(test.title)")
+		globals.log.v("\(id): \(test.title)")
 		
 		var data = Data()
 		data.append(commands.manufacturingTest.rawValue)
 		data.append(test.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+        commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	#endif
 		
@@ -827,7 +827,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 		var data = Data()
 		data.append(commands.setAskForButtonResponse.rawValue)
 		data.append(enable ? 0x01 : 0x00)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -840,7 +840,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 	func getAskForButtonResponse() {
 		var data = Data()
 		data.append(commands.getAskForButtonResponse.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -851,7 +851,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func setHRZoneColor(_ type: hrZoneRangeType, red: Bool, green: Bool, blue: Bool, on_milliseconds: Int, off_milliseconds: Int) {
-		globals.log.v("\(pID): \(type.title) -> R \(red), G \(green), B \(blue).  On: \(on_milliseconds), Off: \(off_milliseconds)")
+		globals.log.v("\(id): \(type.title) -> R \(red), G \(green), B \(blue).  On: \(on_milliseconds), Off: \(off_milliseconds)")
 		
 		var data = Data()
 		data.append(commands.setHRZoneColor.rawValue)
@@ -863,7 +863,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 		data.append(UInt8((on_milliseconds >> 8) & 0xff))
 		data.append(UInt8((off_milliseconds >> 0) & 0xff))
 		data.append(UInt8((off_milliseconds >> 8) & 0xff))
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -874,12 +874,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getHRZoneColor(_ type: hrZoneRangeType) {
-		globals.log.v("\(pID): \(type.title)")
+		globals.log.v("\(id): \(type.title)")
 		
 		var data = Data()
 		data.append(commands.getHRZoneColor.rawValue)
 		data.append(type.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -890,14 +890,14 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func setHRZoneRange(_ enabled: Bool, high_value: Int, low_value: Int) {
-		globals.log.v("\(pID): Enabled: \(enabled) -> High Value: \(high_value), Low Value: \(low_value)")
+		globals.log.v("\(id): Enabled: \(enabled) -> High Value: \(high_value), Low Value: \(low_value)")
 		
 		var data = Data()
 		data.append(commands.setHRZoneRange.rawValue)
 		data.append(enabled ? 0x01 : 0x00)
 		data.append(UInt8(high_value))
 		data.append(UInt8(low_value))
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -908,11 +908,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getHRZoneRange() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.getHRZoneRange.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -923,11 +923,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getPPGAlgorithm() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.getPPGAlgorithm.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -938,12 +938,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func setAdvertiseAsHRM(_ asHRM: Bool) {
-		globals.log.v("\(pID): As HRM? (\(asHRM)")
+		globals.log.v("\(id): As HRM? (\(asHRM)")
 		
 		var data = Data()
 		data.append(commands.setAdvertiseAsHRM.rawValue)
 		data.append(asHRM ? 0x01 : 0x00)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -954,11 +954,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getAdvertiseAsHRM() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.getAdvertiseAsHRM.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -969,13 +969,13 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func setButtonCommand(_ tap: buttonTapType, command: buttonCommandType) {
-		globals.log.v("\(pID): \(tap.title) -> \(command.title)")
+		globals.log.v("\(id): \(tap.title) -> \(command.title)")
 		
 		var data = Data()
 		data.append(commands.setButtonCommand.rawValue)
 		data.append(tap.rawValue)
 		data.append(command.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -986,12 +986,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getButtonCommand(_ tap: buttonTapType) {
-		globals.log.v("\(pID): \(tap.title)")
+		globals.log.v("\(id): \(tap.title)")
 		
 		var data = Data()
 		data.append(commands.getButtonCommand.rawValue)
 		data.append(tap.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1002,13 +1002,13 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func setPaired() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
 		data.append(deviceParameterType.paired.rawValue)
 		data.append(0x01)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1019,12 +1019,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func setUnpaired() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.delDeviceParam.rawValue)
 		data.append(deviceParameterType.paired.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 
@@ -1036,12 +1036,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getPaired() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
 		data.append(deviceParameterType.paired.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1052,13 +1052,13 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func setPageThreshold(_ threshold: Int) {
-		globals.log.v("\(pID): \(threshold)")
+		globals.log.v("\(id): \(threshold)")
 		
 		var data = Data()
 		data.append(commands.setDeviceParam.rawValue)
 		data.append(deviceParameterType.pageThreshold.rawValue)
 		data.append(UInt8(threshold))
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1069,12 +1069,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func getPageThreshold() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.getDeviceParam.rawValue)
 		data.append(deviceParameterType.pageThreshold.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	
@@ -1086,12 +1086,12 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func deletePageThreshold() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.delDeviceParam.rawValue)
 		data.append(deviceParameterType.pageThreshold.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 
 	//--------------------------------------------------------------------------------
@@ -1102,11 +1102,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	func recalibratePPG() {
-		globals.log.v("\(pID)")
+		globals.log.v("\(id)")
 		
 		var data = Data()
 		data.append(commands.recalibratePPG.rawValue)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 	}
 	
 	//--------------------------------------------------------------------------------
@@ -1127,7 +1127,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 		var data = Data()
 		data.append(commands.validateCRC.rawValue)
 		data.append(mCRCOK ? 0x01 : 0x00)
-		pCommandQ?.write(pCharacteristic, data: data, type: .withResponse)
+		commandQ?.write(characteristic, data: data, type: .withResponse)
 		
 		mCRCOK				= true
 	}
@@ -1140,7 +1140,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	internal func mProcessUpdateValue(_ data: Data) {
-		globals.log.v ("\(pID): \(data.hexString)")
+		globals.log.v ("\(id): \(data.hexString)")
 		if let response = notifications(rawValue: data[0]) {
 			switch (response) {
 			case .completion:
@@ -1235,7 +1235,7 @@ class customMainCharacteristic: CharacteristicTemplate {
                                 case .pageThreshold			: self.setPageThresholdComplete.send(successful ? .successful : .device_error)
 								}
 							} else {
-								globals.log.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
+								globals.log.e ("\(id): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
 						case .getDeviceParam	:
 							if let parameter = deviceParameterType(rawValue: data[3]) {
@@ -1286,7 +1286,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 									}
 								}
 							} else {
-								globals.log.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
+								globals.log.e ("\(id): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
 						case .delDeviceParam	:
 							if let parameter = deviceParameterType(rawValue: data[3]) {
@@ -1295,13 +1295,13 @@ class customMainCharacteristic: CharacteristicTemplate {
                                     if successful { self.advertisingInterval = nil }
                                     self.deleteAdvIntervalComplete.send(successful ? .successful : .device_error)
                                 case .serialNumber			: self.deleteSerialNumberComplete.send(successful ? .successful : .device_error)
-								case .chargeCycle			: globals.log.e ("\(pID): Should not have been able to delete \(parameter.title)")
-								case .canLogDiagnostics		: globals.log.e ("\(pID): Should not have been able to delete \(parameter.title)")
+								case .chargeCycle			: globals.log.e ("\(id): Should not have been able to delete \(parameter.title)")
+								case .canLogDiagnostics		: globals.log.e ("\(id): Should not have been able to delete \(parameter.title)")
                                 case .paired				: self.setUnpairedComplete.send(successful ? .successful : .device_error)
                                 case .pageThreshold			: self.deletePageThresholdComplete.send(successful ? .successful : .device_error)
 								}
 							} else {
-								globals.log.e ("\(pID): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
+								globals.log.e ("\(id): Do not know what to do with parameter: \(String(format: "0x%02X", data[3]))")
 							}
 						case .setSessionParam		:
 							if let enumParameter = sessionParameterType(rawValue: data[3]) {
@@ -1316,7 +1316,7 @@ class customMainCharacteristic: CharacteristicTemplate {
                                     setSessionParamComplete.send((.device_error, enumParameter)) // Shouldn't get this ever!)
 								}
 							} else {
-								globals.log.e ("\(pID): Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
+								globals.log.e ("\(id): Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
 							}
 
 						case .getSessionParam		:
@@ -1352,7 +1352,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 								}
 
 							} else {
-								globals.log.e ("\(pID): Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
+								globals.log.e ("\(id): Was not able to encode parameter: \(String(format: "0x%02X", data[3]))")
 							}
 
                         case .manufacturingTest	: self.manufacturingTestComplete.send(successful ? .successful : .device_error)
@@ -1567,14 +1567,14 @@ class customMainCharacteristic: CharacteristicTemplate {
 							//globals.log.v ("\(pID): Got Validate CRC completion: \(data.hexString)")
 						}
 					} else {
-						globals.log.e ("\(pID): Unknown command: \(data.hexString)")
+						globals.log.e ("\(id): Unknown command: \(data.hexString)")
 					}
 				} else {
-					globals.log.e ("\(pID): Incorrect length for completion: \(data.hexString)")
+					globals.log.e ("\(id): Incorrect length for completion: \(data.hexString)")
 				}
 				
                 DispatchQueue.main.async {
-                    self.pCommandQ?.remove() // These were updates from a write, so queue can now move on
+                    self.commandQ?.remove() // These were updates from a write, so queue can now move on
                 }
 				
 			case .dataPacket:
@@ -1585,7 +1585,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 					if (sequence_number == mExpectedSequenceNumber) {
 						//globals.log.v ("\(pID): Sequence Number Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")
 					} else {
-						globals.log.e ("\(pID): \(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
+						globals.log.e ("\(id): \(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
 						mCRCOK	= false
 					}
 					mExpectedSequenceNumber = mExpectedSequenceNumber + 1
@@ -1595,7 +1595,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 						mDataPackets.append(contentsOf: dataPackets)
 					}
 				} else {
-					globals.log.e ("\(pID): Bad data length for data packet: \(data.hexString)")
+					globals.log.e ("\(id): Bad data length for data packet: \(data.hexString)")
 					mCRCOK	= false
 				}
 				
@@ -1603,7 +1603,7 @@ class customMainCharacteristic: CharacteristicTemplate {
                 if      (data[1] == 0x00) { self.worn = false }
                 else if (data[1] == 0x01) { self.worn = true  }
 				else {
-					globals.log.e ("\(pID): Cannot parse worn status: \(data[1])")
+					globals.log.e ("\(id): Cannot parse worn status: \(data[1])")
 				}
 							
 			case .ppg_metrics:
@@ -1640,14 +1640,14 @@ class customMainCharacteristic: CharacteristicTemplate {
 					let hasSleep	= data[1] == 0x01 ? true : false
                     self.endSleepStatus.send(hasSleep)
 				} else {
-					globals.log.e ("\(pID): Cannot parse 'endSleepStatus': \(data.hexString)")
+					globals.log.e ("\(id): Cannot parse 'endSleepStatus': \(data.hexString)")
 				}
 				
 			case .buttonResponse:
 				if (data.count == 2) {
                     self.buttonTaps	= Int(data[1])
 				} else {
-					globals.log.e ("\(pID): Cannot parse 'buttonResponse': \(data.hexString)")
+					globals.log.e ("\(id): Cannot parse 'buttonResponse': \(data.hexString)")
 				}
 				
 			case .validateCRC:
@@ -1657,7 +1657,7 @@ class customMainCharacteristic: CharacteristicTemplate {
 				if (sequence_number == mExpectedSequenceNumber) {
 					//globals.log.v ("\(pID): SN Match: \(sequence_number).  Expected: \(mExpectedSequenceNumber)")
 				} else {
-					globals.log.e ("\(pID): \(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
+					globals.log.e ("\(id): \(response) - Sequence Number Fail: \(sequence_number). Expected: \(mExpectedSequenceNumber): \(data.hexString)")
 					mCRCOK	= false
 				}
 
@@ -1674,11 +1674,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 									let jsonData = try JSONEncoder().encode(mDataPackets)
 									if let jsonString = String(data: jsonData, encoding: .utf8) {
                                         self.dataPackets.send((-1, jsonString))
-									} else { globals.log.e ("\(pID): Cannot make string from json data") }
-								} catch { globals.log.e ("\(pID): Cannot make JSON data") }
+									} else { globals.log.e ("\(id): Cannot make string from json data") }
+								} catch { globals.log.e ("\(id): Cannot make JSON data") }
 						   }
 						} else {
-							globals.log.v ("\(pID): \(response) Failed: Do not let packets through")
+							globals.log.v ("\(id): \(response) Failed: Do not let packets through")
 						}
 					} else {
 						mCRCOK	= false
@@ -1701,11 +1701,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
                             self.manufacturingTestResult.send((true, jsonString))
 						} else {
-							globals.log.e ("\(pID): Result jsonString Failed")
+							globals.log.e ("\(id): Result jsonString Failed")
                             self.manufacturingTestResult.send((false, ""))
 						}
 					} catch {
-						globals.log.e ("\(pID): Result jsonData Failed")
+						globals.log.e ("\(id): Result jsonData Failed")
                         self.manufacturingTestResult.send((false, ""))
 					}
 				} else {
@@ -1721,11 +1721,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 						if let jsonString = String(data: jsonData, encoding: .utf8) {
                             self.manufacturingTestResult.send((true, jsonString))
 						} else {
-							globals.log.e ("\(pID): Result jsonString Failed")
+							globals.log.e ("\(id): Result jsonString Failed")
                             self.manufacturingTestResult.send((false, ""))
 						}
 					} catch {
-						globals.log.e ("\(pID): Result jsonData Failed")
+						globals.log.e ("\(id): Result jsonData Failed")
                         self.manufacturingTestResult.send((false, ""))
 					}
 				} else {
@@ -1743,11 +1743,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 							if let jsonString = String(data: jsonData, encoding: .utf8) {
                                 self.manufacturingTestResult.send((true, jsonString))
 							} else {
-								globals.log.e ("\(pID): Result jsonString Failed")
+								globals.log.e ("\(id): Result jsonString Failed")
                                 self.manufacturingTestResult.send((false, ""))
 							}
 						} catch {
-							globals.log.e ("\(pID): Result jsonData Failed")
+							globals.log.e ("\(id): Result jsonData Failed")
                             self.manufacturingTestResult.send((false, ""))
 						}
 					} else {
@@ -1762,11 +1762,11 @@ class customMainCharacteristic: CharacteristicTemplate {
 							if let jsonString = String(data: jsonData, encoding: .utf8) {
                                 self.manufacturingTestResult.send((true, jsonString))
 							} else {
-								globals.log.e ("\(pID): Result jsonString Failed")
+								globals.log.e ("\(id): Result jsonString Failed")
                                 self.manufacturingTestResult.send((false, ""))
 							}
 						} catch {
-							globals.log.e ("\(pID): Result jsonData Failed")
+							globals.log.e ("\(id): Result jsonData Failed")
                             self.manufacturingTestResult.send((false, ""))
 						}
 					} else {
@@ -1782,11 +1782,11 @@ class customMainCharacteristic: CharacteristicTemplate {
                 self.charging = (data[2] == 0x01)
                 self.charge_error = (data[3] == 0x01)
 				
-			case .streamPacket: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")
-			case .dataAvailable: globals.log.e ("\(pID): Should not get '\(response)' on this characteristic!")
+			case .streamPacket: globals.log.e ("\(id): Should not get '\(response)' on this characteristic!")
+			case .dataAvailable: globals.log.e ("\(id): Should not get '\(response)' on this characteristic!")
 			}
 		} else {
-			globals.log.e ("\(pID): Unknown update: \(data.hexString)")
+			globals.log.e ("\(id): Unknown update: \(data.hexString)")
 		}
 	}
 	
@@ -1798,33 +1798,28 @@ class customMainCharacteristic: CharacteristicTemplate {
 	//
 	//--------------------------------------------------------------------------------
 	override func didUpdateValue() {
-		if let characteristic = pCharacteristic {
-			if let data = characteristic.value {
-				
-				// Packets have to be at least a header + CRC.  If not, do not parse
-				if (data.count >= 4) {
-					// Get the CRC.  Only process the packet if the CRC is good.
-					let crc_received	= data.subdata(in: Range((data.count - 4)...(data.count - 1))).leInt32
-					var input_bytes 	= data.subdata(in: Range(0...(data.count - 5))).bytes
-					let crc_calculated	= crc32(uLong(0), &input_bytes, uInt(input_bytes.count))
+		if let characteristic, let data = characteristic.value {
+            // Packets have to be at least a header + CRC.  If not, do not parse
+            if (data.count >= 4) {
+                // Get the CRC.  Only process the packet if the CRC is good.
+                let crc_received	= data.subdata(in: Range((data.count - 4)...(data.count - 1))).leInt32
+                var input_bytes 	= data.subdata(in: Range(0...(data.count - 5))).bytes
+                let crc_calculated	= crc32(uLong(0), &input_bytes, uInt(input_bytes.count))
 
-					if (crc_received != crc_calculated) {
-						globals.log.e ("\(pID): Hmmm..... Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
-						mCRCOK = false;
-						mExpectedSequenceNumber = mExpectedSequenceNumber + 1	// go ahead and increase the expected sequence number.  already going to create retransmit.  this avoids other expected sequence checks from failling
-					}
+                if (crc_received != crc_calculated) {
+                    globals.log.e ("\(id): Hmmm..... Packet CRC Error! CRC : \(String(format:"0x%08X", crc_received)): \(String(format:"0x%08X", crc_calculated))")
+                    mCRCOK = false;
+                    mExpectedSequenceNumber = mExpectedSequenceNumber + 1	// go ahead and increase the expected sequence number.  already going to create retransmit.  this avoids other expected sequence checks from failling
+                }
 
-					mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
-				} else {
-					globals.log.e ("\(pID): Cannot calculate packet CRC: Not enough data.  Length = \(data.count): \(data.hexString)")
-					return
-				}
+                mProcessUpdateValue(data.subdata(in: Range(0...(data.count - 5))))
+            } else {
+                globals.log.e ("\(id): Cannot calculate packet CRC: Not enough data.  Length = \(data.count): \(data.hexString)")
+                return
+            }
 				
-			} else {
-				globals.log.e ("\(pID): Missing data")
-			}
         } else {
-            globals.log.e ("\(pID): Missing characteristic")
+            globals.log.e ("\(id): Missing characteristic and/or data")
         }
 	}
 

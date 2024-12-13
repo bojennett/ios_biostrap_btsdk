@@ -143,9 +143,9 @@ class ambiqOTAService: ServiceTemplate {
     //--------------------------------------------------------------------------------
     override func didDiscoverDescriptor(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
-        case ambiqOTARXCharacteristic.uuid: globals.log.e ("\(pID) RX chacteristic - should not be here")
+        case ambiqOTARXCharacteristic.uuid: globals.log.e ("\(id) RX chacteristic - should not be here")
         case ambiqOTATXCharacteristic.uuid: txCharacteristic.didDiscoverDescriptor()
-        default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
+        default: globals.log.e ("\(id): Unhandled: \(characteristic.uuid)");
         }
     }
     
@@ -158,9 +158,9 @@ class ambiqOTAService: ServiceTemplate {
     //--------------------------------------------------------------------------------
     override func didUpdateNotificationState(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
-        case ambiqOTARXCharacteristic.uuid: globals.log.e ("\(pID) 'RX Characteristic' - should not be here")
+        case ambiqOTARXCharacteristic.uuid: globals.log.e ("\(id) 'RX Characteristic' - should not be here")
         case ambiqOTATXCharacteristic.uuid: txCharacteristic.didUpdateNotificationState()
-        default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
+        default: globals.log.e ("\(id): Unhandled: \(characteristic.uuid)");
         }
     }
     
@@ -173,15 +173,15 @@ class ambiqOTAService: ServiceTemplate {
     //--------------------------------------------------------------------------------
     override func didUpdateValue(_ characteristic: CBCharacteristic) {
         switch characteristic.uuid {
-        case ambiqOTARXCharacteristic.uuid: globals.log.e ("\(pID) 'RX characteristic' - should not be here")
+        case ambiqOTARXCharacteristic.uuid: globals.log.e ("\(id) 'RX characteristic' - should not be here")
         case ambiqOTATXCharacteristic.uuid:
             // Commands to RX come in on TX, causes RX to do next step
             if let value = characteristic.value {
                 rxCharacteristic.didUpdateTXValue(value)
             } else {
-                globals.log.e ("\(pID) 'TX Characteristic' - No data received for RX command")
+                globals.log.e ("\(id) 'TX Characteristic' - No data received for RX command")
             }
-        default: globals.log.e ("\(pID): Unhandled: \(characteristic.uuid)");
+        default: globals.log.e ("\(id): Unhandled: \(characteristic.uuid)");
         }
     }
 }
