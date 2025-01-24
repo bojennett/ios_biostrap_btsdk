@@ -1516,6 +1516,7 @@ public class Device: NSObject, ObservableObject {
         ).map { $0 && $1 }
 
         Publishers.CombineLatest(partialConfigured1, partialConfigured2)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] partial1, partial2 in
                 if self?.connectionState == .configured { return } // If i was already configured, i don't need to tell the app this again
                 //if self?.preview { return } // If i am mocked, i don't need to tell the app again
@@ -1731,6 +1732,7 @@ public class Device: NSObject, ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { status, value in
                 self.lambdaReadEpochComplete?(self.id, status.successful, value)
+                self.readEpochComplete.send(status)
 			}
             .store(in: &subscriptions)
 				
