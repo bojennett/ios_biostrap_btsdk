@@ -1488,7 +1488,7 @@ public class Device: NSObject, ObservableObject {
             return
         }
         
-        if let peripheral {
+        if let peripheral, peripheral.state == .connected {
             peripheral.readRSSI()
         } else {
             self.signalStrength = nil
