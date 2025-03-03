@@ -51,7 +51,9 @@ class CommandQ {
 	//----------------------------------------------------------------------------
 	internal func add(_ command: Command) {
 		entries.append(command)
-		if (entries.count == 1) { next() }
+        if entries.count == 1 {
+            next()
+        }
 	}
 	
 	//----------------------------------------------------------------------------
@@ -62,7 +64,7 @@ class CommandQ {
 	//
 	//----------------------------------------------------------------------------
 	internal func next() {
-		if let peripheral, let entry = entries.first, let characteristic = entry.characteristic {
+        if let peripheral, peripheral.state == .connected, let entry = entries.first, let characteristic = entry.characteristic {
 			switch (entry.command) {
 			case .read:
 				peripheral.readValue(for: characteristic)
@@ -73,8 +75,7 @@ class CommandQ {
 					
 					// If no response required, nothing is going to come in to tell me to remove the item from the queue
 					if (type == .withoutResponse) { remove() }
-				}
-				else {
+				} else {
 					if entry.data == nil {
 						globals.log.e ("No data to write for \(characteristic.prettyID)")
 					}
@@ -88,13 +89,31 @@ class CommandQ {
 				globals.log.e ("Command not defined!")
 				remove()
 			}
-		}
-		else {
-			if peripheral == nil { globals.log.e ("No peripheral") }
-			else if let entry = entries.first {
-				if entry.characteristic == nil { globals.log.e ("No characteristic") }
-			}
-			else { globals.log.e ("Command queue empty") }
+		} else {
+            if let peripheral {
+                if peripheral.state != .connected {
+                    if entries.count != 0 {
+                        globals.log.e ("Peripheral is not in connected state - flushing")
+                        entries.removeAll()
+                    } else {
+                        globals.log.v ("Peripheral is not in connected state - but no commands to flush.  This is fine")
+                    }
+                } else if let entry = entries.first {
+                    if entry.characteristic == nil {
+                        globals.log.e ("No characteristic - removing command")
+                        remove()
+                    }
+                } else {
+                    globals.log.e ("Command queue empty")
+                }
+            } else {
+                if entries.count != 0 {
+                    globals.log.e ("Peripheral doesn't exist - flushing")
+                    entries.removeAll()
+                } else {
+                    globals.log.v ("Peripheral doesn't exist - but no commands to flush.  This is fine")
+                }
+            }
 		}
 	}
 	
@@ -106,11 +125,10 @@ class CommandQ {
 	//
 	//----------------------------------------------------------------------------
 	func remove() {
-		if (entries.count > 0) {
+		if entries.count > 0 {
 			entries.removeFirst()
 			if entries.count > 0 { next() }
-		}
-		else {
+		} else {
 			globals.log.e ("No commands to remove")
 		}
 	}
